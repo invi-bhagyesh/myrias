@@ -110,3 +110,14 @@ test('site validator: suggestions need real claims, an evidence gap, and review 
   const real = structuredClone(sample); real.release.sample = false; real.claims.forEach(c => { c.verification = 'supported'; });
   assert.ok(validateExport(real).some(e => /draft suggestions must not be published/.test(e)));
 });
+
+import { runClaimStage } from '../pipeline/claimstage.mjs';
+test('claim stage: only quote-checked claims are sent, results attached with the model', async () => {
+  const sent = [];
+  const fetchImpl = async (u, o) => { sent.push(JSON.parse(o.body)); return okFetch('{"verdict":"supported","note":"x"}')(); };
+  const client = createClient({ apiKey: 'k', capUsd: 1, fetchImpl });
+  const { out } = await runClaimStage('verify', [{ quote: 'a', statement_en: 's', quote_check: 'found' }, { quote: 'b', statement_en: 't', quote_check: 'not_on_page' }], client, 2);
+  assert.equal(sent.length, 1);
+  assert.equal(out[0].verify.verdict, 'supported');
+  assert.equal(out[1].verify, undefined);
+});

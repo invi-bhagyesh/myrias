@@ -53,11 +53,17 @@
       },
       "verify": {
         "model": "z-ai/glm-5.3",
-        "temperature": 0
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
       },
       "reconcile": {
         "model": "qwen/qwen3.8-max-0902",
-        "temperature": 0
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
       },
       "translate": {
         "model": "qwen/qwen3.8-flash",
@@ -68,7 +74,10 @@
       },
       "suggest": {
         "model": "qwen/qwen3.8-max-0902",
-        "temperature": 0
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
       },
       "ocr": {
         "model": "qwen/qwen3-vl-30b-a3b-instruct",
@@ -112,11 +121,17 @@
       },
       "verify": {
         "model": "z-ai/glm-5.3",
-        "temperature": 0
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
       },
       "reconcile": {
         "model": "qwen/qwen3.8-max-0902",
-        "temperature": 0
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
       },
       "translate": {
         "model": "qwen/qwen3.8-max-0902",
@@ -127,7 +142,10 @@
       },
       "suggest": {
         "model": "qwen/qwen3.8-max-0902",
-        "temperature": 0
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
       },
       "ocr": {
         "model": "qwen/qwen3-vl-30b-a3b-instruct",

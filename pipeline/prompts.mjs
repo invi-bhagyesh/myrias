@@ -33,3 +33,25 @@ export const SUGGEST_SCHEMA = {
   } } }
 };
 export const suggestUser = claims => `Verified claims:\n${claims.map(c => `[${c.id}] ${c.statement_en}`).join('\n')}\nReturn the suggestions as JSON.`;
+
+// Map and screen in one call: is the claim about a welfare technology, and where does it sit?
+export const MAP_SYSTEM = `You classify one claim from a research paper about a farmed aquatic animal.
+welfare_relevant is true only if the claim concerns a technology, method or practice that affects, measures or addresses the welfare of the animals (stress, disease, feeding, water quality, handling, density, slaughter, painful procedures). Breeding or hormone dosing with no welfare outcome, basic biology and taxonomy are false.
+technology_class and welfare_problem must be one of the listed ids, or "none".`;
+export const TECH_IDS = ['monitoring', 'automation', 'stunning_equipment', 'breeding', 'health_products', 'feeds', 'water_systems', 'none'];
+export const PROBLEM_IDS = ['stocking_density', 'water_quality', 'handling_transport', 'stunning_slaughter', 'disease_parasites', 'feeding', 'procedures', 'none'];
+export const MAP_SCHEMA = {
+  type: 'object', additionalProperties: false, required: ['welfare_relevant', 'technology_class', 'welfare_problem', 'reason'],
+  properties: { welfare_relevant: { type: 'boolean' }, technology_class: { type: 'string', enum: TECH_IDS }, welfare_problem: { type: 'string', enum: PROBLEM_IDS }, reason: { type: 'string' } }
+};
+export const mapUser = c => `Statement: ${c.statement_en}\nQuote: ${c.quote}\nIntervention: ${c.intervention || ''}`;
+
+// Verification by a different model from the extractor: does the quote support the statement?
+export const VERIFY_SYSTEM = `You check whether a quotation supports a statement made about it.
+supported: the quote says what the statement says. partial: the quote supports part of it, or the statement adds detail the quote lacks. unsupported: the quote does not say it, or says something different.
+Judge only from the quote. Do not use outside knowledge.`;
+export const VERIFY_SCHEMA = {
+  type: 'object', additionalProperties: false, required: ['verdict', 'note'],
+  properties: { verdict: { type: 'string', enum: ['supported', 'partial', 'unsupported'] }, note: { type: 'string' } }
+};
+export const verifyUser = c => `Quote: ${c.quote}\nStatement: ${c.statement_en}`;
