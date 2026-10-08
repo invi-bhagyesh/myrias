@@ -1,0 +1,420 @@
+{
+ "schema": "myrias-landscape/1",
+ "release": {
+  "version": "sample",
+  "as_of": "sample",
+  "status": "sample",
+  "sample": true,
+  "licence": null,
+  "note_en": "Placeholder records for testing the layout. Not evidence.",
+  "note_zh": "仅用于测试版面的占位记录，不是证据。"
+ },
+ "taxonomy": {
+  "draft": true,
+  "technology_classes": [
+   {
+    "id": "monitoring",
+    "en": "Monitoring (cameras, acoustics, sensors)",
+    "zh": "监测（摄像、声学、传感器）"
+   },
+   {
+    "id": "automation",
+    "en": "Automation (feeding, grading)",
+    "zh": "自动化（投喂、分级）"
+   },
+   {
+    "id": "stunning_equipment",
+    "en": "Stunning and slaughter equipment",
+    "zh": "致昏与屠宰设备"
+   },
+   {
+    "id": "breeding",
+    "en": "Breeding and genetics",
+    "zh": "育种与遗传"
+   },
+   {
+    "id": "health_products",
+    "en": "Vaccines and health products",
+    "zh": "疫苗与健康产品"
+   },
+   {
+    "id": "feeds",
+    "en": "Feeds and feeding methods",
+    "zh": "饲料与投喂方法"
+   },
+   {
+    "id": "water_systems",
+    "en": "Water treatment and recirculation",
+    "zh": "水处理与循环水系统"
+   }
+  ],
+  "welfare_problems": [
+   {
+    "id": "stocking_density",
+    "en": "Stocking density",
+    "zh": "养殖密度"
+   },
+   {
+    "id": "water_quality",
+    "en": "Water quality",
+    "zh": "水质"
+   },
+   {
+    "id": "handling_transport",
+    "en": "Handling and transport",
+    "zh": "操作与运输"
+   },
+   {
+    "id": "stunning_slaughter",
+    "en": "Stunning and slaughter",
+    "zh": "致昏与屠宰"
+   },
+   {
+    "id": "disease_parasites",
+    "en": "Disease and parasites",
+    "zh": "疾病与寄生虫"
+   },
+   {
+    "id": "feeding",
+    "en": "Feeding (including live prey)",
+    "zh": "投喂（含活饵）"
+   },
+   {
+    "id": "procedures",
+    "en": "Procedures (e.g. eyestalk ablation)",
+    "zh": "操作性手术（如切除眼柄）"
+   }
+  ],
+  "maturity": [
+   {
+    "id": "concept",
+    "en": "Concept",
+    "zh": "概念"
+   },
+   {
+    "id": "research",
+    "en": "Research",
+    "zh": "研究阶段"
+   },
+   {
+    "id": "pilot",
+    "en": "Pilot",
+    "zh": "试点"
+   },
+   {
+    "id": "commercial",
+    "en": "Commercial",
+    "zh": "商业应用"
+   },
+   {
+    "id": "widespread",
+    "en": "Widespread",
+    "zh": "广泛应用"
+   }
+  ],
+  "outcome_evidence": [
+   {
+    "id": "none",
+    "en": "No welfare evidence",
+    "zh": "无福利证据"
+   },
+   {
+    "id": "detection_only",
+    "en": "Detection only",
+    "zh": "仅能检测"
+   },
+   {
+    "id": "proxy_improved",
+    "en": "Welfare proxy improved",
+    "zh": "福利替代指标改善"
+   },
+   {
+    "id": "outcome_improved",
+    "en": "Welfare outcome improved",
+    "zh": "福利结果改善"
+   }
+  ]
+ },
+ "species": [
+  {
+   "id": "sample-fish",
+   "common_en": "[Sample] Fish A",
+   "common_zh": "【示例】鱼类A",
+   "scientific": "Placeholder fishus",
+   "group": "finfish",
+   "run_status": "complete",
+   "summary_en": "[Sample] Placeholder species summary.",
+   "summary_zh": "【示例】占位的物种简介。"
+  },
+  {
+   "id": "sample-shrimp",
+   "common_en": "[Sample] Shrimp B",
+   "common_zh": "【示例】虾类B",
+   "scientific": "Placeholder shrimpus",
+   "group": "crustacean",
+   "run_status": "in_progress",
+   "summary_en": "[Sample] Placeholder species summary.",
+   "summary_zh": "【示例】占位的物种简介。"
+  }
+ ],
+ "sources": [
+  {
+   "id": "S1",
+   "title": "[Sample] Placeholder English source",
+   "title_en": "[Sample] Placeholder English source",
+   "authors": [
+    "Author, A."
+   ],
+   "year": 2020,
+   "lang": "en",
+   "venue": "[Sample] Journal",
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Not redistributed"
+  },
+  {
+   "id": "S2",
+   "title": "【示例】占位中文来源",
+   "title_en": "[Sample] Placeholder Chinese source",
+   "authors": [
+    "作者甲"
+   ],
+   "year": 1998,
+   "lang": "zh",
+   "venue": "【示例】期刊",
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Not redistributed"
+  },
+  {
+   "id": "S3",
+   "title": "[Sample] Placeholder abstract-only source",
+   "title_en": "[Sample] Placeholder abstract-only source",
+   "authors": [
+    "Author, B."
+   ],
+   "year": 2024,
+   "lang": "en",
+   "venue": "[Sample] Conference",
+   "doi": null,
+   "url": null,
+   "access": "abstract",
+   "licence_note": "Not redistributed"
+  }
+ ],
+ "claims": [
+  {
+   "id": "C1",
+   "source_id": "S1",
+   "species_id": "sample-fish",
+   "locator": {
+    "page": 3,
+    "start": 120,
+    "end": 180
+   },
+   "quote": "[Sample] Placeholder passage for layout testing.",
+   "quote_lang": "en",
+   "text_en": "[Sample] Placeholder measured result.",
+   "text_zh": "【示例】占位的实测结果。",
+   "kind": "measured",
+   "population": {
+    "species": "Placeholder fishus",
+    "life_stage": "juvenile",
+    "system": "tank"
+   },
+   "intervention": "Placeholder intervention",
+   "comparator": "Placeholder comparator",
+   "outcome": "survival",
+   "direction": "higher",
+   "magnitude": "[Sample] 0%",
+   "welfare_link": "proxy",
+   "welfare_link_note": "[Sample] Survival is a proxy; a bridge to welfare would be needed.",
+   "verification": "supported",
+   "audit": "audited"
+  },
+  {
+   "id": "C2",
+   "source_id": "S2",
+   "species_id": "sample-fish",
+   "locator": {
+    "page": 2,
+    "start": 40,
+    "end": 70
+   },
+   "quote": "【示例】这是用于测试版面的占位文字。",
+   "quote_lang": "zh",
+   "text_en": "[Sample] Placeholder result from a Chinese source.",
+   "text_zh": "【示例】来自中文来源的占位结果。",
+   "kind": "measured",
+   "population": {
+    "species": "Placeholder fishus",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "Placeholder intervention",
+   "comparator": null,
+   "outcome": "growth rate",
+   "direction": "higher",
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "[Sample] Placeholder note.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C3",
+   "source_id": "S3",
+   "species_id": "sample-shrimp",
+   "locator": {
+    "page": 1,
+    "start": 0,
+    "end": 55
+   },
+   "quote": "[Sample] Placeholder abstract sentence.",
+   "quote_lang": "en",
+   "text_en": "[Sample] Placeholder inferred statement.",
+   "text_zh": "【示例】占位的推论。",
+   "kind": "inferred",
+   "population": {
+    "species": "Placeholder shrimpus",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "Placeholder detection method",
+   "comparator": null,
+   "outcome": "detection accuracy",
+   "direction": "not_applicable",
+   "magnitude": null,
+   "welfare_link": "none",
+   "welfare_link_note": "[Sample] Detection only.",
+   "verification": "partial",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C4",
+   "source_id": "S1",
+   "species_id": "sample-fish",
+   "locator": {
+    "page": 5,
+    "start": 10,
+    "end": 60
+   },
+   "quote": "[Sample] Another placeholder passage.",
+   "quote_lang": "en",
+   "text_en": "[Sample] Placeholder reported-background statement.",
+   "text_zh": "【示例】占位的引述背景。",
+   "kind": "reported_background",
+   "population": {
+    "species": null,
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": "not_applicable",
+   "magnitude": null,
+   "welfare_link": "none",
+   "welfare_link_note": null,
+   "verification": "supported",
+   "audit": "audited"
+  }
+ ],
+ "interventions": [
+  {
+   "id": "I1",
+   "name_en": "[Sample] Feed training method",
+   "name_zh": "【示例】驯食方法",
+   "technology_class": "feeds"
+  },
+  {
+   "id": "I2",
+   "name_en": "[Sample] Camera-based detection",
+   "name_zh": "【示例】基于摄像的检测",
+   "technology_class": "monitoring"
+  }
+ ],
+ "applications": [
+  {
+   "id": "A1",
+   "intervention_id": "I1",
+   "species_id": "sample-fish",
+   "technology_class": "feeds",
+   "welfare_problem": "feeding",
+   "maturity": "research",
+   "outcome_evidence": "proxy_improved",
+   "claim_ids": [
+    "C1",
+    "C2",
+    "C4"
+   ]
+  },
+  {
+   "id": "A2",
+   "intervention_id": "I2",
+   "species_id": "sample-shrimp",
+   "technology_class": "monitoring",
+   "welfare_problem": "disease_parasites",
+   "maturity": "pilot",
+   "outcome_evidence": "detection_only",
+   "claim_ids": [
+    "C3"
+   ]
+  }
+ ],
+ "cells_status": [
+  {
+   "species_id": "sample-fish",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "stunning_slaughter",
+   "status": "probed_empty"
+  },
+  {
+   "species_id": "sample-shrimp",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "stunning_slaughter",
+   "status": "probed_empty"
+  }
+ ],
+ "runs": [
+  {
+   "id": "sample-run-1",
+   "species_id": "sample-fish",
+   "status": "complete",
+   "focus_en": "[Sample] Placeholder focus",
+   "focus_zh": "【示例】占位的重点",
+   "counts": {
+    "documents_collected": 3,
+    "sources_released": 3,
+    "claims_extracted": 4,
+    "claims_supported": 3
+   },
+   "models": [
+    "[Sample] model-a (extract)",
+    "[Sample] model-b (verify)"
+   ],
+   "audit": {
+    "n": 0,
+    "precision": null,
+    "ci": null
+   },
+   "changelog": [
+    {
+     "date": "sample",
+     "text_en": "[Sample] Placeholder change.",
+     "text_zh": "【示例】占位的变更。"
+    }
+   ]
+  }
+ ],
+ "methods": {
+  "limits_en": [
+   "These records are placeholders for testing."
+  ],
+  "limits_zh": [
+   "这些记录仅为测试用的占位内容。"
+  ]
+ }
+}

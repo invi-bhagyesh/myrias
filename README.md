@@ -1,26 +1,50 @@
-# Myrias research desk
+# Myrias
 
-An editorial-style aquaculture knowledge workspace, beginning with mandarin fish.
+An open, bilingual (English and Chinese), source-linked map of welfare technologies for farmed
+aquatic animals. See `FRAMEWORK.md` for the plan: what is built, in what order, and why.
 
-## Use
+## The public site (`public/index.html`)
 
-Run `npm run dev` and open http://localhost:5173. No runtime dependencies or API keys are required. `npm test` checks graph integrity and research-result boundaries; `npm run check` checks JavaScript syntax.
+A static, read-only site that renders one data file, `public/data/release.json`:
 
-The interface supports knowledge records and directed relationships, source-file storage, prepared research requests, result review, and individual report PDF export through the browser print dialog.
+- **Landscape:** a welfare problem x technology class matrix, filterable by species. Each cell is
+  explicitly *has records*, *searched, nothing found* or *not searched yet*; none is left blank.
+- **Species, sources and claims:** every claim shows a verbatim quotation, its location in the
+  source, how it was verified and whether it was sampled in an expert audit.
+- **Methods and limits:** how a run works, what "verified" means, measured error rates, models.
+- **Download and cite:** JSON and CSV exports, a citation line, feedback links that open a
+  pre-filled GitHub issue.
+- English and Chinese interface (the Chinese text is a draft awaiting native-speaker review),
+  light and dark mode, works on phones.
 
-All workspace content stays in this browser's IndexedDB. Export a backup from **Workspace** before clearing browser data. Backups contain the current workspace and original files; previous graph revisions can be downloaded separately from revision history. Private content is not uploaded. The Hugging Face dataset `invi-bhagyesh/myrias-knowledge-base` remains unconnected and uploads are paused.
+Status: pre-release. `release.json` holds the taxonomy and one species run in preparation; nothing
+has been verified yet, and the site says so. The data format is in `docs/export-schema.md`.
+`index.html?data=sample` loads clearly marked placeholder records so the layout can be tested.
 
-## Research flow
+## Staff workspace (`public/workspace.html`)
 
-1. Import sources or add citations. Attach extracted text for PDFs; this frontend does not extract PDF text.
-2. Prepare a research question and select sources. Export the request JSON.
-3. Execute the request using the research framework outside this static site. Its JSON packet includes the required result contract. The frontend does not call a model or run IAA automatically.
-4. Import the result into the matching prepared request. Read the complete proposed record changes and report under Review.
-5. Accept or reject. Acceptance requires the original graph revision to remain current and preserves the prior revision locally. A stale request must be prepared again. Graph updates support additions and replacements, not deletions or record-type changes.
-6. Every imported completed result has its own report under Reports. Print/save PDF or download Markdown. KB snapshots format stored records without claiming new synthesis.
+The earlier research desk: a local, browser-only tool for records, source files, prepared research
+requests and result review. Its data stays in this browser (IndexedDB). It contains demo records,
+is not part of the public evidence base, and is not linked from the site navigation.
 
-The initial public collection contains bibliographic leads and provisional questions, not measured welfare scores or a completed assessment. Source links are metadata; source bodies and private project documents are not bundled.
+## Development
+
+```
+npm run dev      # serves public/ at http://localhost:5173
+npm run check    # JavaScript syntax
+npm test         # export validation, matrix logic, CSV, bilingual string parity
+```
+
+No runtime dependencies or API keys. Tests check that a real release can contain only supported
+or partly supported claims, that quotes and locators are present, that full text is never
+published, and that English and Chinese strings stay in step.
 
 ## Deployment
 
-GitHub Actions validates and deploys `public/` to GitHub Pages on pushes to `main`. The separate repository provides `/myrias/` without modifying the personal-site repository.
+GitHub Actions validates and deploys `public/` to GitHub Pages on pushes to `main`.
+
+## Data and licensing
+
+Source documents are licensed journal content and are never published here. Released records
+contain bibliographic metadata, locators and short quotations only. The data licence is not set
+yet and is shown as such on the download page.

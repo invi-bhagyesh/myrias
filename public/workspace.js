@@ -1,9 +1,8 @@
-import { sampleReports } from './sample-reports.js';
 import { mountGraph } from './graph.js';
 import * as M from './model.js';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let w,db,tab='knowledge',selected='mandarin-fish',graph=true;
-const allReports=()=>[...sampleReports,...w.reports];
+const allReports=()=>w.reports;
 const button=(label,action,id='')=>`<button class="button small" data-action="${action}" data-id="${esc(id)}">${label}</button>`;
 const field=(label,name,value='',area=false)=>`<label class="field"><span>${label}</span>${area?`<textarea name="${name}" rows="5">${esc(value)}</textarea>`:`<input name="${name}" value="${esc(value)}">`}</label>`;
 const select=(label,name,items,value='')=>`<label class="field"><span>${label}</span><select name="${name}">${items.map(([id,title])=>`<option value="${esc(id)}" ${id===value?'selected':''}>${esc(title)}</option>`).join('')}</select></label>`;
@@ -14,7 +13,7 @@ function download(name,content,type='application/json'){const a=document.createE
 async function save(next,files=[],reason=''){next=M.validateWorkspace(next);if(reason){next.revision=w.revision+1;next.history.push({revision:next.revision,date:new Date().toISOString(),message:reason});}await new Promise((resolve,reject)=>{const tx=db.transaction(['workspace','files','revisions'],'readwrite');tx.objectStore('workspace').put(next,'current');for(const [id,file]of files)tx.objectStore('files').put(file,id);if(reason)tx.objectStore('revisions').put(w,w.revision);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||Error('Storage transaction aborted.'));});w=next;render();}
 function get(store,key){return new Promise((resolve,reject)=>{const r=db.transaction(store).objectStore(store).get(key);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
 function lead(title,description){return `<section class="lead"><div><div class="record-type">The research desk · Two-species collection</div><h1>${title}</h1><p>${description}</p></div><aside class="lead-aside"><h2>In this collection</h2><dl class="ledger"><dt>Knowledge records</dt><dd>${w.nodes.length}</dd><dt>Directed relationships</dt><dd>${w.edges.length}</dd><dt>Source materials</dt><dd>${w.sources.length}</dd><dt>Graph revision</dt><dd>${w.revision}</dd></dl></aside></section>`;}
-const speciesPhotos={'mandarin-fish':'./images/mandarin-fish.png','nile-tilapia':'./images/nile-tilapia.jpg'};
+const speciesPhotos={};
 function speciesFigure(n){return speciesPhotos[n.id]?`<figure class="species-photo"><img src="${speciesPhotos[n.id]}" alt="${esc(n.title)}" loading="lazy"><figcaption>${esc(n.title)} · <i>${esc(n.species)}</i></figcaption></figure>`:'';}
 function profile(){const species=w.nodes.filter(n=>n.type==='species');const n=species.find(n=>n.id===selected)||species[0];if(!n)return '<div class="empty"><h1>No species records yet</h1></div>';selected=n.id;
  const direct=w.edges.filter(e=>e.from===n.id||e.to===n.id),relatedIds=new Set(direct.flatMap(e=>[e.from,e.to]));const records=w.nodes.filter(x=>x.id!==n.id&&(relatedIds.has(x.id)||x.species&&x.species===n.species));const sourceIds=new Set([...(n.sourceIds||[]),...records.flatMap(x=>x.sourceIds)]);const sources=w.sources.filter(x=>sourceIds.has(x.id));const reports=allReports().filter(r=>(r.title+' '+r.markdown).toLowerCase().includes(n.title.toLowerCase()));
