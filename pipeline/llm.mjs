@@ -22,7 +22,7 @@ export function estimateCost(model, inputChars, maxOutputTokens) {
   return ((inputChars / 3) * price[0] + maxOutputTokens * price[1]) / 1e6;
 }
 
-export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, logPath, fetchImpl = fetch, profile } = {}) {
+export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, logPath, fetchImpl = fetch, profile, retryMs = 8000 } = {}) {
   if (!(capUsd > 0)) throw new Error('capUsd is required: every run has a hard spend cap');
   let spent = 0, calls = 0;
   async function call(stage, { system, user, schema, maxTokens = 2000, model: override } = {}) {
@@ -35,11 +35,17 @@ export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, 
     const body = {
       model, messages, max_tokens: maxTokens, temperature: setting.temperature ?? 0,
       provider: CONFIG.provider, usage: { include: true },
+      ...(setting.reasoning ? { reasoning: setting.reasoning } : {}),
       ...(schema ? { response_format: { type: 'json_schema', json_schema: { name: stage, strict: true, schema } } } : {})
     };
     const t0 = Date.now();
-    const res = await fetchImpl(ENDPOINT, { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    const json = await res.json().catch(() => ({}));
+    let res, json;
+    for (let attempt = 0; ; attempt++) {
+      res = await fetchImpl(ENDPOINT, { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      json = await res.json().catch(() => ({}));
+      if (res.ok || ![429, 500, 502, 503].includes(res.status) || attempt >= 4) break;
+      await new Promise(r => setTimeout(r, retryMs * 2 ** attempt));
+    }
     if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${json?.error?.message || 'request failed'}`);
     const usage = json.usage || {};
     const cost = Number(usage.cost) || 0;
@@ -49,7 +55,7 @@ export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, 
     if (schema) { try { data = JSON.parse(text); } catch { data = null; } }
     const entry = { at: new Date().toISOString(), stage, profile: setting.profile, model: json.model || model, requested_model: model,
       temperature: body.temperature, input_tokens: usage.prompt_tokens ?? null, output_tokens: usage.completion_tokens ?? null,
-      cost_usd: cost, ms: Date.now() - t0, parsed: schema ? data !== null : null };
+      finish: json.choices?.[0]?.finish_reason ?? null, cost_usd: cost, ms: Date.now() - t0, parsed: schema ? data !== null : null };
     if (logPath) appendFileSync(logPath, JSON.stringify(entry) + '\n');
     return { text, data, entry };
   }
