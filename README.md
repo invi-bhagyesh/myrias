@@ -7,7 +7,11 @@ aquatic animals. See `FRAMEWORK.md` for the plan: what is built, in what order, 
 
 A static, read-only site that renders one data file, `public/data/release.json`:
 
-- **Landscape:** a welfare problem x technology class matrix, filterable by species. Each cell is
+- **Overview (front page):** one question, four live numbers (verified claims, sources,
+  Chinese-language sources, species), three steps, a small picture of the map, what the site
+  guarantees, and how to help check it. It makes no claims beyond what the data shows; in
+  pre-release the numbers are zero and a note says why.
+- **Explore:** a welfare problem x technology class matrix, filterable by species. Each cell is
   explicitly *has records*, *searched, nothing found* or *not searched yet*; none is left blank.
 - **Species, sources and claims:** every claim shows a verbatim quotation, its location in the
   source, how it was verified and whether it was sampled in an expert audit.
