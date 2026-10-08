@@ -3,10 +3,9 @@
 export const STR = {
   en: {
     'site.title': 'Myrias — Aquaculture welfare evidence',
-    'site.tag': 'Sources. Evidence. Judgment.',
     'site.desc': 'An open, bilingual, source-linked map of welfare technologies for farmed aquatic animals.',
-    'masthead.side': 'Aquaculture welfare<br>evidence base',
     'subhead.left': 'Open evidence base',
+    'brand.sub': 'Aquaculture welfare evidence',
     'subhead.version': 'Version {version} · as of {asof}',
     'status.pre-release': 'Pre-release: nothing verified yet',
     'status.sample': 'Sample data',
@@ -227,10 +226,9 @@ export const STR = {
   },
   zh: {
     'site.title': 'Myrias — 水产养殖福利证据',
-    'site.tag': '来源。证据。判断。',
     'site.desc': '一个开放、双语、可溯源的养殖水生动物福利技术地图。',
-    'masthead.side': '水产养殖福利<br>证据库',
     'subhead.left': '开放证据库',
+    'brand.sub': '水产养殖福利证据',
     'subhead.version': '版本 {version} · 截至 {asof}',
     'status.pre-release': '预发布：尚无经核验的内容',
     'status.sample': '示例数据',

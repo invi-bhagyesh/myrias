@@ -127,6 +127,8 @@ function viewExplore(params) {
   };
 }
 
+const statusText = d => tr(d.release.sample ? 'status.sample' : d.release.status === 'pre-release' ? 'status.pre-release' : 'status.released');
+
 function viewOverview() {
   const d = state.data;
   const supported = d.claims.filter(c => c.verification === 'supported').length;
@@ -138,7 +140,7 @@ function viewOverview() {
   const issue = (title, body) => esc(issueLink(title, `${body}\nRelease: ${d.release.version} (${d.release.as_of})\n\n`));
   return {
     title: tr('site.title'),
-    html: `<section class="hero"><div class="record-type">${esc(tr('hero.kicker'))}</div>
+    html: `<section class="hero"><span class="pill">${esc(statusText(d))}</span><div class="record-type">${esc(tr('hero.kicker'))}</div>
         <h1>${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
         <p class="hero-cta"><a class="button primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))}</a> <a class="button" href="${link('methods')}">${esc(tr('hero.cta.methods'))}</a></p></section>
       <section class="stats"><ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul>
@@ -331,10 +333,10 @@ function applyChrome() {
   const banner = $('#banner');
   const d = state.data;
   if (d && d.release.sample) { banner.hidden = false; banner.className = 'notice sample'; banner.textContent = tr('banner.sample'); }
-  else if (d && d.release.status === 'pre-release') { banner.hidden = false; banner.className = 'notice prerelease'; banner.textContent = tr('banner.prerelease'); }
+  else if (d && d.release.status === 'pre-release' && parseHash().parts.length) { banner.hidden = false; banner.className = 'notice prerelease'; banner.textContent = tr('banner.prerelease'); }
   else banner.hidden = true;
   $('#release-line').textContent = d && !d.release.sample ? tr('subhead.version', { version: d.release.version, asof: d.release.as_of }) : '';
-  $('#release-status').textContent = d ? tr(d.release.sample ? 'status.sample' : d.release.status === 'pre-release' ? 'status.pre-release' : 'status.released') : '';
+  $('#release-status').textContent = d ? statusText(d) : '';
 }
 
 function render(navigated = false) {
@@ -359,7 +361,8 @@ function render(navigated = false) {
     const on = a.dataset.route === active;
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
-  $('#content').innerHTML = view.html;
+  const wide = !parts[0] || ['content', 'explore'].includes(parts[0]);
+  $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   document.title = `${view.title} — ${tr('site.title')}`;
   const pathKey = parts.join('/');
   if (navigated && pathKey !== state.lastPath) { window.scrollTo(0, 0); $('#content').focus({ preventScroll: true }); }
