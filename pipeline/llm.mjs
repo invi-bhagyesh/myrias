@@ -26,12 +26,12 @@ export function estimateCost(model, inputChars, maxOutputTokens) {
 export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, logPath, fetchImpl = fetch, profile, retryMs = 8000, retries = 2 } = {}) {
   if (!(capUsd > 0)) throw new Error('capUsd is required: every run has a hard spend cap');
   let spent = 0, calls = 0;
-  async function call(stage, { system, user, schema, maxTokens = 2000, model: override } = {}) {
+  async function call(stage, { system, user, images, schema, maxTokens = 2000, model: override } = {}) {
     if (!apiKey) throw new Error('OPENROUTER_API_KEY is not set');
     const setting = stageSetting(stage, profile);
     const model = override || setting.model;
-    const messages = [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: user }];
-    const projected = spent + estimateCost(model, messages.reduce((n, m) => n + m.content.length, 0), maxTokens);
+    const messages = [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: images?.length ? [{ type: 'text', text: user }, ...images.map(url => ({ type: 'image_url', image_url: { url } }))] : user }];
+    const projected = spent + estimateCost(model, messages.reduce((n, m) => n + (typeof m.content === 'string' ? m.content.length : 3000 * (images?.length || 1)), 0), maxTokens);
     if (projected > capUsd) throw new SpendCapError(`spend cap $${capUsd} would be exceeded (spent $${spent.toFixed(4)}, projected $${projected.toFixed(4)})`);
     const body = {
       model, messages, max_tokens: maxTokens, temperature: setting.temperature ?? 0,

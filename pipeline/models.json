@@ -12,7 +12,8 @@
     "verify",
     "reconcile",
     "translate",
-    "suggest"
+    "suggest",
+    "ocr"
   ],
   "profiles": {
     "demo": {
@@ -67,6 +68,10 @@
       },
       "suggest": {
         "model": "qwen/qwen3.8-max-0902",
+        "temperature": 0
+      },
+      "ocr": {
+        "model": "qwen/qwen3-vl-30b-a3b-instruct",
         "temperature": 0
       }
     },
@@ -123,6 +128,10 @@
       "suggest": {
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0
+      },
+      "ocr": {
+        "model": "qwen/qwen3-vl-30b-a3b-instruct",
+        "temperature": 0
       }
     }
   },
@@ -154,6 +163,26 @@
     "z-ai/glm-5.3-flash": [
       0.15,
       0.5
+    ],
+    "qwen/qwen3-vl-30b-a3b-instruct": [
+      0.15,
+      0.6
+    ],
+    "qwen/qwen3-vl-235b-a22b-instruct": [
+      0.21,
+      1.9
+    ],
+    "deepseek/deepseek-v4-flash-vision-exp": [
+      0.216,
+      0.647
+    ],
+    "z-ai/glm-4.6v": [
+      0.3,
+      0.9
+    ],
+    "baidu/ernie-4.5-vl-424b-a47b": [
+      0.42,
+      1.25
     ]
   }
 }
