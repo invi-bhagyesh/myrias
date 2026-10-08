@@ -3974,8 +3974,12 @@
    "focus_zh": null,
    "counts": {
     "documents_collected": 21,
+    "documents_processed": 14,
     "sources_released": 11,
     "claims_extracted": 231,
+    "claims_quote_found": 206,
+    "claims_relevant": 120,
+    "claims_released": 120,
     "claims_supported": 118
    },
    "models": [

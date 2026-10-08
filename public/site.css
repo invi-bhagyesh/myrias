@@ -516,3 +516,36 @@ h1, h2, h3 { font-feature-settings: "kern" 1, "liga" 1; }
 }
 .band-card { transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease; }
 .band-card:hover { transform: translateY(-3px); box-shadow: var(--card-shadow-hover); }
+
+/* Pipeline tab */
+.funnel { list-style: none; margin: 14px 0 40px; padding: 0; display: grid; gap: 10px; max-width: 860px; }
+.funnel li { display: grid; grid-template-columns: 220px 1fr 56px; align-items: center; gap: 14px; font-size: 14px; }
+.funnel-bar { height: 22px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 7%, transparent); overflow: hidden; }
+.funnel-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, transparent), var(--accent)); }
+.funnel b { font: 600 15px var(--mono); text-align: right; }
+.pipe-flow { position: relative; display: grid; gap: 16px; margin: 18px 0 40px; max-width: 920px; }
+.pipe-flow::before { content: ""; position: absolute; left: 31px; top: 24px; bottom: 24px; width: 2px; background: repeating-linear-gradient(180deg, var(--line-strong) 0 6px, transparent 6px 12px); }
+.pipe-stage { position: relative; display: grid; grid-template-columns: 64px 1fr; gap: 14px; }
+.pipe-id { display: flex; justify-content: center; padding-top: 14px; }
+.pipe-id span { position: relative; z-index: 1; min-width: 46px; text-align: center; padding: 6px 8px; border-radius: 999px; font: 600 12px var(--mono); background: var(--card-bg); border: 1px solid var(--line-strong); color: var(--ink); }
+.pipe-stage.st-built .pipe-id span { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.pipe-stage.st-partial .pipe-id span { border-color: var(--accent); color: var(--accent); }
+.pipe-body { background: var(--card-bg); border: 1px solid var(--card-line, var(--line)); border-radius: 22px; padding: 18px 22px 8px; box-shadow: var(--card-shadow); }
+.pipe-stage.st-planned .pipe-body { border-style: dashed; background: color-mix(in srgb, var(--card-bg) 60%, transparent); box-shadow: none; }
+.pipe-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pipe-head h3 { margin: 0; font: 500 20px/1.3 var(--font); letter-spacing: -.01em; }
+.pipe-badge { font: 500 11px var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--soft); white-space: nowrap; }
+.pipe-stage.st-built .pipe-badge { color: var(--accent); border-color: var(--accent); }
+.pipe-what { margin: 6px 0 12px; }
+.pipe-facts { display: grid; grid-template-columns: 110px 1fr; gap: 8px 16px; margin: 0 0 12px; font-size: 14px; }
+.pipe-facts dt { font: 500 11px/1.9 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--soft); }
+.pipe-facts dd { margin: 0; color: var(--soft); }
+.pipe-facts code { font: 500 13px var(--mono); background: color-mix(in srgb, var(--accent) 10%, transparent); padding: 2px 8px; border-radius: 6px; color: var(--ink); }
+@media (max-width: 640px) {
+  .funnel li { grid-template-columns: 1fr 48px; } .funnel-bar { grid-column: 1 / -1; grid-row: 2; }
+  .pipe-stage { grid-template-columns: 44px 1fr; gap: 8px; } .pipe-flow::before { left: 21px; } .pipe-id span { min-width: 36px; padding: 5px 4px; font-size: 11px; }
+  .pipe-body { padding: 14px 16px 6px; } .pipe-facts { grid-template-columns: 1fr; gap: 2px; } .pipe-facts dd { margin-bottom: 8px; }
+}
+.pipe-id { align-items: flex-start; }
+.pipe-id span { align-self: flex-start; display: inline-block; height: auto; line-height: 1.2; }
+@media (max-width: 560px) { .sections { height: auto; min-height: 52px; padding: 6px 8px; flex-wrap: wrap; border-radius: 28px; overflow: visible; } .sections a { padding: 7px 11px; } }

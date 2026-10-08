@@ -45,7 +45,7 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
   for (const c of out) { delete c._cell; delete c._ev; }
   const extracted = claims.length;
   const run = { ...base.runs[0], status: 'in_progress', focus_en: 'All welfare-technology claims in the first 14 Chinese-language papers (machine-extracted and machine-verified; no expert audit yet).', focus_zh: null,
-    counts: { documents_collected: base.runs[0].counts.documents_collected, sources_released: sources.length, claims_extracted: extracted, claims_supported: out.filter(c => c.verification === 'supported').length }, models, audit: null,
+    counts: { documents_collected: base.runs[0].counts.documents_collected, documents_processed: new Set(claims.map(c => c.source)).size, sources_released: sources.length, claims_extracted: extracted, claims_quote_found: claims.filter(c => c.quote_check === 'found').length, claims_relevant: claims.filter(c => c.quote_check === 'found' && c.map?.welfare_relevant === true).length, claims_released: out.length, claims_supported: out.filter(c => c.verification === 'supported').length }, models, audit: null,
     changelog: [{ date: '2026-10', text_en: 'First machine-verified demo release. Quotes are checked against the page text; support is judged by a second model. No expert has audited these claims.', text_zh: null }] };
   const species = base.species.map(s => ({ ...s, run_status: 'in_progress', summary_en: 'First species run: Chinese-language papers only. Machine-verified, not yet audited by an expert.', summary_zh: null }));
   return { ...base, release: { ...base.release, version: '0.1.0', as_of: '2026-10', status: 'pre-release', sample: false,

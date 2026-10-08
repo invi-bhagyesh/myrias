@@ -240,3 +240,18 @@ test('the live release validates, is not a sample, and has enough claims for the
   const g = layoutGraph(buildGraph(live, 'en'));
   assert.ok(g.nodes.some(n => n.type === 'claim'));
 });
+
+import { STAGES, funnel } from '../public/site-pipeline.js';
+test('pipeline tab: stages are bilingual, models match the demo profile, funnel comes from the release counts', () => {
+  const cfg = JSON.parse(readFileSync(new URL('../pipeline/models.json', import.meta.url), 'utf8')).profiles.demo;
+  const byStage = { L2: 'profile', L3: 'map', L4: 'extract', L5: 'verify', L6: 'map', L7: 'reconcile', S: 'suggest' };
+  for (const st of STAGES) {
+    for (const f of ['name', 'what', 'how', 'out']) assert.ok(st[f][0] && st[f][1], `${st.id}.${f}`);
+    assert.ok(['built', 'partial', 'planned'].includes(st.status));
+    if (byStage[st.id]) assert.equal(st.model, cfg[byStage[st.id]].model, st.id);
+  }
+  const f = funnel(live.runs[0]);
+  assert.deepEqual(f.map(x => x.key), ['documents_collected', 'documents_processed', 'claims_extracted', 'claims_quote_found', 'claims_relevant', 'claims_released']);
+  assert.ok(f.every((x, i) => i === 0 || x.value <= f[i - 1].value || x.key === 'claims_extracted'));
+  assert.equal(funnel(null).length, 0);
+});
