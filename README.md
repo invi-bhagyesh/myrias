@@ -7,6 +7,12 @@ aquatic animals. See `FRAMEWORK.md` for the plan: what is built, in what order, 
 
 A static, read-only site that renders one data file, `public/data/release.json`:
 
+- **Network on the front page:** species, technology classes, welfare problems, applications,
+  claims and sources as a coloured network, built from the release export. Technologies are on the
+  left, welfare problems on the right; each claim sits next to its technology. While nothing is
+  verified it draws only the frame (every technology x problem combination as a faint dashed line);
+  verified records add solid dots and lines. Position is for navigation and carries no evidence
+  meaning, and the page says so. Hover shows links, click opens the record.
 - **Overview (front page):** one question, four live numbers (verified claims, sources,
   Chinese-language sources, species), three steps, a small picture of the map, what the site
   guarantees, and how to help check it. It makes no claims beyond what the data shows; in
