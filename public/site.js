@@ -70,7 +70,7 @@ function issueLink(title, body) {
 }
 
 // ---------- views ----------
-function viewLandscape(params) {
+function viewExplore(params) {
   const d = state.data;
   const speciesId = params.get('species') || 'all';
   const matrix = L.buildMatrix(d, speciesId);
@@ -95,7 +95,7 @@ function viewLandscape(params) {
       const inner = cell.status === 'has_records' ? `<strong>${cell.applications.length}</strong>`
         : cell.status === 'probed_empty' ? `<span aria-hidden="true">0</span><small>${esc(tr('cell.probed_empty'))}</small>`
         : `<span aria-hidden="true">·</span>`;
-      return `<td><a class="cell st-${cell.status}${selected === key ? ' selected' : ''}" href="${link('', { species: speciesId, cell: key })}" aria-label="${esc(label)}" ${selected === key ? 'aria-current="true"' : ''}>${inner}</a></td>`;
+      return `<td><a class="cell st-${cell.status}${selected === key ? ' selected' : ''}" href="${link('explore', { species: speciesId, cell: key })}" aria-label="${esc(label)}" ${selected === key ? 'aria-current="true"' : ''}>${inner}</a></td>`;
     }).join('');
     return `<tr><th scope="row">${esc(pick(row.problem, '', state.lang))}</th>${cells}</tr>`;
   }).join('');
@@ -115,14 +115,43 @@ function viewLandscape(params) {
   }
 
   return {
-    title: tr('nav.landscape'),
+    title: tr('nav.explore'),
     html: lead(tr('land.kicker'), tr('land.title'), tr('land.desc'), aside) +
-      `<div class="section-head"><h2>${esc(tr('land.explorer'))}</h2>
+      `<p class="subnav">${esc(tr('explore.browse'))}: <a href="${link('species')}">${esc(tr('nav.species'))}</a> \u00b7 <a href="${link('sources')}">${esc(tr('nav.sources'))}</a></p>
+       <div class="section-head"><h2>${esc(tr('land.explorer'))}</h2>
         <label class="inline-field">${esc(tr('land.species'))} <select id="species-filter" aria-label="${esc(tr('land.species'))}">${speciesOptions}</select></label></div>
        <p class="small-note">${esc(tr('land.how'))}</p>
        <div class="matrix-wrap" tabindex="0" role="region" aria-label="${esc(tr('land.explorer'))}"><table class="matrix"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div>
        <ul class="legend" aria-label="${esc(tr('land.legend'))}">${legend}</ul>
        <section class="cell-panel" aria-live="polite">${panel}</section>`
+  };
+}
+
+function viewOverview() {
+  const d = state.data;
+  const supported = d.claims.filter(c => c.verification === 'supported').length;
+  const zhSources = d.sources.filter(x => x.lang === 'zh').length;
+  const stats = [[supported, 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
+  const note = d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
+  const matrix = L.buildMatrix(d, 'all');
+  const mini = matrix.rows.map(r => r.cells.map(c => `<span class="mini-cell st-${c.status}"></span>`).join('')).join('');
+  const issue = (title, body) => esc(issueLink(title, `${body}\nRelease: ${d.release.version} (${d.release.as_of})\n\n`));
+  return {
+    title: tr('site.title'),
+    html: `<section class="hero"><div class="record-type">${esc(tr('hero.kicker'))}</div>
+        <h1>${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
+        <p class="hero-cta"><a class="button primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))}</a> <a class="button" href="${link('methods')}">${esc(tr('hero.cta.methods'))}</a></p></section>
+      <section class="stats"><ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul>
+        <p class="small-note">${esc(tr(note))}</p></section>
+      <section class="how"><h2>${esc(tr('how.title'))}</h2><ol class="how-steps">${[1, 2, 3].map(i => `<li><span class="num" aria-hidden="true">${i}</span><h3>${esc(tr(`how.${i}.t`))}</h3><p>${esc(tr(`how.${i}.d`))}</p></li>`).join('')}</ol></section>
+      <section class="figure"><h2>${esc(tr('fig.title'))}</h2>
+        <a class="mini" style="--cols:${matrix.columns.length}" href="${link('explore')}" aria-label="${esc(tr('fig.cta'))}">${mini}</a>
+        <div class="figure-text"><p class="caption">${esc(tr('fig.caption'))}</p><p><a class="button small" href="${link('explore')}">${esc(tr('fig.cta'))}</a></p></div></section>
+      <section class="principles"><h2>${esc(tr('prin.title'))}</h2><ul>${[1, 2, 3].map(i => `<li>${esc(tr(`prin.${i}`))}</li>`).join('')}</ul></section>
+      <section class="join"><h2>${esc(tr('join.title'))}</h2><ul>${[1, 2, 3].map(i => `<li>${esc(tr(`join.${i}`))}</li>`).join('')}</ul>
+        <p><a class="button small" href="${issue('Correction or missing source', 'What is wrong or missing:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.report'))} ↗</a>
+        <a class="button small" href="${issue('Offer to review', 'Languages, fish-welfare background, hours available:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.review'))} ↗</a>
+        <a class="button small" href="${link('download')}">${esc(tr('join.download'))}</a></p></section>`
   };
 }
 
@@ -161,7 +190,7 @@ function viewSpecies(id) {
       dl([[tr('sp.scientific'), `<i>${esc(s.scientific)}</i>`], [tr('sp.group'), esc(tr('group.' + s.group))], [tr('sp.runstatus'), esc(tr('run.' + s.run_status))]]) +
       `<h2>${esc(tr('sp.apps'))}</h2>` + (apps.length ? apps.map(applicationCard).join('') : `<p>${esc(tr('sp.noapps'))}</p>`) +
       `<h2>${esc(tr('sp.cells'))}</h2><p>${esc(tr('sp.cells.line', { has: counts.has_records, empty: counts.probed_empty, not: counts.not_collected }))}</p>
-       <p><a class="button small" href="${link('', { species: id })}">${esc(tr('nav.landscape'))}</a></p>` +
+       <p><a class="button small" href="${link('explore', { species: id })}">${esc(tr('nav.explore'))}</a></p>` +
       `<h2>${esc(tr('sp.runs'))}</h2>` + runs.map(runCard).join('')
   };
 }
@@ -280,7 +309,7 @@ function viewDownload() {
 }
 
 function viewNotFound() {
-  return { title: tr('notfound'), html: empty(tr('notfound'), '') + `<p style="text-align:center"><a class="button small" href="${link()}">${esc(tr('nav.landscape'))}</a></p>` };
+  return { title: tr('notfound'), html: empty(tr('notfound'), '') + `<p style="text-align:center"><a class="button small" href="${link()}">${esc(tr('nav.explore'))}</a></p>` };
 }
 
 function viewError() {
@@ -315,7 +344,8 @@ function render(navigated = false) {
   if (!state.data) view = state.error ? viewError() : { title: tr('loading'), html: `<p class="loading">${esc(tr('loading'))}</p>` };
   else {
     const [head, id] = parts;
-    if (!head || head === 'content') view = viewLandscape(params);
+    if (!head || head === 'content') view = viewOverview();
+    else if (head === 'explore') view = viewExplore(params);
     else if (head === 'species') view = id ? viewSpecies(id) : viewSpeciesList();
     else if (head === 'sources') view = id ? viewSource(id) : viewSources(params);
     else if (head === 'claims' && id) view = viewClaim(id);
@@ -323,7 +353,8 @@ function render(navigated = false) {
     else if (head === 'download') view = viewDownload();
     else view = viewNotFound();
   }
-  const active = !parts[0] || parts[0] === 'content' ? 'landscape' : parts[0] === 'claims' ? 'sources' : parts[0];
+  const section = parts[0] || '';
+  const active = ['explore', 'species', 'sources', 'claims'].includes(section) ? 'explore' : section;
   document.querySelectorAll('.sections a').forEach(a => {
     const on = a.dataset.route === active;
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
@@ -378,7 +409,7 @@ document.addEventListener('click', event => {
 document.addEventListener('change', event => {
   if (event.target.id === 'species-filter') {
     const { params } = parseHash();
-    location.hash = link('', { species: event.target.value, cell: params.get('cell') || '' });
+    location.hash = link('explore', { species: event.target.value, cell: params.get('cell') || '' });
   }
   if (event.target.id === 'source-lang') updateSourceList();
 });
