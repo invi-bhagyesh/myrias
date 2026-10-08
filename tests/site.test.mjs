@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import * as L from '../public/site-lib.js';
 import { STR, t } from '../public/i18n.js';
 import { pixelHills, columns } from '../public/site-art.js';
-import { buildGraph, placeholderGraph, layoutGraph, shortLabel, legendHtml, MIN_REAL_CLAIMS } from '../public/site-graph.js';
+import { buildGraph, placeholderGraph, simplifyGraph, layoutGraph, shortLabel, legendHtml, MIN_REAL_CLAIMS } from '../public/site-graph.js';
 
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url), 'utf8'));
 const release = read('release.json');
@@ -216,4 +216,14 @@ test('placeholder graph: dense, deterministic, labelled, bounded, and links nowh
 test('the placeholder is used only below the real-claim threshold', () => {
   assert.equal(MIN_REAL_CLAIMS, 50);
   assert.ok(release.claims.length < MIN_REAL_CLAIMS);
+});
+
+test('simple view keeps hubs and applications only, with resolvable edges', () => {
+  const full = placeholderGraph(release, 'en');
+  const g = layoutGraph(simplifyGraph(full));
+  assert.ok(g.nodes.length < full.nodes.length / 5);
+  assert.ok(g.nodes.every(n => ['class', 'problem', 'species', 'application'].includes(n.type)));
+  for (const e of g.edges) { assert.ok(g.byId.has(e.a) && g.byId.has(e.b)); assert.notEqual(e.kind, 'cross'); }
+  assert.ok(!g.legend.some(l => l.key === 'source'));
+  assert.equal(full.nodes.filter(n => n.type === 'claim').length > 1000, true);
 });

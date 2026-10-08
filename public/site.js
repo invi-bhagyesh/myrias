@@ -2,7 +2,7 @@ import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 
-import { buildGraph, placeholderGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
+import { buildGraph, placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 
 const { escapeHtml: esc, safeUrl, pick } = L;
 const ISSUES_URL = 'https://github.com/invi-bhagyesh/myrias/issues/new';
@@ -10,7 +10,7 @@ const $ = selector => document.querySelector(selector);
 const params0 = new URLSearchParams(location.search);
 const useSample = params0.get('data') === 'sample';
 
-const state = { data: null, error: null, lang: 'en', index: null, lastPath: null };
+const state = { data: null, error: null, lang: 'en', index: null, lastPath: null, graphView: null };
 const tr = (key, vars) => t(state.lang, key, vars);
 
 function store(key, value) {
@@ -155,7 +155,6 @@ function viewOverview() {
       some ? tr('note.stand.d.some', { empty: count('probed_empty'), not: count('not_collected') }) : tr('note.stand.d.none')],
     ['note.why.k', tr('note.why.t'), tr('note.why.d')]
   ];
-  const isSample = d.claims.length < MIN_REAL_CLAIMS;
   const rows = (prefix) => [1, 2, 3].map(i => `<li>${esc(tr(`${prefix}.${i}`))}</li>`).join('');
   return {
     title: tr('site.title'),
@@ -166,8 +165,8 @@ function viewOverview() {
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
       </section>
       <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
-        <figure class="band-card graph-card">${isSample ? `<span class="graph-badge">${esc(tr('graph.badge'))}</span>` : ''}<div class="graph-stage" data-graph></div>${legendHtml(homeGraph(d, state.lang), tr)}
-          <figcaption class="graph-note">${esc(tr('graph.note'))} ${esc(isSample ? tr('graph.note.placeholder') : (d.claims.length ? '' : tr('graph.note.empty')))} ${esc(tr('graph.hint'))}</figcaption></figure></section>
+        <figure class="band-card graph-card"><div class="graph-head"><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${isPlaceholder(d) && graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
+          <figcaption class="graph-note" data-gnote></figcaption></figure></section>
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
 
       <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2><p>${esc(tr(note))}</p></div>
@@ -428,16 +427,38 @@ function renderFooter() {
     <div class="site-footer-scene" aria-hidden="true">${pixelHills('footer')}<span class="site-footer-wordmark">Myrias</span></div></div>`;
 }
 
-// The front page shows a labelled placeholder network until a release holds enough verified claims.
-const homeGraph = (d, lang) => (d.claims.length < MIN_REAL_CLAIMS ? placeholderGraph(d, lang, link) : buildGraph(d, lang, link));
+// The front page can show the network three ways. "full" is the intended end state and "simple" its
+// hubs only; both are labelled placeholder data until a release holds enough verified claims.
+// "today" is always the real release.
+const GRAPH_VIEWS = ['full', 'simple', 'today'];
+const isPlaceholder = d => d.claims.length < MIN_REAL_CLAIMS;
+const graphView = d => (GRAPH_VIEWS.includes(state.graphView) ? state.graphView : isPlaceholder(d) ? 'full' : 'today');
+function viewGraph(d, lang, view) {
+  if (view === 'today') return buildGraph(d, lang, link);
+  const g = placeholderGraph(d, lang, link);
+  return view === 'simple' ? simplifyGraph(g) : g;
+}
 let observers = [];
 function setupHomeEffects() {
   const home = document.querySelector('.arena-home');
   if (!home || !('IntersectionObserver' in window)) return;
   const stage = home.querySelector('[data-graph]');
   if (stage && state.data) {
-    const handle = mountGraph(stage, homeGraph(state.data, state.lang), { tr, navigate: href => { location.hash = href; } });
-    observers.push({ disconnect: () => handle.destroy() });
+    let handle = null;
+    const show = () => {
+      const d = state.data, view = graphView(d), g = viewGraph(d, state.lang, view);
+      const sample = view !== 'today' && isPlaceholder(d);
+      if (handle) handle.destroy();
+      handle = mountGraph(stage, g, { tr, navigate: href => { location.hash = href; } });
+      home.querySelector('[data-glegend]').innerHTML = legendHtml(g, tr);
+      home.querySelector('[data-gbadge]').hidden = !sample;
+      const note = sample ? tr('graph.note.placeholder') : (view === 'today' && !d.claims.length ? tr('graph.note.empty') : '');
+      home.querySelector('[data-gnote]').textContent = [tr('graph.note'), note, tr('graph.hint')].filter(Boolean).join(' ');
+      home.querySelectorAll('[data-gview]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.gview === view)));
+    };
+    home.querySelectorAll('[data-gview]').forEach(btn => btn.addEventListener('click', () => { state.graphView = btn.dataset.gview; show(); }));
+    show();
+    observers.push({ disconnect: () => handle && handle.destroy() });
   }
   const targets = home.querySelectorAll('.band-section');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

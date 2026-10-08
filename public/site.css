@@ -423,3 +423,13 @@ h1, h2, h3 { font-weight: 500; }
 .graph-stage canvas { background: radial-gradient(ellipse 60% 60% at 50% 50%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 80%); }
 .graph-badge { position: absolute; z-index: 2; top: 18px; left: 22px; padding: 4px 10px; border-radius: 999px; font: 500 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase;
   color: var(--accent); border: 1px dashed var(--accent); background: color-mix(in srgb, var(--card-bg) 85%, transparent); }
+
+/* Graph view switcher */
+.graph-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 2px 6px 8px; }
+.graph-badge { position: static; }
+.graph-badge[hidden] { display: none; }
+.graph-tabs { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line-strong); border-radius: 999px; background: color-mix(in srgb, var(--bg) 70%, transparent); }
+.graph-tabs button { border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; font: 500 12px/1.2 var(--mono); letter-spacing: .03em; color: var(--soft); transition: background-color .2s ease, color .2s ease; }
+.graph-tabs button:hover { color: var(--ink); }
+.graph-tabs button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+.graph-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
