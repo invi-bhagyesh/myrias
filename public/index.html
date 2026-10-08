@@ -1,24 +1,25 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f7f6f0">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#ffffff">
 <meta name="description" content="An open, bilingual, source-linked map of welfare technologies for farmed aquatic animals.">
 <meta property="og:type" content="website"><meta property="og:title" content="Myrias: aquaculture welfare evidence"><meta property="og:description" content="An open, bilingual, source-linked map of welfare technologies for farmed aquatic animals.">
 <title>Myrias — Aquaculture welfare evidence</title>
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="site.css"><link rel="icon" href="favicon.svg" type="image/svg+xml"></head>
+<link rel="stylesheet" href="site.css"><link rel="icon" href="favicon.svg" type="image/svg+xml"></head>
 <body><a class="skip" href="#content" data-i18n="skip">Skip to content</a>
-<div class="paper">
-  <div class="edition"><div class="edition-left"><a href="https://myrias.org/">myrias.org</a><span data-i18n="subhead.left">Open evidence base</span></div>
-    <div class="edition-right"><button id="lang-toggle" type="button" class="text-button" lang="zh-Hans">中文</button><button id="theme-toggle" type="button" class="text-button" aria-pressed="false">Dark mode</button></div></div>
-  <header class="masthead"><div class="masthead-side"><span lang="zh-Hans" class="chinese">水产研究</span><span data-i18n-html="masthead.side">Aquaculture welfare<br>evidence base</span></div><div class="wordmark"><a href="#/">Myrias</a></div><div class="masthead-side right"><span data-i18n="site.tag">Sources. Evidence. Judgment.</span></div></header>
-  <div class="subhead"><span id="release-line" role="status"></span><span id="release-status"></span></div>
+<header class="topbar"><div class="wrap topbar-in">
+  <a class="brand" href="#/"><span class="brand-mark">Myrias</span><span class="brand-sub" data-i18n="brand.sub">Aquaculture welfare evidence</span></a>
   <nav class="sections" aria-label="Sections">
     <a data-route="explore" href="#/explore" data-i18n="nav.explore">Explore</a>
     <a data-route="methods" href="#/methods" data-i18n="nav.methods">Methods and limits</a>
     <a data-route="download" href="#/download" data-i18n="nav.download">Download and cite</a>
   </nav>
-  <div id="banner" class="notice" hidden></div>
-  <main id="content" tabindex="-1"><p class="loading">Loading…</p></main>
-  <footer class="colophon"><div><strong>Myrias</strong><span data-i18n="subhead.left">Open evidence base</span></div><p data-i18n-html="footer.line">The map records what sources say. The methods page explains how it was checked.<br>Corrections are welcome.</p>
-    <div class="footer-links"><a href="https://github.com/invi-bhagyesh/myrias" target="_blank" rel="noopener noreferrer" data-i18n="footer.repo">Project repository</a><a href="workspace.html" data-i18n="footer.workspace">Staff workspace</a></div></footer>
-</div>
+  <div class="tools"><button id="lang-toggle" type="button" class="chip" lang="zh-Hans">中文</button><button id="theme-toggle" type="button" class="chip" aria-pressed="false">Dark mode</button></div>
+</div></header>
+<div class="wrap"><div id="banner" class="notice" hidden></div></div>
+<main id="content" class="wrap" tabindex="-1"><p class="loading">Loading…</p></main>
+<footer class="footer"><div class="wrap footer-in">
+  <div><p data-i18n-html="footer.line">The map records what sources say. The methods page explains how it was checked.<br>Corrections are welcome.</p>
+    <div class="release-meta"><span id="release-line"></span><span id="release-status" role="status"></span></div></div>
+  <div class="footer-links"><a href="https://myrias.org/">myrias.org</a><a href="https://github.com/invi-bhagyesh/myrias" target="_blank" rel="noopener noreferrer" data-i18n="footer.repo">Project repository</a><a href="workspace.html" data-i18n="footer.workspace">Staff workspace</a></div>
+</div></footer>
 <script type="module" src="site.js"></script>
 </body></html>
