@@ -1,0 +1,4 @@
+Space Grotesk and JetBrains Mono are distributed under the SIL Open Font License 1.1.
+Space Grotesk: Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk)
+JetBrains Mono: Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+License text: https://openfontlicense.org

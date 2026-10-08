@@ -52,3 +52,7 @@ GitHub Actions validates and deploys `public/` to GitHub Pages on pushes to `mai
 Source documents are licensed journal content and are never published here. Released records
 contain bibliographic metadata, locators and short quotations only. The data licence is not set
 yet and is shown as such on the download page.
+
+Fonts: Space Grotesk and JetBrains Mono (SIL Open Font License 1.1), self-hosted in `public/fonts/`
+so visiting the site makes no third-party requests. Visual style is inspired by ValueArena
+(valuearena.github.io): warm paper background, forest-green accent, monospace labels, numbered sections.
