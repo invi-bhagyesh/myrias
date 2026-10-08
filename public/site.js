@@ -183,6 +183,7 @@ function viewOverview() {
         <h1 id="home-title">${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
         </div>
+        <button type="button" class="scroll-cue" data-scroll="graph-title"><span>${esc(tr('hero.scroll'))}</span><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 7l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <aside class="hero-side" aria-hidden="true">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</aside>
       </section>
       <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
@@ -498,6 +499,7 @@ let observers = [];
 function setupHomeEffects() {
   const home = document.querySelector('.arena-home');
   if (!home || !('IntersectionObserver' in window)) return;
+  home.querySelectorAll('[data-scroll]').forEach(b => b.addEventListener('click', () => { const t = document.getElementById(b.dataset.scroll); if (t) t.closest('section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   const stage = home.querySelector('[data-graph]');
   if (stage && state.data) {
     let handle = null;

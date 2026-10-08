@@ -610,3 +610,11 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .mc-key i.sz { background: color-mix(in srgb, var(--accent) 55%, transparent); } .sz.s1 { width: 9px; height: 9px; } .sz.s2 { width: 15px; height: 15px; } .sz.s3 { width: 22px; height: 22px; }
 .mc-ring { border: 1.2px dashed var(--soft); } .mc-pt { width: 4px !important; height: 4px !important; background: color-mix(in srgb, var(--ink) 30%, transparent); }
 .matrix-details { margin: 8px 0 14px; } .matrix-details summary { cursor: pointer; font: 500 13px var(--mono); color: var(--soft); padding: 6px 2px; }
+
+/* First screen: the hero fills the view under the header, so nothing is cut off at the fold */
+.arena-home .hero-with-hills { min-height: calc(100svh - 52px); padding: 24px 0 88px; }
+.arena-home .graph-feature { scroll-margin-top: 84px; }
+.scroll-cue { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: inline-flex; flex-direction: column; align-items: center; gap: 4px; background: transparent; border: 0; color: var(--soft); font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; padding: 6px 12px; }
+.scroll-cue:hover { color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .scroll-cue svg { animation: cue 1.8s ease-in-out infinite; } @keyframes cue { 0%, 100% { translate: 0 0; } 50% { translate: 0 5px; } } }
+@media (max-width: 860px) { .arena-home .hero-with-hills { min-height: calc(100svh - 150px); padding: 16px 0 72px; align-content: center; } }
