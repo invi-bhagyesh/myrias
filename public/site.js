@@ -143,17 +143,18 @@ function viewOverview() {
     html: `<section class="hero"><span class="pill">${esc(statusText(d))}</span><div class="record-type">${esc(tr('hero.kicker'))}</div>
         <h1>${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
         <p class="hero-cta"><a class="button primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))}</a> <a class="button" href="${link('methods')}">${esc(tr('hero.cta.methods'))}</a></p></section>
-      <section class="stats"><ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul>
+      <div class="overview"><section class="stats"><ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul>
         <p class="small-note">${esc(tr(note))}</p></section>
       <section class="how"><h2>${esc(tr('how.title'))}</h2><ol class="how-steps">${[1, 2, 3].map(i => `<li><span class="num" aria-hidden="true">${i}</span><h3>${esc(tr(`how.${i}.t`))}</h3><p>${esc(tr(`how.${i}.d`))}</p></li>`).join('')}</ol></section>
       <section class="figure"><h2>${esc(tr('fig.title'))}</h2>
         <a class="mini" style="--cols:${matrix.columns.length}" href="${link('explore')}" aria-label="${esc(tr('fig.cta'))}">${mini}</a>
         <div class="figure-text"><p class="caption">${esc(tr('fig.caption'))}</p><p><a class="button small" href="${link('explore')}">${esc(tr('fig.cta'))}</a></p></div></section>
+      <section class="caveat"><div class="caveat-label">${esc(tr('cav.label'))}</div><p>${esc(tr('cav.text'))}</p></section>
       <section class="principles"><h2>${esc(tr('prin.title'))}</h2><ul>${[1, 2, 3].map(i => `<li>${esc(tr(`prin.${i}`))}</li>`).join('')}</ul></section>
       <section class="join"><h2>${esc(tr('join.title'))}</h2><ul>${[1, 2, 3].map(i => `<li>${esc(tr(`join.${i}`))}</li>`).join('')}</ul>
         <p><a class="button small" href="${issue('Correction or missing source', 'What is wrong or missing:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.report'))} ↗</a>
         <a class="button small" href="${issue('Offer to review', 'Languages, fish-welfare background, hours available:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.review'))} ↗</a>
-        <a class="button small" href="${link('download')}">${esc(tr('join.download'))}</a></p></section>`
+        <a class="button small" href="${link('download')}">${esc(tr('join.download'))}</a></p></section></div>`
   };
 }
 

@@ -1,29 +1,33 @@
 /* Public site stylesheet. Standalone: the staff workspace keeps using styles.css. */
 
+@font-face { font-family: "Space Grotesk"; src: url("fonts/SpaceGrotesk-latin.woff2") format("woff2"); font-weight: 400 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono-latin.woff2") format("woff2"); font-weight: 400 600; font-style: normal; font-display: swap; }
+
 :root {
-  --bg: #ffffff;
-  --ink: #12171b;
-  --soft: #58656f;
-  --line: #e3e8ec;
-  --card: #f6f8fa;
-  --accent: #17705b;
-  --accent-soft: #e5f2ee;
-  --danger: #b3412b;
-  --line-strong: #c3ccd3;
-  --radius: 14px;
-  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --bg: #f2ebdf;
+  --ink: #242922;
+  --soft: #565d55;
+  --line: #d3c9b9;
+  --line-strong: #b5a994;
+  --card: #fbf8f2;
+  --accent: #35644c;
+  --accent-soft: #e2e9dc;
+  --danger: #a8402c;
+  --radius: 8px;
+  --font: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, "PingFang SC", "Noto Sans SC", monospace;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
-  --bg: #0e1317;
-  --ink: #e9edf0;
-  --soft: #a1adb6;
-  --line: #243038;
-  --card: #141b20;
-  --accent: #5fc0a3;
-  --accent-soft: #12302a;
+  --bg: #15171b;
+  --ink: #e7e6e1;
+  --soft: #a4a79f;
+  --line: #2b2f33;
+  --line-strong: #3d4348;
+  --card: #1b1e23;
+  --accent: #a3cbb0;
+  --accent-soft: #1f2d26;
   --danger: #f08a72;
-  --line-strong: #3a4954;
   color-scheme: dark;
 }
 
@@ -216,3 +220,36 @@ html[lang^=zh] .hero h1 { line-height: 1.2; }
   .toolbar { flex-direction: column; align-items: stretch; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Theme: warm paper, forest green, monospace labels, thin rules (after ValueArena) */
+h1, h2, h3 { font-weight: 600; letter-spacing: -.025em; }
+.topbar { background: var(--bg); }
+.brand-mark { font-weight: 700; letter-spacing: -.03em; }
+.record-type, .pill, .badge, .chip, .stat-list span, .facts dt, .legend, .release-meta, .cell small, .ledger dt, .caveat-label, .idx { font-family: var(--mono); }
+.record-type { font-size: 11px; font-weight: 500; letter-spacing: .08em; }
+.pill { border-radius: 4px; font-size: 11px; font-weight: 500; letter-spacing: .04em; }
+.badge { border-radius: 4px; font-size: 11px; }
+.chip { border-radius: 6px; font-size: 12px; }
+.sections a { border-radius: 6px; font-size: 14px; }
+.button { border-radius: 6px; font-weight: 600; }
+.button.primary { color: #fbf8f2; }
+:root[data-theme="dark"] .button.primary { color: #15171b; }
+.stat-list li, .how-steps li, .run-entry, .mini, .matrix-wrap, .ledger, .cite, .empty { border-radius: var(--radius); }
+.stat-list li { background: var(--card); }
+.stat-list span { font-size: 12px; letter-spacing: .02em; }
+.principles li, .join li { border-radius: 0 6px 6px 0; border-left-width: 3px; background: var(--card); }
+.quote { border-radius: 6px; }
+.cell { border-radius: 4px; }
+.mini-cell { border-radius: 2px; }
+.hero { border-bottom: 1px solid var(--line); padding-bottom: 48px; max-width: none; }
+.hero h1 { max-width: 880px; font-weight: 600; }
+.stats { margin-top: 40px; }
+
+/* Numbered sections on the overview */
+.overview { counter-reset: sec; }
+.overview h2::before { counter-increment: sec; content: counter(sec, decimal-leading-zero); display: block; font: 500 12px/1 var(--mono); color: var(--accent); letter-spacing: .08em; margin-bottom: 10px; }
+
+/* What this map is not */
+.caveat { margin-top: 56px; padding: 22px 24px; border: 1px solid var(--line-strong); border-left: 4px solid var(--accent); border-radius: var(--radius); background: var(--card); max-width: 760px; }
+.caveat-label { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.caveat p { margin: 0; font-size: 17px; line-height: 1.55; }
