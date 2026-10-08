@@ -83,7 +83,7 @@ function viewExplore(params) {
   const aside = `<aside class="lead-aside"><h2>${esc(tr('land.ledger'))}</h2><dl class="ledger">
     <dt>${esc(tr('land.l.species'))}</dt><dd>${d.species.length}</dd>
     <dt>${esc(tr('land.l.apps'))}</dt><dd>${d.applications.length}</dd>
-    <dt>${esc(tr('land.l.claims'))}</dt><dd>${supported}</dd>
+    <dt>${esc(tr(isDemo(d) ? 'land.l.claims.demo' : 'land.l.claims'))}</dt><dd>${supported}</dd>
     <dt>${esc(tr('land.l.sources'))}</dt><dd>${d.sources.length}</dd>
     <dt>${esc(tr('land.l.zh'))}</dt><dd>${zhSources}</dd></dl></aside>`;
 
@@ -130,7 +130,8 @@ function viewExplore(params) {
   };
 }
 
-const statusText = d => tr(d.release.sample ? 'status.sample' : d.release.status === 'pre-release' ? 'status.pre-release' : 'status.released');
+const isDemo = d => !d.release.sample && d.release.status === 'pre-release' && d.claims.length > 0;
+const statusText = d => isDemo(d) ? tr('status.demo') : tr(d.release.sample ? 'status.sample' : d.release.status === 'pre-release' ? 'status.pre-release' : 'status.released');
 
 const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-sand)', 'var(--band-clay)', 'var(--band-mint)', 'var(--bg)'];
 // Each section sits on a tint; neighbouring bands meet on a shared mix of their two colours.
@@ -141,8 +142,8 @@ function viewOverview() {
   const d = state.data;
   const supported = d.claims.filter(c => c.verification === 'supported').length;
   const zhSources = d.sources.filter(x => x.lang === 'zh').length;
-  const stats = [[supported, 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
-  const note = d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
+  const stats = [[supported, isDemo(d) ? 'stats.claims.demo' : 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
+  const note = isDemo(d) ? 'stats.note.demo' : d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
   const matrix = L.buildMatrix(d, 'all');
   const cells = matrix.rows.flatMap(r => r.cells);
   const count = s => cells.filter(c => c.status === s).length;
@@ -382,7 +383,7 @@ function applyChrome() {
   const banner = $('#banner');
   const d = state.data;
   if (d && d.release.sample) { banner.hidden = false; banner.className = 'notice sample'; banner.textContent = tr('banner.sample'); }
-  else if (d && d.release.status === 'pre-release' && parseHash().parts.length) { banner.hidden = false; banner.className = 'notice prerelease'; banner.textContent = tr('banner.prerelease'); }
+  else if (d && d.release.status === 'pre-release' && (parseHash().parts.length || isDemo(d))) { banner.hidden = false; banner.className = 'notice prerelease'; banner.textContent = tr(isDemo(d) ? 'banner.demo' : 'banner.prerelease'); }
   else banner.hidden = true;
   $('#release-line').textContent = d && !d.release.sample ? tr('subhead.version', { version: d.release.version, asof: d.release.as_of }) : '';
   $('#release-status').textContent = d ? statusText(d) : '';
@@ -411,6 +412,7 @@ function render(navigated = false) {
     const on = a.dataset.route === active;
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
+  moveBlob(true);
   const wide = !parts[0] || ['content', 'explore'].includes(parts[0]);
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   document.title = `${view.title} — ${tr('site.title')}`;
@@ -450,6 +452,28 @@ function viewGraph(d, lang, view) {
   const g = placeholderGraph(d, lang, link);
   return view === 'simple' ? simplifyGraph(g) : g;
 }
+// Liquid highlight in the header: one soft pill glides to the hovered item, then back to the current page.
+function moveBlob(instant = false, target) {
+  const nav = document.querySelector('.sections'), blob = nav && nav.querySelector('.nav-blob');
+  if (!blob) return;
+  const a = target || nav.querySelector('a[aria-current="page"]');
+  if (!a) { blob.classList.remove('is-on'); return; }
+  blob.classList.toggle('is-instant', instant || !blob.classList.contains('is-on'));
+  blob.style.translate = `${a.offsetLeft}px ${a.offsetTop}px`;
+  blob.style.width = a.offsetWidth + 'px'; blob.style.height = a.offsetHeight + 'px';
+  blob.classList.add('is-on');
+}
+function setupNav() {
+  const nav = document.querySelector('.sections');
+  if (!nav) return;
+  nav.addEventListener('mouseover', e => { const a = e.target.closest('a'); if (a) moveBlob(false, a); });
+  nav.addEventListener('mouseleave', () => moveBlob());
+  nav.addEventListener('focusin', e => { const a = e.target.closest('a'); if (a) moveBlob(false, a); });
+  nav.addEventListener('focusout', () => moveBlob());
+  addEventListener('resize', () => moveBlob(true));
+  document.fonts && document.fonts.ready.then(() => moveBlob(true));
+}
+setupNav();
 let observers = [];
 function setupHomeEffects() {
   const home = document.querySelector('.arena-home');

@@ -8,7 +8,9 @@ import { pixelHills, columns } from '../public/site-art.js';
 import { buildGraph, placeholderGraph, simplifyGraph, layoutGraph, shortLabel, legendHtml, MIN_REAL_CLAIMS } from '../public/site-graph.js';
 
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url), 'utf8'));
-const release = read('release.json');
+// The pre-release export with no records, kept as a fixture; the live release.json now holds real claims.
+const release = JSON.parse(readFileSync(new URL('./empty-release.json', import.meta.url), 'utf8'));
+const live = read('release.json');
 const sample = read('sample.json');
 const clone = x => structuredClone(x);
 
@@ -226,4 +228,15 @@ test('simple view keeps hubs and applications only, with resolvable edges', () =
   for (const e of g.edges) { assert.ok(g.byId.has(e.a) && g.byId.has(e.b)); assert.notEqual(e.kind, 'cross'); }
   assert.ok(!g.legend.some(l => l.key === 'source'));
   assert.equal(full.nodes.filter(n => n.type === 'claim').length > 1000, true);
+});
+
+test('the live release validates, is not a sample, and has enough claims for the real graph', () => {
+  assert.deepEqual(L.validateExport(live), []);
+  assert.equal(live.release.sample, false);
+  assert.ok(live.claims.length >= MIN_REAL_CLAIMS);
+  assert.ok(live.claims.every(c => ['supported', 'partial'].includes(c.verification) && c.quote.length <= 600 && c.locator.page));
+  assert.ok(live.claims.every(c => c.audit === 'not_audited'));
+  assert.ok(!('suggestions' in live));
+  const g = layoutGraph(buildGraph(live, 'en'));
+  assert.ok(g.nodes.some(n => n.type === 'claim'));
 });

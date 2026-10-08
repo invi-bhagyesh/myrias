@@ -127,3 +127,16 @@ test('suggestions skip claims judged irrelevant or unsupported when those stages
   const g = groupClaims([{ ...base, map: { welfare_relevant: true }, verify: { verdict: 'supported' } }, { ...base, map: { welfare_relevant: false } }, { ...base, verify: { verdict: 'partial' } }]);
   assert.equal([...g.values()].flat().length, 1);
 });
+
+import { buildRelease } from '../pipeline/export.mjs';
+test('export: only relevant, quote-checked, supported claims; valid against the site validator; no suggestions', () => {
+  const base = JSON.parse(readFileSync(new URL('../public/data/release.json', import.meta.url), 'utf8'));
+  const mk = (over = {}) => ({ source: '题目_作者.pdf', page: 1, quote: '循环水养殖系统可降低氨氮浓度。', statement_en: 'RAS lowers ammonia.', intervention: 'RAS', quote_check: 'found', map: { welfare_relevant: true, technology_class: 'water_systems', welfare_problem: 'water_quality', kind: 'measured', welfare_link: 'proxy', outcome_evidence: 'proxy_improved', reason: 'r' }, verify: { verdict: 'supported' }, ...over });
+  const rel = buildRelease({ claims: [mk(), mk({ quote_check: 'not_on_page' }), mk({ verify: { verdict: 'unsupported' } }), mk({ map: { welfare_relevant: false } })], base });
+  assert.deepEqual(validateExport(rel), []);
+  assert.equal(rel.claims.length, 1);
+  assert.equal(rel.applications.length, 1);
+  assert.equal(rel.release.sample, false);
+  assert.ok(!('suggestions' in rel));
+  assert.equal(rel.cells_status.length, 48);
+});
