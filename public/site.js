@@ -1,7 +1,8 @@
 import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
-import { buildGraph, mountGraph, legendHtml } from './site-graph.js';
+
+import { buildGraph, placeholderGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 
 const { escapeHtml: esc, safeUrl, pick } = L;
 const ISSUES_URL = 'https://github.com/invi-bhagyesh/myrias/issues/new';
@@ -154,18 +155,19 @@ function viewOverview() {
       some ? tr('note.stand.d.some', { empty: count('probed_empty'), not: count('not_collected') }) : tr('note.stand.d.none')],
     ['note.why.k', tr('note.why.t'), tr('note.why.d')]
   ];
+  const isSample = d.claims.length < MIN_REAL_CLAIMS;
   const rows = (prefix) => [1, 2, 3].map(i => `<li>${esc(tr(`${prefix}.${i}`))}</li>`).join('');
   return {
     title: tr('site.title'),
     html: `<div class="arena-home">
-      <section class="hero hero-with-hills" aria-labelledby="home-title">${pixelHills('hero', 'hero-hills')}
+      <section class="hero hero-with-hills" aria-labelledby="home-title"><div class="hero-aurora" aria-hidden="true"></div>
         <span class="pill">${esc(statusText(d))}</span><div class="record-type">${esc(tr('hero.kicker'))}</div>
         <h1 id="home-title">${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
       </section>
       <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
-        <figure class="band-card graph-card"><div class="graph-stage" data-graph></div>${legendHtml(buildGraph(d, state.lang), tr)}
-          <figcaption class="graph-note">${esc(tr('graph.note'))}${d.claims.length ? '' : ' ' + esc(tr('graph.note.empty'))} ${esc(tr('graph.hint'))}</figcaption></figure></section>
+        <figure class="band-card graph-card">${isSample ? `<span class="graph-badge">${esc(tr('graph.badge'))}</span>` : ''}<div class="graph-stage" data-graph></div>${legendHtml(homeGraph(d, state.lang), tr)}
+          <figcaption class="graph-note">${esc(tr('graph.note'))} ${esc(isSample ? tr('graph.note.placeholder') : (d.claims.length ? '' : tr('graph.note.empty')))} ${esc(tr('graph.hint'))}</figcaption></figure></section>
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
 
       <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2><p>${esc(tr(note))}</p></div>
@@ -426,13 +428,15 @@ function renderFooter() {
     <div class="site-footer-scene" aria-hidden="true">${pixelHills('footer')}<span class="site-footer-wordmark">Myrias</span></div></div>`;
 }
 
+// The front page shows a labelled placeholder network until a release holds enough verified claims.
+const homeGraph = (d, lang) => (d.claims.length < MIN_REAL_CLAIMS ? placeholderGraph(d, lang, link) : buildGraph(d, lang, link));
 let observers = [];
 function setupHomeEffects() {
   const home = document.querySelector('.arena-home');
   if (!home || !('IntersectionObserver' in window)) return;
   const stage = home.querySelector('[data-graph]');
   if (stage && state.data) {
-    const handle = mountGraph(stage, buildGraph(state.data, state.lang, link), { tr, navigate: href => { location.hash = href; } });
+    const handle = mountGraph(stage, homeGraph(state.data, state.lang), { tr, navigate: href => { location.hash = href; } });
     observers.push({ disconnect: () => handle.destroy() });
   }
   const targets = home.querySelectorAll('.band-section');

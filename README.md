@@ -7,12 +7,12 @@ aquatic animals. See `FRAMEWORK.md` for the plan: what is built, in what order, 
 
 A static, read-only site that renders one data file, `public/data/release.json`:
 
-- **Network on the front page:** species, technology classes, welfare problems, applications,
-  claims and sources as a coloured network, built from the release export. Technologies are on the
-  left, welfare problems on the right; each claim sits next to its technology. While nothing is
-  verified it draws only the frame (every technology x problem combination as a faint dashed line);
-  verified records add solid dots and lines. Position is for navigation and carries no evidence
-  meaning, and the page says so. Hover shows links, click opens the record.
+- **Network on the front page:** a dense, coloured network of technology classes, welfare problems,
+  species, applications, claims and sources. Until a release holds at least 50 verified claims it
+  shows a placeholder network, badged "Placeholder data": the technology classes and welfare
+  problems are real, every other dot is invented and labelled "[Sample]". Once there are enough
+  verified claims it is built from the release export instead. Position is for navigation and
+  carries no evidence meaning, and the page says so. Hover highlights links; click opens a record.
 - **Overview (front page):** one question, four live numbers (verified claims, sources,
   Chinese-language sources, species), three steps, a small picture of the map, what the site
   guarantees, and how to help check it. It makes no claims beyond what the data shows; in
@@ -61,4 +61,4 @@ yet and is shown as such on the download page.
 
 Fonts: Space Grotesk and JetBrains Mono (SIL Open Font License 1.1), self-hosted in `public/fonts/`
 so visiting the site makes no third-party requests. Visual style is inspired by ValueArena
-(valuearena.github.io): warm paper background, forest-green accent, monospace labels, numbered sections.
+(valuearena.github.io): tinted bands, floating cards, monospace labels, numbered sections; recoloured with a cooler ocean palette and a dot-grid and aurora hero.

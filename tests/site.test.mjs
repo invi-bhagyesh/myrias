@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import * as L from '../public/site-lib.js';
 import { STR, t } from '../public/i18n.js';
 import { pixelHills, columns } from '../public/site-art.js';
-import { buildGraph, layoutGraph, shortLabel, legendHtml } from '../public/site-graph.js';
+import { buildGraph, placeholderGraph, layoutGraph, shortLabel, legendHtml, MIN_REAL_CLAIMS } from '../public/site-graph.js';
 
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url), 'utf8'));
 const release = read('release.json');
@@ -195,4 +195,25 @@ test('graph labels and legend', () => {
   assert.ok(html.includes('&lt;graph.legend.problems&gt;'));
   assert.ok(!html.includes('<graph.legend'));
   assert.equal(g.legend.filter(l => l.key === 'source').length, 0);
+});
+
+test('placeholder graph: dense, deterministic, labelled, bounded, and links nowhere invented', () => {
+  const run = () => layoutGraph(placeholderGraph(release, 'en'));
+  const g = run();
+  assert.ok(g.nodes.length > 1000, String(g.nodes.length));
+  assert.ok(g.edges.length > g.nodes.length);
+  assert.equal(g.placeholder, true);
+  assert.equal(g.mode, 'radial');
+  assert.deepEqual(run().nodes.map(n => [n.x.toFixed(5), n.y.toFixed(5)]), g.nodes.map(n => [n.x.toFixed(5), n.y.toFixed(5)]));
+  for (const n of g.nodes) assert.ok(n.x >= 0 && n.x <= 1 && n.y >= 0 && n.y <= 1, n.id);
+  for (const e of g.edges) { assert.ok(g.byId.has(e.a), e.a); assert.ok(g.byId.has(e.b), e.b); }
+  const invented = g.nodes.filter(n => !['class', 'problem'].includes(n.type));
+  assert.ok(invented.every(n => n.href === null && n.tip.startsWith('[Sample]')));
+  assert.ok(!g.nodes.some(n => n.id === 's:mandarin-fish'));
+  assert.ok(placeholderGraph(release, 'zh').nodes.filter(n => n.type === 'claim').every(n => n.tip.startsWith('[示例]')));
+});
+
+test('the placeholder is used only below the real-claim threshold', () => {
+  assert.equal(MIN_REAL_CLAIMS, 50);
+  assert.ok(release.claims.length < MIN_REAL_CLAIMS);
 });

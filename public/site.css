@@ -389,3 +389,37 @@ h1, h2, h3 { font-weight: 500; }
 .graph-legend li { display: flex; align-items: center; gap: 7px; }
 .graph-legend .sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; }
 .graph-note { font-size: 13px; line-height: 1.6; color: var(--soft); margin: 10px 6px 0; max-width: 800px; }
+
+/* ===== Ocean variant: cooler palette, dot-grid and aurora instead of pixel hills in the hero ===== */
+:root {
+  --bg: #f3f6f7; --ink: #0f1d24; --soft: #4f616b; --line: #d5e0e4; --line-strong: #b4c4cb;
+  --card: #ffffff; --accent: #0e6f86; --accent-soft: #dcecf0;
+  --band-sage: #def0f1; --band-sand: #e2efe6; --band-clay: #e3ebf5; --band-mint: #f1ebe6;
+  --hill-1: #d6e8ee; --hill-2: #b5d6e1; --hill-3: #8fc0d2; --hill-edge: #f3f9fb;
+  --card-bg: #ffffff; --card-line: #0b1f2a0f;
+  --card-shadow: inset 0 1px 0 #ffffffb3, 0 10px 30px #0b24331a;
+  --card-shadow-hover: inset 0 1px 0 #ffffffb3, 0 18px 40px #0b243329;
+  --footer-panel: #dde8ec; --wordmark: #ffffffc4;
+}
+:root[data-theme="dark"] {
+  --bg: #0a1419; --ink: #e4eef1; --soft: #9bb0b9; --line: #1d2e36; --line-strong: #2d434d;
+  --card: #101c23; --accent: #5fd0e0; --accent-soft: #12303a;
+  --band-sage: #0d1f26; --band-sand: #0e211f; --band-clay: #0e1a29; --band-mint: #1a1713;
+  --hill-1: #0f2029; --hill-2: #133040; --hill-3: #1a4457; --hill-edge: #2c6379;
+  --card-bg: #101c23; --card-line: #ffffff10;
+  --footer-panel: #0d171c; --wordmark: #ffffff14;
+}
+.arena-home .hero-with-hills { padding: 72px 0 60px; }
+.hero-aurora { position: absolute; z-index: -1; left: 50%; top: 0; bottom: 0; width: 100vw; transform: translateX(-50%); pointer-events: none; overflow: hidden;
+  background:
+    radial-gradient(ellipse 55% 70% at 85% 10%, color-mix(in srgb, #2fb4c8 34%, transparent), transparent 70%),
+    radial-gradient(ellipse 45% 60% at 60% 90%, color-mix(in srgb, #6f5bd6 20%, transparent), transparent 70%),
+    radial-gradient(ellipse 40% 60% at 10% 100%, color-mix(in srgb, #2f9e6b 22%, transparent), transparent 70%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent); mask-image: linear-gradient(to bottom, #000 65%, transparent); }
+.hero-aurora::before { content: ""; position: absolute; inset: 0; opacity: .55;
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 22%, transparent) 1px, transparent 1.4px); background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at 80% 20%, #000, transparent 75%); mask-image: radial-gradient(ellipse 70% 90% at 80% 20%, #000, transparent 75%); }
+.graph-card { position: relative; background: var(--card-bg); }
+.graph-stage canvas { background: radial-gradient(ellipse 60% 60% at 50% 50%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 80%); }
+.graph-badge { position: absolute; z-index: 2; top: 18px; left: 22px; padding: 4px 10px; border-radius: 999px; font: 500 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--accent); border: 1px dashed var(--accent); background: color-mix(in srgb, var(--card-bg) 85%, transparent); }
