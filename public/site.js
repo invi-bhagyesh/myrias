@@ -2,6 +2,7 @@ import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { STAGES, funnel } from './site-pipeline.js';
+import { matrixChart } from './site-chart.js';
 
 import { buildGraph, placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 
@@ -139,7 +140,8 @@ function viewExplore(params) {
        <div class="section-head"><h2>${esc(tr('land.explorer'))}</h2>
         <label class="inline-field">${esc(tr('land.species'))} <select id="species-filter" aria-label="${esc(tr('land.species'))}">${speciesOptions}</select></label></div>
        <p class="small-note">${esc(tr('land.how'))}</p>
-       <div class="matrix-wrap" tabindex="0" role="region" aria-label="${esc(tr('land.explorer'))}"><table class="matrix"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div>
+       ${matrixChart({ matrix, data: d, lang: state.lang, selected, speciesId, link, tr })}
+       <details class="matrix-details"><summary>${esc(tr('chart.table'))}</summary><div class="matrix-wrap" tabindex="0" role="region" aria-label="${esc(tr('land.explorer'))}"><table class="matrix"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div></details>
        <ul class="legend" aria-label="${esc(tr('land.legend'))}">${legend}</ul>
        <section class="cell-panel" aria-live="polite">${panel}</section>`
   };
@@ -176,9 +178,12 @@ function viewOverview() {
     title: tr('site.title'),
     html: `<div class="arena-home">
       <section class="hero hero-with-hills" aria-labelledby="home-title"><div class="hero-aurora" aria-hidden="true"></div>
+        <div class="hero-copy">
         ${d.release.sample ? `<span class="pill">${esc(statusText(d))}</span>` : ''}<div class="record-type">${esc(tr('hero.kicker'))}</div>
         <h1 id="home-title">${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
+        </div>
+        <aside class="hero-side" aria-hidden="true">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</aside>
       </section>
       <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
         <figure class="band-card graph-card"><div class="graph-head"><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${isPlaceholder(d) && graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>

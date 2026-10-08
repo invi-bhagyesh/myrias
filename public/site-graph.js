@@ -424,7 +424,7 @@ export function mountGraph(stage, graph, { tr, navigate }) {
   function resize() {
     const rect = stage.getBoundingClientRect();
     w = Math.max(280, Math.round(rect.width));
-    h = Math.round(dense ? Math.max(340, Math.min(640, w * 0.6)) : Math.max(300, Math.min(500, w * 0.5)));
+    h = Math.round(dense ? Math.max(300, Math.min(500, w * 0.58)) : Math.max(300, Math.min(500, w * 0.5)));
     stage.style.height = h + 'px';
     dpr = Math.min(2, window.devicePixelRatio || 1);
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
