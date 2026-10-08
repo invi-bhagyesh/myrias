@@ -1,16 +1,26 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f7f6f0"><meta name="description" content="Myrias aquaculture research desk: source material, evidence-linked knowledge, research review and reports."><title>Myrias — Aquaculture research desk</title><link rel="stylesheet" href="styles.css"><link rel="icon" href="favicon.svg" type="image/svg+xml"></head>
-<body><a class="skip" href="#content">Skip to research desk</a>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f7f6f0">
+<meta name="description" content="An open, bilingual, source-linked map of welfare technologies for farmed aquatic animals.">
+<meta property="og:type" content="website"><meta property="og:title" content="Myrias: aquaculture welfare evidence"><meta property="og:description" content="An open, bilingual, source-linked map of welfare technologies for farmed aquatic animals.">
+<title>Myrias — Aquaculture welfare evidence</title>
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="site.css"><link rel="icon" href="favicon.svg" type="image/svg+xml"></head>
+<body><a class="skip" href="#content" data-i18n="skip">Skip to content</a>
 <div class="paper">
-  <div class="edition"><a href="https://invi-bhagyesh.github.io/">Bhagyesh Kumar / Projects</a><span>Independent research workspace</span><button id="theme-toggle" type="button" class="text-button" aria-pressed="false">Dark mode</button><button class="text-button" id="workspace-menu">Workspace &amp; backup</button></div>
-  <header class="masthead"><div class="masthead-side"><span lang="zh-Hans" class="chinese">水产研究</span><span>Aquaculture<br>research desk</span></div><div class="wordmark">Myrias</div><div class="masthead-side right"><span>Sources. Evidence. Judgment.</span><span class="edition-date" id="edition-date"></span></div></header>
-  <div class="subhead"><span>Animal welfare knowledge base</span><span id="storage-status" role="status">Opening local workspace…</span><span>Hugging Face upload paused</span></div>
-  <nav class="sections" aria-label="Research sections"><button data-tab="knowledge" aria-current="page">Knowledge</button><button data-tab="species">Species profiles</button>
-      <button data-tab="sources">Source library</button><button data-tab="runs">Research desk</button><button data-tab="review">Change review <span id="review-count"></span></button><button data-tab="reports">Reports</button></nav>
-  <div id="notice" class="notice" hidden></div><div id="message" role="status" aria-live="polite" hidden></div>
-  <main id="content" tabindex="-1"><p class="loading">Opening the research desk…</p></main>
-  <footer class="colophon"><div><strong>Myrias</strong><span>Aquaculture welfare research</span></div><p>The graph records what is known. The research explains why.<br>Sources and previous judgments remain part of the record.</p><a href="https://github.com/invi-bhagyesh/myrias" target="_blank" rel="noopener noreferrer">Project repository</a></footer>
+  <div class="edition"><div class="edition-left"><a href="https://myrias.org/">myrias.org</a><span data-i18n="subhead.left">Open evidence base</span></div>
+    <div class="edition-right"><button id="lang-toggle" type="button" class="text-button" lang="zh-Hans">中文</button><button id="theme-toggle" type="button" class="text-button" aria-pressed="false">Dark mode</button></div></div>
+  <header class="masthead"><div class="masthead-side"><span lang="zh-Hans" class="chinese">水产研究</span><span data-i18n-html="masthead.side">Aquaculture welfare<br>evidence base</span></div><div class="wordmark">Myrias</div><div class="masthead-side right"><span data-i18n="site.tag">Sources. Evidence. Judgment.</span></div></header>
+  <div class="subhead"><span id="release-line" role="status"></span><span id="release-status"></span></div>
+  <nav class="sections" aria-label="Sections">
+    <a data-route="landscape" href="#/" data-i18n="nav.landscape">Landscape</a>
+    <a data-route="species" href="#/species" data-i18n="nav.species">Species</a>
+    <a data-route="sources" href="#/sources" data-i18n="nav.sources">Sources</a>
+    <a data-route="methods" href="#/methods" data-i18n="nav.methods">Methods and limits</a>
+    <a data-route="download" href="#/download" data-i18n="nav.download">Download and cite</a>
+  </nav>
+  <div id="banner" class="notice" hidden></div>
+  <main id="content" tabindex="-1"><p class="loading">Loading…</p></main>
+  <footer class="colophon"><div><strong>Myrias</strong><span data-i18n="subhead.left">Open evidence base</span></div><p data-i18n-html="footer.line">The map records what sources say. The methods page explains how it was checked.<br>Corrections are welcome.</p>
+    <div class="footer-links"><a href="https://github.com/invi-bhagyesh/myrias" target="_blank" rel="noopener noreferrer" data-i18n="footer.repo">Project repository</a><a href="workspace.html" data-i18n="footer.workspace">Staff workspace</a></div></footer>
 </div>
-<dialog id="dialog"><div class="dialog-heading"><h2 id="dialog-title"></h2><button id="dialog-close" class="close" aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>
-<input id="backup-input" type="file" accept="application/json,.json" hidden><script type="module" src="app.js"></script>
+<script type="module" src="site.js"></script>
 </body></html>

@@ -251,7 +251,26 @@ repository; the material is licensed journal content.
 5. Expert audit design and sample; baselines; evaluation on the aquaculture subset; system paper.
 6. Add species in stages with gap probes and audits; landscape paper.
 
-## 12. Open decisions
+## 12. Delivery: the public site
+
+Built (front end only; the pipeline does not exist yet). `public/index.html` is a static, read-only
+site that renders one export file, `public/data/release.json`, defined in `docs/export-schema.md`.
+Views: landscape matrix (each cell is has-records, searched-and-empty or not-searched-yet), species,
+sources, claim pages (verbatim quote, locator, verification and audit badges), methods and limits,
+download and cite. English and Chinese interface, light and dark mode, mobile layout.
+
+- The site validates the export on load; CI runs the same checks. A real release can hold only
+  supported or partly supported claims, every claim needs a quote and locator, full text is rejected.
+- Pre-release state is shown as such: the current export has the draft taxonomy and one species run
+  in preparation, with no sources or claims. `index.html?data=sample` loads flagged placeholders for
+  testing the layout.
+- The earlier research desk is kept as a local staff tool (`public/workspace.html`), not linked from
+  the public navigation. Demo content, the sample GPT-4o reports and the species photographs were
+  removed from the public site (the mandarin fish photograph appeared to show a different species).
+- Still to do: Chinese text reviewed by a native speaker, a data licence, correctly identified and
+  licensed species images, a screen-reader pass, sharding the data file when it grows.
+
+## 13. Open decisions
 
 1. Who audits (bilingual, with fish-welfare knowledge), and how many hours are available?
 2. Licensed Chinese full-text access (CNKI, Wanfang) and what may be redistributed or sent to a

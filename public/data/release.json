@@ -1,0 +1,88 @@
+{
+  "schema": "myrias-landscape/1",
+  "release": {
+    "version": "0.0.0",
+    "as_of": "2026-10",
+    "status": "pre-release",
+    "sample": false,
+    "licence": null,
+    "note_en": "No verified records have been released yet. The first species run is being prepared.",
+    "note_zh": "目前尚未发布经核验的记录。首个物种的运行正在准备中。"
+  },
+  "taxonomy": {
+    "draft": true,
+    "technology_classes": [
+      { "id": "monitoring", "en": "Monitoring (cameras, acoustics, sensors)", "zh": "监测（摄像、声学、传感器）" },
+      { "id": "automation", "en": "Automation (feeding, grading)", "zh": "自动化（投喂、分级）" },
+      { "id": "stunning_equipment", "en": "Stunning and slaughter equipment", "zh": "致昏与屠宰设备" },
+      { "id": "breeding", "en": "Breeding and genetics", "zh": "育种与遗传" },
+      { "id": "health_products", "en": "Vaccines and health products", "zh": "疫苗与健康产品" },
+      { "id": "feeds", "en": "Feeds and feeding methods", "zh": "饲料与投喂方法" },
+      { "id": "water_systems", "en": "Water treatment and recirculation", "zh": "水处理与循环水系统" }
+    ],
+    "welfare_problems": [
+      { "id": "stocking_density", "en": "Stocking density", "zh": "养殖密度" },
+      { "id": "water_quality", "en": "Water quality", "zh": "水质" },
+      { "id": "handling_transport", "en": "Handling and transport", "zh": "操作与运输" },
+      { "id": "stunning_slaughter", "en": "Stunning and slaughter", "zh": "致昏与屠宰" },
+      { "id": "disease_parasites", "en": "Disease and parasites", "zh": "疾病与寄生虫" },
+      { "id": "feeding", "en": "Feeding (including live prey)", "zh": "投喂（含活饵）" },
+      { "id": "procedures", "en": "Procedures (e.g. eyestalk ablation)", "zh": "操作性手术（如切除眼柄）" }
+    ],
+    "maturity": [
+      { "id": "concept", "en": "Concept", "zh": "概念" },
+      { "id": "research", "en": "Research", "zh": "研究阶段" },
+      { "id": "pilot", "en": "Pilot", "zh": "试点" },
+      { "id": "commercial", "en": "Commercial", "zh": "商业应用" },
+      { "id": "widespread", "en": "Widespread", "zh": "广泛应用" }
+    ],
+    "outcome_evidence": [
+      { "id": "none", "en": "No welfare evidence", "zh": "无福利证据" },
+      { "id": "detection_only", "en": "Detection only", "zh": "仅能检测" },
+      { "id": "proxy_improved", "en": "Welfare proxy improved", "zh": "福利替代指标改善" },
+      { "id": "outcome_improved", "en": "Welfare outcome improved", "zh": "福利结果改善" }
+    ]
+  },
+  "species": [
+    {
+      "id": "mandarin-fish",
+      "common_en": "Mandarin fish",
+      "common_zh": "鳜鱼",
+      "scientific": "Siniperca chuatsi",
+      "group": "finfish",
+      "run_status": "in_preparation",
+      "summary_en": "First species run. Source documents have been collected. No claims have been extracted or verified yet.",
+      "summary_zh": "首个物种运行。来源文献已收集，尚未提取或核验任何论断。"
+    }
+  ],
+  "sources": [],
+  "claims": [],
+  "interventions": [],
+  "applications": [],
+  "cells_status": [],
+  "runs": [
+    {
+      "id": "mandarin-fish-run-0",
+      "species_id": "mandarin-fish",
+      "status": "in_preparation",
+      "focus_en": "To be set by the profiling stage from the collected corpus.",
+      "focus_zh": "由语料分析阶段根据已收集的文献确定。",
+      "counts": { "documents_collected": 21, "sources_released": 0, "claims_extracted": 0, "claims_supported": 0 },
+      "models": [],
+      "audit": null,
+      "changelog": []
+    }
+  ],
+  "methods": {
+    "limits_en": [
+      "Nothing on this site has been verified yet.",
+      "Chinese-language interface text is a draft awaiting review by a native speaker.",
+      "The taxonomy is a draft and will change."
+    ],
+    "limits_zh": [
+      "本站目前没有任何已核验的内容。",
+      "中文界面文字为草稿，尚待母语者审校。",
+      "分类体系为草稿，之后会调整。"
+    ]
+  }
+}
