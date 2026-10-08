@@ -1,6 +1,8 @@
 import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
+import { STAGES, funnel } from './site-pipeline.js';
+import { matrixChart } from './site-chart.js';
 
 import { buildGraph, placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 
@@ -73,6 +75,20 @@ function issueLink(title, body) {
 }
 
 // ---------- views ----------
+function viewPipeline() {
+  const i = state.lang === 'zh' ? 1 : 0;
+  const run = state.data.runs[0];
+  const stages = STAGES.map(st => `<article class="pipe-stage st-${st.status}"><div class="pipe-id"><span>${esc(st.id)}</span></div>
+    <div class="pipe-body"><div class="pipe-head"><h3>${esc(st.name[i])}</h3><span class="pipe-badge">${esc(tr('pipe.status.' + st.status))}</span></div>
+      <p class="pipe-what">${esc(st.what[i])}</p>
+      <dl class="pipe-facts"><dt>${esc(tr('pipe.how'))}</dt><dd>${esc(st.how[i])}</dd>
+        <dt>${esc(tr('pipe.model'))}</dt><dd>${st.model ? `<code>${esc(st.model)}</code>` : esc(tr('pipe.nomodel'))}</dd>
+        <dt>${esc(tr('pipe.out'))}</dt><dd>${esc(st.out[i])}</dd>${st.check ? `<dt>${esc(tr('pipe.check'))}</dt><dd>${esc(st.check[i])}</dd>` : ''}</dl></div></article>`).join('');
+  const steps = funnel(run), top = steps.length ? Math.max(...steps.map(x => x.value)) : 1;
+  const bars = steps.length ? `<h2>${esc(tr('pipe.funnel'))}</h2><p class="small-note">${esc(tr('pipe.funnel.note'))}</p><ol class="funnel">${steps.map(x => `<li><span class="funnel-label">${esc(x.label[i])}</span><span class="funnel-bar"><i style="width:${Math.max(3, Math.round(100 * x.value / top))}%"></i></span><b>${x.value}</b></li>`).join('')}</ol>` : '';
+  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pipe.lead')) + bars + `<h2>${esc(tr('pipe.stages'))}</h2><div class="pipe-flow">${stages}</div>` };
+}
+
 function viewExplore(params) {
   const d = state.data;
   const speciesId = params.get('species') || 'all';
@@ -124,7 +140,8 @@ function viewExplore(params) {
        <div class="section-head"><h2>${esc(tr('land.explorer'))}</h2>
         <label class="inline-field">${esc(tr('land.species'))} <select id="species-filter" aria-label="${esc(tr('land.species'))}">${speciesOptions}</select></label></div>
        <p class="small-note">${esc(tr('land.how'))}</p>
-       <div class="matrix-wrap" tabindex="0" role="region" aria-label="${esc(tr('land.explorer'))}"><table class="matrix"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div>
+       ${matrixChart({ matrix, data: d, lang: state.lang, selected, speciesId, link, tr })}
+       <details class="matrix-details"><summary>${esc(tr('chart.table'))}</summary><div class="matrix-wrap" tabindex="0" role="region" aria-label="${esc(tr('land.explorer'))}"><table class="matrix"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div></details>
        <ul class="legend" aria-label="${esc(tr('land.legend'))}">${legend}</ul>
        <section class="cell-panel" aria-live="polite">${panel}</section>`
   };
@@ -161,9 +178,12 @@ function viewOverview() {
     title: tr('site.title'),
     html: `<div class="arena-home">
       <section class="hero hero-with-hills" aria-labelledby="home-title"><div class="hero-aurora" aria-hidden="true"></div>
+        <div class="hero-copy">
         ${d.release.sample ? `<span class="pill">${esc(statusText(d))}</span>` : ''}<div class="record-type">${esc(tr('hero.kicker'))}</div>
         <h1 id="home-title">${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
+        </div>
+        <aside class="hero-side" aria-hidden="true">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</aside>
       </section>
       <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
         <figure class="band-card graph-card"><div class="graph-head"><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${isPlaceholder(d) && graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
@@ -401,6 +421,7 @@ function render(navigated = false) {
     else if (head === 'species') view = id ? viewSpecies(id) : viewSpeciesList();
     else if (head === 'sources') view = id ? viewSource(id) : viewSources(params);
     else if (head === 'claims' && id) view = viewClaim(id);
+    else if (head === 'pipeline') view = viewPipeline();
     else if (head === 'methods') view = viewMethods();
     else if (head === 'download') view = viewDownload();
     else view = viewNotFound();
@@ -412,7 +433,7 @@ function render(navigated = false) {
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   moveBlob(true);
-  const wide = !parts[0] || ['content', 'explore'].includes(parts[0]);
+  const wide = !parts[0] || ['content', 'explore', 'pipeline'].includes(parts[0]);
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   document.title = `${view.title} — ${tr('site.title')}`;
   const pathKey = parts.join('/');
