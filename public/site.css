@@ -471,3 +471,48 @@ h1, h2, h3 { font-weight: 500; }
 body { text-rendering: optimizeLegibility; font-kerning: normal; }
 h1, h2, h3 { font-feature-settings: "kern" 1, "liga" 1; }
 .arena-home .hero h1 { font-weight: 500; letter-spacing: -.02em; line-height: 1.15; }
+
+/* ===== Warmer, mixed palette; eased block transitions; a pattern per block ===== */
+:root {
+  --bg: #f7f4ee; --card: #fffdf9; --card-bg: #fffdf9; --line: #e1dbcf; --line-strong: #c9c1b1; --soft: #565f63;
+  --band-sage: #e4eee7; --band-sand: #f3ebdb; --band-clay: #e2eaf2; --band-mint: #f6e6dc;
+  --hill-1: #e1ebe3; --hill-2: #c6dccf; --hill-3: #a2c9b7; --hill-edge: #f7f4ee;
+  --footer-panel: #ebe5d8; --card-shadow: inset 0 1px 0 #fffffff0, 0 10px 30px #3a331f14;
+  --pattern: color-mix(in srgb, var(--ink) 16%, transparent);
+}
+:root[data-theme="dark"] {
+  --bg: #0f1315; --card: #161b1e; --card-bg: #161b1e; --line: #232b2f; --line-strong: #34403f; --soft: #a3afb2;
+  --band-sage: #0f1c18; --band-sand: #1b1812; --band-clay: #101822; --band-mint: #1e1517;
+  --hill-1: #14211d; --hill-2: #1a2e27; --hill-3: #234036; --hill-edge: #35584a;
+  --footer-panel: #121719; --pattern: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.hero-aurora { background:
+    radial-gradient(ellipse 50% 70% at 86% 6%, color-mix(in srgb, #2fb4c8 22%, transparent), transparent 70%),
+    radial-gradient(ellipse 40% 60% at 6% 92%, color-mix(in srgb, #e9a15a 20%, transparent), transparent 70%),
+    radial-gradient(ellipse 36% 55% at 48% 100%, color-mix(in srgb, #8c7ad8 14%, transparent), transparent 72%); }
+
+/* Eased fades: each band blends into its neighbours over a long, smooth curve, not a hard line. */
+.band-section[style]::before { background: linear-gradient(180deg,
+  var(--band-from) 0%, color-mix(in srgb, var(--band-from) 70%, var(--band-color)) 6%, color-mix(in srgb, var(--band-from) 35%, var(--band-color)) 13%,
+  var(--band-color) 26%, var(--band-color) 74%,
+  color-mix(in srgb, var(--band-to) 35%, var(--band-color)) 87%, color-mix(in srgb, var(--band-to) 70%, var(--band-color)) 94%, var(--band-to) 100%); }
+.band-section { padding: 84px 0 76px; }
+
+/* One pattern per block, fading out toward the block edges */
+.band-section[style]::after { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; transform: translateX(-50%); pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent 4%, #000 26%, #000 70%, transparent 96%); mask-image: linear-gradient(180deg, transparent 4%, #000 26%, #000 70%, transparent 96%); }
+#numbers::after { background-image: radial-gradient(var(--pattern) 1.2px, transparent 1.6px); background-size: 22px 22px; }
+#how::after { background-image: repeating-linear-gradient(135deg, var(--pattern) 0 1px, transparent 1px 16px); opacity: .6; }
+#map::after { background-image: linear-gradient(var(--pattern) 1px, transparent 1px), linear-gradient(90deg, var(--pattern) 1px, transparent 1px); background-size: 36px 36px; opacity: .55; }
+#rely::after { background-image: repeating-radial-gradient(circle at 92% 30%, var(--pattern) 0 1px, transparent 1px 22px); opacity: .7; }
+#help::after { background-image: radial-gradient(var(--pattern) 1.6px, transparent 2px); background-size: 30px 30px; background-position: 11px 11px; opacity: .8; }
+
+/* Blocks rise in with a soft blur-to-sharp, cards a beat later */
+@media (prefers-reduced-motion: no-preference) {
+  .arena-home.reveal-ready .band-section > * { opacity: 0; transform: translateY(26px) scale(.985); filter: blur(5px); transition: opacity .8s ease, transform .9s cubic-bezier(.2,.7,.2,1), filter .8s ease; }
+  .arena-home.reveal-ready .band-section.is-visible > * { opacity: 1; transform: none; filter: none; }
+  .arena-home.reveal-ready .band-section.is-visible > :nth-child(2) { transition-delay: .12s; }
+  .arena-home.reveal-ready .band-section.is-visible > :nth-child(n + 3) { transition-delay: .24s; }
+}
+.band-card { transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease; }
+.band-card:hover { transform: translateY(-3px); box-shadow: var(--card-shadow-hover); }

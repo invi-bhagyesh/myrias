@@ -161,7 +161,7 @@ function viewOverview() {
     title: tr('site.title'),
     html: `<div class="arena-home">
       <section class="hero hero-with-hills" aria-labelledby="home-title"><div class="hero-aurora" aria-hidden="true"></div>
-        <span class="pill">${esc(statusText(d))}</span><div class="record-type">${esc(tr('hero.kicker'))}</div>
+        ${d.release.sample ? `<span class="pill">${esc(statusText(d))}</span>` : ''}<div class="record-type">${esc(tr('hero.kicker'))}</div>
         <h1 id="home-title">${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
       </section>
@@ -170,7 +170,7 @@ function viewOverview() {
           <figcaption class="graph-note" data-gnote></figcaption></figure></section>
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
 
-      <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2><p>${esc(tr(note))}</p></div>
+      <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2>${d.release.sample ? `<p>${esc(tr(note))}</p>` : ''}</div>
         <ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul></section>
 
       <section class="band-section" id="how" style="${band(2)}"><div class="story-copy"><h2>${esc(tr('how.title'))}</h2><p>${esc(tr('how.lead'))}</p></div>
@@ -383,10 +383,9 @@ function applyChrome() {
   const banner = $('#banner');
   const d = state.data;
   if (d && d.release.sample) { banner.hidden = false; banner.className = 'notice sample'; banner.textContent = tr('banner.sample'); }
-  else if (d && d.release.status === 'pre-release' && (parseHash().parts.length || isDemo(d))) { banner.hidden = false; banner.className = 'notice prerelease'; banner.textContent = tr(isDemo(d) ? 'banner.demo' : 'banner.prerelease'); }
   else banner.hidden = true;
   $('#release-line').textContent = d && !d.release.sample ? tr('subhead.version', { version: d.release.version, asof: d.release.as_of }) : '';
-  $('#release-status').textContent = d ? statusText(d) : '';
+  $('#release-status').textContent = d && d.release.sample ? statusText(d) : '';
 }
 
 function render(navigated = false) {
@@ -489,7 +488,7 @@ function setupHomeEffects() {
       home.querySelector('[data-glegend]').innerHTML = legendHtml(g, tr);
       home.querySelector('[data-gbadge]').hidden = !sample;
       const note = sample ? tr('graph.note.placeholder') : (view === 'today' && !d.claims.length ? tr('graph.note.empty') : '');
-      home.querySelector('[data-gnote]').textContent = [tr('graph.note'), note, tr('graph.hint')].filter(Boolean).join(' ');
+      home.querySelector('[data-gnote]').textContent = tr('graph.hint');
       home.querySelectorAll('[data-gview]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.gview === view)));
     };
     home.querySelectorAll('[data-gview]').forEach(btn => btn.addEventListener('click', () => { state.graphView = btn.dataset.gview; show(); }));
