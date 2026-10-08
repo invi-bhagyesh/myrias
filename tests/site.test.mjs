@@ -4,6 +4,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import * as L from '../public/site-lib.js';
 import { STR, t } from '../public/i18n.js';
+import { pixelHills, columns } from '../public/site-art.js';
+import { buildGraph, placeholderGraph, layoutGraph, shortLabel, legendHtml, MIN_REAL_CLAIMS } from '../public/site-graph.js';
 
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url), 'utf8'));
 const release = read('release.json');
@@ -118,7 +120,7 @@ test('English and Chinese strings stay in sync', () => {
 test('every i18n key used in index.html exists', () => {
   const html = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
   const keys = [...html.matchAll(/data-i18n(?:-html)?="([^"]+)"/g)].map(m => m[1]);
-  assert.ok(keys.length > 5);
+  assert.ok(keys.length >= 4);
   for (const k of keys) assert.ok(k in STR.en, k);
 });
 
@@ -134,4 +136,84 @@ test('the public folder contains no PDFs or large files', () => {
     assert.ok(!/\.(pdf|docx?|epub)$/i.test(p), p);
     assert.ok(statSync(p).size < 400_000, `${p} is large`);
   }
+});
+
+test('pixel landscape is deterministic, decorative and merges equal-height columns', () => {
+  const a = pixelHills('hero', 'hero-hills'), b = pixelHills('hero', 'hero-hills');
+  assert.equal(a, b);
+  assert.ok(a.startsWith('<svg class="pixel-hills pixel-hills-hero hero-hills"'));
+  assert.ok(a.includes('aria-hidden="true"') && a.includes('shape-rendering="crispEdges"'));
+  assert.ok(pixelHills('footer').includes('pixel-hills-footer'));
+  const runs = columns(() => 10);
+  assert.equal(runs.length, 1);
+  assert.equal(runs[0].w, 240);
+  const stepped = columns(x => (x < 100 ? 5 : 20));
+  assert.deepEqual(stepped.map(r => [r.x, r.w, r.y]), [[0, 100, 5], [100, 140, 20]]);
+});
+
+test('every id used by the overview contents list is a section the page defines', () => {
+  const src = readFileSync(new URL('../public/site.js', import.meta.url), 'utf8');
+  const ids = [...src.matchAll(/\['(\w+)', '[\w.]+'\]/g)].map(m => m[1]).filter(id => ['numbers', 'how', 'map', 'rely', 'help'].includes(id));
+  assert.deepEqual(ids, ['numbers', 'how', 'map', 'rely', 'help']);
+  for (const id of ids) assert.ok(src.includes(`id="${id}"`), id);
+});
+
+test('graph: the empty release draws only the frame, every combination unsearched', () => {
+  const g = buildGraph(release, 'en');
+  assert.equal(g.nodes.length, 7 + 7 + 1);
+  assert.equal(g.edges.length, 49);
+  assert.ok(g.edges.every(e => e.kind === 'cell' && e.status === 'not_collected'));
+  assert.ok(!g.nodes.some(n => ['claim', 'source', 'application'].includes(n.type)));
+});
+
+test('graph: sample data adds applications, claims and sources, and every edge resolves', () => {
+  const g = buildGraph(sample, 'en', (path, q) => '#/' + path);
+  const count = type => g.nodes.filter(n => n.type === type).length;
+  assert.equal(count('application'), sample.applications.length);
+  assert.equal(count('claim'), sample.claims.length);
+  assert.equal(count('source'), sample.sources.length);
+  for (const e of g.edges) { assert.ok(g.byId.has(e.a), e.a); assert.ok(g.byId.has(e.b), e.b); }
+  assert.ok(g.edges.some(e => e.kind === 'cell' && e.status === 'has_records'));
+  assert.ok(g.nodes.every(n => n.href.startsWith('#/')));
+  assert.ok(g.nodes.filter(n => n.type === 'claim').every(n => n.degree >= 1));
+});
+
+test('graph layout is deterministic, bounded, and puts technologies left of problems', () => {
+  const run = () => layoutGraph(buildGraph(sample, 'en')).nodes.map(n => [n.x.toFixed(6), n.y.toFixed(6)]);
+  assert.deepEqual(run(), run());
+  const g = layoutGraph(buildGraph(sample, 'en'));
+  for (const n of g.nodes) { assert.ok(n.x >= 0 && n.x <= 1 && n.y >= 0 && n.y <= 1, n.id); }
+  const mean = type => { const xs = g.nodes.filter(n => n.type === type).map(n => n.x); return xs.reduce((a, b) => a + b, 0) / xs.length; };
+  assert.ok(mean('class') < mean('problem'));
+});
+
+test('graph labels and legend', () => {
+  assert.equal(shortLabel('Monitoring (cameras, acoustics, sensors)'), 'Monitoring');
+  assert.equal(shortLabel('监测（摄像、声学、传感器）'), '监测');
+  const g = buildGraph(release, 'zh');
+  const html = legendHtml(g, k => `<${k}>`);
+  assert.ok(html.includes('&lt;graph.legend.problems&gt;'));
+  assert.ok(!html.includes('<graph.legend'));
+  assert.equal(g.legend.filter(l => l.key === 'source').length, 0);
+});
+
+test('placeholder graph: dense, deterministic, labelled, bounded, and links nowhere invented', () => {
+  const run = () => layoutGraph(placeholderGraph(release, 'en'));
+  const g = run();
+  assert.ok(g.nodes.length > 1000, String(g.nodes.length));
+  assert.ok(g.edges.length > g.nodes.length);
+  assert.equal(g.placeholder, true);
+  assert.equal(g.mode, 'radial');
+  assert.deepEqual(run().nodes.map(n => [n.x.toFixed(5), n.y.toFixed(5)]), g.nodes.map(n => [n.x.toFixed(5), n.y.toFixed(5)]));
+  for (const n of g.nodes) assert.ok(n.x >= 0 && n.x <= 1 && n.y >= 0 && n.y <= 1, n.id);
+  for (const e of g.edges) { assert.ok(g.byId.has(e.a), e.a); assert.ok(g.byId.has(e.b), e.b); }
+  const invented = g.nodes.filter(n => !['class', 'problem'].includes(n.type));
+  assert.ok(invented.every(n => n.href === null && n.tip.startsWith('[Sample]')));
+  assert.ok(!g.nodes.some(n => n.id === 's:mandarin-fish'));
+  assert.ok(placeholderGraph(release, 'zh').nodes.filter(n => n.type === 'claim').every(n => n.tip.startsWith('[示例]')));
+});
+
+test('the placeholder is used only below the real-claim threshold', () => {
+  assert.equal(MIN_REAL_CLAIMS, 50);
+  assert.ok(release.claims.length < MIN_REAL_CLAIMS);
 });

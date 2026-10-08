@@ -1,5 +1,8 @@
 import { t } from './i18n.js';
 import * as L from './site-lib.js';
+import { pixelHills } from './site-art.js';
+
+import { buildGraph, placeholderGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 
 const { escapeHtml: esc, safeUrl, pick } = L;
 const ISSUES_URL = 'https://github.com/invi-bhagyesh/myrias/issues/new';
@@ -129,6 +132,11 @@ function viewExplore(params) {
 
 const statusText = d => tr(d.release.sample ? 'status.sample' : d.release.status === 'pre-release' ? 'status.pre-release' : 'status.released');
 
+const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-sand)', 'var(--band-clay)', 'var(--band-mint)', 'var(--bg)'];
+// Each section sits on a tint; neighbouring bands meet on a shared mix of their two colours.
+const band = i => `--band-from: color-mix(in srgb, ${BANDS[i - 1]} 50%, ${BANDS[i]}); --band-color: ${BANDS[i]}; --band-to: color-mix(in srgb, ${BANDS[i]} 50%, ${BANDS[i + 1]});`;
+const SECTIONS = [['numbers', 'sec.numbers'], ['how', 'how.title'], ['map', 'fig.title'], ['rely', 'prin.title'], ['help', 'join.title']];
+
 function viewOverview() {
   const d = state.data;
   const supported = d.claims.filter(c => c.verification === 'supported').length;
@@ -136,25 +144,53 @@ function viewOverview() {
   const stats = [[supported, 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
   const note = d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
   const matrix = L.buildMatrix(d, 'all');
+  const cells = matrix.rows.flatMap(r => r.cells);
+  const count = s => cells.filter(c => c.status === s).length;
   const mini = matrix.rows.map(r => r.cells.map(c => `<span class="mini-cell st-${c.status}"></span>`).join('')).join('');
   const issue = (title, body) => esc(issueLink(title, `${body}\nRelease: ${d.release.version} (${d.release.as_of})\n\n`));
+  const some = count('has_records') > 0;
+  const notes = [
+    ['note.read.k', tr('note.read.t'), tr('note.read.d')],
+    ['note.stand.k', some ? tr('note.stand.t.some', { n: count('has_records'), total: cells.length }) : tr('note.stand.t.none'),
+      some ? tr('note.stand.d.some', { empty: count('probed_empty'), not: count('not_collected') }) : tr('note.stand.d.none')],
+    ['note.why.k', tr('note.why.t'), tr('note.why.d')]
+  ];
+  const isSample = d.claims.length < MIN_REAL_CLAIMS;
+  const rows = (prefix) => [1, 2, 3].map(i => `<li>${esc(tr(`${prefix}.${i}`))}</li>`).join('');
   return {
     title: tr('site.title'),
-    html: `<section class="hero"><span class="pill">${esc(statusText(d))}</span><div class="record-type">${esc(tr('hero.kicker'))}</div>
-        <h1>${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
-        <p class="hero-cta"><a class="button primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))}</a> <a class="button" href="${link('methods')}">${esc(tr('hero.cta.methods'))}</a></p></section>
-      <div class="overview"><section class="stats"><ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul>
-        <p class="small-note">${esc(tr(note))}</p></section>
-      <section class="how"><h2>${esc(tr('how.title'))}</h2><ol class="how-steps">${[1, 2, 3].map(i => `<li><span class="num" aria-hidden="true">${i}</span><h3>${esc(tr(`how.${i}.t`))}</h3><p>${esc(tr(`how.${i}.d`))}</p></li>`).join('')}</ol></section>
-      <section class="figure"><h2>${esc(tr('fig.title'))}</h2>
-        <a class="mini" style="--cols:${matrix.columns.length}" href="${link('explore')}" aria-label="${esc(tr('fig.cta'))}">${mini}</a>
-        <div class="figure-text"><p class="caption">${esc(tr('fig.caption'))}</p><p><a class="button small" href="${link('explore')}">${esc(tr('fig.cta'))}</a></p></div></section>
-      <section class="caveat"><div class="caveat-label">${esc(tr('cav.label'))}</div><p>${esc(tr('cav.text'))}</p></section>
-      <section class="principles"><h2>${esc(tr('prin.title'))}</h2><ul>${[1, 2, 3].map(i => `<li>${esc(tr(`prin.${i}`))}</li>`).join('')}</ul></section>
-      <section class="join"><h2>${esc(tr('join.title'))}</h2><ul>${[1, 2, 3].map(i => `<li>${esc(tr(`join.${i}`))}</li>`).join('')}</ul>
-        <p><a class="button small" href="${issue('Correction or missing source', 'What is wrong or missing:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.report'))} ↗</a>
-        <a class="button small" href="${issue('Offer to review', 'Languages, fish-welfare background, hours available:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.review'))} ↗</a>
-        <a class="button small" href="${link('download')}">${esc(tr('join.download'))}</a></p></section></div>`
+    html: `<div class="arena-home">
+      <section class="hero hero-with-hills" aria-labelledby="home-title"><div class="hero-aurora" aria-hidden="true"></div>
+        <span class="pill">${esc(statusText(d))}</span><div class="record-type">${esc(tr('hero.kicker'))}</div>
+        <h1 id="home-title">${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
+        <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
+      </section>
+      <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
+        <figure class="band-card graph-card">${isSample ? `<span class="graph-badge">${esc(tr('graph.badge'))}</span>` : ''}<div class="graph-stage" data-graph></div>${legendHtml(homeGraph(d, state.lang), tr)}
+          <figcaption class="graph-note">${esc(tr('graph.note'))} ${esc(isSample ? tr('graph.note.placeholder') : (d.claims.length ? '' : tr('graph.note.empty')))} ${esc(tr('graph.hint'))}</figcaption></figure></section>
+      <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
+
+      <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2><p>${esc(tr(note))}</p></div>
+        <ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul></section>
+
+      <section class="band-section" id="how" style="${band(2)}"><div class="story-copy"><h2>${esc(tr('how.title'))}</h2><p>${esc(tr('how.lead'))}</p></div>
+        <div class="band-card"><dl class="arena-protocol">${[1, 2, 3].map(i => `<div><dt>${esc(tr(`how.${i}.t`))}</dt><dd>${esc(tr(`how.${i}.d`))}</dd></div>`).join('')}</dl></div></section>
+
+      <section class="band-section" id="map" style="${band(3)}"><div class="story-copy"><h2>${esc(tr('fig.title'))}</h2><p>${esc(tr('map.lead'))}</p></div>
+        <div class="band-split"><div class="band-card"><a class="mini" style="--cols:${matrix.columns.length}" href="${link('explore')}" aria-label="${esc(tr('fig.cta'))}">${mini}</a>
+          <a class="button small" href="${link('explore')}">${esc(tr('fig.cta'))}</a></div>
+          <aside class="band-notes" aria-label="${esc(tr('fig.title'))}">${notes.map(([k, t, text]) => `<div class="band-note"><span class="band-note-dot" aria-hidden="true"></span><p class="band-note-kicker">${esc(tr(k))}</p><h3>${esc(t)}</h3><p>${esc(text)}</p></div>`).join('')}</aside></div></section>
+
+      <section class="band-section" id="rely" style="${band(4)}"><div class="story-copy"><h2>${esc(tr('prin.title'))}</h2><p>${esc(tr('rely.lead'))}</p></div>
+        <div class="band-card"><ul class="arena-rows">${rows('prin')}</ul></div>
+        <p class="story-small"><strong>${esc(tr('cav.label'))}.</strong> ${esc(tr('cav.text'))}</p></section>
+
+      <section class="story-closing" id="help"><h2>${esc(tr('join.title'))}</h2><p class="small-note">${esc(tr('help.lead'))}</p>
+        <ul class="arena-rows">${rows('join')}</ul>
+        <div class="home-actions"><a class="button-primary" href="${issue('Offer to review', 'Languages, fish-welfare background, hours available:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.review'))} <span aria-hidden="true">↗</span></a>
+          <a class="button-secondary" href="${issue('Correction or missing source', 'What is wrong or missing:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.report'))} <span aria-hidden="true">↗</span></a>
+          <a class="button-secondary" href="${link('download')}">${esc(tr('join.download'))} <span aria-hidden="true">→</span></a></div></section>
+    </div>`
   };
 }
 
@@ -321,6 +357,7 @@ function viewError() {
 
 // ---------- chrome and rendering ----------
 function applyChrome() {
+  renderFooter();
   document.documentElement.lang = state.lang === 'zh' ? 'zh-Hans' : 'en';
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = tr(el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = tr(el.dataset.i18nHtml); });
@@ -341,6 +378,7 @@ function applyChrome() {
 }
 
 function render(navigated = false) {
+  observers.forEach(o => o.disconnect()); observers = [];
   applyChrome();
   const { parts, params } = parseHash();
   let view;
@@ -369,6 +407,62 @@ function render(navigated = false) {
   if (navigated && pathKey !== state.lastPath) { window.scrollTo(0, 0); $('#content').focus({ preventScroll: true }); }
   else if (navigated && params.get('cell')) { const panel = $('.cell-panel'); if (panel) panel.scrollIntoView({ block: 'nearest' }); }
   state.lastPath = pathKey;
+  if (!parts[0] || parts[0] === 'content') setupHomeEffects();
+}
+
+// ---------- footer and home-page effects ----------
+function renderFooter() {
+  const d = state.data;
+  const year = new Date().getFullYear();
+  const reviewLink = esc(issueLink('Offer to review', 'Languages, fish-welfare background, hours available:\n\n'));
+  const list = items => `<ul>${items.map(([label, href, ext]) => `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(label)}${ext ? ' ↗' : ''}</a></li>`).join('')}</ul>`;
+  const card = (key, items) => `<nav class="site-footer-card" aria-label="${esc(tr(key))}"><h2>${esc(tr(key))}</h2>${list(items)}</nav>`;
+  $('#site-footer').innerHTML = `<div class="site-footer-panel"><div class="site-footer-cards">
+      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.sources'), link('sources')]])}
+      ${card('foot.learn', [[tr('nav.methods'), link('methods')], [tr('nav.download'), link('download')]])}
+      ${card('foot.open', [['myrias.org', 'https://myrias.org/', true], [tr('footer.repo'), 'https://github.com/invi-bhagyesh/myrias', true], [tr('footer.workspace'), 'workspace.html']])}
+      <div class="site-footer-card site-footer-cta"><div><p>${esc(tr('foot.cta'))}</p><a class="site-footer-button" href="${reviewLink}" target="_blank" rel="noopener noreferrer">${esc(tr('foot.cta.btn'))} <span aria-hidden="true">→</span></a></div></div>
+    </div>
+    <div class="site-footer-meta"><span>${esc(tr('foot.copy', { year }))} · <span id="release-line"></span> <span id="release-status" role="status"></span></span>
+      <a href="https://valuearena.github.io/" target="_blank" rel="noopener noreferrer">${esc(tr('foot.credit'))} ↗</a></div>
+    <div class="site-footer-scene" aria-hidden="true">${pixelHills('footer')}<span class="site-footer-wordmark">Myrias</span></div></div>`;
+}
+
+// The front page shows a labelled placeholder network until a release holds enough verified claims.
+const homeGraph = (d, lang) => (d.claims.length < MIN_REAL_CLAIMS ? placeholderGraph(d, lang, link) : buildGraph(d, lang, link));
+let observers = [];
+function setupHomeEffects() {
+  const home = document.querySelector('.arena-home');
+  if (!home || !('IntersectionObserver' in window)) return;
+  const stage = home.querySelector('[data-graph]');
+  if (stage && state.data) {
+    const handle = mountGraph(stage, homeGraph(state.data, state.lang), { tr, navigate: href => { location.hash = href; } });
+    observers.push({ disconnect: () => handle.destroy() });
+  }
+  const targets = home.querySelectorAll('.band-section');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) targets.forEach(t => t.classList.add('is-visible'));
+  else {
+    // Only hide content once the observer is in place to reveal it again.
+    home.classList.add('reveal-ready');
+    const reveal = new IntersectionObserver(entries => {
+      for (const entry of entries) if (entry.isIntersecting || entry.boundingClientRect.top < 0) {
+        // Anything at or above a revealed section has already been scrolled past, so reveal it too.
+        for (const t of targets) { t.classList.add('is-visible'); reveal.unobserve(t); if (t === entry.target) break; }
+      }
+    }, { rootMargin: '0px 0px -12% 0px' });
+    targets.forEach(t => reveal.observe(t));
+    observers.push(reveal);
+  }
+  const spy = new IntersectionObserver(entries => {
+    for (const entry of entries) if (entry.isIntersecting) {
+      home.querySelectorAll('.home-contents a').forEach(a => {
+        if (a.dataset.jump === entry.target.id) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+      });
+    }
+  }, { rootMargin: '-15% 0px -65% 0px' });
+  home.querySelectorAll('section[id]').forEach(s => spy.observe(s));
+  observers.push(spy);
 }
 
 // ---------- events ----------
@@ -407,6 +501,7 @@ document.addEventListener('click', event => {
     document.documentElement.dataset.theme = next; store('myrias-theme', next); applyChrome();
   } else if (target.dataset.download) handleDownload(target.dataset.download);
   else if (target.hasAttribute('data-retry')) { state.data = null; render(); load().then(render); }
+  else if (target.dataset.jump) { event.preventDefault(); const el = document.getElementById(target.dataset.jump); if (el) el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
   else if (target.classList.contains('skip')) { event.preventDefault(); $('#content').focus(); }
 });
 
