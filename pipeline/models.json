@@ -21,21 +21,21 @@
         "model": "deepseek/deepseek-v4.1-flash",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         }
       },
       "screen": {
         "model": "deepseek/deepseek-v4.1-flash",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         }
       },
       "extract": {
         "model": "qwen/qwen3.8-flash",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         },
         "fallback": [
           "deepseek/deepseek-v4.1-flash"
@@ -45,7 +45,7 @@
         "model": "qwen/qwen3.8-flash",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         },
         "fallback": [
           "deepseek/deepseek-v4.1-flash"
@@ -63,7 +63,7 @@
         "model": "qwen/qwen3.8-flash",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         }
       },
       "suggest": {
@@ -80,21 +80,21 @@
         "model": "qwen/qwen3.8-flash",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         }
       },
       "screen": {
         "model": "qwen/qwen3.8-flash",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         }
       },
       "extract": {
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         },
         "fallback": [
           "deepseek/deepseek-v4.1-flash"
@@ -104,7 +104,7 @@
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         },
         "fallback": [
           "deepseek/deepseek-v4.1-flash"
@@ -122,7 +122,7 @@
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0,
         "reasoning": {
-          "effort": "low"
+          "enabled": false
         }
       },
       "suggest": {
