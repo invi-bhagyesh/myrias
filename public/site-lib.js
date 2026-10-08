@@ -167,6 +167,19 @@ export function validateExport(data) {
     if (!Array.isArray(a.claim_ids) || !a.claim_ids.length) fail(`application ${a.id}: needs at least one claim`);
     for (const cid of a.claim_ids || []) if (!claimIds.has(cid)) fail(`application ${a.id}: unknown claim ${cid}`);
   }
+  // Suggested actions are optional proposals built from released claims. They are never evidence
+  // and never ranked; a real release may carry only ones a person has reviewed.
+  for (const x of data.suggestions || []) {
+    if (!x.id) fail('suggestion without id');
+    if (!speciesIds.has(x.species_id)) fail(`suggestion ${x.id}: unknown species ${x.species_id}`);
+    if (!x.action_en) fail(`suggestion ${x.id}: missing action`);
+    if (!x.evidence_gap) fail(`suggestion ${x.id}: missing evidence gap`);
+    if (!['draft', 'reviewed'].includes(x.status)) fail(`suggestion ${x.id}: status must be draft or reviewed`);
+    if (data.release.sample === false && x.status !== 'reviewed') fail(`suggestion ${x.id}: draft suggestions must not be published`);
+    if (!Array.isArray(x.claim_ids) || !x.claim_ids.length) fail(`suggestion ${x.id}: needs at least one claim`);
+    for (const cid of x.claim_ids || []) if (!claimIds.has(cid)) fail(`suggestion ${x.id}: unknown claim ${cid}`);
+    if ('rank' in x || 'score' in x) fail(`suggestion ${x.id}: suggestions are not ranked`);
+  }
   for (const x of data.cells_status) {
     if (!CELL_STATUS.includes(x.status)) fail(`cells_status: unknown status ${x.status}`);
     if (!speciesIds.has(x.species_id)) fail(`cells_status: unknown species ${x.species_id}`);

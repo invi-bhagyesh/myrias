@@ -169,6 +169,17 @@ export function placeholderGraph(data, lang = 'en', href = path => `#/${path}`) 
   return g;
 }
 
+// The hubs and applications of a network without its claims and sources: a quieter, readable version.
+export function simplifyGraph(g) {
+  const keep = n => ['class', 'problem', 'species', 'application'].includes(n.type);
+  const nodes = g.nodes.filter(keep).map(n => ({ ...n, cluster: n.group, degree: 0 }));
+  const byId = new Map(nodes.map(n => [n.id, n]));
+  const edges = g.edges.filter(e => e.kind !== 'cross' && !(e.kind === 'far' && (e.a.startsWith('s:') || e.b.startsWith('s:'))) && byId.has(e.a) && byId.has(e.b)).map(e => ({ ...e }));
+  for (const e of edges) { byId.get(e.a).degree++; byId.get(e.b).degree++; }
+  for (const n of nodes) if (n.type === 'application') n.r = 5;
+  return { ...g, nodes, edges, byId, legend: g.legend.filter(l => l.key !== 'source') };
+}
+
 // ---- Layout ----
 
 const STIFF = { cell: 0.002, link: 0.1, far: 0.004, claim: 0.28, src: 0.1, cross: 0 };

@@ -4,3 +4,5 @@ node_modules/
 .env.*
 test-results/
 playwright-report/
+pipeline/gold/*.jsonl
+pipeline/runs/

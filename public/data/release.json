@@ -1,88 +1,4010 @@
 {
-  "schema": "myrias-landscape/1",
-  "release": {
-    "version": "0.0.0",
-    "as_of": "2026-10",
-    "status": "pre-release",
-    "sample": false,
-    "licence": null,
-    "note_en": "No verified records have been released yet. The first species run is being prepared.",
-    "note_zh": "目前尚未发布经核验的记录。首个物种的运行正在准备中。"
-  },
-  "taxonomy": {
-    "draft": true,
-    "technology_classes": [
-      { "id": "monitoring", "en": "Monitoring (cameras, acoustics, sensors)", "zh": "监测（摄像、声学、传感器）" },
-      { "id": "automation", "en": "Automation (feeding, grading)", "zh": "自动化（投喂、分级）" },
-      { "id": "stunning_equipment", "en": "Stunning and slaughter equipment", "zh": "致昏与屠宰设备" },
-      { "id": "breeding", "en": "Breeding and genetics", "zh": "育种与遗传" },
-      { "id": "health_products", "en": "Vaccines and health products", "zh": "疫苗与健康产品" },
-      { "id": "feeds", "en": "Feeds and feeding methods", "zh": "饲料与投喂方法" },
-      { "id": "water_systems", "en": "Water treatment and recirculation", "zh": "水处理与循环水系统" }
-    ],
-    "welfare_problems": [
-      { "id": "stocking_density", "en": "Stocking density", "zh": "养殖密度" },
-      { "id": "water_quality", "en": "Water quality", "zh": "水质" },
-      { "id": "handling_transport", "en": "Handling and transport", "zh": "操作与运输" },
-      { "id": "stunning_slaughter", "en": "Stunning and slaughter", "zh": "致昏与屠宰" },
-      { "id": "disease_parasites", "en": "Disease and parasites", "zh": "疾病与寄生虫" },
-      { "id": "feeding", "en": "Feeding (including live prey)", "zh": "投喂（含活饵）" },
-      { "id": "procedures", "en": "Procedures (e.g. eyestalk ablation)", "zh": "操作性手术（如切除眼柄）" }
-    ],
-    "maturity": [
-      { "id": "concept", "en": "Concept", "zh": "概念" },
-      { "id": "research", "en": "Research", "zh": "研究阶段" },
-      { "id": "pilot", "en": "Pilot", "zh": "试点" },
-      { "id": "commercial", "en": "Commercial", "zh": "商业应用" },
-      { "id": "widespread", "en": "Widespread", "zh": "广泛应用" }
-    ],
-    "outcome_evidence": [
-      { "id": "none", "en": "No welfare evidence", "zh": "无福利证据" },
-      { "id": "detection_only", "en": "Detection only", "zh": "仅能检测" },
-      { "id": "proxy_improved", "en": "Welfare proxy improved", "zh": "福利替代指标改善" },
-      { "id": "outcome_improved", "en": "Welfare outcome improved", "zh": "福利结果改善" }
-    ]
-  },
-  "species": [
-    {
-      "id": "mandarin-fish",
-      "common_en": "Mandarin fish",
-      "common_zh": "鳜鱼",
-      "scientific": "Siniperca chuatsi",
-      "group": "finfish",
-      "run_status": "in_preparation",
-      "summary_en": "First species run. Source documents have been collected. No claims have been extracted or verified yet.",
-      "summary_zh": "首个物种运行。来源文献已收集，尚未提取或核验任何论断。"
-    }
+ "schema": "myrias-landscape/1",
+ "release": {
+  "version": "0.1.0",
+  "as_of": "2026-10",
+  "status": "pre-release",
+  "sample": false,
+  "licence": null,
+  "note_en": "Demo release: claims are extracted and checked by models and have not been audited by an expert. Treat them as leads to check, not findings.",
+  "note_zh": null
+ },
+ "taxonomy": {
+  "draft": true,
+  "technology_classes": [
+   {
+    "id": "monitoring",
+    "en": "Monitoring (cameras, acoustics, sensors)",
+    "zh": "监测（摄像、声学、传感器）"
+   },
+   {
+    "id": "automation",
+    "en": "Automation (feeding, grading)",
+    "zh": "自动化（投喂、分级）"
+   },
+   {
+    "id": "stunning_equipment",
+    "en": "Stunning and slaughter equipment",
+    "zh": "致昏与屠宰设备"
+   },
+   {
+    "id": "breeding",
+    "en": "Breeding and genetics",
+    "zh": "育种与遗传"
+   },
+   {
+    "id": "health_products",
+    "en": "Vaccines and health products",
+    "zh": "疫苗与健康产品"
+   },
+   {
+    "id": "feeds",
+    "en": "Feeds and feeding methods",
+    "zh": "饲料与投喂方法"
+   },
+   {
+    "id": "water_systems",
+    "en": "Water treatment and recirculation",
+    "zh": "水处理与循环水系统"
+   }
   ],
-  "sources": [],
-  "claims": [],
-  "interventions": [],
-  "applications": [],
-  "cells_status": [],
-  "runs": [
-    {
-      "id": "mandarin-fish-run-0",
-      "species_id": "mandarin-fish",
-      "status": "in_preparation",
-      "focus_en": "To be set by the profiling stage from the collected corpus.",
-      "focus_zh": "由语料分析阶段根据已收集的文献确定。",
-      "counts": { "documents_collected": 21, "sources_released": 0, "claims_extracted": 0, "claims_supported": 0 },
-      "models": [],
-      "audit": null,
-      "changelog": []
-    }
+  "welfare_problems": [
+   {
+    "id": "stocking_density",
+    "en": "Stocking density",
+    "zh": "养殖密度"
+   },
+   {
+    "id": "water_quality",
+    "en": "Water quality",
+    "zh": "水质"
+   },
+   {
+    "id": "handling_transport",
+    "en": "Handling and transport",
+    "zh": "操作与运输"
+   },
+   {
+    "id": "stunning_slaughter",
+    "en": "Stunning and slaughter",
+    "zh": "致昏与屠宰"
+   },
+   {
+    "id": "disease_parasites",
+    "en": "Disease and parasites",
+    "zh": "疾病与寄生虫"
+   },
+   {
+    "id": "feeding",
+    "en": "Feeding (including live prey)",
+    "zh": "投喂（含活饵）"
+   },
+   {
+    "id": "procedures",
+    "en": "Procedures (e.g. eyestalk ablation)",
+    "zh": "操作性手术（如切除眼柄）"
+   }
   ],
-  "methods": {
-    "limits_en": [
-      "Nothing on this site has been verified yet.",
-      "Chinese-language interface text is a draft awaiting review by a native speaker.",
-      "The taxonomy is a draft and will change."
-    ],
-    "limits_zh": [
-      "本站目前没有任何已核验的内容。",
-      "中文界面文字为草稿，尚待母语者审校。",
-      "分类体系为草稿，之后会调整。"
-    ]
+  "maturity": [
+   {
+    "id": "concept",
+    "en": "Concept",
+    "zh": "概念"
+   },
+   {
+    "id": "research",
+    "en": "Research",
+    "zh": "研究阶段"
+   },
+   {
+    "id": "pilot",
+    "en": "Pilot",
+    "zh": "试点"
+   },
+   {
+    "id": "commercial",
+    "en": "Commercial",
+    "zh": "商业应用"
+   },
+   {
+    "id": "widespread",
+    "en": "Widespread",
+    "zh": "广泛应用"
+   }
+  ],
+  "outcome_evidence": [
+   {
+    "id": "none",
+    "en": "No welfare evidence",
+    "zh": "无福利证据"
+   },
+   {
+    "id": "detection_only",
+    "en": "Detection only",
+    "zh": "仅能检测"
+   },
+   {
+    "id": "proxy_improved",
+    "en": "Welfare proxy improved",
+    "zh": "福利替代指标改善"
+   },
+   {
+    "id": "outcome_improved",
+    "en": "Welfare outcome improved",
+    "zh": "福利结果改善"
+   }
+  ]
+ },
+ "species": [
+  {
+   "id": "mandarin-fish",
+   "common_en": "Mandarin fish",
+   "common_zh": "鳜鱼",
+   "scientific": "Siniperca chuatsi",
+   "group": "finfish",
+   "run_status": "in_progress",
+   "summary_en": "First species run: Chinese-language papers only. Machine-verified, not yet audited by an expert.",
+   "summary_zh": null
   }
+ ],
+ "sources": [
+  {
+   "id": "S01",
+   "title": "不同驯食方式对鳜鱼胃肠道消化酶活性的影响",
+   "title_en": null,
+   "authors": [
+    "钱国英"
+   ],
+   "year": null,
+   "lang": "zh",
+   "venue": null,
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S02",
+   "title": "传染性脾肾坏死病毒(ISKNV)感染途径、宿主范围及对温度敏感性的研究",
+   "title_en": null,
+   "authors": [
+    "曾慷"
+   ],
+   "year": 1999,
+   "lang": "zh",
+   "venue": "中国病毒学 14(4)",
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S03",
+   "title": "用摄食条件反射研究鳜鱼食性的驯化",
+   "title_en": null,
+   "authors": [
+    "钱国英"
+   ],
+   "year": 1998,
+   "lang": "zh",
+   "venue": "浙江农村技术师范专科学校学报 (1)",
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S04",
+   "title": "鳜食性驯化的研究",
+   "title_en": null,
+   "authors": [
+    "梁旭方"
+   ],
+   "year": null,
+   "lang": "zh",
+   "venue": null,
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S05",
+   "title": "鳜鱼人工繁殖及其养殖的研究",
+   "title_en": null,
+   "authors": [
+    "肖元祥"
+   ],
+   "year": 1983,
+   "lang": "zh",
+   "venue": null,
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S06",
+   "title": "鳜鱼人工繁殖和夏花培育研究",
+   "title_en": null,
+   "authors": [
+    "俞小先"
+   ],
+   "year": 1996,
+   "lang": "zh",
+   "venue": "淡水渔业 26(3)",
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S07",
+   "title": "鳜鱼人工繁殖的生态生理学特性",
+   "title_en": null,
+   "authors": [
+    "梁银铨"
+   ],
+   "year": 1992,
+   "lang": "zh",
+   "venue": "水生生物学报 16(1)",
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S08",
+   "title": "鳜鱼口咽腔味蕾和行为反应特性及其对捕食习性的适应",
+   "title_en": null,
+   "authors": [
+    "梁旭方"
+   ],
+   "year": 1996,
+   "lang": "zh",
+   "venue": "动物学报 42(1)",
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S09",
+   "title": "鳜鱼早繁新技术研究",
+   "title_en": null,
+   "authors": [
+    "郑应龙"
+   ],
+   "year": null,
+   "lang": "zh",
+   "venue": null,
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S10",
+   "title": "鳜鱼生殖生长调控与良种培育技术研究进展",
+   "title_en": null,
+   "authors": [
+    "刘士琰"
+   ],
+   "year": null,
+   "lang": "zh",
+   "venue": null,
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  },
+  {
+   "id": "S11",
+   "title": "鳜鱼病毒病原及细胞感染特性的研究",
+   "title_en": null,
+   "authors": [
+    "方勤"
+   ],
+   "year": null,
+   "lang": "zh",
+   "venue": null,
+   "doi": null,
+   "url": null,
+   "access": "full_text",
+   "licence_note": "Licensed journal content; not redistributed. Only short quotations are shown."
+  }
+ ],
+ "claims": [
+  {
+   "id": "C001",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "病毒感染鱼使其发病，与鱼生活的水体环境温度有密切的关系",
+   "quote_lang": "zh",
+   "text_en": "Viral infection causing disease in fish is closely related to the environmental temperature of the water body where the fish live.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a biological relationship between environmental temperature and viral disease occurrence in fish. While it addresses a welfare problem (disease), it is a background fact about pathogen ecology rather than a specific technology or practice intervention that improves welfare.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C002",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "ISKNV在不同温度条件下对健康鳜鱼感染结果，表明25～34℃都是ISKNV适合流行的水温，而28～30℃是其最适流行水温",
+   "quote_lang": "zh",
+   "text_en": "Infection results on healthy mandarin fish under different temperatures indicate that 25-34°C are suitable water temperatures for ISKNV prevalence, with 28-30°C being the optimal range.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports experimental results on the prevalence of a specific disease (ISKNV) in mandarin fish under different water temperatures. This directly addresses the welfare problem of disease by identifying temperature ranges that favor pathogen prevalence, which is crucial for managing animal health and welfare.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C003",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "而20℃条件下，鳜鱼不发生ISKNV病，显然温度是ISKNV病暴发流行的限制性因素。",
+   "quote_lang": "zh",
+   "text_en": "Under 20°C conditions, mandarin fish do not develop ISKNV disease, indicating that temperature is a limiting factor for the outbreak and prevalence of ISKNV disease.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports a direct observation that maintaining water temperature at 20°C prevents the development of ISKNV disease in mandarin fish. This addresses animal welfare by preventing disease (a negative welfare state) through environmental management (temperature control). The outcome is 'improved' because the disease did not occur.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C004",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "因此生产中，为了预防ISKNV病的暴发流行，应该注意养殖水温的变化，特别在发病温度范围内。",
+   "quote_lang": "zh",
+   "text_en": "Therefore, in production, to prevent the outbreak of ISKNV disease, attention should be paid to changes in aquaculture water temperature, especially within the disease-onset temperature range.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "monitoring aquaculture water temperature",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement concerns monitoring water temperature to prevent ISKNV disease outbreaks, which is a welfare-relevant disease issue in farmed aquatic animals.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C005",
+   "source_id": "S08",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "待测鳜鱼饥饿1天。",
+   "quote_lang": "zh",
+   "text_en": "The mandarin fish being tested were subjected to a one-day fasting period.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "fasting",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "Fasting is a feeding-related practice that directly affects animal welfare (hunger/feeding deprivation), but the statement only reports that fasting was applied, with no welfare outcome measured.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C006",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "水质的恶化更能加剧疾病的流行",
+   "quote_lang": "zh",
+   "text_en": "Deterioration of water quality exacerbates the spread of disease.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim links water quality (a welfare-relevant environmental factor) to disease spread (a direct welfare outcome). It is stated as a general background fact rather than a specific experimental result of the paper.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C007",
+   "source_id": "S08",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "本文首次利用扫描电镜观察和行为学实验方法研究了鳜鱼口咽腔味蕾形态、分布和行为作用，以期阐述鱼类味蕾结构功能关系，并对诱导鳜鱼吞食人工饲料有参考价值。",
+   "quote_lang": "zh",
+   "text_en": "The study uses scanning electron microscopy and behavioral experiments to investigate taste bud morphology and function, aiming to provide reference for inducing mandarin fish to accept artificial feed.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "scanning electron microscopy and behavioral experiments",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The study investigates taste bud morphology and function to understand feeding behavior (acceptance of artificial feed). While it uses SEM (a diagnostic tool) and behavioral experiments, the primary goal is to provide reference for inducing feed acceptance, which directly relates to the welfare problem of 'feeding'. The outcome is currently limited to understanding/detecting the structural basis of taste (detection_only) rather than reporting an improved welfare state.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C008",
+   "source_id": "S08",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "鳜鱼麻醉后通过外科手术摘除双侧眼球以除去视觉，手术后2～3天即能正常摄食活饵鱼和低频(<10Hz)抖动食物球。",
+   "quote_lang": "zh",
+   "text_en": "After anesthesia and surgical removal of both eyeballs to eliminate vision, blind mandarin fish were able to normally consume live bait fish and low-frequency shaken food balls within 2-3 days post-surgery.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "surgical removal of eyeballs (blindness induction)",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim describes a surgical procedure (enucleation) to induce blindness and reports that the fish resumed normal feeding behavior within 2-3 days. This is welfare-relevant because it addresses the impact of a painful/invasive procedure on animal function (feeding). The outcome evidence is 'proxy_improved' because the restoration of feeding behavior is used as an indirect measure (proxy) for recovery/welfare status post-surgery, rather than a direct measurement of pain or stress levels.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C009",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "实验共设五组，每组健康鳜鱼5尾，养殖温度为30±0.5℃，充气养殖于本室循环过滤控温水族箱中。",
+   "quote_lang": "zh",
+   "text_en": "Healthy mandarin fish were kept at 30±0.5°C with aeration in a circulating filtered temperature-controlled aquarium.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "circulating filtered temperature-controlled aquarium",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes the housing conditions (temperature control, aeration, filtration) which are practices directly affecting animal welfare. However, it is a description of the experimental setup/methodology rather than a result measuring a specific welfare outcome or improvement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C010",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "肌肉注射组：注射部位为背鳍前侧基部，注射病毒滤液按鱼体重计算为0.1 mL/100 g。",
+   "quote_lang": "zh",
+   "text_en": "Intramuscular injection of virus filtrate at 0.1 mL/100 g fish body weight into the base anterior to the dorsal fin was used as an infection route.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "intramuscular injection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific handling procedure (intramuscular injection) used to induce infection. This is a painful procedure directly affecting animal welfare during the experimental process.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C011",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "腹腔注射组：注射部位为腹鳍基部，注射剂量同肌肉注射组。",
+   "quote_lang": "zh",
+   "text_en": "Intraperitoneal injection of virus filtrate at the same dose as the intramuscular group into the base of the pelvic fin was used as an infection route.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "intraperitoneal injection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific method of inducing disease (intraperitoneal injection of virus) in the animals. This is a painful procedure and directly addresses the welfare problem of disease/infection induction, which is relevant to animal welfare studies.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C012",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "划痕浸泡组：鳜鱼背部去磷，划破皮肤，面积为1 cm²，在稀释1000倍病毒滤液中浸泡2 h后，放入水族箱中养殖。",
+   "quote_lang": "zh",
+   "text_en": "After removing scales and scratching the skin over 1 cm² on the back, mandarin fish were immersed in 1000-fold diluted virus filtrate for 2 h and then placed in an aquarium.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "skin scratch immersion",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific experimental procedure involving painful handling (scratching skin) and disease exposure (virus immersion), which directly impacts animal welfare. It is a methodological step reported in the study.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C013",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "口服组：用圆头针头直接插入鱼胃中注射病毒滤液，注射剂量同肌肉注射组。",
+   "quote_lang": "zh",
+   "text_en": "Virus filtrate was injected directly into the fish stomach with a round-tipped needle at the same dose as the intramuscular group.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "oral injection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "none",
+   "welfare_link_note": "The statement describes an experimental virus inoculation procedure (oral injection of virus filtrate into the stomach) used to challenge fish. It is a method detail of the study, not a technology or practice aimed at affecting, measuring or addressing animal welfare, and no welfare outcome (stress, disease, injury, etc.) is reported in this statement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C014",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "对照组：腹腔注射灭菌PBS，注射剂量按鱼体重计算为0.1 mL/100 g。",
+   "quote_lang": "zh",
+   "text_en": "The control group received intraperitoneal injection of sterile PBS at 0.1 mL/100 g fish body weight.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "intraperitoneal PBS injection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "none",
+   "welfare_link_note": "The statement describes a control procedure (intraperitoneal PBS injection) rather than a technology or practice affecting welfare; it is background methodology with no welfare outcome reported.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C015",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "实验组感染方法同上述腹腔注射组，对照组感染方法同上述对照组。",
+   "quote_lang": "zh",
+   "text_en": "In the host range experiment, experimental fish were infected by the same intraperitoneal injection method and control fish received the same control treatment.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "intraperitoneal injection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes the method of infection (intraperitoneal injection) applied to experimental fish. Intraperitoneal injection is a handling procedure that can cause stress and pain, making it welfare-relevant. The statement reports the methodology used in the experiment (measured/kind: measured as it describes what was done in the study's own experiment). It does not report an outcome (improvement or deterioration), so outcome_evidence is none.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C016",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "另外用病毒滤液感染健康鳜鱼作为阳性对照，方法同腹腔注射组。",
+   "quote_lang": "zh",
+   "text_en": "Healthy mandarin fish were infected with virus filtrate as a positive control using the same intraperitoneal injection method.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "intraperitoneal injection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes an experimental procedure (intraperitoneal injection of virus) used as a positive control. While the primary purpose is scientific validation, the act involves handling and injecting animals with a pathogen, which directly impacts their welfare state (inducing disease/stress). It falls under 'disease_parasites' as it relates to infection methods. The outcome evidence is 'none' because the statement only describes the method/setup, not the result or impact on welfare metrics.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C017",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "养殖温度为30±0.5℃，充气养殖于本室循环过滤控温水族箱中。",
+   "quote_lang": "zh",
+   "text_en": "Fish were kept at 30±0.5°C with aeration in a circulating filtered temperature-controlled aquarium.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "circulating filtered temperature-controlled aquarium",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes the housing conditions (temperature control, aeration, filtration) which are direct determinants of fish welfare. However, it is a descriptive methodological statement without reporting any specific welfare outcome or improvement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C018",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "实验组感染方法同腹腔注射组，对照组感染方法同上述对照组，充气养殖于本室循环过滤控温水族箱中。",
+   "quote_lang": "zh",
+   "text_en": "Experimental fish were infected by the same intraperitoneal injection method, control fish received the same control treatment, and fish were kept with aeration in a circulating filtered temperature-controlled aquarium.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "intraperitoneal injection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes the method of infection (intraperitoneal injection) and housing conditions. Intraperitoneal injection is a handling procedure that can cause stress or injury to fish, making it welfare-relevant. However, the statement only describes the methodology used in the experiment without reporting any specific welfare outcomes (such as increased mortality, stress markers, or behavioral changes) resulting from this intervention. It serves as background information on how the animals were treated/handled.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C019",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "取发病濒死鱼，观察体表症状和内脏变化，无菌操作取脾脏、肾脏和肝脏组织块，加少量无菌PBS，匀浆后，接种于鲂鱼白胨琼脂培养基上，30℃培养48 h，观察细菌生长情况。",
+   "quote_lang": "zh",
+   "text_en": "Spleen, kidney, and liver tissue from moribund fish were homogenized with sterile PBS, inoculated on bream peptone agar, and cultured at 30°C for 48 h to observe bacterial growth.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "bacteriological culture",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a diagnostic procedure (bacteriological culture) performed on moribund fish to detect bacterial pathogens. This directly addresses the welfare problem of disease by identifying its cause, but it only detects the condition without reporting an improvement in welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C020",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "并取肾脏和脾脏组织块，Bouin's液固定，常规石蜡切片，厚度5～6 μm，H-E染色，观察组织病理变化。",
+   "quote_lang": "zh",
+   "text_en": "Kidney and spleen tissue blocks were fixed in Bouin's solution, processed into 5–6 μm paraffin sections, stained with H-E, and examined for histopathological changes.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "histopathology",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "Histopathological examination of kidney and spleen is a method for detecting tissue lesions/disease, a welfare-relevant health condition. It provides diagnostic/detection data rather than demonstrating a welfare improvement, and the technique itself is an analytical method applied to the animals.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C021",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "病毒滤液通过四种感染途径都能够引起健康鳜鱼发病并死亡，死亡率都为100%（见表1）。",
+   "quote_lang": "zh",
+   "text_en": "Virus filtrate through four infection routes caused disease and death in healthy mandarin fish, with 100% mortality.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "virus filtrate infection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports a disease challenge experiment in which virus filtrate caused disease and 100% mortality in healthy mandarin fish, directly addressing disease as a welfare outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C022",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "四种途径中，发病鱼平均感染后死亡时间：肌肉注射组为第10天，划痕浸泡组为第11天，腹腔注射组为第14天，口服组为第22天。",
+   "quote_lang": "zh",
+   "text_en": "Average time to death after infection was day 10 for intramuscular injection, day 11 for skin scratch immersion, day 14 for intraperitoneal injection, and day 22 for oral administration.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "virus filtrate infection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports the time to death following infection via different routes. This directly addresses animal welfare by measuring mortality (a severe negative outcome) resulting from disease/infection challenges. It is a measured result from the study.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C023",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "濒死鱼表现嘴张大，呼吸加快、加深，身体失去平衡，鳃苍白，脾脏和肾脏肿大，部分鱼体表颜色变黑。",
+   "quote_lang": "zh",
+   "text_en": "Moribund fish showed open mouths, rapid and deep breathing, loss of balance, pale gills, enlarged spleen and kidney, and some fish had darkened body surface color.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes clinical signs of disease and distress in moribund fish (open mouths, rapid breathing, loss of balance, pale gills, organ enlargement). This directly addresses the welfare state of the animals by identifying symptoms of poor health and suffering. It is a measured observation from the study. There is no intervention or technology mentioned that improves this state, so outcome_evidence is none.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C024",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "组织切片观察，脾脏和肾脏中都能见到由病毒感染引起的强嗜碱性、肿大的细胞（见图1）。",
+   "quote_lang": "zh",
+   "text_en": "Histological sections showed strongly basophilic, enlarged cells caused by viral infection in both spleen and kidney.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "histopathology",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "Histopathology detecting viral infection-induced cellular changes in spleen and kidney is a direct welfare-relevant disease outcome, but the method only detects the condition.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C025",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "细菌学检查只有划痕浸泡组和肌肉注射组各有一尾鳜鱼的肾脏有少量细菌，其它鱼都无细菌感染。",
+   "quote_lang": "zh",
+   "text_en": "Bacteriological examination found a small amount of bacteria in the kidney of one mandarin fish each in the skin scratch immersion group and intramuscular injection group, while other fish had no bacterial infection.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "bacteriological examination",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports the results of a bacteriological examination (a diagnostic method) regarding bacterial infection in fish kidneys. This directly addresses animal health/welfare by detecting disease presence. Since it only reports the detection of bacteria without stating that the condition was cured or prevented as a result of an intervention's success in improving welfare outcomes beyond mere observation, 'detection_only' is appropriate.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C026",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "5种鱼腹腔注射病毒滤液后，大口黑鲈对ISKNV敏感，发病死亡，死亡率为100%（见表2）。",
+   "quote_lang": "zh",
+   "text_en": "After intraperitoneal injection of virus filtrate, largemouth bass is susceptible to ISKNV, becomes diseased and dies, with a mortality rate of 100%.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "intraperitoneal injection of virus filtrate",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports that largemouth bass injected with ISKNV virus filtrate become diseased and die (100% mortality), which is a direct welfare outcome related to disease. The intervention is an experimental infection method (health_products/vaccine-challenge context), and the result detects susceptibility and disease rather than showing an improvement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C027",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "在20、25、28、30和34℃养殖温度下，腹腔注射病毒滤液的健康鳜鱼在25～34℃之间都能够发病死亡，死亡率都为100%。",
+   "quote_lang": "zh",
+   "text_en": "At rearing temperatures of 20, 25, 28, 30 and 34°C, healthy mandarin fish injected intraperitoneally with virus filtrate became diseased and died at 25–34°C, with a mortality rate of 100%.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "rearing temperature",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim concerns rearing temperature affecting disease onset and mortality in mandarin fish, which is a welfare-relevant outcome (disease and death). Mortality is a proxy measure of welfare.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C028",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "因此病毒滤液引起健康鳜鱼发病的最适养殖温度为28～30℃。",
+   "quote_lang": "zh",
+   "text_en": "The optimal rearing temperature for virus filtrate to cause disease in healthy mandarin fish is 28–30°C.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "rearing temperature",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim concerns rearing temperature affecting disease development in mandarin fish, which is a direct welfare outcome (disease).",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C029",
+   "source_id": "S02",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "20℃组在30d观察时间内正常，组织病理切片检测不到病毒引起的强嗜碱性、肿大的细胞。",
+   "quote_lang": "zh",
+   "text_en": "The 20°C group remained normal during the 30-day observation period, and histopathological sections showed no strongly basophilic, enlarged cells caused by the virus.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "rearing temperature",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports that at a specific rearing temperature (20°C), fish remained normal and showed no histopathological signs of viral infection. This directly addresses disease status, which is a core component of animal welfare. The outcome is 'improved' because the absence of disease symptoms indicates good health/welfare under this condition.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C030",
+   "source_id": "S08",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "Behavioural experiments showed that the elevated taste buds in the oropharyngeal cavity were sensitive to both chemical and mechanical stimuli, and the texture of the food is as important as its chemical nature to the fish.",
+   "quote_lang": "en",
+   "text_en": "Behavioural experiments demonstrated that elevated taste buds in the oropharyngeal cavity respond to chemical and mechanical stimuli, indicating that food texture is as critical to the fish as its chemical composition.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim concerns how food texture is perceived by the fish's taste buds, which relates to feeding behaviour and feed acceptability—a direct welfare-relevant aspect of feeding. It reports the paper's own behavioural experiment results (measured) and detects a sensory/feeding condition without demonstrating an improved welfare outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C031",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "在网箱养殖条件下，采用抛投活饵建立鳜鱼上水面摄食的条件反射，再改投死鱼、鱼块和配合饲料的方法，对鳜鱼进行驯化。",
+   "quote_lang": "zh",
+   "text_en": "Under cage-culture conditions, throwing live bait to establish a conditioned reflex of feeding at the water surface, then switching to dead fish, fish pieces and compound feed, domesticated mandarin fish.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding-conditioning domestication with live bait then dead fish and compound feed",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "Feeding-conditioning domestication changes feeding behaviour and acceptance of non-live feed, a direct welfare-relevant feeding outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C032",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "经15d的驯化，5～7.5g、110～145g、205～245g的鳜鱼苗种驯化率分别达74%、71.5%和70.50%。",
+   "quote_lang": "zh",
+   "text_en": "After 15 days of domestication, the domestication rates of 5–7.5 g, 110–145 g and 205–245 g mandarin fish fry and fingerlings reached 74%, 71.5% and 70.50% respectively.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "15-day feeding-conditioning domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim reports measured domestication (feeding-conditioning) rates of mandarin fish fry/fingerlings after a 15-day feeding domestication practice. This concerns a feeding practice affecting the animals' acceptance of formulated feed, which is a welfare-relevant feeding issue. The domestication rate is an indirect (proxy) measure of feeding adaptation rather than a direct welfare outcome such as stress or disease, and the measured improvement in domestication rate indicates a proxy improvement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C033",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "不用活饵建立摄食反射的鳜鱼，直接投喂死鱼、鱼块和配合饲料，驯化率为零；",
+   "quote_lang": "zh",
+   "text_en": "For mandarin fish not given live bait to establish a feeding reflex and directly fed dead fish, fish pieces and compound feed, the domestication rate was zero.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "direct feeding of dead fish, fish pieces and compound feed without live-bait conditioning",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports a specific outcome (zero domestication rate) regarding the feeding method of mandarin fish. It addresses the welfare problem of 'feeding' by measuring the success of an intervention (direct feeding without live bait conditioning). Since the result is negative (failure to feed/domesticate), it does not demonstrate an improvement in welfare outcomes or proxies, hence 'none' for evidence.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C034",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "直接投喂尾死鱼，驯化率为13%。",
+   "quote_lang": "zh",
+   "text_en": "When directly fed dead fish, the domestication rate was 13%.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "direct feeding of dead fish",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The statement reports a specific metric (domestication rate) resulting from a feeding practice (direct feeding of dead fish). While 'domestication' in this context likely refers to the acceptance of artificial feed or training for aquaculture purposes rather than evolutionary domestication, it is a measure of how well the animals adapt to a husbandry practice. However, the claim itself only provides a percentage of success/adaptation without explicitly stating that animal welfare (stress, health, etc.) improved or worsened as a direct consequence of this rate. It is a measured outcome of a management practice related to feeding.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C035",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "驯化期间，饲料采用少量多次抛投的方法，日投饲2次，早晚各1次。",
+   "quote_lang": "zh",
+   "text_en": "During domestication, feed is broadcast in small amounts multiple times, with feeding twice a day, once in the morning and once in the evening.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "small-amount multiple broadcast feeding",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a specific feeding practice (broadcasting small amounts multiple times) used during domestication. This directly addresses the welfare aspect of feeding behavior and management. It is reported as background information on standard practice rather than a measured experimental result or an inferred causal link to a specific welfare outcome in this context.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C036",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "一组为饥饿直接驯化组，即鳜鱼在饥饿5～7d后，分别投喂死鱼、鱼块和饲料，看其驯化效果。",
+   "quote_lang": "zh",
+   "text_en": "In the starvation direct domestication group, mandarin fish are starved for 5 to 7 days and then fed dead fish, fish pieces, or compound feed to observe domestication results.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "starvation direct domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "Starvation for 5-7 days followed by feeding dead fish, fish pieces, or compound feed is a feeding practice that directly affects the animals' feeding behaviour and nutritional welfare.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C037",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "另一组为条件反射组，即饥饿3～5d后，先投喂活饵，待其形成上水面摄食的条件反射时，改投死鱼、鱼块，最后过渡到投软颗粒饲料。",
+   "quote_lang": "zh",
+   "text_en": "In the conditioned reflex group, after 3 to 5 days of starvation, live bait is fed first, and once the fish form a conditioned reflex of feeding at the water surface, they are switched to dead fish and fish pieces, and finally transitioned to soft pellet feed.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditioned reflex domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a feeding/domestication practice (conditioned reflex training with starvation and feed transition) that directly concerns feeding behaviour and husbandry of the animals, but it reports no welfare outcome itself.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C038",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "在驯化15d后，分别测定生长比率、驯化率和成活率。",
+   "quote_lang": "zh",
+   "text_en": "After 15 days of domestication, growth rate, domestication rate, and survival rate are measured.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Growth rate, domestication rate and survival rate are indirect welfare proxies (survival/growth), not direct welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C039",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "在投喂鱼块和饲料的网箱鳜鱼对投入的鱼块和配合饲料有反应，但不摄食，驯化率为零。",
+   "quote_lang": "zh",
+   "text_en": "In cages fed fish pieces and compound feed, the mandarin fish respond to the fish pieces and compound feed but do not ingest them, resulting in a domestication rate of zero.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding fish pieces and compound feed",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific feeding practice (offering fish pieces and compound feed) and reports the animals' behavioral response (reacting but not ingesting), which is a direct measure of feeding behavior and welfare status. However, since the intervention failed to achieve ingestion or domestication, there is no evidence of improved welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C040",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "投喂死鱼的网箱第5天后个别鳜鱼开始摄食浮在水面上的死鱼，直至驯化结束，平均驯化率为13%。",
+   "quote_lang": "zh",
+   "text_en": "In cages fed dead fish, after the 5th day some mandarin fish begin to ingest dead fish floating on the water surface, and by the end of domestication the average domestication rate is 13%.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding dead fish",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports a measured feeding outcome (domestication rate) for mandarin fish trained to accept dead fish as feed, which directly concerns feeding behaviour and feed acceptance, a welfare-relevant practice.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C041",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "鳜鱼在所有试验箱中均出现负增长，测定结果见表2。",
+   "quote_lang": "zh",
+   "text_en": "Mandarin fish in all experimental cages showed negative growth, with results shown in Table 2.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The statement reports a measured outcome (negative growth) in experimental cages. Negative growth is an indirect indicator (proxy) of poor welfare, likely stemming from issues with feeding or environmental conditions within the cages. Since it describes a negative state without indicating an improvement or specific intervention success, the evidence status is 'none' regarding positive welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C042",
+   "source_id": "S07",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "在鳜鱼(Siniperca chuatsi)苗种培育过程中，适时投喂适口饵料鱼是成功的关键。",
+   "quote_lang": "zh",
+   "text_en": "Timely feeding of palatable bait fish is the key to success in the rearing of mandarin fish fry.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "timely feeding of palatable bait fish",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement addresses feeding practices (timely provision of palatable bait fish), which directly impacts the nutritional status and welfare of the fry. It is presented as a general principle or background knowledge regarding successful rearing rather than a specific experimental result from this paper.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C043",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "由表2、表3可见，相同规格的鳜鱼，分别饥饿5d和7d，3d和5d，驯化率、成活率以及生长比率差异不显著（P>0.1），这表明在较短时间的饥饿时间差对3项指标的影响不大。",
+   "quote_lang": "zh",
+   "text_en": "For mandarin fish of the same size, starvation for 5 d versus 7 d, and 3 d versus 5 d, produced no significant differences in domestication rate, survival rate, or growth ratio (P>0.1), indicating that short differences in starvation time have little effect on these three measures.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "starvation time",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim concerns the effect of starvation duration on survival and growth. While starvation is a welfare-relevant practice (affecting feeding), the study measures proxies (survival/growth) rather than direct welfare indicators like stress or injury. The result shows no significant difference between short starvation periods, implying these specific durations do not drastically alter survival/growth outcomes in this context, but it does not report an improvement in welfare itself.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C044",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "这种对饥饿的抵抗力，幼鱼比成鱼差得多，本试验中夏花鱼种的成活率低于仔口和老口鱼种，也证明了这一点。",
+   "quote_lang": "zh",
+   "text_en": "Resistance to starvation is much poorer in juvenile fish than in adult fish, as shown by the lower survival rate of summer-fry fingerlings compared with young and old fingerlings in this trial.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim addresses the physiological capacity to withstand starvation (a welfare-relevant condition related to feeding/nutrition) and reports a measured difference in survival rates between age groups. However, it does not describe an intervention or technology applied to improve this outcome; it merely states a biological fact/observation from the trial data.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C045",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "鳜鱼的驯化在普通的网箱养殖条件下，采用分阶段驯化，即第一阶段投喂活饵使鳜鱼形成上水面摄食的条件反射，第二阶段再改投死鱼，以后逐渐掺喂配合饲料，过渡到投喂软颗粒饲料。",
+   "quote_lang": "zh",
+   "text_en": "Under ordinary cage-culture conditions, mandarin fish can be domesticated in stages: first feeding live prey to establish a conditioned reflex of feeding at the water surface, then switching to dead fish, then gradually mixing in formulated feed, and finally transitioning to soft pelleted feed.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "staged domestication in cage culture",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific feeding practice (staged domestication) used to transition mandarin fish from live prey to formulated feed. This directly addresses the welfare problem of 'feeding' by attempting to satisfy nutritional needs without relying on live prey, which is often associated with higher stress and disease risk for both the predator and the prey. However, the statement itself only describes the method/stages and does not report any measured outcome regarding the fish's health, stress levels, or survival.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C046",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "仔口与老口鱼种的成活率较高，可达98%～100%，夏花鱼种的成活率约90%。",
+   "quote_lang": "zh",
+   "text_en": "Young and old fingerlings had high survival rates of 98%-100%, while summer-fry fingerlings had a survival rate of about 90%.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim reports survival rates for different types of fingerlings. Survival is a direct proxy for welfare (indicating successful handling, transport, or acclimation). Since the paper measures these outcomes itself, it is 'measured'. The high survival rates indicate that the welfare proxies are improved.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C047",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "分别在饥饿3～5d后，抛投活鱼，鳜鱼马上就能追踪摄食。第3天起就能形成在水面上摄食的条件反射，第7天改投死鱼便能很好摄食，第10天改投鱼块，以后逐日添加20%、50%、70%的配合饲料，摄食情况良好。",
+   "quote_lang": "zh",
+   "text_en": "After 3-5 days of starvation, throwing live fish immediately gets mandarin fish to track and feed, and a conditioned reflex to feed at the water surface forms from day 3, with good feeding on dead fish from day 7, fish chunks from day 10, and then compound feed added daily at 20%, 50% and 70%.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditioned reflex domestication method",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports a feeding/domestication practice (starvation followed by live fish, dead fish, fish chunks, and compound feed) that directly affects feeding behaviour and acceptance of feed in mandarin fish, a welfare-relevant outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C048",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "经15d驯化，起箱检查，结果见表3。",
+   "quote_lang": "zh",
+   "text_en": "After 15 days of domestication, the cages were checked and the results are shown in Table 3.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditioned reflex domestication method",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "none",
+   "welfare_link_note": "The statement only reports that cages were checked after 15 days of domestication and refers to a table; it does not itself report a welfare outcome, proxy, or condition.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C049",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "由表3可见，采用建立条件反射法驯化的八只网箱内的鳜鱼都具比较好的驯化效果，驯化率达68.2%～84.1%，且在15d的驯化过程中，鳜鱼已呈现生长态势，生长比率分别为：夏花鱼种1.02%～1.39%；仔口鱼种0.31%～0.38%；老口鱼种0.22%～0.26%。",
+   "quote_lang": "zh",
+   "text_en": "The eight cages of mandarin fish domesticated by the conditioned reflex method all showed relatively good domestication results, with domestication rates of 68.2%-84.1%, and during the 15-day domestication the fish showed growth, with specific growth rates of 1.02%-1.39% for summer fry, 0.31%-0.38% for fingerlings, and 0.22%-0.26% for older fish.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditioned reflex domestication method",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim describes a domestication method (conditioned reflex) aimed at adapting fish to artificial feeding. The reported outcomes are domestication rates and specific growth rates. While the method addresses the challenge of feeding adaptation (a welfare-relevant practice), the evidence provided is based on growth performance (a proxy for successful feeding/adaptation) rather than direct physiological stress or behavioral welfare indicators.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C050",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "只有抛投活饵使其形成摄食反应，使之逐渐缩短跟踪时间，乃至消除跟踪的习惯，才能可能在较短的时间内将鳜鱼驯化为摄食非活饵。",
+   "quote_lang": "zh",
+   "text_en": "Only by throwing live bait to form a feeding response and gradually shortening the tracking time, even eliminating the tracking habit, is it possible to domesticate mandarin fish to eat non-live bait in a relatively short time.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "live bait feeding to establish a feeding response",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim concerns a feeding/domestication practice (transitioning mandarin fish to non-live bait) that directly affects feeding behaviour, a welfare-relevant outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C051",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "因而在转换饲料种类时，采用掺合过渡的方法，能较好地改变鳜鱼对口感的要求。",
+   "quote_lang": "zh",
+   "text_en": "Therefore, when switching feed types, using a blending transition method can better change the mandarin fish's requirements for mouthfeel.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "blending transition method",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim addresses a feeding practice (blending transition) designed to accommodate the fish's sensory requirements ('mouthfeel'), which directly relates to feeding behavior and welfare. The authors infer that this method improves the outcome by better meeting these requirements.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C052",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "Domestication of mandarin fish, Siniperca Chuatsi, with artificial diets is successfully carried out for the first time by conditional reflex.",
+   "quote_lang": "en",
+   "text_en": "Domestication of mandarin fish with artificial diets can be successfully carried out for the first time using conditional reflex.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditional reflex domestication with artificial diets",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim describes a method (conditional reflex training) to achieve artificial diet feeding. Successful domestication to artificial diets is a proxy for improved welfare as it allows for controlled nutrition and reduces reliance on wild prey, which can be inconsistent or carry disease risks. The paper reports this success as a measured result.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C053",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "The eating reflex is used to solve the problem of stubborn eating habits.",
+   "quote_lang": "en",
+   "text_en": "The eating reflex is used to solve the problem of stubborn eating habits.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "eating reflex training",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim addresses feeding behavior ('stubborn eating habits') which is a welfare-relevant issue. However, it describes the use of an 'eating reflex' as a method without providing specific evidence of improved welfare outcomes in this statement, and 'eating reflex training' does not fit standard technology classes like anesthesia or slaughter methods.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C054",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "Once Siniperca Chuatsi can swallow the livefish on the water surface, it can be trained to eat dead fish, fish meal, and artificial diet in order.",
+   "quote_lang": "en",
+   "text_en": "Once Siniperca Chuatsi can swallow live fish on the water surface, it can be trained to eat dead fish, fish meal, and artificial diet in that order.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "sequential training with live fish, dead fish, fish meal, and artificial diet",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a method for transitioning the diet of Siniperca Chuatsi from live prey to artificial feed. This directly addresses the 'feeding' aspect of welfare by altering how animals are nourished in captivity. The statement presents this as an established practice or background knowledge regarding training protocols rather than a specific experimental result measuring stress or health outcomes in this instance.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C055",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "After fifteen days, the rate of domestication is about 70%, and the survival rate is about 99%.",
+   "quote_lang": "en",
+   "text_en": "After fifteen days, the domestication rate is about 70% and the survival rate is about 99%.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The statement reports survival rate (99%) as a metric following a domestication process. Survival is an indirect measure (proxy) of welfare, and the high rate indicates that the animals survived the procedure well, representing a proxy improvement in welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C056",
+   "source_id": "S03",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "According to the experiment results, it can be concluded that the eating reflex is beneficial for domestication of mandarin fish.",
+   "quote_lang": "en",
+   "text_en": "The eating reflex is beneficial for domestication of mandarin fish.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "eating reflex training",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim concerns eating reflex training as a method for domesticating mandarin fish. Feeding behavior is a welfare-relevant outcome, and improved feeding/domestication is treated as a proxy improvement in welfare.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C057",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "经常加注新水和投喂野杂鱼，尤为重要的是催产前一个月的强化培育。",
+   "quote_lang": "zh",
+   "text_en": "Broodstock conditioning involves frequent addition of fresh water and feeding with wild miscellaneous fish, with particular emphasis on intensive feeding one month before induced spawning.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "broodstock conditioning with fresh water and wild fish feed",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "none",
+   "welfare_link_note": "The claim describes a standard husbandry practice (broodstock conditioning) involving water changes and feeding. While these practices affect the animals' environment and nutrition, the statement itself is descriptive of the method used to prepare for spawning rather than reporting a specific welfare outcome (such as stress reduction or health improvement) or measuring a welfare parameter. It falls under breeding management without an explicit welfare result.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C058",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "在孵化缸中放入消毒过的三束杨柳须作鱼巢。",
+   "quote_lang": "zh",
+   "text_en": "Disinfected willow root bundles were placed in the hatching tanks to serve as egg substrates for natural spawning.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "provision of artificial egg substrate (willow roots)",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "none",
+   "welfare_link_note": "The statement describes a specific husbandry practice (providing artificial substrate for spawning) which is relevant to breeding management. However, the claim itself only states the action taken ('were placed') without reporting any outcome regarding animal welfare (such as stress reduction, egg survival rates, or injury prevention). Therefore, while it concerns a method that *can* affect welfare, the claim as stated does not provide evidence of a welfare outcome or measurement, making 'welfare_problem' and 'outcome_evidence' none.",
+   "verification": "partial",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C059",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "由于鳜鱼卵为半浮性卵，耗氧量又高，在孵化过程中我们通过调控水流量保持水中充足溶氧量，而又不使卵下沉",
+   "quote_lang": "zh",
+   "text_en": "During incubation, regulating water flow maintains sufficient dissolved oxygen in the water without letting the eggs sink.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "water flow regulation during incubation",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Water flow regulation during incubation maintains dissolved oxygen and keeps eggs suspended, addressing water quality/oxygen availability for developing eggs; this is a husbandry practice affecting welfare-relevant conditions, though the outcome is a proxy (egg viability/development) rather than a direct welfare outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C060",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "为提高孵化率，随鱼苗逐渐长大，我们采用由孵化缸转入孵化环道稀养，并逐渐减少进水流量以便减少鱼苗体能消耗。",
+   "quote_lang": "zh",
+   "text_en": "Moving fry from hatching jars to hatching circular channels for lower-density rearing and gradually reducing water inflow reduces fry energy consumption and improves hatching rate.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "transfer to hatching circular channels with reduced water flow",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim describes a specific husbandry practice (transfer to circular channels and flow reduction) intended to reduce energy consumption (a welfare proxy for stress/effort) and improve hatching rate. The text states this was done 'to improve hatching rate' and 'reduce fry energy consumption', implying these outcomes were observed or the method is established as effective in this context. Since it links handling/water management to physiological cost (energy) and survival/hatching success, it is welfare-relevant. The outcome 'improves hatching rate' is a production metric often used as a proxy for successful early life stage welfare, while 'reduces energy consumption' addresses physiological stress.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C061",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "后因产卵池排水不畅，改微流水为定期加水换水培育。",
+   "quote_lang": "zh",
+   "text_en": "Because the spawning pond drained poorly, micro-flow water was changed to periodic water addition and exchange for rearing.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "periodic water addition and exchange",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim describes a change in water management practice (from micro-flow to periodic exchange) due to poor drainage. This is a husbandry method affecting the rearing environment. It is reported as background context for the study's methods rather than a measured experimental result of welfare improvement. The link to welfare is indirect (proxy) via water quality/environment, and no specific welfare outcome evidence is provided in this statement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C062",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "此阶段培育关键在于掌握水质，重视病害防治及保证饵料的充足供应。",
+   "quote_lang": "zh",
+   "text_en": "At this stage, the key to rearing is managing water quality, paying attention to disease prevention and control, and ensuring an adequate supply of bait.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement identifies water quality management, disease prevention, and feeding as key practices for rearing. These are direct welfare-relevant interventions (addressing stress from poor water, disease risk, and hunger). However, the text presents this as general advice or background knowledge ('the key is...') rather than reporting a specific experimental result showing that these measures improved welfare outcomes in a study.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C063",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "准确掌握鳜鱼开口饵料鱼的适时供应及保证量的稳定、充足是鳜鱼养殖成败的关键。",
+   "quote_lang": "zh",
+   "text_en": "Accurately timing the supply of first-feeding bait fish and ensuring a stable and sufficient quantity is the key to the success of mandarin fish culture.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "timed and sufficient supply of first-feeding bait fish",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Timing and quantity of first-feeding bait fish affects feeding success and survival of larval mandarin fish, an indirect welfare proxy.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C064",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "不同水温，不同饵料鱼品种略有差异，应作相应调整，以便保证饵料鱼的适时、充足、稳定地供应。",
+   "quote_lang": "zh",
+   "text_en": "Different water temperatures and different bait fish species cause slight differences, so corresponding adjustments should be made to ensure timely, sufficient and stable supply of bait fish.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "adjustment of bait fish supply schedule",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim concerns adjusting bait fish supply schedules to account for water temperature and bait fish species differences, which affects feeding/feed supply for the farmed aquatic animals. This is a husbandry practice related to feeding, a welfare-relevant area, but the statement itself reports no welfare outcome (no stress, disease, growth or survival data), so it is a proxy-level link with no outcome evidence.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C065",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "为了适应鳜鱼的摄食特性，我们在鳜鱼卵黄囊尚没完全消失的情况下就投喂了尚未完全平游的团头鲂苗，诱导和帮助鳜鱼苗摄食。",
+   "quote_lang": "zh",
+   "text_en": "To adapt to the feeding characteristics of mandarin fish, blunt snout bream fry that had not yet fully begun horizontal swimming were fed before the mandarin fish yolk sac had completely disappeared, to induce and help mandarin fish fry feed.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "early feeding of pre-swimming blunt snout bream fry",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific feeding practice (early introduction of prey) designed to address the nutritional needs and feeding behavior of mandarin fish fry. It reports that this method successfully induced and helped the fry feed, which is a direct improvement in a welfare-relevant outcome (feeding/nutrition).",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C066",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "开始每尾鳜鱼苗每天只能摄食1—2尾团头鲂苗，故一般来说每天投喂一次，数量为鳜鱼苗的5—6倍。",
+   "quote_lang": "zh",
+   "text_en": "At the start, each mandarin fish fry could only eat 1–2 blunt snout bream fry per day, so generally feeding was once daily at 5–6 times the number of mandarin fish fry.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "daily bait fish feeding at 5–6 times mandarin fish fry number",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a feeding practice (frequency and quantity of bait fish) which directly addresses the nutritional needs and feeding behavior of the mandarin fish fry. It is stated as background information regarding standard husbandry practices rather than a measured experimental result or an inferred welfare outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C067",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "1周后，每天每尾鳜鱼苗能摄取5—6尾，两周后增加到15—20尾。",
+   "quote_lang": "zh",
+   "text_en": "After one week, each mandarin fish fry could consume 5–6 bait fish per day, increasing to 15–20 after two weeks.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports feeding behaviour (prey consumption rate) of mandarin fish fry, which is a direct welfare-relevant outcome related to feeding.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C068",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "因此，饵料鱼的投喂量可根据鳜鱼苗的估计数量来推算。",
+   "quote_lang": "zh",
+   "text_en": "Therefore, the feeding amount of bait fish can be calculated based on the estimated number of mandarin fish fry.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "calculation of bait fish feeding amount from estimated mandarin fish fry number",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim addresses feeding practices (calculating bait fish amount based on fry number), which is directly relevant to animal welfare. It is an interpretation or methodological proposal by the authors rather than a measured experimental result of welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C069",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "(1)水霉病：每天用1ppm孔雀石绿进行消毒，持续10天。",
+   "quote_lang": "zh",
+   "text_en": "For saprolegniasis, disinfection with 1 ppm malachite green is carried out daily for 10 consecutive days.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "1 ppm malachite green disinfection",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific treatment protocol (malachite green disinfection) for a disease (saprolegniasis), which directly addresses animal health and welfare. It is presented as a standard practice or background information rather than a novel experimental result measuring welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C070",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "具体操作是关孵化缸的进水阀，在缸中加入适量1ppm孔雀石绿水溶液使孵化缸内的水呈淡绿色，并不断搅拌，2—3分钟后打开进水阀，让其慢慢稀释后流出。",
+   "quote_lang": "zh",
+   "text_en": "The specific operation is to close the water inlet valve of the hatching jar, add an appropriate amount of 1 ppm malachite green aqueous solution to make the water in the hatching jar light green, stir continuously, and after 2–3 minutes open the water inlet valve to let it slowly dilute and flow out.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "malachite green treatment procedure in hatching jar",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a specific procedure for applying malachite green, an antifungal/antiparasitic agent, to treat eggs in a hatching jar. This directly addresses disease and parasite control, which is a welfare-relevant practice. The text details the operational steps (dosage, duration, dilution) but does not report the outcome of this treatment on egg survival or health in this specific snippet.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C071",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "(2)剑水蚤：采用80%敌敌畏乳剂毒杀，具体方法与孔雀石绿相同。",
+   "quote_lang": "zh",
+   "text_en": "For cyclops, 80% dichlorvos emulsion is used to kill them, with the same specific method as for malachite green.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "80% dichlorvos emulsion",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a method for killing cyclops (copepods) using dichlorvos. While this is a pest control measure in aquaculture that affects the environment and potentially the health of farmed animals by removing parasites/vectors, it does not directly address or measure the welfare of the farmed aquatic animal itself (e.g., stress, pain, feeding). It is a management practice regarding water quality/pest control. However, since 'water quality' is listed as a welfare-relevant category, and this is a chemical treatment affecting the water system, it is classified under water systems. The welfare link is direct in the sense that it addresses a potential source of harm (parasites), but no outcome evidence is provided.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C072",
+   "source_id": "S06",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "(3)车轮虫和小瓜虫病：采用硫酸铜水溶液泼洒，使池水浓度为0.7ppm，效果很好。",
+   "quote_lang": "zh",
+   "text_en": "For trichodiniasis and ichthyophthiriasis, splashing copper sulfate aqueous solution to make the pond water concentration 0.7 ppm has a very good effect.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "0.7 ppm copper sulfate solution",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim concerns treating parasitic infections (trichodiniasis and ichthyophthiriasis) in farmed aquatic animals using copper sulfate, which directly addresses disease welfare.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C073",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "经注射催情剂的亲鱼放置在网箱内冲水（便于人工授精时捕捉），当水温25—27℃时经24小时，水温28—30℃时约22小",
+   "quote_lang": "zh",
+   "text_en": "Holding injected broodstock in net cages with flowing water at 25–27°C for 24 hours or at 28–30°C for about 22 hours is used to facilitate artificial insemination.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "holding broodstock in net cages with flowing water",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "none",
+   "welfare_link_note": "The statement describes a holding/handling practice for injected broodstock to facilitate artificial insemination. It concerns handling of the animals but does not report any welfare outcome (stress, injury, disease, etc.), so welfare_link is none and outcome_evidence is none. It is reported as a method/protocol (background), not a measured result.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C074",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "为防止鱼卵下沉常需搅动水体，并及时排除卵膜。",
+   "quote_lang": "zh",
+   "text_en": "Stirring the water body and timely removal of egg membranes are necessary to prevent fish eggs from sinking.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "water stirring and membrane removal",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The statement describes a standard hatchery practice (stirring water and removing membranes) to prevent egg sinking. While this affects survival (a welfare proxy), the claim itself is presented as background knowledge or common practice rather than a specific experimental result measuring a welfare outcome like stress or disease in this context. However, since it addresses a physical condition affecting the viability of the eggs (which are animals in early life stages), it is considered welfare-relevant regarding husbandry practices. The 'welfare_problem' is often categorized under general husbandry or none if no specific pathology is named, but here it prevents mechanical damage/suffocation. Given the strict list, 'none' for problem might be too broad, but usually, these lists include 'disease', 'stress', etc. If 'none' is allowed for technology_class when it's just basic biology, that would be false. But this is a *practice*. Let's look at the options. Usually, 'water_quality' or 'handling' fits. Here, 'water_systems' or 'handling' is appropriate. The prompt asks for IDs from a listed set which I don't see explicitly provided in the user text, but standard ones are implied. I will use 'water_systems' as it involves manipulating the water environment. The kind is 'reported_background' because it states what is 'necessary' generally. Welfare link is 'proxy' because preventing sinking aids survival/hatching success.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C075",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "当水温在25—30℃孵化出的鱼苗正常，约需29小时出膜；水温在23—27℃时则需53小时才能出膜。",
+   "quote_lang": "zh",
+   "text_en": "Incubation at 25-30°C yields normal fry hatching in about 29 hours, while 23-27°C requires 53 hours.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "temperature control during incubation",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim reports the effect of incubation temperature on hatching time. While this is a biological parameter relevant to early life stages, it does not directly measure or address a specific welfare outcome such as stress, disease, injury, or mortality in this context. It serves as background information on optimal conditions rather than a welfare intervention result.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C076",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "若将尚未进食的鳜鱼苗投放到池塘里培育，成活率极低甚至全部死亡。",
+   "quote_lang": "zh",
+   "text_en": "Placing unfed mandarin fish larvae into ponds for rearing results in extremely low survival rates or total mortality.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Survival rate is a proxy welfare measure; the statement reports that unfed larvae stocked into ponds have very low survival or total mortality, indicating poor welfare outcomes under this practice.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C077",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "选择刚出膜的团头鲂鱼苗，细长柔嫩，游泳能力差，是鳜鱼苗进食的适口饵料",
+   "quote_lang": "zh",
+   "text_en": "Newly hatched blunt snout bream larvae are selected as palatable feed because they are slender, tender, and have poor swimming ability.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "selection of specific live feed (blunt snout bream larvae)",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes the selection of live feed based on physical traits (slender, tender) and behavioral traits (poor swimming ability) to ensure palatability for predatory fish larvae. This directly addresses feeding practices and animal welfare by ensuring adequate nutrition intake, although it is stated as background knowledge rather than a measured experimental result.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C078",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "在没有适口鱼苗可供其摄食时，常常发现鳜鱼苗互相吞食，甚至双双卡死的现象。",
+   "quote_lang": "zh",
+   "text_en": "In the absence of suitable live feed, mandarin fish larvae often cannibalize each other, sometimes resulting in mutual death by choking.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a direct welfare issue (cannibalism leading to death) resulting from inadequate feeding practices. It is reported as background knowledge/common observation rather than a specific experimental result of an intervention in this context.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C079",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "为此采用孵化缸流水培育的方法，其效果比静水好；据观察：流水大大有助于鳜鱼苗吞食鲂苗。",
+   "quote_lang": "zh",
+   "text_en": "Using flowing water in incubation jars for rearing is more effective than static water, as the flow significantly helps mandarin fish larvae consume bream larvae.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "flowing water rearing in incubation jars",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific rearing practice (flowing water) and reports a direct observation that it improves feeding behavior (larvae consuming prey), which is a welfare-relevant outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C080",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "鳜鱼培育期间极易感染水霉菌和寄生车轮虫、斜管虫及其他原生动物，严重时布满全身，因此大批死亡。",
+   "quote_lang": "zh",
+   "text_en": "Mandarin fish are highly susceptible to infections by Saprolegnia, Trichodina, Chilodonella, and other protozoa during rearing, leading to mass deaths when severe.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The authors state as background that during fingerling rearing, mandarin fish are highly susceptible to water mould and protozoan parasites (Trichodina, Chilodonella), causing mass mortality when severe. This concerns disease in farmed aquatic animals, so it is welfare-relevant. It is reported background rather than a paper result, and the link is indirect for welfare because the outcome is mortality (a proxy) rather than a direct welfare measure.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C081",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "病鱼停止摄食，游泳失去平衡而下沉或在水中翻滚，不及时治疗，很快会死亡。",
+   "quote_lang": "zh",
+   "text_en": "Diseased fish stop feeding, lose swimming balance causing them to sink or roll, and die quickly if not treated immediately.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes clinical signs and rapid mortality of diseased fish, serving as background information for identifying/treating disease rather than presenting a measured result of a technology or method.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C082",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "经试验：培育期间鱼苗采用硫酸铜、硫酸亚铁混合剂(5:2)消毒治疗效果较好。",
+   "quote_lang": "zh",
+   "text_en": "Treatment with a 5:2 mixture of copper sulfate and ferrous sulfate showed good disinfection and therapeutic effects on fish larvae during rearing.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "copper sulfate and ferrous sulfate treatment",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific chemical treatment (copper sulfate and ferrous sulfate) applied to fish larvae for disinfection and therapeutic purposes. This directly addresses disease/parasite control, which is a core welfare issue. The statement reports that the treatment showed 'good' effects, implying an improvement in health outcomes based on the study's results.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C083",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "鳜鱼苗对药物比较敏感，用药时需计算准确，否则极易死亡。",
+   "quote_lang": "zh",
+   "text_en": "Mandarin fish larvae are sensitive to drugs, requiring accurate dosage calculations to avoid high mortality.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "accurate drug dosing",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a general sensitivity of the species to drugs and the risk of mortality if dosing is inaccurate. It does not report a specific experimental result or intervention outcome from this paper, but rather states background knowledge about handling/medication practices affecting survival (a direct welfare concern).",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C084",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "混养鳜鱼的成鱼塘不宜再放养鲢鳙鱼夏花，因鳜鱼长速快，防止小规格家鱼被其吞食；",
+   "quote_lang": "zh",
+   "text_en": "In adult fish ponds where mandarin fish are polycultured, summer fry of silver carp and bighead carp should not be stocked because mandarin fish grow fast and small-sized farmed fish may be swallowed by them.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "polyculture of mandarin fish in adult fish ponds",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim addresses a specific stocking practice (polyculture) and warns against it to prevent predation ('swallowed') of smaller fish by mandarin fish. Predation is a direct welfare issue involving injury/death. The statement is an inference/recommendation based on the growth rate of the predator, not a measured experimental result from this specific paper's data.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C085",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "未进食的鳜鱼苗在池塘培育成活率极低，流水培育的成活率高、成长快，但需掌握好鱼苗进食和防病两个关键。",
+   "quote_lang": "zh",
+   "text_en": "Mandarin fish fry that have not yet fed have a very low survival rate when cultivated in ponds, whereas flowing water rearing gives a high survival rate and fast growth, but the two keys of fry feeding and disease prevention must be well managed.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "flowing water rearing",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Survival rate and growth are production proxies rather than direct welfare outcomes, and the statement reflects common-knowledge husbandry background rather than the paper's own measured result.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C086",
+   "source_id": "S05",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "待培育到20—30毫米时再行池塘培育，育苗成活率60%左右。",
+   "quote_lang": "zh",
+   "text_en": "When fry have been reared to 20–30 millimeters and then cultivated in ponds, the nursery survival rate is about 60 percent.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "pond cultivation after rearing to 20–30 mm",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Survival rate is a proxy welfare measure; the statement reports a survival outcome for pond cultivation of fry.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C087",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "条件反射组的类胰蛋白酶活性、驯化率和生长比速均显著高于直接驯化组，从而说明采用条件反射法驯化比较符合鳜鱼的生理变化规律",
+   "quote_lang": "zh",
+   "text_en": "The conditional reflex domestication method resulted in significantly higher trypsin activity, domestication rate, and specific growth rate compared to the direct domestication method, indicating it better aligns with the physiological changes of mandarin fish.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditional reflex domestication method",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim compares two domestication methods for feeding adaptation. It reports that the conditional reflex method resulted in higher trypsin activity (digestive physiology), domestication rate (success of feeding transition), and specific growth rate. While these are physiological and production metrics, they serve as proxies for welfare in the context of feeding adaptation and stress reduction during the transition to artificial feed. The improvement in these metrics suggests a better alignment with the fish's physiological needs, reducing potential stress or malnutrition associated with failed domestication.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C088",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "投饲开始后，直接驯化组鳜鱼的胃蛋白酶和类胰蛋白酶活性都出现明显的上升趋势，说明食物能通过鳜鱼的嗅觉等外周感觉器官影响中枢神经系统对消化腺分泌的调控",
+   "quote_lang": "zh",
+   "text_en": "After feeding begins, the activity of pepsin and trypsin in directly acclimated mandarin fish increases significantly, indicating that food influences the regulation of digestive gland secretion by the central nervous system through peripheral sensory organs such as olfaction.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "direct acclimation to feeding",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim discusses digestive enzyme activity (pepsin and trypsin) as a physiological response to feeding/acclimation. While it infers a mechanism involving the nervous system, it does not report a direct welfare outcome like stress reduction or improved health status, nor does it evaluate a specific technology's impact on welfare metrics. It is a biological observation related to feeding physiology.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C089",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "条件反射组在恢复摄食后，胃蛋白酶和类胰蛋白酶活性的回升速度大大超过尚未摄食的直接驯化组，并迅速恢复到停食前的水平",
+   "quote_lang": "zh",
+   "text_en": "In the conditioned reflex group, the recovery speed of pepsin and trypsin activity after resuming feeding is much faster than in the direct acclimation group that had not yet fed, rapidly returning to pre-fasting levels.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditioned reflex training for feeding",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim describes a physiological response (enzyme activity recovery) to a feeding intervention (conditioned reflex training). While enzyme activity is not a direct welfare metric like stress hormones or injury, rapid recovery of digestive function after fasting/feeding cycles is generally considered a positive indicator of animal health and efficient feeding management, thus serving as a proxy for improved welfare status related to feeding. The study measures this outcome directly.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C090",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "条件反射组从第10天起掺喂配合饲料后，其淀粉酶的活性有上升趋势，说明鳜鱼对食料中碳水化合物含量的变化有一定的适应能力",
+   "quote_lang": "zh",
+   "text_en": "After incorporating compound feed into the diet from day 10, the amylase activity in the conditioned reflex group showed an upward trend, indicating that mandarin fish have a certain adaptability to changes in carbohydrate content in their feed.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "incorporation of compound feed",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim reports a physiological response (amylase activity) to a dietary change (incorporation of compound feed). While this relates to feeding practices and animal adaptation, it is an indirect measure (proxy) of welfare rather than a direct welfare outcome like stress or injury. The result indicates adaptability but does not explicitly state that welfare improved or worsened.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C091",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "全期电热棒控温28℃，连续充气增氧，日排污一次，换水1／4",
+   "quote_lang": "zh",
+   "text_en": "The experiment maintained water quality and oxygen levels by using electric heating rods to control temperature at 28°C, continuous aeration, daily waste removal, and replacing one-quarter of the water.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "temperature control, aeration, and water exchange",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes specific husbandry practices (temperature control, aeration, waste removal, water exchange) that directly address and maintain water quality, which is a key factor in animal welfare. Since it describes the experimental setup/methodology rather than reporting a specific outcome or improvement in welfare metrics resulting from these actions, the outcome evidence is 'none'.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C092",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "投饲方法均采用少量抛投法，以饱食为度，对不摄食组也足量投喂，早晚各投饲一次",
+   "quote_lang": "zh",
+   "text_en": "Feeding was conducted twice daily (morning and evening) using a small-quantity scattering method until satiation, with sufficient feed provided even to groups that did not eat.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding management",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific feeding practice (twice daily, scattering method, satiation) which directly addresses animal welfare regarding nutrition and hunger. It is reported as the method used in the study (measured/implemented), linking directly to feeding behavior/welfare, but does not report an improvement outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C093",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "直接驯化组在恢复投饲后其蛋白酶活性呈缓慢上升态势，直至试验结束都不能回复到试验前水平",
+   "quote_lang": "zh",
+   "text_en": "In the direct domestication group, protease activity rose slowly after feeding resumed but did not return to pre-experiment levels by the end of the trial.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "direct domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Digestive protease activity is a physiological proxy for feeding/digestive function affected by domestication/handling stress, not a direct welfare outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C094",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "条件反射组在停食后投喂活饵马上开始摄食，第3天起就能上水面抢食，形成投饲条件反射",
+   "quote_lang": "zh",
+   "text_en": "The conditioned reflex group began eating immediately when live bait was offered after fasting, started competing for food on the water surface from day 3, and formed a conditioned reflex for feeding.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditioned reflex domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific training method (conditioned reflex domestication) that directly addresses feeding behavior. It reports positive welfare outcomes: the animals ate immediately after fasting and actively competed for food, indicating successful adaptation to captive feeding conditions and reduced stress or starvation risk associated with poor feeding response.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C095",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "直接驯化组停食后直接投喂配合饲料，无摄食现象",
+   "quote_lang": "zh",
+   "text_en": "The direct domestication group showed no feeding behavior when compound feed was offered directly after fasting.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "direct domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific observation of feeding behavior (or lack thereof) in a domestication group after fasting. This directly relates to the animal's welfare state regarding feeding and adaptation to captive conditions. The paper reports this as an observed result ('no feeding phenomenon'), making it 'measured'. Since it describes a negative or neutral behavioral response without indicating an improvement in welfare outcomes, the evidence is classified as 'none'.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C096",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "第7天死鱼1尾，第9、第10两天均少1尾鱼，无尸体",
+   "quote_lang": "zh",
+   "text_en": "One fish died on day 7, and one fish disappeared on each of days 9 and 10 without corpses found.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "direct domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The statement reports mortality and disappearance of fish during a domestication process. While this is an outcome related to survival (a proxy for welfare), the claim itself does not describe a specific technology or method that *addresses* or *improves* welfare in a way that fits the 'intervention' definition strictly as a welfare-enhancing practice; rather, it reports negative outcomes (death/loss). However, under strict definitions where 'survival' is a proxy measure of welfare status during handling/domestication, it is welfare relevant. But looking at the options: 'technology_class' and 'welfare_problem' must be from listed ids or none. Since no specific welfare problem like 'stress' or 'disease' is explicitly named/measured via a metric (just death count), and no specific welfare-improving technology is claimed to work, these are 'none'. The kind is measured. Welfare link is proxy (survival/death). Outcome evidence is none because deaths occurred (negative outcome) and no improvement is stated.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C097",
+   "source_id": "S01",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "条件反射组的驯化率大大高于直接驯化组，为82.1％，且呈现正生长",
+   "quote_lang": "zh",
+   "text_en": "The domestication rate of the conditioned reflex group was significantly higher than that of the direct domestication group at 82.1%, and it showed positive growth.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "conditioned reflex domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Domestication rate and positive growth are indirect welfare proxies (survival/growth), not direct welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C098",
+   "source_id": "S09",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "按常规方法定期用药防治病害。",
+   "quote_lang": "zh",
+   "text_en": "Diseases are prevented and treated regularly using conventional medication methods.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "regular medication for disease prevention",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a standard husbandry practice (regular medication) aimed at preventing and treating disease, which directly addresses animal health and welfare. However, it is presented as background information or a general description of the method rather than a specific experimental result demonstrating improved welfare outcomes in this study.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C099",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "本研究结果证实鳜通过我们依据其感觉倾向性特点制定的驯食程序可很好地被驯化接受摄食人工饲料。",
+   "quote_lang": "zh",
+   "text_en": "A specialized feeding-taming procedure based on the sensory predispositions of mandarin fish can successfully train them to accept artificial feed under production conditions.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding-taming procedure based on sensory predispositions",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The paper directly reports that a specialized feeding-taming procedure successfully trained mandarin fish to accept artificial feed under production conditions, which is the study's own measured result about a feeding practice with a direct welfare outcome (feeding behavior/acceptance).",
+   "verification": "partial",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C100",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "我们的驯食程序成功地将鳜的摄食行为模式从以偷袭方式捕食不小心游近其掩蔽体的活饵料鱼转变为在弱光环境中停留于水面近表层待食并以抢食方式很快摄食投喂的食物。",
+   "quote_lang": "zh",
+   "text_en": "The feeding-taming procedure shifts mandarin fish feeding behavior from ambushing live prey near cover to waiting near the water surface in dim light and quickly competing for the feed offered.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding-taming procedure",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim describes a specific change in feeding behavior (from ambushing to surface competition) resulting from a taming procedure. This directly addresses the 'feeding' aspect of welfare by measuring how the animals interact with their food environment. It is a measured result from the study. The link is direct because it reports on the behavioral outcome itself, not just survival or growth. However, since it only describes the shift in behavior without explicitly stating that this reduces stress or improves health outcomes compared to the previous state, the evidence level is detection_only.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C101",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "鳜视觉对运动的物体十分敏感　投喂的食物在沉底前始终处于运动状态　因而是鳜理想的食物视觉信号。",
+   "quote_lang": "zh",
+   "text_en": "Because mandarin fish vision is highly sensitive to moving objects, feed that remains in motion before sinking is an ideal visual food signal for them.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim concerns feeding behaviour/visual food signal for mandarin fish, which relates to feeding practice and welfare-relevant feeding behaviour, but it is stated as background biology rather than a measured welfare outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C102",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "另外　投喂的食物入水瞬间产生的水流（water jet）　可强烈地刺激鳜侧线系统　也是鳜理想的食物侧线机械感觉信号。",
+   "quote_lang": "zh",
+   "text_en": "The water jet produced at the moment feed enters the water strongly stimulates the mandarin fish lateral line system and is an ideal mechanosensory food signal.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "Claim concerns a feeding-related sensory signal (water jet stimulating the lateral line) that affects feeding behavior, a welfare-relevant outcome, but reports no welfare measurement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C103",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "由于喂食时鳜在水表层待食　整个摄食过程在短暂时间内完成　同时由于鳜视敏度不高　其视觉对食物形状识别能力不强　因此投喂的鱼块或颗粒饲料的形状均能被鳜很好地接受。",
+   "quote_lang": "zh",
+   "text_en": "Because mandarin fish have low visual acuity and poor shape recognition, the shape of the fish pieces or pellet feed offered is well accepted by them.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim addresses feeding behavior and acceptance of feed shape based on visual acuity. It is stated as background knowledge explaining why certain feed shapes are accepted, rather than reporting a new experimental result or intervention outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C104",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "显然鳜通过联想学习获得的这种新摄食策略　无法在含有活饵料鱼且水体较大的池塘等天然环境中起作用　但在集约化水产养殖设施（网箱、流水池）这样人工控制的简单环境中却非常适应。",
+   "quote_lang": "zh",
+   "text_en": "The new feeding strategy acquired through associative learning cannot work in natural environments such as ponds with live prey and large water bodies, but is well suited to artificially controlled simple environments like intensive aquaculture facilities (cages, flow-through tanks).",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "associative learning",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim discusses the applicability of a feeding strategy (via associative learning) in different environments. While it addresses 'feeding' behavior, which is welfare-relevant, it does not report a specific welfare outcome (improvement or deterioration) but rather infers suitability based on environmental complexity. It is an interpretation by the authors regarding where the method works.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C105",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "鳜食性驯化操作必须在弱光环境下（黄昏或凌晨）进行。",
+   "quote_lang": "zh",
+   "text_en": "Mandarin fish feeding-taming operations must be carried out in a low-light environment (dusk or early morning).",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding-taming operation in low-light environment",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a specific handling practice (low-light feeding-taming) required for the species. This directly addresses animal welfare by reducing stress associated with light exposure during a critical behavioral adaptation period. It is presented as background knowledge or standard protocol rather than a measured experimental result.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C106",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "本研究结果不仅在生产条件下证实我们的鳜驯食方法的可行性同时我们发现这种鳜驯食方法也可以使驯食成功的鳜达到正常生长所需的对人工饲料的摄食量。",
+   "quote_lang": "zh",
+   "text_en": "The weaning method for mandarin fish is feasible under production conditions and allows successfully weaned fish to reach the feed intake of artificial diet needed for normal growth.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "mandarin fish weaning method",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The paper's own result confirms that a weaning method for mandarin fish is feasible under production conditions and enables successfully weaned fish to reach the artificial-diet feed intake needed for normal growth. This concerns feeding/weaning practice affecting the animals' ability to feed and grow, so it is welfare-relevant via a growth/feeding proxy rather than a direct stress or disease outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C107",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "目前困扰鳜人工饲料养殖的技术难题已不再是饲料问题而是由病毒引起的鳜暴发性鱼病。",
+   "quote_lang": "zh",
+   "text_en": "The current technical problem troubling artificial-diet farming of mandarin fish is no longer the feed but viral outbreaks of disease in mandarin fish.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement concerns viral disease outbreaks in farmed mandarin fish, a direct welfare problem (disease). It is presented as background context rather than a measured result, and no welfare outcome or intervention is evaluated.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C108",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "由于现在发现致病病毒可通过鳜驯食前活饵料鱼传染或鳜亲代传染等方式传播故极难绝对预防。",
+   "quote_lang": "zh",
+   "text_en": "Because the pathogenic virus has now been found to spread through live prey fish before weaning or through parental mandarin fish, it is extremely difficult to prevent absolutely.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim concerns the transmission of a pathogenic virus in mandarin fish, which is a disease welfare issue affecting the animals.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C109",
+   "source_id": "S04",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "另外鳜人工饲料驯食与养殖均要求在高饲养密度条件下进行水质极易恶化因此往往在鳜人工饲料养殖后期诱发已经感染并潜伏于鳜体内的病毒发病。",
+   "quote_lang": "zh",
+   "text_en": "In addition, both artificial-diet weaning and farming of mandarin fish require high stocking densities, so water quality easily deteriorates, often triggering disease in the late stage of artificial-diet farming in fish already infected with latent virus.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "high stocking density",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The statement describes a causal link between high stocking densities (a farming practice) and water quality deterioration leading to disease outbreaks. This directly addresses animal welfare by identifying a management factor that causes suffering/disease. It is classified as reported background because it states general conditions of mandarin fish farming rather than presenting a specific experimental result from the paper itself.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C110",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "自梁旭方（1995a）首次成功实现了鳜鱼驯食人工饲料，研究人员在此基础上对驯食频率、驯食条件、驯食流程等进行了改进，总结出了较为完善的鳜鱼驯食技术",
+   "quote_lang": "zh",
+   "text_en": "Researchers improved feeding training techniques by optimizing frequency, conditions, and processes to enable mandarin fish to eat artificial feed.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding training technology",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The statement describes improvements to feeding training techniques (frequency, conditions, process) that enable mandarin fish to accept artificial feed, which is a feeding-related practice affecting welfare. It is reported as background from prior work, and the outcome is a proxy improvement (feeding acceptance) rather than a direct welfare outcome.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C111",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 5
+   },
+   "quote": "因此，在养殖过程中对鳜鱼进行适当的光照控制可促进其摄食，提高生产效率。",
+   "quote_lang": "zh",
+   "text_en": "Appropriate light control during the farming process promotes feeding in mandarin fish and improves production efficiency.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "light control",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim concerns light control as a farming practice affecting feeding behavior (a welfare-relevant outcome) in mandarin fish, and is an author interpretation of improved feeding and production.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C112",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 1
+   },
+   "quote": "进行生长选育和饲料驯化，培育出了多个鳜鱼优良新品种。",
+   "quote_lang": "zh",
+   "text_en": "Growth selection and feed domestication were performed in mandarin fish, and several excellent new varieties were cultivated.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "growth selection and feed domestication",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "Growth selection and feed domestication in mandarin fish are breeding/feeding practices that indirectly affect welfare through improved growth and adaptation to formulated feed (proxy measure), though no direct welfare outcome is reported.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C113",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "实践证明，\n用饲料养殖鳜鱼可以大幅降低了养殖成本，减少\n病害发生（李燕等，2014）。",
+   "quote_lang": "zh",
+   "text_en": "Farming mandarin fish with feed can greatly reduce farming costs and reduce disease occurrence.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "feeding domesticated compound feed",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "Claim states that feeding compound feed reduces disease occurrence, a direct welfare outcome, though it is reported from earlier work (Li Yan et al., 2014) rather than the paper's own result.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C114",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 3
+   },
+   "quote": "我们对200条易驯食\n饲料鳜鱼和200 条不易驯食饲料鳜鱼进行了GWAS\n分析，在LG23 连锁群中筛选到2 个与易驯食性状\n显著相关的SNP 位点",
+   "quote_lang": "zh",
+   "text_en": "A GWAS analysis of 200 feed-easily-domesticated and 200 not-easily-domesticated mandarin fish identified two SNP loci significantly associated with feed-domestication traits in linkage group LG23.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "GWAS analysis of feed-domestication traits",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "GWAS identifying SNP loci associated with feed-domestication (acceptance of formulated feed) in mandarin fish. Feed domestication relates to feeding behaviour and reduces reliance on live prey, a welfare-relevant feeding issue; the study detects genetic markers (detection only) rather than demonstrating a welfare improvement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C115",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 4
+   },
+   "quote": "对饥饿处理下的翘嘴鳜胰岛素生长因子-1 受体（igf1r1 和igf1r2）进行了表达量分析，发现饥饿处理下两者在肌肉和肝脏中的表达均升高，恢复饲喂后两者恢复到饥饿处理前的水平",
+   "quote_lang": "zh",
+   "text_en": "Expression of insulin-like growth factor-1 receptors (igf1r1 and igf1r2) in muscle and liver of Siniperca chuatsi increases under starvation and returns to pre-starvation levels after refeeding.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "starvation treatment followed by refeeding",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim reports expression of IGF-1 receptors in muscle and liver under starvation and refeeding, which concerns feeding practice and its physiological response. It is a measured result from the study. The link to welfare is indirect (proxy) because receptor expression is a physiological indicator rather than a direct welfare outcome such as stress, disease or feeding behaviour; it only detects a condition, so outcome_evidence is detection_only.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C116",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 6
+   },
+   "quote": "与未选育群体相比，最终获得的全雌翘嘴鳜“鼎鳜鱼1 号”\n（品种登记号：GS-04-001-2021）\n的体质量高了13.5%，成活率提高了10.5%。",
+   "quote_lang": "zh",
+   "text_en": "Compared with unselected populations, the all-female mandarin fish \"Dinggui No. 1\" had 13.5% greater body mass and 10.5% higher survival rate.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "hormone-induced sex control breeding",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim reports measured improvements in body mass and survival rate for the all-female mandarin fish 'Dinggui No. 1' compared to unselected populations. Survival and growth are welfare proxies, not direct welfare outcomes.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C117",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 7
+   },
+   "quote": "度休克法对翘嘴鳜进行四倍体诱导，结果显示静水压休克法和热休克法处理下均可获得翘嘴鳜四倍体，诱导率分别为7.69%~13.33% 和1.33%。诱导过程中，胚胎死亡率显著提高，并出现发育延迟的现象。",
+   "quote_lang": "zh",
+   "text_en": "Hydrostatic pressure shock and heat shock can both induce tetraploidy in mandarin fish, with induction rates of 7.69%–13.33% and 1.33% respectively, and the induction process significantly increases embryo mortality and causes developmental delay.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "hydrostatic pressure shock and heat shock",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim explicitly states that the induction process (hydrostatic pressure and heat shock) significantly increases embryo mortality and causes developmental delay. This is a direct measurement of negative welfare outcomes (mortality and developmental issues) resulting from a breeding technology.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C118",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 7
+   },
+   "quote": "目前，三倍体、四倍体诱导技术流程已经成熟，探索高存活率的诱导条件是需要继续攻克的难题。",
+   "quote_lang": "zh",
+   "text_en": "The technical procedures for triploid and tetraploid induction are now mature, but exploring induction conditions that yield high survival rates remains a problem that needs to be overcome.",
+   "text_zh": null,
+   "kind": "inferred",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": null,
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim discusses the maturity of ploidy induction techniques (triploid/tetraploid) and identifies 'high survival rates' as a remaining challenge. While breeding is often excluded if no welfare outcome is mentioned, here 'survival rate' is explicitly linked to the induction conditions. Survival is a proxy for welfare (indicating that the procedure does not cause excessive mortality). The statement infers that current conditions may not yield optimal survival, thus addressing a welfare-relevant aspect of the practice.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C119",
+   "source_id": "S10",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 7
+   },
+   "quote": "李勇明等采用紫外线灭活精子、63 MPa 静水压诱导受精卵染色体加倍的方法，获得了100% 雌性率的雌核发育群体，诱导后72 h 成活率为7.56%，相比于冷休克法，该方法显著提高了群体的成活率（李勇明等， 2022）。",
+   "quote_lang": "zh",
+   "text_en": "Li Yongming et al. used ultraviolet-inactivated sperm and 63 MPa hydrostatic pressure to induce chromosome doubling in fertilized eggs, obtaining a gynogenetic population with a 100% female rate and a 72 h post-induction survival rate of 7.56%, which significantly improved population survival compared with the cold shock method.",
+   "text_zh": null,
+   "kind": "reported_background",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "ultraviolet irradiation and hydrostatic pressure",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "proxy",
+   "welfare_link_note": "The claim describes a breeding technique (gynogenesis induction) using UV and hydrostatic pressure. While primarily a genetic method, it explicitly reports 'survival rate' as an outcome metric compared to another method (cold shock). In the context of larval/fry handling and induction procedures, survival is considered a proxy for welfare/health outcomes during these stressful interventions. The statement notes that this method 'significantly improved population survival', which constitutes evidence of a proxy improvement.",
+   "verification": "supported",
+   "audit": "not_audited"
+  },
+  {
+   "id": "C120",
+   "source_id": "S11",
+   "species_id": "mandarin-fish",
+   "locator": {
+    "page": 2
+   },
+   "quote": "同时观\n察到鳜鱼脾、肾、肝组织切片内含有大量的直径在120～150nm 的球状病毒颗粒。",
+   "quote_lang": "zh",
+   "text_en": "Large numbers of spherical virus particles with a diameter of 120–150 nm were observed in sections of mandarin fish spleen, kidney and liver tissue.",
+   "text_zh": null,
+   "kind": "measured",
+   "population": {
+    "species": "Siniperca chuatsi",
+    "life_stage": null,
+    "system": null
+   },
+   "intervention": "ultra-thin sectioning and transmission electron microscopy",
+   "comparator": null,
+   "outcome": null,
+   "direction": null,
+   "magnitude": null,
+   "welfare_link": "direct",
+   "welfare_link_note": "The claim reports the direct observation of virus particles in fish tissues using electron microscopy. This is a diagnostic finding related to disease status (a welfare problem), but it only detects the presence of the pathogen without reporting on treatment outcomes or improvements in welfare metrics.",
+   "verification": "supported",
+   "audit": "not_audited"
+  }
+ ],
+ "interventions": [
+  {
+   "id": "I01",
+   "name_en": "growth selection and feed domestication",
+   "name_zh": null,
+   "technology_class": "breeding"
+  },
+  {
+   "id": "I02",
+   "name_en": "feeding domesticated compound feed",
+   "name_zh": null,
+   "technology_class": "feeds"
+  },
+  {
+   "id": "I03",
+   "name_en": "15-day feeding-conditioning domestication",
+   "name_zh": null,
+   "technology_class": "feeds"
+  },
+  {
+   "id": "I04",
+   "name_en": "histopathology",
+   "name_zh": null,
+   "technology_class": "health_products"
+  },
+  {
+   "id": "I05",
+   "name_en": "rearing temperature",
+   "name_zh": null,
+   "technology_class": "water_systems"
+  },
+  {
+   "id": "I06",
+   "name_en": "flowing water rearing in incubation jars",
+   "name_zh": null,
+   "technology_class": "water_systems"
+  },
+  {
+   "id": "I07",
+   "name_en": "water flow regulation during incubation",
+   "name_zh": null,
+   "technology_class": "water_systems"
+  }
+ ],
+ "applications": [
+  {
+   "id": "A01",
+   "intervention_id": "I01",
+   "species_id": "mandarin-fish",
+   "technology_class": "breeding",
+   "welfare_problem": "feeding",
+   "maturity": "research",
+   "outcome_evidence": "proxy_improved",
+   "claim_ids": [
+    "C112",
+    "C114"
+   ]
+  },
+  {
+   "id": "A02",
+   "intervention_id": "I02",
+   "species_id": "mandarin-fish",
+   "technology_class": "feeds",
+   "welfare_problem": "disease_parasites",
+   "maturity": "research",
+   "outcome_evidence": "outcome_improved",
+   "claim_ids": [
+    "C113"
+   ]
+  },
+  {
+   "id": "A03",
+   "intervention_id": "I03",
+   "species_id": "mandarin-fish",
+   "technology_class": "feeds",
+   "welfare_problem": "feeding",
+   "maturity": "research",
+   "outcome_evidence": "outcome_improved",
+   "claim_ids": [
+    "C030",
+    "C032",
+    "C036",
+    "C040",
+    "C051",
+    "C054",
+    "C099",
+    "C106",
+    "C115"
+   ]
+  },
+  {
+   "id": "A04",
+   "intervention_id": "I04",
+   "species_id": "mandarin-fish",
+   "technology_class": "health_products",
+   "welfare_problem": "disease_parasites",
+   "maturity": "research",
+   "outcome_evidence": "outcome_improved",
+   "claim_ids": [
+    "C019",
+    "C020",
+    "C021",
+    "C024",
+    "C026",
+    "C069",
+    "C070",
+    "C082",
+    "C098"
+   ]
+  },
+  {
+   "id": "A05",
+   "intervention_id": "I05",
+   "species_id": "mandarin-fish",
+   "technology_class": "water_systems",
+   "welfare_problem": "disease_parasites",
+   "maturity": "research",
+   "outcome_evidence": "outcome_improved",
+   "claim_ids": [
+    "C002",
+    "C004",
+    "C006",
+    "C027",
+    "C028",
+    "C029",
+    "C062",
+    "C072"
+   ]
+  },
+  {
+   "id": "A06",
+   "intervention_id": "I06",
+   "species_id": "mandarin-fish",
+   "technology_class": "water_systems",
+   "welfare_problem": "feeding",
+   "maturity": "research",
+   "outcome_evidence": "outcome_improved",
+   "claim_ids": [
+    "C079"
+   ]
+  },
+  {
+   "id": "A07",
+   "intervention_id": "I07",
+   "species_id": "mandarin-fish",
+   "technology_class": "water_systems",
+   "welfare_problem": "water_quality",
+   "maturity": "research",
+   "outcome_evidence": "proxy_improved",
+   "claim_ids": [
+    "C059",
+    "C091"
+   ]
+  }
+ ],
+ "cells_status": [
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "monitoring",
+   "welfare_problem": "stocking_density",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "monitoring",
+   "welfare_problem": "water_quality",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "monitoring",
+   "welfare_problem": "handling_transport",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "monitoring",
+   "welfare_problem": "stunning_slaughter",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "monitoring",
+   "welfare_problem": "disease_parasites",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "monitoring",
+   "welfare_problem": "feeding",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "monitoring",
+   "welfare_problem": "procedures",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "automation",
+   "welfare_problem": "stocking_density",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "automation",
+   "welfare_problem": "water_quality",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "automation",
+   "welfare_problem": "handling_transport",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "automation",
+   "welfare_problem": "stunning_slaughter",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "automation",
+   "welfare_problem": "disease_parasites",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "automation",
+   "welfare_problem": "feeding",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "automation",
+   "welfare_problem": "procedures",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "stocking_density",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "water_quality",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "handling_transport",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "stunning_slaughter",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "disease_parasites",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "feeding",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "stunning_equipment",
+   "welfare_problem": "procedures",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "breeding",
+   "welfare_problem": "stocking_density",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "breeding",
+   "welfare_problem": "water_quality",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "breeding",
+   "welfare_problem": "handling_transport",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "breeding",
+   "welfare_problem": "stunning_slaughter",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "breeding",
+   "welfare_problem": "disease_parasites",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "breeding",
+   "welfare_problem": "procedures",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "health_products",
+   "welfare_problem": "stocking_density",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "health_products",
+   "welfare_problem": "water_quality",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "health_products",
+   "welfare_problem": "handling_transport",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "health_products",
+   "welfare_problem": "stunning_slaughter",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "health_products",
+   "welfare_problem": "feeding",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "health_products",
+   "welfare_problem": "procedures",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "feeds",
+   "welfare_problem": "stocking_density",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "feeds",
+   "welfare_problem": "water_quality",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "feeds",
+   "welfare_problem": "handling_transport",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "feeds",
+   "welfare_problem": "stunning_slaughter",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "feeds",
+   "welfare_problem": "procedures",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "water_systems",
+   "welfare_problem": "stocking_density",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "water_systems",
+   "welfare_problem": "handling_transport",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "water_systems",
+   "welfare_problem": "stunning_slaughter",
+   "status": "not_collected"
+  },
+  {
+   "species_id": "mandarin-fish",
+   "technology_class": "water_systems",
+   "welfare_problem": "procedures",
+   "status": "not_collected"
+  }
+ ],
+ "runs": [
+  {
+   "id": "mandarin-fish-run-0",
+   "species_id": "mandarin-fish",
+   "status": "in_progress",
+   "focus_en": "All welfare-technology claims in the first 14 Chinese-language papers (machine-extracted and machine-verified; no expert audit yet).",
+   "focus_zh": null,
+   "counts": {
+    "documents_collected": 21,
+    "sources_released": 11,
+    "claims_extracted": 231,
+    "claims_supported": 118
+   },
+   "models": [
+    "qwen/qwen3.8-flash (extract)",
+    "qwen/qwen3.8-flash (map)",
+    "z-ai/glm-5.3 (verify)",
+    "deepseek/deepseek-v4.1-flash (map)",
+    "deepseek/deepseek-v4.1-flash (extract)"
+   ],
+   "audit": null,
+   "changelog": [
+    {
+     "date": "2026-10",
+     "text_en": "First machine-verified demo release. Quotes are checked against the page text; support is judged by a second model. No expert has audited these claims.",
+     "text_zh": null
+    }
+   ]
+  }
+ ],
+ "methods": {
+  "limits_en": [
+   "Nothing on this site has been verified yet.",
+   "Chinese-language interface text is a draft awaiting review by a native speaker.",
+   "The taxonomy is a draft and will change."
+  ],
+  "limits_zh": [
+   "本站目前没有任何已核验的内容。",
+   "中文界面文字为草稿，尚待母语者审校。",
+   "分类体系为草稿，之后会调整。"
+  ]
+ }
 }

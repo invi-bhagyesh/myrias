@@ -2,7 +2,7 @@ import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 
-import { buildGraph, placeholderGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
+import { buildGraph, placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 
 const { escapeHtml: esc, safeUrl, pick } = L;
 const ISSUES_URL = 'https://github.com/invi-bhagyesh/myrias/issues/new';
@@ -10,7 +10,7 @@ const $ = selector => document.querySelector(selector);
 const params0 = new URLSearchParams(location.search);
 const useSample = params0.get('data') === 'sample';
 
-const state = { data: null, error: null, lang: 'en', index: null, lastPath: null };
+const state = { data: null, error: null, lang: 'en', index: null, lastPath: null, graphView: null };
 const tr = (key, vars) => t(state.lang, key, vars);
 
 function store(key, value) {
@@ -83,7 +83,7 @@ function viewExplore(params) {
   const aside = `<aside class="lead-aside"><h2>${esc(tr('land.ledger'))}</h2><dl class="ledger">
     <dt>${esc(tr('land.l.species'))}</dt><dd>${d.species.length}</dd>
     <dt>${esc(tr('land.l.apps'))}</dt><dd>${d.applications.length}</dd>
-    <dt>${esc(tr('land.l.claims'))}</dt><dd>${supported}</dd>
+    <dt>${esc(tr(isDemo(d) ? 'land.l.claims.demo' : 'land.l.claims'))}</dt><dd>${supported}</dd>
     <dt>${esc(tr('land.l.sources'))}</dt><dd>${d.sources.length}</dd>
     <dt>${esc(tr('land.l.zh'))}</dt><dd>${zhSources}</dd></dl></aside>`;
 
@@ -130,7 +130,8 @@ function viewExplore(params) {
   };
 }
 
-const statusText = d => tr(d.release.sample ? 'status.sample' : d.release.status === 'pre-release' ? 'status.pre-release' : 'status.released');
+const isDemo = d => !d.release.sample && d.release.status === 'pre-release' && d.claims.length > 0;
+const statusText = d => isDemo(d) ? tr('status.demo') : tr(d.release.sample ? 'status.sample' : d.release.status === 'pre-release' ? 'status.pre-release' : 'status.released');
 
 const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-sand)', 'var(--band-clay)', 'var(--band-mint)', 'var(--bg)'];
 // Each section sits on a tint; neighbouring bands meet on a shared mix of their two colours.
@@ -141,8 +142,8 @@ function viewOverview() {
   const d = state.data;
   const supported = d.claims.filter(c => c.verification === 'supported').length;
   const zhSources = d.sources.filter(x => x.lang === 'zh').length;
-  const stats = [[supported, 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
-  const note = d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
+  const stats = [[supported, isDemo(d) ? 'stats.claims.demo' : 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
+  const note = isDemo(d) ? 'stats.note.demo' : d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
   const matrix = L.buildMatrix(d, 'all');
   const cells = matrix.rows.flatMap(r => r.cells);
   const count = s => cells.filter(c => c.status === s).length;
@@ -155,7 +156,6 @@ function viewOverview() {
       some ? tr('note.stand.d.some', { empty: count('probed_empty'), not: count('not_collected') }) : tr('note.stand.d.none')],
     ['note.why.k', tr('note.why.t'), tr('note.why.d')]
   ];
-  const isSample = d.claims.length < MIN_REAL_CLAIMS;
   const rows = (prefix) => [1, 2, 3].map(i => `<li>${esc(tr(`${prefix}.${i}`))}</li>`).join('');
   return {
     title: tr('site.title'),
@@ -166,8 +166,8 @@ function viewOverview() {
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
       </section>
       <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
-        <figure class="band-card graph-card">${isSample ? `<span class="graph-badge">${esc(tr('graph.badge'))}</span>` : ''}<div class="graph-stage" data-graph></div>${legendHtml(homeGraph(d, state.lang), tr)}
-          <figcaption class="graph-note">${esc(tr('graph.note'))} ${esc(isSample ? tr('graph.note.placeholder') : (d.claims.length ? '' : tr('graph.note.empty')))} ${esc(tr('graph.hint'))}</figcaption></figure></section>
+        <figure class="band-card graph-card"><div class="graph-head"><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${isPlaceholder(d) && graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
+          <figcaption class="graph-note" data-gnote></figcaption></figure></section>
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
 
       <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2><p>${esc(tr(note))}</p></div>
@@ -228,10 +228,22 @@ function viewSpecies(id) {
        <p class="species-intro">${esc(pick(s, 'summary', state.lang))}</p>` +
       dl([[tr('sp.scientific'), `<i>${esc(s.scientific)}</i>`], [tr('sp.group'), esc(tr('group.' + s.group))], [tr('sp.runstatus'), esc(tr('run.' + s.run_status))]]) +
       `<h2>${esc(tr('sp.apps'))}</h2>` + (apps.length ? apps.map(applicationCard).join('') : `<p>${esc(tr('sp.noapps'))}</p>`) +
+      suggestionBlock(id) +
       `<h2>${esc(tr('sp.cells'))}</h2><p>${esc(tr('sp.cells.line', { has: counts.has_records, empty: counts.probed_empty, not: counts.not_collected }))}</p>
        <p><a class="button small" href="${link('explore', { species: id })}">${esc(tr('nav.explore'))}</a></p>` +
       `<h2>${esc(tr('sp.runs'))}</h2>` + runs.map(runCard).join('')
   };
+}
+
+function suggestionBlock(speciesId) {
+  const list = (state.data.suggestions || []).filter(x => x.species_id === speciesId);
+  if (!list.length) return '';
+  const cards = list.map(x => `<article class="run-entry suggestion">
+    <span class="record-type">${esc(tr('sug.' + x.status))}</span>
+    <p><strong>${esc(pick(x, 'action', state.lang))}</strong></p>
+    ${dl([[tr('sug.who'), esc(x.who || '—')], [tr('sug.gap'), esc(pick(x, 'evidence_gap', state.lang))], [tr('sug.risks'), esc(pick(x, 'risks', state.lang) || '—')],
+      [tr('sug.claims'), x.claim_ids.map(c => `<a href="${link('claims/' + encodeURIComponent(c))}">${esc(c)}</a>`).join(', ')]])}</article>`).join('');
+  return `<h2>${esc(tr('sug.title'))}</h2><p>${esc(tr('sug.lead'))}</p>${cards}`;
 }
 
 function runCard(run) {
@@ -371,7 +383,7 @@ function applyChrome() {
   const banner = $('#banner');
   const d = state.data;
   if (d && d.release.sample) { banner.hidden = false; banner.className = 'notice sample'; banner.textContent = tr('banner.sample'); }
-  else if (d && d.release.status === 'pre-release' && parseHash().parts.length) { banner.hidden = false; banner.className = 'notice prerelease'; banner.textContent = tr('banner.prerelease'); }
+  else if (d && d.release.status === 'pre-release' && (parseHash().parts.length || isDemo(d))) { banner.hidden = false; banner.className = 'notice prerelease'; banner.textContent = tr(isDemo(d) ? 'banner.demo' : 'banner.prerelease'); }
   else banner.hidden = true;
   $('#release-line').textContent = d && !d.release.sample ? tr('subhead.version', { version: d.release.version, asof: d.release.as_of }) : '';
   $('#release-status').textContent = d ? statusText(d) : '';
@@ -400,6 +412,7 @@ function render(navigated = false) {
     const on = a.dataset.route === active;
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
+  moveBlob(true);
   const wide = !parts[0] || ['content', 'explore'].includes(parts[0]);
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   document.title = `${view.title} — ${tr('site.title')}`;
@@ -428,16 +441,60 @@ function renderFooter() {
     <div class="site-footer-scene" aria-hidden="true">${pixelHills('footer')}<span class="site-footer-wordmark">Myrias</span></div></div>`;
 }
 
-// The front page shows a labelled placeholder network until a release holds enough verified claims.
-const homeGraph = (d, lang) => (d.claims.length < MIN_REAL_CLAIMS ? placeholderGraph(d, lang, link) : buildGraph(d, lang, link));
+// The front page can show the network three ways. "full" is the intended end state and "simple" its
+// hubs only; both are labelled placeholder data until a release holds enough verified claims.
+// "today" is always the real release.
+const GRAPH_VIEWS = ['full', 'simple', 'today'];
+const isPlaceholder = d => d.claims.length < MIN_REAL_CLAIMS;
+const graphView = d => (GRAPH_VIEWS.includes(state.graphView) ? state.graphView : isPlaceholder(d) ? 'full' : 'today');
+function viewGraph(d, lang, view) {
+  if (view === 'today') return buildGraph(d, lang, link);
+  const g = placeholderGraph(d, lang, link);
+  return view === 'simple' ? simplifyGraph(g) : g;
+}
+// Liquid highlight in the header: one soft pill glides to the hovered item, then back to the current page.
+function moveBlob(instant = false, target) {
+  const nav = document.querySelector('.sections'), blob = nav && nav.querySelector('.nav-blob');
+  if (!blob) return;
+  const a = target || nav.querySelector('a[aria-current="page"]');
+  if (!a) { blob.classList.remove('is-on'); return; }
+  blob.classList.toggle('is-instant', instant || !blob.classList.contains('is-on'));
+  blob.style.translate = `${a.offsetLeft}px ${a.offsetTop}px`;
+  blob.style.width = a.offsetWidth + 'px'; blob.style.height = a.offsetHeight + 'px';
+  blob.classList.add('is-on');
+}
+function setupNav() {
+  const nav = document.querySelector('.sections');
+  if (!nav) return;
+  nav.addEventListener('mouseover', e => { const a = e.target.closest('a'); if (a) moveBlob(false, a); });
+  nav.addEventListener('mouseleave', () => moveBlob());
+  nav.addEventListener('focusin', e => { const a = e.target.closest('a'); if (a) moveBlob(false, a); });
+  nav.addEventListener('focusout', () => moveBlob());
+  addEventListener('resize', () => moveBlob(true));
+  document.fonts && document.fonts.ready.then(() => moveBlob(true));
+}
+setupNav();
 let observers = [];
 function setupHomeEffects() {
   const home = document.querySelector('.arena-home');
   if (!home || !('IntersectionObserver' in window)) return;
   const stage = home.querySelector('[data-graph]');
   if (stage && state.data) {
-    const handle = mountGraph(stage, homeGraph(state.data, state.lang), { tr, navigate: href => { location.hash = href; } });
-    observers.push({ disconnect: () => handle.destroy() });
+    let handle = null;
+    const show = () => {
+      const d = state.data, view = graphView(d), g = viewGraph(d, state.lang, view);
+      const sample = view !== 'today' && isPlaceholder(d);
+      if (handle) handle.destroy();
+      handle = mountGraph(stage, g, { tr, navigate: href => { location.hash = href; } });
+      home.querySelector('[data-glegend]').innerHTML = legendHtml(g, tr);
+      home.querySelector('[data-gbadge]').hidden = !sample;
+      const note = sample ? tr('graph.note.placeholder') : (view === 'today' && !d.claims.length ? tr('graph.note.empty') : '');
+      home.querySelector('[data-gnote]').textContent = [tr('graph.note'), note, tr('graph.hint')].filter(Boolean).join(' ');
+      home.querySelectorAll('[data-gview]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.gview === view)));
+    };
+    home.querySelectorAll('[data-gview]').forEach(btn => btn.addEventListener('click', () => { state.graphView = btn.dataset.gview; show(); }));
+    show();
+    observers.push({ disconnect: () => handle && handle.destroy() });
   }
   const targets = home.querySelectorAll('.band-section');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

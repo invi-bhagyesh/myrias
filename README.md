@@ -11,7 +11,10 @@ A static, read-only site that renders one data file, `public/data/release.json`:
   species, applications, claims and sources. Until a release holds at least 50 verified claims it
   shows a placeholder network, badged "Placeholder data": the technology classes and welfare
   problems are real, every other dot is invented and labelled "[Sample]". Once there are enough
-  verified claims it is built from the release export instead. Position is for navigation and
+  verified claims it is built from the release export instead. A switch above the graph offers three
+  views: **Full picture** (the intended end state, placeholder for now), **Simple** (technologies,
+  problems, species and applications only) and **Today** (the real release, which pre-release is only
+  the frame). Position is for navigation and
   carries no evidence meaning, and the page says so. Hover highlights links; click opens a record.
 - **Overview (front page):** one question, four live numbers (verified claims, sources,
   Chinese-language sources, species), three steps, a small picture of the map, what the site
@@ -36,6 +39,14 @@ has been verified yet, and the site says so. The data format is in `docs/export-
 The earlier research desk: a local, browser-only tool for records, source files, prepared research
 requests and result review. Its data stays in this browser (IndexedDB). It contains demo records,
 is not part of the public evidence base, and is not linked from the site navigation.
+
+## Pipeline scaffold (`pipeline/`)
+
+Not wired to the site. `models.json` sets the model per stage and profile (`demo`, `full`), all through
+OpenRouter with provider data collection denied; `llm.mjs` is the single client (hard spend cap,
+per-call log of model, tokens and cost); `quote.mjs` is the deterministic quote check; `bakeoff.mjs`
+compares models on a hand-checked gold set (`pipeline/gold/README.md`). It makes no paid call unless
+run with `--run --cap USD`.
 
 ## Development
 

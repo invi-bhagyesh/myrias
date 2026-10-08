@@ -1,0 +1,206 @@
+{
+  "_note": "Model per stage and profile. Switch profile with MYRIAS_PROFILE or --profile. Every record stores the model it came from. Prices are USD per million tokens, checked against OpenRouter's public model list on 2026-10-08; they are only used for the pre-call estimate, the real cost comes from the API response.",
+  "provider": {
+    "data_collection": "deny",
+    "require_parameters": true
+  },
+  "stages": [
+    "profile",
+    "screen",
+    "extract",
+    "map",
+    "verify",
+    "reconcile",
+    "translate",
+    "suggest",
+    "ocr"
+  ],
+  "profiles": {
+    "demo": {
+      "profile": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "screen": {
+        "model": "deepseek/deepseek-v4.1-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "extract": {
+        "model": "qwen/qwen3.8-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
+      },
+      "map": {
+        "model": "qwen/qwen3.8-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
+      },
+      "verify": {
+        "model": "z-ai/glm-5.3",
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "reconcile": {
+        "model": "qwen/qwen3.8-max-0902",
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "translate": {
+        "model": "qwen/qwen3.8-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "suggest": {
+        "model": "qwen/qwen3.8-max-0902",
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "ocr": {
+        "model": "qwen/qwen3-vl-30b-a3b-instruct",
+        "temperature": 0
+      }
+    },
+    "full": {
+      "profile": {
+        "model": "qwen/qwen3.8-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "screen": {
+        "model": "qwen/qwen3.8-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "extract": {
+        "model": "qwen/qwen3.8-max-0902",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
+      },
+      "map": {
+        "model": "qwen/qwen3.8-max-0902",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
+      },
+      "verify": {
+        "model": "z-ai/glm-5.3",
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "reconcile": {
+        "model": "qwen/qwen3.8-max-0902",
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "translate": {
+        "model": "qwen/qwen3.8-max-0902",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "suggest": {
+        "model": "qwen/qwen3.8-max-0902",
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "ocr": {
+        "model": "qwen/qwen3-vl-30b-a3b-instruct",
+        "temperature": 0
+      }
+    }
+  },
+  "prices": {
+    "deepseek/deepseek-v4.1-flash": [
+      0.036,
+      1.0
+    ],
+    "qwen/qwen3.8-flash": [
+      0.15,
+      0.47
+    ],
+    "qwen/qwen3.8-max-0902": [
+      2.0,
+      6.0
+    ],
+    "z-ai/glm-5.3": [
+      0.049,
+      3.39
+    ],
+    "tencent/hy-mt2-30b-a3b": [
+      0.074,
+      0.295
+    ],
+    "xiaomi/mimo-v2.6-flash": [
+      0.14,
+      0.28
+    ],
+    "z-ai/glm-5.3-flash": [
+      0.15,
+      0.5
+    ],
+    "qwen/qwen3-vl-30b-a3b-instruct": [
+      0.15,
+      0.6
+    ],
+    "qwen/qwen3-vl-235b-a22b-instruct": [
+      0.21,
+      1.9
+    ],
+    "deepseek/deepseek-v4-flash-vision-exp": [
+      0.216,
+      0.647
+    ],
+    "z-ai/glm-4.6v": [
+      0.3,
+      0.9
+    ],
+    "baidu/ernie-4.5-vl-424b-a47b": [
+      0.42,
+      1.25
+    ]
+  }
+}
