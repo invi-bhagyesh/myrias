@@ -83,3 +83,30 @@ test('bakeoff scoring: fabricated quotes are caught, recall counted', async () =
 test('no API key or secrets in the pipeline files', () => {
   for (const f of ['llm.mjs', 'models.json', 'bakeoff.mjs', 'prompts.mjs']) assert.ok(!/sk-or-|sk-[a-z0-9]{20}/i.test(readFileSync(new URL('../pipeline/' + f, import.meta.url), 'utf8')), f);
 });
+
+import { groupClaims, cleanSuggestions } from '../pipeline/suggest.mjs';
+import { validateExport } from '../public/site-lib.js';
+
+test('client: falls back to the next model after repeated rate limits, and records who answered', async () => {
+  const seen = [];
+  const fetchImpl = async (u, o) => { const b = JSON.parse(o.body); seen.push(b.model); return b.model === 'qwen/qwen3.8-flash' ? { ok: false, status: 429, json: async () => ({ error: { message: 'Provider returned error' } }) } : okFetch('{"claims":[]}')(); };
+  const client = createClient({ apiKey: 'k', capUsd: 1, fetchImpl, retryMs: 1, retries: 1 });
+  const out = await client.call('extract', { user: 'x', schema: EXTRACT_SCHEMA });
+  assert.deepEqual(seen, ['qwen/qwen3.8-flash', 'qwen/qwen3.8-flash', 'deepseek/deepseek-v4.1-flash']);
+  assert.equal(out.entry.requested_model, 'qwen/qwen3.8-flash');
+});
+
+test('suggestions: only quote-checked claims, cited ids must exist, no rank', () => {
+  const g = groupClaims([{ quote_check: 'found', intervention: 'RAS', statement_en: 'a' }, { quote_check: 'not_on_page', intervention: 'RAS', statement_en: 'b' }, { quote_check: 'found', intervention: '', statement_en: 'c' }]);
+  assert.equal(g.get('ras').length, 1);
+  assert.equal(cleanSuggestions([{ claim_ids: ['c0'] }, { claim_ids: ['zz'] }, { claim_ids: [] }], g.get('ras')).length, 1);
+});
+
+test('site validator: suggestions need real claims, an evidence gap, and review in a real release', async () => {
+  const sample = JSON.parse(readFileSync(new URL('../public/data/sample.json', import.meta.url), 'utf8'));
+  assert.deepEqual(validateExport(sample), []);
+  const bad = structuredClone(sample); bad.suggestions[0].claim_ids = ['nope']; bad.suggestions[0].rank = 1;
+  assert.ok(validateExport(bad).some(e => /unknown claim/.test(e)) && validateExport(bad).some(e => /not ranked/.test(e)));
+  const real = structuredClone(sample); real.release.sample = false; real.claims.forEach(c => { c.verification = 'supported'; });
+  assert.ok(validateExport(real).some(e => /draft suggestions must not be published/.test(e)));
+});

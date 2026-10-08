@@ -227,10 +227,22 @@ function viewSpecies(id) {
        <p class="species-intro">${esc(pick(s, 'summary', state.lang))}</p>` +
       dl([[tr('sp.scientific'), `<i>${esc(s.scientific)}</i>`], [tr('sp.group'), esc(tr('group.' + s.group))], [tr('sp.runstatus'), esc(tr('run.' + s.run_status))]]) +
       `<h2>${esc(tr('sp.apps'))}</h2>` + (apps.length ? apps.map(applicationCard).join('') : `<p>${esc(tr('sp.noapps'))}</p>`) +
+      suggestionBlock(id) +
       `<h2>${esc(tr('sp.cells'))}</h2><p>${esc(tr('sp.cells.line', { has: counts.has_records, empty: counts.probed_empty, not: counts.not_collected }))}</p>
        <p><a class="button small" href="${link('explore', { species: id })}">${esc(tr('nav.explore'))}</a></p>` +
       `<h2>${esc(tr('sp.runs'))}</h2>` + runs.map(runCard).join('')
   };
+}
+
+function suggestionBlock(speciesId) {
+  const list = (state.data.suggestions || []).filter(x => x.species_id === speciesId);
+  if (!list.length) return '';
+  const cards = list.map(x => `<article class="run-entry suggestion">
+    <span class="record-type">${esc(tr('sug.' + x.status))}</span>
+    <p><strong>${esc(pick(x, 'action', state.lang))}</strong></p>
+    ${dl([[tr('sug.who'), esc(x.who || '—')], [tr('sug.gap'), esc(pick(x, 'evidence_gap', state.lang))], [tr('sug.risks'), esc(pick(x, 'risks', state.lang) || '—')],
+      [tr('sug.claims'), x.claim_ids.map(c => `<a href="${link('claims/' + encodeURIComponent(c))}">${esc(c)}</a>`).join(', ')]])}</article>`).join('');
+  return `<h2>${esc(tr('sug.title'))}</h2><p>${esc(tr('sug.lead'))}</p>${cards}`;
 }
 
 function runCard(run) {

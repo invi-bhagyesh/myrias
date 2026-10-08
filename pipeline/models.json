@@ -35,14 +35,20 @@
         "temperature": 0,
         "reasoning": {
           "effort": "low"
-        }
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
       },
       "map": {
         "model": "qwen/qwen3.8-flash",
         "temperature": 0,
         "reasoning": {
           "effort": "low"
-        }
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
       },
       "verify": {
         "model": "z-ai/glm-5.3",
@@ -84,14 +90,20 @@
         "temperature": 0,
         "reasoning": {
           "effort": "low"
-        }
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
       },
       "map": {
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0,
         "reasoning": {
           "effort": "low"
-        }
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
       },
       "verify": {
         "model": "z-ai/glm-5.3",

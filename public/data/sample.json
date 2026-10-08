@@ -416,5 +416,19 @@
   "limits_zh": [
    "这些记录仅为测试用的占位内容。"
   ]
- }
+ },
+ "suggestions": [
+  {
+   "id": "sug-sample-1",
+   "species_id": "sample-fish",
+   "status": "draft",
+   "action_en": "[Sample] Trial a continuous water-quality sensor alongside the existing manual checks on one pond.",
+   "who": "[Sample] Farm manager with an extension officer",
+   "claim_ids": [
+    "C1"
+   ],
+   "evidence_gap": "[Sample] No trial yet in this species under commercial conditions.",
+   "risks": "[Sample] Sensor drift; false alarms may cause unnecessary handling."
+  }
+ ]
 }

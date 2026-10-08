@@ -4,6 +4,7 @@
 import { readFileSync, appendFileSync } from 'node:fs';
 
 export const CONFIG = JSON.parse(readFileSync(new URL('./models.json', import.meta.url), 'utf8'));
+const RETRYABLE = [429, 500, 502, 503];
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 
 export class SpendCapError extends Error {}
@@ -22,7 +23,7 @@ export function estimateCost(model, inputChars, maxOutputTokens) {
   return ((inputChars / 3) * price[0] + maxOutputTokens * price[1]) / 1e6;
 }
 
-export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, logPath, fetchImpl = fetch, profile, retryMs = 8000 } = {}) {
+export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, logPath, fetchImpl = fetch, profile, retryMs = 8000, retries = 2 } = {}) {
   if (!(capUsd > 0)) throw new Error('capUsd is required: every run has a hard spend cap');
   let spent = 0, calls = 0;
   async function call(stage, { system, user, schema, maxTokens = 2000, model: override } = {}) {
@@ -39,21 +40,28 @@ export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, 
       ...(schema ? { response_format: { type: 'json_schema', json_schema: { name: stage, strict: true, schema } } } : {})
     };
     const t0 = Date.now();
-    let res, json;
-    for (let attempt = 0; ; attempt++) {
-      res = await fetchImpl(ENDPOINT, { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      json = await res.json().catch(() => ({}));
-      if (res.ok || ![429, 500, 502, 503].includes(res.status) || attempt >= 4) break;
-      await new Promise(r => setTimeout(r, retryMs * 2 ** attempt));
+    // Retry a rate-limited or failing provider, then fall back to the next model listed for the stage.
+    // The model that actually answered is what the log and every record store.
+    const candidates = [model, ...(override ? [] : setting.fallback || [])];
+    let res, json, used = model;
+    for (const m of candidates) {
+      used = m; body.model = m;
+      for (let attempt = 0; ; attempt++) {
+        res = await fetchImpl(ENDPOINT, { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        json = await res.json().catch(() => ({}));
+        if (res.ok || !RETRYABLE.includes(res.status) || attempt >= retries) break;
+        await new Promise(r => setTimeout(r, retryMs * 2 ** attempt));
+      }
+      if (res.ok || !RETRYABLE.includes(res.status)) break;
     }
-    if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${json?.error?.message || 'request failed'}`);
+    if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${json?.error?.message || 'request failed'}${json?.error?.metadata?.raw ? ' (' + String(json.error.metadata.raw).slice(0, 160) + ')' : ''}`);
     const usage = json.usage || {};
     const cost = Number(usage.cost) || 0;
     spent += cost; calls += 1;
     const text = json.choices?.[0]?.message?.content ?? '';
     let data = null;
     if (schema) { try { data = JSON.parse(text); } catch { data = null; } }
-    const entry = { at: new Date().toISOString(), stage, profile: setting.profile, model: json.model || model, requested_model: model,
+    const entry = { at: new Date().toISOString(), stage, profile: setting.profile, model: json.model || used, requested_model: model,
       temperature: body.temperature, input_tokens: usage.prompt_tokens ?? null, output_tokens: usage.completion_tokens ?? null,
       finish: json.choices?.[0]?.finish_reason ?? null, cost_usd: cost, ms: Date.now() - t0, parsed: schema ? data !== null : null };
     if (logPath) appendFileSync(logPath, JSON.stringify(entry) + '\n');
