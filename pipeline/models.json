@@ -62,7 +62,7 @@
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0,
         "reasoning": {
-          "enabled": false
+          "effort": "low"
         }
       },
       "translate": {
@@ -76,7 +76,7 @@
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0,
         "reasoning": {
-          "enabled": false
+          "effort": "low"
         }
       },
       "ocr": {
@@ -130,7 +130,7 @@
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0,
         "reasoning": {
-          "enabled": false
+          "effort": "low"
         }
       },
       "translate": {
@@ -144,7 +144,7 @@
         "model": "qwen/qwen3.8-max-0902",
         "temperature": 0,
         "reasoning": {
-          "enabled": false
+          "effort": "low"
         }
       },
       "ocr": {

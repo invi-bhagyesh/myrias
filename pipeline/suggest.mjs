@@ -1,5 +1,6 @@
-// Suggested actions from verified claims. Reads claims.jsonl (only quote-checked claims count),
-// groups by intervention, asks the suggest stage for proposals, and writes DRAFT suggestions.
+// Suggested actions from verified claims. Reads claims.jsonl (quote-checked, and where the map and verify
+// stages have run, welfare-relevant and supported claims only),
+// groups by technology and welfare problem (or by intervention when unmapped), asks the suggest stage for proposals, and writes DRAFT suggestions.
 //   node pipeline/suggest.mjs --claims DIR/claims.jsonl --out DIR --cap 0.20
 // A draft needs expert review before it can enter a real release (the site validator enforces this).
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -8,8 +9,8 @@ import { SUGGEST_SYSTEM, SUGGEST_SCHEMA, suggestUser } from './prompts.mjs';
 
 export function groupClaims(claims) {
   const groups = new Map();
-  claims.filter(c => c.quote_check === 'found' && c.intervention).forEach((c, i) => {
-    const key = c.intervention.trim().toLowerCase();
+  claims.filter(c => c.quote_check === 'found' && c.intervention && (!c.map || c.map.welfare_relevant === true) && (!c.verify || c.verify.verdict === 'supported')).forEach((c, i) => {
+    const key = c.map ? `${c.map.technology_class}|${c.map.welfare_problem}` : c.intervention.trim().toLowerCase();
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push({ id: `c${i}`, statement_en: c.statement_en, source: c.source, page: c.page });
   });
@@ -28,7 +29,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const client = createClient({ capUsd: Number(arg('cap', 0)), logPath: `${arg('out')}/suggest-calls.jsonl` });
   const out = [];
   for (const [intervention, group] of groupClaims(claims)) {
-    const r = await client.call('suggest', { system: SUGGEST_SYSTEM, user: suggestUser(group), schema: SUGGEST_SCHEMA, maxTokens: 3000 });
+    const r = await client.call('suggest', { system: SUGGEST_SYSTEM, user: suggestUser(group), schema: SUGGEST_SCHEMA, maxTokens: 8000 });
     for (const x of cleanSuggestions(r.data?.suggestions || [], group)) out.push({ ...x, intervention, status: 'draft', model: r.entry.model, claims: group.filter(c => x.claim_ids.includes(c.id)) });
   }
   writeFileSync(`${arg('out')}/suggestions.json`, JSON.stringify(out, null, 1));

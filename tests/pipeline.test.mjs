@@ -121,3 +121,9 @@ test('claim stage: only quote-checked claims are sent, results attached with the
   assert.equal(out[0].verify.verdict, 'supported');
   assert.equal(out[1].verify, undefined);
 });
+
+test('suggestions skip claims judged irrelevant or unsupported when those stages ran', () => {
+  const base = { quote_check: 'found', intervention: 'RAS', statement_en: 'a' };
+  const g = groupClaims([{ ...base, map: { welfare_relevant: true }, verify: { verdict: 'supported' } }, { ...base, map: { welfare_relevant: false } }, { ...base, verify: { verdict: 'partial' } }]);
+  assert.equal([...g.values()].flat().length, 1);
+});
