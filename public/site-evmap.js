@@ -46,51 +46,69 @@ function rowsY(n, height) {
 const curve = (x0, y0, x1, y1) => { const m = (x0 + x1) / 2; return `M${x0},${y0} C${m},${y0} ${m},${y1} ${x1},${y1}`; };
 
 // The map as markup: an SVG for wide screens and a list for phones. href(path, query) builds router links.
-export function evidenceMapHtml(model, { tr, href }) {
+// Compact by default: one line per technology and welfare problem, sized by claims. `open` names the
+// technology whose interventions unfold in the middle column (clicking a technology toggles it).
+export function evidenceMapHtml(model, { tr, href, open = null }) {
   const { classes, problems, apps, totals } = model;
-  const n = Math.max(classes.length, problems.length, apps.length, 1);
+  const openApps = apps.filter(a => a.cls === open);
+  const n = Math.max(classes.length, problems.length, openApps.length, 1);
   const height = n * ROW;
   const H = TOP + height + 14;
-  const yc = rowsY(classes.length, height), yp = rowsY(problems.length, height), ya = rowsY(Math.max(apps.length, 1), height);
-  const maxClaims = Math.max(1, ...apps.map(a => a.claims));
-  const width = k => (1.4 + 7 * Math.sqrt(k / maxClaims)).toFixed(1);
+  const yc = rowsY(classes.length, height), yp = rowsY(problems.length, height), ya = rowsY(Math.max(openApps.length, 1), height);
   const cY = new Map(classes.map((c, i) => [c.id, yc[i]])), pY = new Map(problems.map((p, i) => [p.id, yp[i]]));
   const explore = (q = {}) => esc(href('explore', q));
+  // Lines between a technology and a problem, summed over its interventions.
+  const pairs = new Map();
+  for (const a of apps) { const k = a.cls + '|' + a.prob; const e = pairs.get(k) || { cls: a.cls, prob: a.prob, claims: 0, color: a.color }; e.claims += a.claims; pairs.set(k, e); }
+  const maxPair = Math.max(1, ...[...pairs.values()].map(e => e.claims)), maxApp = Math.max(1, ...apps.map(a => a.claims));
+  const w = (k, max) => (1.6 + 8 * Math.sqrt(k / max)).toFixed(1);
 
-  const links = apps.map((a, i) => {
+  let links = '';
+  for (const e of pairs.values()) {
+    if (e.cls === open) continue;
+    links += `<path class="em-link${open ? ' is-faint' : ''}" data-k="c:${e.cls} p:${e.prob}" d="${curve(XC + 8, cY.get(e.cls), XP - 8, pY.get(e.prob))}" stroke="${e.color}" stroke-width="${w(e.claims, maxPair)}"><title>${esc(tr('evmap.claims', { n: e.claims }))}</title></path>`;
+  }
+  openApps.forEach((a, i) => {
     const keys = `c:${a.cls} a:${a.id} p:${a.prob}`;
-    return `<path class="em-link" data-k="${keys}" d="${curve(XC + 8, cY.get(a.cls), XA - 10, ya[i])}" stroke="${a.color}" stroke-width="${width(a.claims)}"/>` +
-      `<path class="em-link" data-k="${keys}" d="${curve(XAE + 6, ya[i], XP - 8, pY.get(a.prob))}" stroke="${a.color}" stroke-width="${width(a.claims)}"/>`;
-  }).join('');
+    links += `<path class="em-link" data-k="${keys}" d="${curve(XC + 8, cY.get(a.cls), XA - 10, ya[i])}" stroke="${a.color}" stroke-width="${w(a.claims, maxApp)}"/>` +
+      `<path class="em-link" data-k="${keys}" d="${curve(XAE + 6, ya[i], XP - 8, pY.get(a.prob))}" stroke="${a.color}" stroke-width="${w(a.claims, maxApp)}"/>`;
+  });
 
-  const head = [[XC, 'end', 'evmap.col.class'], [XA, 'start', 'evmap.col.app'], [XP, 'start', 'evmap.col.problem']]
-    .map(([x, anchor, key]) => `<text class="em-head" x="${anchor === 'end' ? x + 6 : x}" y="22" text-anchor="${anchor}">${esc(tr(key))}</text>`).join('');
+  const head = [[XC, 'end', 'evmap.col.class'], [XA, 'start', open ? 'evmap.col.app' : null], [XP, 'start', 'evmap.col.problem']].filter(x => x[2])
+    .map(([x, anchor, key]) => `<text class="em-head" x="${anchor === 'end' ? x + 6 : x}" y="22" text-anchor="${anchor}">${esc(tr(key))}</text>`).join('')
+    + (open ? '' : `<text class="em-hint" x="${(XC + XP) / 2}" y="22" text-anchor="middle">${esc(tr('evmap.hint.open'))}</text>`);
 
   const count = (key, k) => tr(k === 1 ? key + '.one' : key, { n: k });
   const sub = x => (x.apps ? `${count('evmap.apps', x.apps)} · ${count('evmap.claims', x.claims)}` : tr('evmap.none'));
   const oe = id => { const s = tr('evmap.oe.' + id); return s === 'evmap.oe.' + id ? '' : s; };
-  const classNodes = classes.map((c, i) => `<a href="${explore()}" class="em-node${c.apps ? '' : ' is-empty'}" data-k="c:${c.id}">
-    <circle cx="${XC}" cy="${yc[i]}" r="7" ${c.apps ? `fill="${c.color}"` : `fill="none" stroke="${c.color}"`}/>
-    <text x="${XC - 16}" y="${yc[i] - 3}" text-anchor="end" class="em-label">${esc(c.label)}</text>
-    <text x="${XC - 16}" y="${yc[i] + 13}" text-anchor="end" class="em-sub">${esc(sub(c))}</text></a>`).join('');
+  const classNodes = classes.map((c, i) => {
+    const isOpen = c.id === open, can = c.apps > 0;
+    const attrs = can ? `role="button" tabindex="0" aria-expanded="${isOpen}" data-open="${esc(c.id)}"` : '';
+    return `<g class="em-node em-class${can ? ' is-toggle' : ' is-empty'}${isOpen ? ' is-open' : ''}" data-k="c:${c.id}" ${attrs}>
+    <rect class="em-hit" x="0" y="${yc[i] - 22}" width="${XC + 14}" height="44" rx="10"/>
+    <circle cx="${XC}" cy="${yc[i]}" r="7" ${can ? `fill="${c.color}"` : `fill="none" stroke="${c.color}"`}/>
+    <text x="${XC - 16}" y="${yc[i] - 3}" text-anchor="end" class="em-label">${can ? `<tspan class="em-chev">${isOpen ? '▾' : '▸'}</tspan> ` : ''}${esc(c.label)}</text>
+    <text x="${XC - 16}" y="${yc[i] + 13}" text-anchor="end" class="em-sub">${esc(sub(c))}</text></g>`;
+  }).join('');
   const probNodes = problems.map((p, i) => `<a href="${explore()}" class="em-node${p.apps ? '' : ' is-empty'}" data-k="p:${p.id}">
     <circle cx="${XP}" cy="${yp[i]}" r="6" ${p.apps ? 'class="em-pfill"' : 'class="em-pempty"'}/>
     <text x="${XP + 14}" y="${yp[i] - 3}" class="em-label">${esc(p.label)}</text>
     <text x="${XP + 14}" y="${yp[i] + 13}" class="em-sub">${esc(sub(p))}</text></a>`).join('');
-  const appNodes = apps.length ? apps.map((a, i) => {
-    const bar = 6 + BAR * (a.claims / maxClaims);
+  const appNodes = openApps.map((a, i) => {
+    const bar = 6 + BAR * (a.claims / maxApp);
     return `<a href="${explore({ species: a.species, cell: `${a.prob}|${a.cls}` })}" class="em-node" data-k="a:${a.id}">
       <title>${esc(a.label)}</title>
       <text x="${XA}" y="${ya[i] - 6}" class="em-label em-app">${esc(clip(a.label, 44))}</text>
       <rect x="${XA}" y="${ya[i] + 2}" width="${bar.toFixed(1)}" height="7" rx="3.5" fill="${a.color}"/>
       <text x="${XA + bar + 8}" y="${ya[i] + 9}" class="em-sub">${esc(count('evmap.claims', a.claims))}${oe(a.outcome) ? ' · ' + esc(oe(a.outcome)) : ''}</text></a>`;
-  }).join('') : `<text x="${(XA + XAE) / 2}" y="${TOP + height / 2}" text-anchor="middle" class="em-sub">${esc(tr('evmap.noapps'))}</text>`;
+  }).join('');
+  const empty = !apps.length ? `<text x="${(XC + XP) / 2}" y="${TOP + height / 2}" text-anchor="middle" class="em-sub">${esc(tr('evmap.noapps'))}</text>` : '';
 
-  const svg = `<svg class="em-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(tr('evmap.aria'))}">${head}<g class="em-links">${links}</g>${classNodes}${appNodes}${probNodes}</svg>`;
+  const svg = `<svg class="em-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(tr('evmap.aria'))}">${head}<g class="em-links">${links}</g>${classNodes}${appNodes}${probNodes}${empty}</svg>`;
 
-  // Phone layout: the same content as a list, grouped by technology.
-  const list = classes.filter(c => c.apps).map(c => `<li><h3><span class="sw" style="background:${c.color}"></span>${esc(c.label)}</h3><ul>${apps.filter(a => a.cls === c.id).map(a =>
-    `<li><a href="${explore({ species: a.species, cell: `${a.prob}|${a.cls}` })}">${esc(a.label)}</a><span>${esc(count('evmap.claims', a.claims))} → ${esc(problems.find(p => p.id === a.prob).label)}</span></li>`).join('')}</ul></li>`).join('');
+  // Phone layout: each technology folds open to its interventions.
+  const list = classes.filter(c => c.apps).map(c => `<li><details ${c.id === open ? 'open' : ''}><summary><span class="sw" style="background:${c.color}"></span>${esc(c.label)}<span class="em-list-n">${esc(sub(c))}</span></summary><ul>${apps.filter(a => a.cls === c.id).map(a =>
+    `<li><a href="${explore({ species: a.species, cell: `${a.prob}|${a.cls}` })}">${esc(a.label)}</a><span>${esc(count('evmap.claims', a.claims))} → ${esc(problems.find(p => p.id === a.prob).label)}</span></li>`).join('')}</ul></details></li>`).join('');
   const gaps = classes.filter(c => !c.apps).map(c => c.label);
   const src = tr(totals.zh === totals.sources ? 'evmap.src.allzh' : 'evmap.src', { n: totals.sources, zh: totals.zh });
   const summary = tr('evmap.summary', { src, claims: totals.claims, inApps: totals.inApps, apps: apps.length, k: totals.classesWith, K: classes.length }) +
@@ -99,22 +117,34 @@ export function evidenceMapHtml(model, { tr, href }) {
 }
 
 // Hover: light up an item and everything it connects to. Returns { destroy }.
-export function mountEvidenceMap(stage, html) {
-  stage.innerHTML = html;
-  const svg = stage.querySelector('.em-svg');
-  const items = svg ? [...svg.querySelectorAll('[data-k]')] : [];
-  const keysOf = el => el.dataset.k.split(' ');
-  const on = e => {
-    const el = e.target.closest('[data-k]');
-    if (!el) return;
-    // An intervention or a link lights its own path; a class or problem lights every path through it.
-    const focus = keysOf(el).find(k => k.startsWith('a:')) || keysOf(el)[0];
-    const lit = items.filter(x => x.classList.contains('em-link') && keysOf(x).includes(focus));
-    const hit = new Set([focus, ...lit.flatMap(keysOf)]);
-    svg.classList.add('is-focus');
-    for (const x of items) x.classList.toggle('is-on', x.classList.contains('em-link') ? lit.includes(x) : hit.has(keysOf(x)[0]));
+export function mountEvidenceMap(stage, render) {
+  let open = null;
+  const draw = focusId => {
+    stage.innerHTML = typeof render === 'function' ? render(open) : render;
+    wire();
+    if (focusId) stage.querySelector(`[data-open="${focusId}"]`)?.focus();
   };
-  const off = () => { svg.classList.remove('is-focus'); items.forEach(x => x.classList.remove('is-on')); };
-  if (svg) { svg.addEventListener('pointerover', on); svg.addEventListener('focusin', on); svg.addEventListener('pointerleave', off); svg.addEventListener('focusout', off); }
+  function wire() {
+    const svg = stage.querySelector('.em-svg');
+    if (!svg) return;
+    const items = [...svg.querySelectorAll('[data-k]')];
+    const keysOf = el => el.dataset.k.split(' ');
+    const on = e => {
+      const el = e.target.closest('[data-k]');
+      if (!el) return;
+      // An intervention or a link lights its own path; a technology or problem lights every path through it.
+      const focus = keysOf(el).find(k => k.startsWith('a:')) || keysOf(el)[0];
+      const lit = items.filter(x => x.classList.contains('em-link') && keysOf(x).includes(focus));
+      const hit = new Set([focus, ...lit.flatMap(keysOf)]);
+      svg.classList.add('is-focus');
+      for (const x of items) x.classList.toggle('is-on', x.classList.contains('em-link') ? lit.includes(x) : hit.has(keysOf(x)[0]));
+    };
+    const off = () => { svg.classList.remove('is-focus'); items.forEach(x => x.classList.remove('is-on')); };
+    svg.addEventListener('pointerover', on); svg.addEventListener('focusin', on); svg.addEventListener('pointerleave', off); svg.addEventListener('focusout', off);
+    const toggle = el => { const id = el.dataset.open; open = open === id ? null : id; draw(id); };
+    svg.addEventListener('click', e => { const el = e.target.closest('[data-open]'); if (el) toggle(el); });
+    svg.addEventListener('keydown', e => { const el = e.target.closest('[data-open]'); if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(el); } });
+  }
+  draw();
   return { destroy() { stage.innerHTML = ''; } };
 }
