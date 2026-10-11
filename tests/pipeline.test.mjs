@@ -56,8 +56,8 @@ test('bigram overlap', () => {
 
 const okFetch = (content, cost = 0.001) => async () => ({ ok: true, status: 200, json: async () => ({ model: 'm/x', choices: [{ message: { content } }], usage: { prompt_tokens: 10, completion_tokens: 5, cost } }) });
 
-test('client: needs a cap, logs fields, never logs the key, parses JSON schema output', async () => {
-  assert.throws(() => createClient({ apiKey: 'k' }), /capUsd/);
+test('client: no cap unless given, logs fields, never logs the key, parses JSON schema output', async () => {
+  assert.equal(createClient({ apiKey: 'k' }).capUsd, Infinity);
   const calls = [];
   const client = createClient({ apiKey: 'sk-secret', capUsd: 1, fetchImpl: async (u, o) => { calls.push({ u, o }); return okFetch('{"claims":[]}')(); } });
   const out = await client.call('extract', { user: 'hi', schema: EXTRACT_SCHEMA });
@@ -362,4 +362,24 @@ test('intake: species filter, topics, merging, JATS sections and PDF meta tags',
   assert.equal(I.pdfMeta('<meta name="citation_pdf_url" content="https://j.cn/a.pdf">'), 'https://j.cn/a.pdf');
   assert.equal(I.pdfMeta('<meta content="/b.pdf" name="citation_pdf_url" />'), '/b.pdf');
   assert.equal(I.pdfMeta('<html></html>'), null);
+});
+
+test('reconcile: one name per practice, originals kept, every name in one group at most', async () => {
+  const { distinctNames, applyGroups } = await import('../pipeline/reconcile.mjs');
+  const c = (iv, extra = {}) => ({ quote_check: 'found', map: { welfare_relevant: true }, intervention: iv, intervention_en: iv + '-en', intervention_key: 'k-' + iv, ...extra });
+  const claims = [c('条件反射驯化'), c('驯食方式'), c('条件反射驯化'), c('孔雀石绿药浴'), c('无关', { map: { welfare_relevant: false } }), c('未分组')];
+  const names = distinctNames(claims);
+  assert.deepEqual(names.map(n => n.zh), ['条件反射驯化', '驯食方式', '孔雀石绿药浴', '未分组']);
+  const out = applyGroups(claims, names, [
+    { key: 'Feed Training', name_zh: '驯食', name_en: 'feed training', members: [0, 1] },
+    { key: 'malachite-green', name_zh: '孔雀石绿药浴', name_en: 'malachite green bath', members: [2, 0] }
+  ]);
+  assert.equal(out[0].intervention, '驯食');
+  assert.equal(out[0].intervention_key, 'feed-training');
+  assert.equal(out[0].intervention_original, '条件反射驯化');
+  assert.equal(out[1].intervention_key, 'feed-training');
+  assert.equal(out[3].intervention_en, 'malachite green bath');
+  assert.equal(out[4].intervention, '无关');
+  assert.equal(out[4].reconcile, undefined);
+  assert.equal(out[5].intervention, '未分组');
 });

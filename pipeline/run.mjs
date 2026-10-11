@@ -100,7 +100,7 @@ async function main() {
     tasks_done: count('done'), tasks_truncated: count('truncated'), tasks_unparsed: count('unparsed'), tasks_pending: tasks.length - last.size,
     claims_raw: raw.length, claims_after_merge: claims.length, quote_found: claims.filter(c => c.quote_check === 'found').length,
     recall: r, gate: gold.length ? (r >= minRecall ? 'pass' : 'fail') : 'not_measured',
-    stopped, spent_usd_this_run: client.spent, cap_usd: cap, config_hash: configHash
+    stopped, spent_usd_this_run: client.spent, cap_usd: cap > 0 ? cap : null, config_hash: configHash
   };
   writeFileSync(`${out}/summary.json`, JSON.stringify(summary, null, 2));
   console.log(summary);
