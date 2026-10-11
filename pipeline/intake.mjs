@@ -17,7 +17,8 @@ import { createHash } from 'node:crypto';
 
 const UA = 'myrias-intake/0.1 (research; https://github.com/invi-bhagyesh/myrias)';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-export const stripTags = s => String(s || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').trim();
+// Entities first, so an escaped tag such as &lt;i&gt; is removed as a tag rather than left as "i".
+export const stripTags = s => String(s || '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').trim();
 const cjk = s => (String(s || '').match(/[一-鿿]/g) || []).length;
 export const langOf = (title, given) => (cjk(title) >= 2 ? 'zh' : given === 'chi' || given === 'zh' ? 'zh' : 'en');
 

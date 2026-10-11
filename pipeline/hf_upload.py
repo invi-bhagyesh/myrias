@@ -121,7 +121,104 @@ def site_summary(species, repo, private, files, root):
         'files': len(files), 'bytes': sum(f['bytes'] for f in files),
     }
     return {'species': species, 'repo': repo, 'url': f'https://huggingface.co/datasets/{repo}', 'private': private, 'as_of': date.today().isoformat(),
-            'parts': PARTS, 'headline': headline, 'folders': folders}
+            'parts': PARTS, 'headline': headline, 'charts': charts(root), 'folders': folders}
+
+def charts(root):
+    # Counts for the Corpus page charts, from the intake records. Counts only, never text.
+    path = os.path.join(root, 'intake/records.jsonl')
+    if not os.path.exists(path): return None
+    recs = [json.loads(l) for l in open(path) if l.strip()]
+    fetch_path = os.path.join(root, 'intake/fetch.jsonl')
+    via = {f['id']: f.get('via') for f in (json.loads(l) for l in open(fetch_path) if l.strip())} if os.path.exists(fetch_path) else {}
+    langs = ['en', 'zh']
+    by_lang = lambda rows: {l: sum(1 for r in rows if r['lang'] == l) for l in langs}
+    about = [r for r in recs if r.get('species_in_title') and r.get('welfare_relevant')]
+    full = [r for r in about if via.get(r['id'])]
+    stages = [
+        {'id': 'found', 'n': len(recs), 'by_lang': by_lang(recs)},
+        {'id': 'about', 'n': len(about), 'by_lang': by_lang(about)},
+        {'id': 'tried', 'n': sum(1 for r in about if r['id'] in via), 'by_lang': by_lang([r for r in about if r['id'] in via])},
+        {'id': 'full_text', 'n': len(full), 'by_lang': by_lang(full),
+         'by_route': {k: sum(1 for r in full if via.get(r['id']) == k) for k in sorted({v for v in via.values() if v})}},
+    ]
+    sources = {}
+    for r in recs:
+        for s in r['sources']:
+            e = sources.setdefault(s, {'papers': 0, 'only_here': 0, 'zh': 0})
+            e['papers'] += 1; e['zh'] += r['lang'] == 'zh'; e['only_here'] += len(r['sources']) == 1
+    topics = {}
+    for r in about:
+        for t in r.get('topics', []):
+            topics.setdefault(t, {l: 0 for l in langs})[r['lang']] += 1
+    decades = {}
+    for r in recs:
+        d = f"{(r['year'] // 10) * 10}s" if r.get('year') else 'unknown'
+        decades.setdefault(d, {l: 0 for l in langs})[r['lang']] += 1
+    return {'stages': stages, 'sources': sources, 'topics': dict(sorted(topics.items(), key=lambda kv: -sum(kv[1].values()))),
+            'decades': dict(sorted(decades.items()))}
+
+import re
+# Titles fetched before the intake fix carry the remains of escaped tags: "( i Siniperca chuatsi /i )".
+def clean_title(t):
+    t = str(t or '')
+    if re.search(r'(^|\s)/(i|sub|sup|b)(\s|\)|$)', t):
+        t = re.sub(r'(?:(?<=\s)|(?<=\()|^)/?(?:i|sub|sup|b)(?=\s|\)|$)', '', t)
+        t = re.sub(r'\(\s+', '(', re.sub(r'\s+\)', ')', re.sub(r'\s{2,}', ' ', t))).strip()
+    return t
+
+def catalog(root):
+    # Every paper's bibliographic details for the Corpus page: no abstracts, no text.
+    out = []
+    path = os.path.join(root, 'intake/records.jsonl')
+    fetch = {}
+    fp = os.path.join(root, 'intake/fetch.jsonl')
+    if os.path.exists(fp):
+        for l in open(fp):
+            if l.strip(): f = json.loads(l); fetch[f['id']] = f
+    def why(f):
+        if not f: return None
+        if f.get('via'): return None
+        t = ' '.join(f.get('tried') or [])
+        if not t: return 'no_link'
+        if 'paywall' in t or 'login' in t or 'not a PDF' in t: return 'paywall'
+        if 'HTTP 403' in t or 'HTTP 401' in t: return 'refused'
+        if 'no PDF link' in t: return 'no_pdf_link'
+        if any(k in t for k in ('HTTP 429', 'HTTP 503', 'HTTP 418', 'timeout', 'fetch failed', 'HTTP 500')): return 'retry_later'
+        if 'HTTP 404' in t: return 'broken_link'
+        return 'failed'
+    if os.path.exists(path):
+        for l in open(path):
+            if not l.strip(): continue
+            r = json.loads(l); f = fetch.get(r['id'])
+            file = f"intake/pdf/{r['id']}.pdf" if f and f.get('via') in ('pdf', 'landing_meta') else 'intake/xml-pages.jsonl' if f and f.get('via') == 'europepmc_xml' else None
+            out.append({'id': r['id'], 'set': 'intake', 'title': clean_title(r.get('title')), 'year': r.get('year'), 'venue': r.get('venue'), 'lang': r.get('lang'),
+                        'authors': (r.get('authors') or [])[:8], 'doi': r.get('doi'), 'pmid': r.get('pmid'), 'pmcid': r.get('pmcid'), 'type': r.get('type'),
+                        'sources': r.get('sources'), 'topics': r.get('topics'), 'about': bool(r.get('species_in_title') and r.get('welfare_relevant')),
+                        'landing': (r.get('oa') or {}).get('landing'), 'pdf_url': (r.get('oa') or {}).get('pdf'),
+                        'full_text': (f or {}).get('via'), 'tried': bool(f), 'why_not': why(f), 'file': file})
+    meta = os.path.join(root, 'first-run/sources-meta.json')
+    pdfs = sorted(os.listdir(os.path.join(root, 'first-run/source-pdfs'))) if os.path.isdir(os.path.join(root, 'first-run/source-pdfs')) else []
+    m = json.load(open(meta)) if os.path.exists(meta) else {}
+    for i, name in enumerate(pdfs):
+        title = name.rsplit('_', 1)[0] if '_' in name else name.removesuffix('.pdf')
+        info = next((v for k, v in m.items() if not k.startswith('_') and (k in title or title in k)), {})
+        out.append({'id': f'F{i + 1:02d}', 'set': 'first-run', 'title': title, 'year': info.get('year'), 'venue': info.get('venue'), 'lang': 'zh',
+                    'authors': [name.rsplit('_', 1)[1].removesuffix('.pdf')] if '_' in name else [], 'sources': ['supplied'], 'topics': [], 'about': True,
+                    'full_text': 'supplied_pdf', 'tried': True, 'why_not': None, 'file': f'first-run/source-pdfs/{name}', 'in_release': bool(info)})
+    return out
+
+# Column format for the site: one list of field names, then one short row per paper, empty values
+# dropped to null and links the site can rebuild (a DOI's own URL) left out. Keeps the file small.
+FIELDS = ['id', 'set', 'title', 'year', 'venue', 'lang', 'authors', 'doi', 'pmid', 'pmcid', 'sources', 'topics', 'about', 'landing', 'pdf_url', 'full_text', 'tried', 'why_not', 'file']
+def pack(papers):
+    rows = []
+    for p in papers:
+        p = dict(p)
+        p['authors'] = (p.get('authors') or [])[:4]
+        if p.get('doi') and p.get('landing') and p['doi'].lower() in str(p['landing']).lower(): p['landing'] = None
+        if p.get('file') == 'intake/xml-pages.jsonl': p['file'] = 'x'
+        rows.append([p.get(k) if p.get(k) not in ('', [], None) else None for k in FIELDS])
+    return {'fields': FIELDS, 'rows': rows}
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
@@ -132,6 +229,15 @@ def main():
     json.dump({'species': species, 'files': files}, open(os.path.join(root, 'MANIFEST.json'), 'w'), indent=1, ensure_ascii=False)
     if opt('--site'):
         json.dump(site_summary(species, repo, private, files, root), open(opt('--site'), 'w'), indent=1, ensure_ascii=False)
+        # The paper list in chunks of 700, each well under the site's 400 KB file limit.
+        site_dir, papers = os.path.dirname(opt('--site')), catalog(root)
+        for old in [f for f in os.listdir(site_dir) if f.startswith('corpus-papers')]: os.remove(os.path.join(site_dir, old))
+        names = []
+        for i in range(0, len(papers), 700):
+            names.append(f'corpus-papers-{i // 700}.json')
+            json.dump(pack(papers[i:i + 700]), open(os.path.join(site_dir, names[-1]), 'w'), ensure_ascii=False, separators=(',', ':'))
+        summary = json.load(open(opt('--site'))); summary['paper_files'] = names
+        json.dump(summary, open(opt('--site'), 'w'), indent=1, ensure_ascii=False)
     print(f'{len(files)} files, {sum(f["bytes"] for f in files) / 1e6:.1f} MB')
     if '--dry-run' in sys.argv: return
     from huggingface_hub import HfApi
