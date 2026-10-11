@@ -70,7 +70,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const existing = [...known.byKey.values(), ...byKey.values()].map(g => `${g.key}: ${g.name_zh} (${g.name_en})`).join('\n');
     const user = (existing ? `Existing groups (reuse a key exactly when a new name is the same practice; do not rename them):\n${existing}\n\nNew names:\n` : '')
       + chunk.map((n, i) => `${i}. ${n.zh}${n.en ? ` (${n.en})` : ''}`).join('\n') + '\nReturn JSON.';
-    const r = await client.call('reconcile', { system: RECONCILE_SYSTEM, user, schema: RECONCILE_SCHEMA, maxTokens: 20000 });
+    const r = await client.call('reconcile', { system: RECONCILE_SYSTEM, user, schema: RECONCILE_SCHEMA });
     if (!r.data) { console.error(`reconcile: unparsed output for names ${off}-${off + chunk.length - 1}`); process.exit(1); }
     for (const g of r.data.groups) {
       const members = g.members.filter(m => m >= 0 && m < chunk.length).map(m => m + off);
