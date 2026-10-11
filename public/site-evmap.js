@@ -117,8 +117,9 @@ export function evidenceMapHtml(model, { tr, href, open = null }) {
 }
 
 // Hover: light up an item and everything it connects to. Returns { destroy }.
-export function mountEvidenceMap(stage, render) {
-  let open = null;
+export function mountEvidenceMap(stage, render, { open: initial = null } = {}) {
+  // Opens on the technology with the most claims, so the middle column is never empty on arrival.
+  let open = initial;
   const draw = focusId => {
     stage.innerHTML = typeof render === 'function' ? render(open) : render;
     wire();

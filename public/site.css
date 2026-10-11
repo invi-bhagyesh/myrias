@@ -964,3 +964,9 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
   .fx-src .fx-name { grid-area: name; } .fx-src .fx-val { grid-area: val; } .fx-src .fx-track { grid-area: bar; }
   .fx-val small { display: inline; margin-left: 6px; }
 }
+/* Desktop shows the ribbon flow; phones the stacked bars */
+.fx-phone { display: none; }
+.fx-sankey .cv-svg { display: block; }
+.fx-sankey .cv-list { display: none; }
+.fx-keep-row { margin: 4px 20px 14px; }
+@media (max-width: 700px) { .fx-sankey { display: none; } .fx-phone { display: block; } }

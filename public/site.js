@@ -627,7 +627,8 @@ function setupHomeEffects() {
       stage.style.height = '';
       if (view === 'today') {
         const model = evidenceModel(d, state.lang);
-        handle = mountEvidenceMap(stage, open => evidenceMapHtml(model, { tr, href: link, open }));
+        const biggest = [...model.classes].sort((a, b) => b.claims - a.claims)[0];
+        handle = mountEvidenceMap(stage, open => evidenceMapHtml(model, { tr, href: link, open }), { open: biggest && biggest.claims ? biggest.id : null });
         home.querySelector('[data-glegend]').innerHTML = '';
       } else {
         const g = viewGraph(d, state.lang, view);
