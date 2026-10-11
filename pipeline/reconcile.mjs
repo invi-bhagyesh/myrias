@@ -1,5 +1,5 @@
 // Reconcile (L7, first part): give one name to each intervention the claims describe in different words.
-//   node pipeline/reconcile.mjs --in final.jsonl --out reconciled.jsonl [--known STORE/claims.jsonl] [--cap USD]
+//   node pipeline/reconcile.mjs --in final.jsonl --out reconciled.jsonl [--known STORE/claims.jsonl] [--cap USD] [--batch 150]
 // With --known, groups already in the store stay fixed: a name seen before goes straight to its group,
 // and the model sees the existing groups so a new name can join one instead of starting a duplicate.
 // Extraction names an intervention per text window, so the same practice arrives as several names
@@ -61,15 +61,25 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const known = arg('known') ? knownGroups(readFileSync(arg('known'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l))) : { byKey: new Map(), byName: new Map() };
   const names = distinctNames(claims).filter(n => !known.byName.has(n.zh));
   const client = createClient({ capUsd: Number(arg('cap', 0)), logPath: `${arg('out')}.calls.jsonl` });
-  let groups = [];
-  if (names.length) {
-    const existing = [...known.byKey.values()].map(g => `${g.key}: ${g.name_zh} (${g.name_en})`).join('\n');
+  // Names go to the model in batches so each answer fits. Every batch sees the groups so far (from the
+  // store and from earlier batches), so a later name can join a group an earlier batch made.
+  const BATCH = Number(arg('batch', 150));
+  const byKey = new Map();
+  for (let off = 0; off < names.length; off += BATCH) {
+    const chunk = names.slice(off, off + BATCH);
+    const existing = [...known.byKey.values(), ...byKey.values()].map(g => `${g.key}: ${g.name_zh} (${g.name_en})`).join('\n');
     const user = (existing ? `Existing groups (reuse a key exactly when a new name is the same practice; do not rename them):\n${existing}\n\nNew names:\n` : '')
-      + names.map((n, i) => `${i}. ${n.zh}${n.en ? ` (${n.en})` : ''}`).join('\n') + '\nReturn JSON.';
+      + chunk.map((n, i) => `${i}. ${n.zh}${n.en ? ` (${n.en})` : ''}`).join('\n') + '\nReturn JSON.';
     const r = await client.call('reconcile', { system: RECONCILE_SYSTEM, user, schema: RECONCILE_SCHEMA, maxTokens: 20000 });
-    if (!r.data) { console.error('reconcile: unparsed output'); process.exit(1); }
-    groups = r.data.groups;
+    if (!r.data) { console.error(`reconcile: unparsed output for names ${off}-${off + chunk.length - 1}`); process.exit(1); }
+    for (const g of r.data.groups) {
+      const members = g.members.filter(m => m >= 0 && m < chunk.length).map(m => m + off);
+      const have = byKey.get(g.key);
+      if (have) have.members.push(...members); else byKey.set(g.key, { ...g, members });
+    }
+    console.error(`reconcile: names ${off + chunk.length} of ${names.length}, groups ${byKey.size}`);
   }
+  const groups = [...byKey.values()];
   const out = applyGroups(claims, names, groups, known);
   writeFileSync(arg('out'), out.map(c => JSON.stringify(c)).join('\n') + '\n');
   const assigned = new Set(groups.flatMap(g => g.members));
