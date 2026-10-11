@@ -144,7 +144,7 @@
         "node pipeline/reconcile.mjs --in $OUT/B/final.jsonl --out $OUT/B/reconciled.jsonl",
         "node pipeline/export.mjs --claims $OUT/A/final.jsonl,$OUT/B/final.jsonl --base public/data/release.json --meta pipeline/sources-meta.json --records $CORPUS/intake/records.jsonl --out public/data/release.json"
       ],
-      "status": "planned"
+      "status": "in_progress"
     }
   ],
   "estimate_basis_en": "Per-call costs measured in the first run: extract about $0.0006 per window (raised by half for the longer v0.3 output), map $0.0001 and verify $0.00035 per claim; about 2.2 claims per window, 85% with the quote found, about 60% welfare-relevant.",

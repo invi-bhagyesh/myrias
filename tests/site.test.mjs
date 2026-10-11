@@ -6,6 +6,7 @@ import * as L from '../public/site-lib.js';
 import { STR, t } from '../public/i18n.js';
 import { pixelHills, columns } from '../public/site-art.js';
 import { buildGraph, placeholderGraph, simplifyGraph, layoutGraph, shortLabel, legendHtml, MIN_REAL_CLAIMS } from '../public/site-graph.js';
+import { speciesModel, speciesSteps, speciesPageHtml, PROFILES } from '../public/site-species.js';
 
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url), 'utf8'));
 // The pre-release export with no records, kept as a fixture; the live release.json now holds real claims.
@@ -298,4 +299,22 @@ test('corpus list: unpacks the column format, filters and sorts', async () => {
     const rows = unpackPapers(read(f));
     assert.ok(rows.length && rows.every(p => p.id && p.title && !('abstract' in p)), f);
   }
+});
+
+test('species page: counts come from the release, steps from corpus and plan, every key translated', () => {
+  const corpus = read('corpus.json'), plan = read('next-run.json');
+  const m = speciesModel(live, 'mandarin-fish', { corpus, nextRun: plan });
+  assert.equal(m.claims.length, live.claims.filter(c => c.species_id === 'mandarin-fish').length);
+  assert.equal(m.sources.reduce((a, s) => a + s.claims, 0), m.claims.length);
+  assert.equal((m.verdicts.supported || 0) + (m.verdicts.partial || 0), m.claims.length);
+  const steps = speciesSteps(m);
+  assert.equal(steps[0].n, corpus.headline.papers_found);
+  assert.equal(steps.filter(s => s.key === 'phase').length, plan.phases.length);
+  assert.equal(speciesModel(live, 'no-such-fish'), null);
+  for (const lang of ['en', 'zh']) {
+    const tr = (k, v) => { assert.ok(STR[lang][k] !== undefined, `${lang}: ${k}`); return t(lang, k, v); };
+    const html = speciesPageHtml(m, { tr, link: p => '#/' + p, lang, flowHtml: () => '', topicsHtml: () => '', taxonomyLabel: (k, id) => id });
+    assert.ok(!/\{\w+\}/.test(html), 'unfilled placeholder');
+  }
+  for (const p of Object.values(PROFILES)) statSync(new URL('../public/' + p.image, import.meta.url));
 });

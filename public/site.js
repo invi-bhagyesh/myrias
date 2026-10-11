@@ -6,6 +6,7 @@ import { matrixChart } from './site-chart.js';
 
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 import { evidenceModel, evidenceMapHtml, mountEvidenceMap } from './site-evmap.js';
+import { speciesModel, speciesPageHtml, speciesCardsHtml } from './site-species.js';
 import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, LANG_COLOR } from './site-corpusviz.js';
 import { controlsHtml, mountCorpusList, FILTER_DEFAULTS, unpackPapers } from './site-corpuslist.js';
 
@@ -313,35 +314,33 @@ function applicationCard(app) {
 
 function viewSpeciesList() {
   const d = state.data;
-  return {
-    title: tr('nav.species'),
-    html: lead(tr('sp.kicker'), tr('sp.title'), tr('sp.desc')) + d.species.map(s => `<article class="run-entry">
-      <span class="record-type">${esc(tr('run.' + s.run_status))}</span>
-      <h2><a href="${link('species/' + encodeURIComponent(s.id))}">${esc(pick(s, 'common', state.lang))}</a></h2>
-      <p class="meta"><i>${esc(s.scientific)}</i> · ${esc(tr('group.' + s.group))}</p><p>${esc(pick(s, 'summary', state.lang))}</p></article>`).join('')
-  };
+  return { title: tr('nav.species'), html: lead(tr('sp.kicker'), tr('sp.title'), tr('sp.desc')) + speciesCardsHtml(d, { tr, link, lang: state.lang }) };
 }
 
 function viewSpecies(id) {
-  const s = state.index.species.get(id);
-  if (!s) return viewNotFound();
-  const d = state.data;
-  const apps = d.applications.filter(a => a.species_id === id);
-  const counts = { has_records: 0, probed_empty: 0, not_collected: 0 };
-  L.buildMatrix(d, id).rows.forEach(r => r.cells.forEach(c => { counts[c.status]++; }));
-  const runs = d.runs.filter(r => r.species_id === id);
-  return {
-    title: pick(s, 'common', state.lang),
-    html: `<p class="meta"><a href="${link('species')}">← ${esc(tr('nav.species'))}</a></p>` +
-      `<header class="species-title"><div class="record-type">${esc(tr('sp.kicker'))}</div><h1>${esc(pick(s, 'common', state.lang))}</h1><p><i>${esc(s.scientific)}</i></p></header>
-       <p class="species-intro">${esc(pick(s, 'summary', state.lang))}</p>` +
-      dl([[tr('sp.scientific'), `<i>${esc(s.scientific)}</i>`], [tr('sp.group'), esc(tr('group.' + s.group))], [tr('sp.runstatus'), esc(tr('run.' + s.run_status))]]) +
-      `<h2>${esc(tr('sp.apps'))}</h2>` + (apps.length ? apps.map(applicationCard).join('') : `<p>${esc(tr('sp.noapps'))}</p>`) +
-      suggestionBlock(id) +
-      `<h2>${esc(tr('sp.cells'))}</h2><p>${esc(tr('sp.cells.line', { has: counts.has_records, empty: counts.probed_empty, not: counts.not_collected }))}</p>
-       <p><a class="button small" href="${link('explore', { species: id })}">${esc(tr('nav.explore'))}</a></p>` +
-      `<h2>${esc(tr('sp.runs'))}</h2>` + runs.map(runCard).join('')
+  const m = speciesModel(state.data, id, { corpus: state.corpus, nextRun: state.nextRun });
+  if (!m) return viewNotFound();
+  const flowHtml = c => corpusFlowHtml(c, tr);
+  const topicsHtml = c => {
+    const st = Object.fromEntries(c.charts.stages.map(x => [x.id, x]));
+    const total = Object.values(c.charts.decades).reduce((a, v) => a + v.en + v.zh, 0);
+    return `<div class="cv-two"><section><h3>${esc(tr('cv.topics'))}</h3>${topicBarsHtml(c.charts.topics, k => tr('cv.topic.' + k))}<p class="cv-note">${esc(tr('cv.topics.note', { n: Number(st.about.n).toLocaleString() }))}</p></section>
+      <section><h3>${esc(tr('cv.decades'))}</h3>${decadeColumnsHtml(c.charts.decades)}<p class="cv-note">${esc(tr('cv.decades.note', { n: total.toLocaleString() }))}</p></section></div>`;
   };
+  return { title: pick(m.s, 'common', state.lang), html: speciesPageHtml(m, { tr, link, lang: state.lang, flowHtml, topicsHtml, taxonomyLabel }) + suggestionBlock(id), model: m };
+}
+
+// Species page: the evidence map for this species, and the contents links.
+function setupSpeciesPage(m) {
+  const page = document.querySelector('.sp-page');
+  if (!page || !m) return;
+  page.querySelectorAll('[data-sp-jump]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const t = document.getElementById(a.dataset.spJump); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  const stage = page.querySelector('[data-sp-map]');
+  if (stage) {
+    const model = evidenceModel(m.data, state.lang);
+    const biggest = [...model.classes].sort((a, b) => b.claims - a.claims)[0];
+    mountEvidenceMap(stage, open => evidenceMapHtml(model, { tr, href: link, open }), { open: biggest && biggest.claims ? biggest.id : null });
+  }
 }
 
 function suggestionBlock(speciesId) {
@@ -353,13 +352,6 @@ function suggestionBlock(speciesId) {
     ${dl([[tr('sug.who'), esc(x.who || '—')], [tr('sug.gap'), esc(pick(x, 'evidence_gap', state.lang))], [tr('sug.risks'), esc(pick(x, 'risks', state.lang) || '—')],
       [tr('sug.claims'), x.claim_ids.map(c => `<a href="${link('claims/' + encodeURIComponent(c))}">${esc(c)}</a>`).join(', ')]])}</article>`).join('');
   return `<h2>${esc(tr('sug.title'))}</h2><p>${esc(tr('sug.lead'))}</p>${cards}`;
-}
-
-function runCard(run) {
-  const c = run.counts || {};
-  return `<article class="run-entry"><span class="record-type">${esc(tr('run.' + run.status))}</span>
-    <p>${esc(tr('run.focus'))}: ${esc(pick(run, 'focus', state.lang))}</p>
-    ${dl([[tr('run.collected'), esc(c.documents_collected ?? '—')], [tr('run.released'), esc(c.sources_released ?? '—')], [tr('run.extracted'), esc(c.claims_extracted ?? '—')], [tr('run.supported'), esc(c.claims_supported ?? '—')]])}</article>`;
 }
 
 function sourceItems(q, lang) {
@@ -541,13 +533,13 @@ function render(navigated = false) {
     else view = viewNotFound();
   }
   const section = parts[0] || '';
-  const active = ['explore', 'species', 'sources', 'claims'].includes(section) ? 'explore' : section;
+  const active = ['explore', 'sources', 'claims'].includes(section) ? 'explore' : section;
   document.querySelectorAll('.sections a').forEach(a => {
     const on = a.dataset.route === active;
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   moveBlob(true);
-  const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus'].includes(parts[0]);
+  const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus'].includes(parts[0]) || (parts[0] === 'species' && parts[1]);
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   document.title = `${view.title} — ${tr('site.title')}`;
   const pathKey = parts.join('/');
@@ -555,6 +547,7 @@ function render(navigated = false) {
   else if (navigated && params.get('cell')) { const panel = $('.cell-panel'); if (panel) panel.scrollIntoView({ block: 'nearest' }); }
   state.lastPath = pathKey;
   if (!parts[0] || parts[0] === 'content') setupHomeEffects();
+  if (parts[0] === 'species' && parts[1]) setupSpeciesPage(view.model);
   if (parts[0] === 'corpus' && state.papers && state.corpus) {
     const root = document.querySelector('[data-cl-root]');
     if (root) { const holder = { filter: state.corpusFilter }; mountCorpusList(root, state.papers, state.corpus, tr, holder); state.corpusFilter = holder.filter; }
