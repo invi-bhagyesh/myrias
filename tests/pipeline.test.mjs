@@ -383,3 +383,57 @@ test('reconcile: one name per practice, originals kept, every name in one group 
   assert.equal(out[4].reconcile, undefined);
   assert.equal(out[5].intervention, '未分组');
 });
+
+test('prepare: reference lists and what follows are trimmed, sections stop at a references heading', async () => {
+  const { trimReferences } = await import('../pipeline/prepare.mjs');
+  const pages = [{ source: 'a', page: 2, text: 'Results here.\nReferences\n1. Smith' }, { source: 'a', page: 1, text: 'Intro text.' }, { source: 'a', page: 3, text: 'More refs' }];
+  assert.deepEqual(trimReferences(pages).map(p => [p.page, p.text]), [[1, 'Intro text.'], [2, 'Results here.\n']]);
+  const secs = [{ page: 1, locator: 'section', text: 'Methods\nFish were fed.' }, { page: 2, locator: 'section', text: 'Acknowledgements\nThanks' }, { page: 3, locator: 'section', text: 'Late' }];
+  assert.deepEqual(trimReferences(secs).map(p => p.page), [1]);
+  assert.equal(trimReferences([{ page: 1, text: '研究结果。\n参考文献\n[1] 李' }])[0].text, '研究结果。\n');
+});
+
+test('step record: call logs summarised by model and finish reason', async () => {
+  const { callSummary } = await import('../pipeline/step.mjs');
+  const lines = [{ model: 'a/x', cost_usd: 0.001, input_tokens: 10, output_tokens: 5, finish: 'stop' }, { model: 'a/x', cost_usd: 0.002, finish: 'length' }, { model: 'b/y', cost_usd: 0.5, finish: 'stop' }].map(JSON.stringify);
+  const s = callSummary([...lines, '']);
+  assert.equal(s.calls, 3);
+  assert.equal(s.cost_usd, 0.503);
+  assert.equal(s.models['a/x'].calls, 2);
+  assert.deepEqual(s.finish, { stop: 2, length: 1 });
+});
+
+test('merge: claims add to the store once, public ids never change, papers get details from records', async () => {
+  const { mergeIntoStore, claimUid } = await import('../pipeline/merge.mjs');
+  const ok = (source, page, quote) => ({ source, page, quote, quote_check: 'found', map: { welfare_relevant: true }, verify: { verdict: 'supported' } });
+  const records = new Map([['R1', { title: 'Feed training', year: 2020, lang: 'en', doi: '10.1/x', authors: ['Li'] }]]);
+  let store = { claims: [], sources: {}, runs: [] };
+  store = mergeIntoStore(store, [ok('R1', 1, 'Fish ate pellets.'), { ...ok('R1', 2, 'No'), verify: { verdict: 'unsupported' } }], { run: 'r1', phase: 'A', date: '2026-01-01', records });
+  assert.equal(store.claims.length, 1);
+  assert.equal(store.claims[0].release_id, 'C0001');
+  assert.equal(store.sources.R1.id, 'S001');
+  assert.equal(store.sources.R1.doi, '10.1/x');
+  const again = mergeIntoStore(store, [ok('R1', 1, 'Fish  ate pellets.'), ok('R1', 3, 'Growth rose.'), ok('b_作者.pdf', 1, '鳜鱼摄食。')], { run: 'r2', phase: 'B', date: '2026-02-01', records });
+  assert.deepEqual(again.claims.map(c => c.release_id), ['C0001', 'C0002', 'C0003']);
+  assert.equal(again.claims[0].seen_in[0].run, 'r2');
+  assert.equal(again.entry.claims_already_present, 1);
+  assert.equal(again.sources['b_作者.pdf'].id, 'S002');
+  assert.equal(again.sources['b_作者.pdf'].lang, 'zh');
+  assert.equal(claimUid(ok('R1', 1, 'Fish ate pellets.')), again.claims[0].uid);
+  assert.equal(again.runs.length, 2);
+});
+
+test('reconcile with known groups: seen names map without a call, existing keys keep their names', async () => {
+  const { knownGroups, applyGroups, distinctNames } = await import('../pipeline/reconcile.mjs');
+  const store = [{ reconcile: 'r', intervention_key: 'feed-training', intervention: '驯食', intervention_en: 'feed training', intervention_original: '条件反射驯化' }];
+  const known = knownGroups(store);
+  const c = iv => ({ quote_check: 'found', map: { welfare_relevant: true }, intervention: iv });
+  const claims = [c('条件反射驯化'), c('驯食方法'), c('孔雀石绿')];
+  const names = distinctNames(claims).filter(n => !known.byName.has(n.zh));
+  assert.deepEqual(names.map(n => n.zh), ['驯食方法', '孔雀石绿']);
+  const out = applyGroups(claims, names, [{ key: 'feed-training', name_zh: '别名', name_en: 'other', members: [0] }, { key: 'malachite-green', name_zh: '孔雀石绿药浴', name_en: 'malachite green bath', members: [1] }], known);
+  assert.equal(out[0].intervention, '驯食');
+  assert.equal(out[1].intervention, '驯食');
+  assert.equal(out[1].intervention_en, 'feed training');
+  assert.equal(out[2].intervention_key, 'malachite-green');
+});
