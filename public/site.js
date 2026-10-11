@@ -44,6 +44,7 @@ async function load() {
   }
   // What the private corpus on Hugging Face holds: names, counts and sizes only, never text.
   try { const r = await fetch('data/corpus.json', { cache: 'no-cache' }); state.corpus = r.ok ? await r.json() : null; } catch { state.corpus = null; }
+  try { const r = await fetch('data/next-run.json', { cache: 'no-cache' }); state.nextRun = r.ok ? await r.json() : null; } catch { state.nextRun = null; }
 }
 
 const taxonomyLabel = (kind, id) => {
@@ -91,7 +92,36 @@ function viewPipeline() {
         <dt>${esc(tr('pipe.out'))}</dt><dd>${esc(st.out[i])}</dd>${st.check ? `<dt>${esc(tr('pipe.check'))}</dt><dd>${esc(st.check[i])}</dd>` : ''}</dl></div></article>`).join('');
   const steps = funnel(run), top = steps.length ? Math.max(...steps.map(x => x.value)) : 1;
   const bars = steps.length ? `<h2>${esc(tr('pipe.funnel'))}</h2><p class="small-note">${esc(tr('pipe.funnel.note'))}</p><ol class="funnel">${steps.map(x => `<li><span class="funnel-label">${esc(x.label[i])}</span><span class="funnel-bar"><i style="width:${Math.max(3, Math.round(100 * x.value / top))}%"></i></span><b>${x.value}</b></li>`).join('')}</ol>` : '';
-  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pipe.lead')) + bars + `<h2>${esc(tr('pipe.stages'))}</h2><div class="pipe-flow">${stages}</div>` };
+  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pipe.lead')) + nextRunHtml(state.nextRun) + bars + `<h2>${esc(tr('pipe.stages'))}</h2><div class="pipe-flow">${stages}</div>` };
+}
+
+// The planned run and its settings, from data/next-run.json. Nothing here has been run.
+function nextRunHtml(p) {
+  if (!p) return '';
+  const zh = state.lang === 'zh', L = (o, k) => (zh ? o[k + '_zh'] || o[k + '_en'] : o[k + '_en']) || '', B = o => (zh ? o.zh || o.en : o.en);
+  const usd = x => '$' + Number(x).toFixed(2);
+  const phases = p.phases.map(ph => `<article class="nr-phase"><div class="nr-phase-head"><span class="nr-id">${esc(ph.id)}</span><h3>${esc(L(ph, 'name'))}</h3></div>
+    <ul class="nr-nums"><li><b>${ph.papers}</b>${esc(tr('nr.papers'))}</li><li><b>${Number(ph.windows).toLocaleString()}</b>${esc(tr('nr.windows'))}</li>
+      <li><b>${usd(ph.estimate_usd.low)}–${usd(ph.estimate_usd.high)}</b>${esc(tr('nr.estimate'))}</li><li><b>${usd(ph.cap_usd)}</b>${esc(tr('nr.cap'))}</li><li><b>~${ph.minutes} min</b>${esc(tr('nr.time'))}</li></ul>
+    <p>${esc(L(ph, 'why'))}</p><p class="small-note"><code>${esc(ph.input)}</code></p>
+    <details class="nr-cmds"><summary>${esc(tr('nr.commands'))}</summary><pre>${esc(ph.commands.join('\n'))}</pre></details></article>`).join('');
+  const rows = p.stages.map(st => `<tr><td>${esc(st.id)}</td><td>${st.model ? `<code>${esc(st.model)}</code>${st.fallback ? `<br><small>${esc(tr('nr.fallback'))}: <code>${esc(st.fallback.join(', '))}</code></small>` : ''}` : esc(tr('pipe.nomodel'))}</td>
+    <td>${esc(st.reasoning || '—')}</td><td>${st.max_output_tokens ? Number(st.max_output_tokens).toLocaleString() : '—'}</td><td>${esc(st.per)}${st.note_en ? `<br><small>${esc(L(st, 'note'))}</small>` : ''}</td></tr>`).join('');
+  const gates = p.gates.map(g => `<li class="nr-gate g-${esc(g.status)}"><span>${esc(tr('nr.gate.' + g.status))}</span>${esc(B(g))}</li>`).join('');
+  const build = p.to_build_first.map(x => `<li>${esc(B(x))}</li>`).join('');
+  const outs = p.outputs.map(x => `<li>${esc(B(x))}</li>`).join('');
+  const total = p.phases.reduce((a, ph) => [a[0] + ph.estimate_usd.low, a[1] + ph.estimate_usd.high, a[2] + ph.cap_usd], [0, 0, 0]);
+  return `<section class="next-run"><div class="nr-top"><span class="pill">${esc(tr('nr.status.' + p.status))}</span><h2>${esc(tr('nr.title'))}</h2>
+      <p>${esc(L(p, 'goal'))}</p><p class="small-note">${esc(tr('nr.total', { low: usd(total[0]), high: usd(total[1]), cap: usd(total[2]) }))}</p></div>
+    <div class="nr-phases">${phases}</div>
+    <h3>${esc(tr('nr.config'))}</h3>
+    <dl class="nr-settings"><dt>${esc(tr('nr.profile'))}</dt><dd><code>${esc(p.profile)}</code></dd><dt>${esc(tr('nr.router'))}</dt><dd>${esc(p.provider.router)} · data_collection: <code>${esc(p.provider.data_collection)}</code></dd>
+      <dt>${esc(tr('nr.window'))}</dt><dd>${p.window.size_chars.toLocaleString()} / ${p.window.overlap_chars}</dd><dt>${esc(tr('nr.prompts'))}</dt><dd>${Object.entries(p.prompt_versions).map(([k, v]) => `${esc(k)} <code>${esc(v)}</code>`).join(' · ')}</dd></dl>
+    <div class="nr-table"><table class="plain"><thead><tr><th>${esc(tr('nr.stage'))}</th><th>${esc(tr('pipe.model'))}</th><th>${esc(tr('nr.reasoning'))}</th><th>${esc(tr('nr.maxout'))}</th><th>${esc(tr('nr.per'))}</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="small-note">${esc(L(p, 'estimate_basis'))}</p>
+    <div class="nr-cols"><div><h3>${esc(tr('nr.gates'))}</h3><ul class="nr-gates">${gates}</ul></div>
+      <div><h3>${esc(tr('nr.build'))}</h3><ul class="nr-list">${build}</ul><h3>${esc(tr('nr.outputs'))}</h3><ul class="nr-list">${outs}</ul></div></div>
+    <p class="small-note"><b>${esc(tr('nr.notin'))}</b> ${esc(L(p, 'not_in_this_run'))} · <a href="data/next-run.json">next-run.json</a></p></section>`;
 }
 
 const fmtBytes = n => (n >= 1e6 ? (n / 1e6).toFixed(1) + ' MB' : n >= 1e3 ? Math.round(n / 1e3) + ' KB' : n + ' B');
