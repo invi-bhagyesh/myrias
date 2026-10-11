@@ -255,3 +255,20 @@ test('pipeline tab: stages are bilingual, models match the demo profile, funnel 
   assert.ok(f.every((x, i) => i === 0 || x.value <= f[i - 1].value || x.key === 'claims_extracted'));
   assert.equal(funnel(null).length, 0);
 });
+
+test('evidence map: every intervention is placed, empty classes and problems stay on the map', async () => {
+  const { evidenceModel, evidenceMapHtml } = await import('../public/site-evmap.js');
+  const live = read('release.json');
+  const m = evidenceModel(live, 'en');
+  assert.equal(m.apps.length, live.applications.length);
+  assert.equal(m.classes.length, live.taxonomy.technology_classes.length);
+  assert.equal(m.problems.length, live.taxonomy.welfare_problems.length);
+  assert.equal(m.classes.reduce((s, c) => s + c.claims, 0), live.applications.reduce((s, a) => s + a.claim_ids.length, 0));
+  assert.ok(m.totals.inApps <= m.totals.claims);
+  const html = evidenceMapHtml(m, { tr: (k, v) => t('en', k, v), href: (p, q = {}) => '#/' + p + '?' + new URLSearchParams(q) });
+  for (const a of m.apps) assert.ok(html.includes(`data-k="a:${a.id}"`));
+  assert.ok(!/\{\w+\}/.test(html), 'no unfilled placeholders');
+  const empty = evidenceModel(release, 'zh');
+  assert.equal(empty.apps.length, 0);
+  assert.ok(evidenceMapHtml(empty, { tr: (k, v) => t('zh', k, v), href: p => '#/' + p }).includes(t('zh', 'evmap.noapps')));
+});
