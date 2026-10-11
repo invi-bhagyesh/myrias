@@ -1108,3 +1108,4 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .mc-n { fill: var(--on-accent); }
 .home-actions .button-primary { color: var(--on-accent); }
 .cl-tag.t-first { color: var(--on-accent); background: var(--lang-zh); border-color: var(--lang-zh); }
+@media (min-width: 861px) { .arena-home .hero-with-hills .hero-art { max-width: 280px; } }
