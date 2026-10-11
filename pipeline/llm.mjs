@@ -16,23 +16,36 @@ export function stageSetting(stage, profile = process.env.MYRIAS_PROFILE || 'dem
   return { profile, ...p[stage] };
 }
 
-// Rough pre-call estimate in USD, used only to refuse a call that would clearly break the cap.
-export function estimateCost(model, inputChars, maxOutputTokens) {
-  const price = CONFIG.prices[model];
-  if (!price) return 0;
-  return ((inputChars / 3) * price[0] + maxOutputTokens * price[1]) / 1e6;
+// Worst-case cost of one call in USD: the full output budget, and input tokens counted
+// conservatively (about one per Chinese character, one per three other characters). A model with
+// no listed price is charged at a deliberately high default so it cannot slip under the cap.
+const DEFAULT_PRICE = [5, 25];
+export function estimateTokens(text) {
+  const s = String(text || ''), cjk = (s.match(/[\u3000-\u9fff\uff00-\uffef]/g) || []).length;
+  return Math.ceil(cjk * 1.2 + (s.length - cjk) / 3);
+}
+export function estimateCost(model, input, maxOutputTokens) {
+  const price = CONFIG.prices[model] || DEFAULT_PRICE;
+  const inTokens = typeof input === 'number' ? input / 3 : estimateTokens(input);
+  return (inTokens * price[0] + maxOutputTokens * price[1]) / 1e6;
 }
 
 export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, logPath, fetchImpl = fetch, profile, retryMs = 8000, retries = 2 } = {}) {
   if (!(capUsd > 0)) throw new Error('capUsd is required: every run has a hard spend cap');
-  let spent = 0, calls = 0;
+  // Budget reservation: a call reserves its worst-case cost before it is sent and releases it when
+  // the real cost is known, so concurrent calls can never take the run past the cap.
+  let spent = 0, reserved = 0, calls = 0, inFlight = 0;
   async function call(stage, { system, user, images, schema, maxTokens = 2000, model: override } = {}) {
     if (!apiKey) throw new Error('OPENROUTER_API_KEY is not set');
     const setting = stageSetting(stage, profile);
     const model = override || setting.model;
     const messages = [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: images?.length ? [{ type: 'text', text: user }, ...images.map(url => ({ type: 'image_url', image_url: { url } }))] : user }];
-    const projected = spent + estimateCost(model, messages.reduce((n, m) => n + (typeof m.content === 'string' ? m.content.length : 3000 * (images?.length || 1)), 0), maxTokens);
-    if (projected > capUsd) throw new SpendCapError(`spend cap $${capUsd} would be exceeded (spent $${spent.toFixed(4)}, projected $${projected.toFixed(4)})`);
+    const candidates = [model, ...(override ? [] : setting.fallback || [])];
+    const inputText = messages.map(m => (typeof m.content === 'string' ? m.content : m.content.map(p => p.text || '').join(''))).join('\n');
+    const worst = Math.max(...candidates.map(m => estimateCost(m, inputText, maxTokens))) + (images?.length || 0) * 0.002;
+    if (spent + reserved + worst > capUsd) throw new SpendCapError(`spend cap $${capUsd} would be exceeded (spent $${spent.toFixed(4)}, reserved $${reserved.toFixed(4)}, this call up to $${worst.toFixed(4)})`);
+    reserved += worst; inFlight++;
+    try {
     const body = {
       model, messages, max_tokens: maxTokens, temperature: setting.temperature ?? 0,
       provider: CONFIG.provider, usage: { include: true },
@@ -42,7 +55,6 @@ export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, 
     const t0 = Date.now();
     // Retry a rate-limited or failing provider, then fall back to the next model listed for the stage.
     // The model that actually answered is what the log and every record store.
-    const candidates = [model, ...(override ? [] : setting.fallback || [])];
     let res, json, used = model;
     for (const m of candidates) {
       used = m; body.model = m;
@@ -66,6 +78,7 @@ export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, 
       finish: json.choices?.[0]?.finish_reason ?? null, cost_usd: cost, ms: Date.now() - t0, parsed: schema ? data !== null : null };
     if (logPath) appendFileSync(logPath, JSON.stringify(entry) + '\n');
     return { text, data, entry };
+    } finally { inFlight--; reserved = inFlight ? Math.max(0, reserved - worst) : 0; }
   }
-  return { call, get spent() { return spent; }, get calls() { return calls; }, capUsd };
+  return { call, get spent() { return spent; }, get reserved() { return reserved; }, get calls() { return calls; }, capUsd };
 }

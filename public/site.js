@@ -336,6 +336,8 @@ function viewClaim(id) {
       dl([[tr('claim.species'), c.species_id ? esc(speciesName(c.species_id)) : orUnknown(null)], [tr('claim.population'), orUnknown(popText)],
           [tr('claim.intervention'), orUnknown(c.intervention)], [tr('claim.comparator'), orUnknown(c.comparator)], [tr('claim.outcome'), orUnknown(c.outcome)],
           [tr('claim.direction'), esc(tr('dir.' + (c.direction || 'not_applicable')))], [tr('claim.magnitude'), orUnknown(c.magnitude)],
+          ...(c.polarity ? [[tr('claim.polarity'), esc(tr('pol.' + c.polarity))]] : []),
+          ...(c.limitations ? [[tr('claim.limits'), esc(c.limitations)]] : []), ...(c.counterevidence ? [[tr('claim.counter'), esc(c.counterevidence)]] : []),
           [tr('claim.welfare'), `${esc(tr('welfare.' + c.welfare_link))}${c.welfare_link_note ? `<br><span class="meta">${esc(c.welfare_link_note)}</span>` : ''}`]]) +
       `<p><a class="button small" href="${esc(issueLink(`Correction: claim ${c.id}`, reportBody))}" target="_blank" rel="noopener noreferrer">${esc(tr('claim.report'))} ↗</a></p>
        <p class="small-note">${esc(tr('claim.report.note'))}</p>`

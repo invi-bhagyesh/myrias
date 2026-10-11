@@ -140,3 +140,89 @@ test('export: only relevant, quote-checked, supported claims; valid against the 
   assert.ok(!('suggestions' in rel));
   assert.equal(rel.cells_status.length, 48);
 });
+
+import { windows, locatePage, mergeOverlaps } from '../pipeline/chunk.mjs';
+import { dedupSources } from '../pipeline/dedup.mjs';
+import { recall, taskId } from '../pipeline/run.mjs';
+import { estimateTokens } from '../pipeline/llm.mjs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { mkdtempSync, writeFileSync as wf } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+test('windows overlap, cover every page, and a quote across a page break is located to its first page', () => {
+  const pages = [{ page: 1, text: 'a'.repeat(1500) + '鳜鱼驯化' }, { page: 2, text: '成功率高。' + 'b'.repeat(1500) }];
+  const w = windows(pages, { size: 1000, overlap: 200 });
+  assert.ok(w.length >= 3);
+  assert.equal(w[0].page_start, 1); assert.equal(w.at(-1).page_end, 2);
+  for (let i = 1; i < w.length; i++) assert.ok(w[i - 1].text.endsWith(w[i].text.slice(0, 200)));
+  assert.equal(locatePage('鳜鱼驯化成功率高。', pages), 1);
+  assert.equal(locatePage('成功率高', pages), 2);
+  assert.equal(locatePage('不存在的句子', pages), null);
+});
+
+test('overlap duplicates merge to the longer quote, per source', () => {
+  const m = mergeOverlaps([{ source: 'a', quote: '鳜鱼驯化成功' }, { source: 'a', quote: '鳜鱼驯化成功率高' }, { source: 'b', quote: '鳜鱼驯化成功' }]);
+  assert.equal(m.length, 2);
+  assert.equal(m.find(c => c.source === 'a').quote, '鳜鱼驯化成功率高');
+});
+
+test('stage 0 drops the same text or the same title and says why', () => {
+  const r = dedupSources([
+    { source: '鳜鱼驯化_张三.pdf', page: 1, text: '正文一' }, { source: '鳜鱼驯化_张三 (1).pdf', page: 1, text: '正文一' },
+    { source: '鳜鱼驯化_李四.pdf', page: 1, text: '不同正文' }, { source: '其他论文_王五.pdf', page: 1, text: '正文二' }]);
+  assert.deepEqual(r.kept, ['鳜鱼驯化_张三.pdf', '其他论文_王五.pdf']);
+  assert.deepEqual(r.dropped.map(d => d.reason).sort(), ['same_text', 'same_title']);
+});
+
+test('budget reservation: concurrent calls can never pass the cap', async () => {
+  let inFlight = 0, maxInFlight = 0;
+  const fetchImpl = async () => { inFlight++; maxInFlight = Math.max(maxInFlight, inFlight); await new Promise(r => setTimeout(r, 5)); inFlight--; return okFetch('{"claims":[]}', 0.0001)(); };
+  const client = createClient({ apiKey: 'k', capUsd: 0.01, fetchImpl });
+  const one = () => client.call('extract', { user: '鳜'.repeat(100), schema: EXTRACT_SCHEMA, maxTokens: 2000 });
+  const results = await Promise.allSettled(Array.from({ length: 20 }, one));
+  const ok = results.filter(r => r.status === 'fulfilled').length;
+  assert.ok(ok > 0 && ok < 20, String(ok));
+  assert.ok(results.some(r => r.status === 'rejected' && r.reason instanceof SpendCapError));
+  assert.ok(client.spent <= 0.01);
+  assert.equal(client.reserved, 0);
+  assert.ok(estimateTokens('鳜鱼') > estimateTokens('ab'));
+});
+
+test('extract schema keeps the quote and separates basis, polarity and candidate status', () => {
+  const item = EXTRACT_SCHEMA.properties.claims.items;
+  for (const k of ['quote', 'basis', 'polarity', 'candidate_status', 'intervention_key', 'counterevidence', 'limitations']) assert.ok(item.required.includes(k), k);
+  assert.ok(item.properties.polarity.enum.includes('null'));
+});
+
+test('recall and stable task ids', () => {
+  assert.equal(recall([{ source: 'a', quote: '鳜鱼驯化成功率高' }], [{ source: 'a', quote: '鳜鱼驯化成功率高' }, { source: 'a', quote: '完全不同的一句' }]), 0.5);
+  assert.equal(recall([], []), null);
+  const w = { index: 0, text: 'x' };
+  assert.equal(taskId('s', w, 'h'), taskId('s', w, 'h'));
+  assert.notEqual(taskId('s', w, 'h'), taskId('s', w, 'h2'));
+});
+
+test('run end to end with a fake model: dedup, windows, quote check, resume without new calls, refuse mixed settings', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'myrias-run-'));
+  const pagesFile = join(dir, 'pages.jsonl'), gold = join(dir, 'gold.jsonl'), out = join(dir, 'out');
+  const text = '鳜鱼经条件反射驯化后可摄食人工饲料。' + '其后逐渐增加配合饲料比例，摄食情况良好。'.repeat(200);
+  wf(pagesFile, [{ source: '驯化_甲.pdf', page: 1, text }, { source: '驯化_甲 (1).pdf', page: 1, text }].map(x => JSON.stringify(x)).join('\n'));
+  wf(gold, JSON.stringify({ source: '驯化_甲.pdf', quote: '鳜鱼经条件反射驯化后可摄食人工饲料。' }) + '\n');
+  const env = { ...process.env, OPENROUTER_API_KEY: 'test' };
+  const run = (...extra) => spawnSync(process.execPath, ['--import', './tests/fixtures/fake-openrouter.mjs', 'pipeline/run.mjs', '--pages', pagesFile, '--out', out, '--cap', '0.5', '--gold', gold, '--min-recall', '0.9', ...extra], { env, encoding: 'utf8' });
+  const first = run();
+  assert.equal(first.status, 0, first.stderr);
+  const s1 = JSON.parse(readFileSync(join(out, 'summary.json'), 'utf8'));
+  assert.equal(s1.duplicates_dropped, 1);
+  assert.ok(s1.windows > 1);
+  assert.equal(s1.tasks_done, s1.windows);
+  assert.ok(s1.quote_found >= 1 && s1.quote_found < s1.claims_after_merge);
+  assert.equal(s1.gate, 'pass');
+  const calls1 = readFileSync(join(out, 'calls.jsonl'), 'utf8').trim().split('\n').length;
+  const second = run();
+  assert.equal(second.status, 0);
+  assert.equal(readFileSync(join(out, 'calls.jsonl'), 'utf8').trim().split('\n').length, calls1);
+  const mixed = run('--window', '900');
+  assert.equal(mixed.status, 2);
+});

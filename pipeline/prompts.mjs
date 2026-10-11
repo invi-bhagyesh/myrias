@@ -1,19 +1,35 @@
 // Prompts and output schemas for model-driven stages. Versioned: the version is stored with records.
-export const PROMPT_VERSION = 'extract-0.1';
+export const PROMPT_VERSION = 'extract-0.2';
 
-export const EXTRACT_SYSTEM = `You extract welfare-technology claims about farmed aquatic animals from one passage of a research paper.
-A claim is a specific statement that a technology, method or intervention affects, measures or addresses an animal-welfare outcome (stress, disease, water quality, stocking density, feeding, handling, slaughter and similar).
+// v0.2 keeps the verbatim quote and adds the fields that separate what a study measured from what
+// it claims, infers or proposes, and that keep negative evidence (after WelfareLens's EvidenceClaim).
+export const EXTRACT_SYSTEM = `You extract evidence about technologies, methods and practices for farmed aquatic animals from one passage of a research paper. This is a high-recall evidence record, not a judgment: never score, rank or recommend.
+A claim is a specific statement that a technology, method or practice affects, measures or addresses the animals' welfare or health (stress, disease, water quality, stocking density, feeding, handling, slaughter and similar).
 Rules:
-- "quote" must be copied exactly, character for character, from the passage, in the passage's own language. Never translate, shorten with ellipses, or repair the text.
-- "statement_en" is one plain English sentence saying what the passage claims. Do not add anything the passage does not say.
-- "intervention" names the technology, method or action the passage describes, in a few English words (for example "recirculating aquaculture system"), or "" if the passage reports an outcome without one.
-- Include only claims the passage itself supports. If it has none, return an empty list.`;
+- "quote" must be copied exactly, character for character, from the passage, in its own language. Never translate, shorten with ellipses, join separate sentences, or repair the text. One quote is one continuous stretch of the passage.
+- "statement_en" is one plain English sentence saying what the quote says. Add nothing.
+- Keep negative, null, mixed and speculative evidence. Do not drop a claim because the result is unfavourable, small, early or only proposed.
+- "basis": measured (this study observed or measured it), claimed (asserted here without a measurement shown), reported_background (attributed to earlier work), inferred (the authors' interpretation), speculative (a proposal or hope).
+- "polarity": supportive, counterevidence, null (no effect found), mixed, or descriptive.
+- "intervention": the technology, method or practice in a few English words, or "" if none. "intervention_key": a conservative lowercase-hyphenated label for exact variants of the same intervention (e.g. "conditioned-reflex-feed-training"), or "".
+- "candidate_status": clear (a stable, reproducible intervention), possible (plausible but its boundary is unclear), evidence_only (supporting evidence that is not itself an intervention).
+- "welfare_relevance": the welfare or health dimension, stated neutrally (e.g. "feeding behaviour", not "better feeding").
+- "species", "production_system", "limitations", "counterevidence", "uncertainty": only what the passage itself says; "" when it says nothing.
+If the passage has no such claim, return an empty list.`;
 
+const S = { type: 'string' };
 export const EXTRACT_SCHEMA = {
   type: 'object', additionalProperties: false, required: ['claims'],
   properties: { claims: { type: 'array', items: {
-    type: 'object', additionalProperties: false, required: ['quote', 'statement_en', 'intervention'],
-    properties: { quote: { type: 'string' }, statement_en: { type: 'string' }, intervention: { type: 'string' } }
+    type: 'object', additionalProperties: false,
+    required: ['quote', 'statement_en', 'intervention', 'intervention_key', 'candidate_status', 'basis', 'polarity', 'welfare_relevance', 'species', 'production_system', 'limitations', 'counterevidence', 'uncertainty'],
+    properties: {
+      quote: S, statement_en: S, intervention: S, intervention_key: S,
+      candidate_status: { type: 'string', enum: ['clear', 'possible', 'evidence_only'] },
+      basis: { type: 'string', enum: ['measured', 'claimed', 'reported_background', 'inferred', 'speculative'] },
+      polarity: { type: 'string', enum: ['supportive', 'counterevidence', 'null', 'mixed', 'descriptive'] },
+      welfare_relevance: S, species: S, production_system: S, limitations: S, counterevidence: S, uncertainty: S
+    }
   } } }
 };
 

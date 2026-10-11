@@ -1,6 +1,6 @@
 # Screening and rules: current state and proposed changes
 
-Status as of 2026-10-09. Written to be read without the code.
+Status as of 2026-10-11. Written to be read without the code.
 
 ## What is in the repository today (built, on `main`)
 
@@ -19,17 +19,39 @@ First run, mandarin fish, 14 Chinese-language papers: 231 claims extracted, 206 
 
 ## Relationship to WelfareLens (Robert's repository)
 
-I read its README, VISION, AGENTS, the schema, the lint rules and the triage job spec. **No change in Myrias is based on it yet.** The ideas below come from comparing the two.
+WelfareLens is a large-scale discovery funnel (67k extraction tasks, mostly metadata and abstracts)
+feeding a private research wiki. Myrias is a small full-text pipeline that checks every claim against
+its page and publishes the result. Where Myrias was ahead: a verbatim quote on every claim checked by
+code (WelfareLens's stage-1 `source_support` allows paraphrase), a second model from another lab
+judging every claim, claims from Chinese full text (their Chinese intake is metadata only), and a
+public site. Where WelfareLens was ahead: claim richness, dedup, chunking, identity resolution,
+recall gates and run safety.
 
-## Proposed changes (not built)
+## Adopted from WelfareLens (built and tested; not yet run on real data)
 
-1. Overlapping chunks with page locators instead of one page per call, so claims that span a page break are not lost.
-2. A dedup stage before extraction (file hash, DOI, normalised title).
-3. Recall measurement: a hand-made gold set from 6 to 8 papers, and a recall gate on each run (WelfareLens does this with anchors and a holdout set).
-4. Resolve interventions properly (strict clusters, ambiguous cases left separate), replacing the one-name-per-cell shortcut.
-5. Run safety: atomic budget reservation, SQLite checkpoints with resume, input and config hashes.
-6. Extract negative, null and speculative claims as their own kinds.
-7. Find more papers with a fixed query list over open Chinese indexes. Check permissions first.
+| Idea from WelfareLens | What Myrias now does | Where |
+|---|---|---|
+| Stage 0 eligibility and dedup | Drops duplicate papers (same text, or same title under another file name) before any model call, with a reason for each | `pipeline/dedup.mjs` |
+| Overlapping, locator-preserving chunks | Reads each paper in 1,800-character windows overlapping by 300; a quote is located back to its page; duplicates from the overlaps are merged | `pipeline/chunk.mjs` |
+| Rich `EvidenceClaim` (measured vs claimed vs inferred, polarity, speculative, counterevidence, limitations, uncertainties) | Extraction v0.2 adds basis, polarity (for, against, no effect, mixed, descriptive), candidate status, intervention key, limitations, counterevidence and uncertainty, **while keeping the verbatim quote** | `pipeline/prompts.mjs` |
+| Keep negative and speculative evidence | The extractor is told not to drop unfavourable, null or proposed results | `pipeline/prompts.mjs` |
+| Intervention keys and conservative grouping | Applications are grouped by intervention key within each cell; evidence-only claims support a cell without forming an application | `pipeline/export.mjs` |
+| Hard budget reservations | Each call reserves its worst-case cost before it is sent, so concurrent calls cannot pass the cap | `pipeline/llm.mjs` |
+| Durable checkpoints, resume, hashed configuration | Each window is a task with a stable id; finished tasks are checkpointed; a rerun skips them; a run with different inputs or settings refuses to write into an old directory; outputs cut off by the length limit are retried | `pipeline/run.mjs` |
+| Recall gates | A run can be scored against a hand-checked gold set and marked fail below a threshold | `pipeline/run.mjs --gold --min-recall` |
+
+The current public release (120 claims) was produced with the earlier version (one page per call,
+fewer fields). Re-exporting it with the new code gives an identical release, so nothing on the site
+changed. The new fields appear on claim pages once claims are re-extracted. Tests: 53 pass, including
+an end-to-end run against a fake model (dedup, windows, quote check, resume without new calls,
+refusal to mix settings, recall gate).
+
+## Still to do
+
+1. Build the gold set (6 to 8 papers, every claim listed by a bilingual reader) and set the recall threshold.
+2. Re-run extraction on the corpus with v0.2 and compare with v0.1 against the gold set.
+3. Resolve interventions across cells (strict clusters; ambiguous ones left separate).
+4. Find more papers with a fixed query list over open Chinese indexes, after checking permissions.
 
 ## Open decisions
 

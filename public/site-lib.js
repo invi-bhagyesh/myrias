@@ -3,7 +3,8 @@
 export const SCHEMA = 'myrias-landscape/1';
 export const VERIFICATION = ['unchecked', 'supported', 'partial', 'unsupported'];
 export const PUBLIC_VERIFICATION = ['supported', 'partial'];
-export const KINDS = ['measured', 'reported_background', 'inferred', 'speculative'];
+export const KINDS = ['measured', 'claimed', 'reported_background', 'inferred', 'speculative'];
+export const POLARITY = ['supportive', 'counterevidence', 'null', 'mixed', 'descriptive'];
 export const CELL_STATUS = ['has_records', 'probed_empty', 'not_collected'];
 
 // Pick a localized field: obj.field_<lang>, then obj.field_en, then obj.<lang>, then obj.field.
@@ -154,6 +155,7 @@ export function validateExport(data) {
     if (!KINDS.includes(c.kind)) fail(`claim ${c.id}: unknown kind ${c.kind}`);
     if (!VERIFICATION.includes(c.verification)) fail(`claim ${c.id}: unknown verification ${c.verification}`);
     if (!c.text_en) fail(`claim ${c.id}: missing English statement`);
+    if (c.polarity != null && !POLARITY.includes(c.polarity)) fail(`claim ${c.id}: unknown polarity ${c.polarity}`);
     if (data.release.sample === false && !PUBLIC_VERIFICATION.includes(c.verification)) {
       fail(`claim ${c.id}: ${c.verification} claims must not be published`);
     }

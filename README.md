@@ -44,7 +44,8 @@ is not part of the public evidence base, and is not linked from the site navigat
 
 Not wired to the site. `models.json` sets the model per stage and profile (`demo`, `full`), all through
 OpenRouter with provider data collection denied; `llm.mjs` is the single client (hard spend cap,
-per-call log of model, tokens and cost); `quote.mjs` is the deterministic quote check; `bakeoff.mjs`
+per-call log of model, tokens and cost); `quote.mjs` is the deterministic quote check; `dedup.mjs` and `chunk.mjs` drop duplicate papers and
+split text into overlapping, page-locating windows; `run.mjs` is resumable and refuses to mix settings; `bakeoff.mjs`
 compares models on a hand-checked gold set (`pipeline/gold/README.md`). It makes no paid call unless
 run with `--run --cap USD`.
 
