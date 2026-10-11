@@ -77,7 +77,7 @@ async function main() {
         for (const c of r.data.claims) {
           const q = checkQuote(c.quote, t.w.text);
           const page = q.ok ? (locatePage(c.quote, t.pages) ?? t.w.page_start) : t.w.page_start;
-          appendFileSync(`${out}/raw-claims.jsonl`, JSON.stringify({ source: t.source, page, window: t.w.index, task: t.id, ...c, quote_check: q.reason, model: r.entry.model, prompt_version: PROMPT_VERSION }) + '\n');
+          appendFileSync(`${out}/raw-claims.jsonl`, JSON.stringify({ source: t.source, page, window: t.w.index, task: t.id, ...c, quote_check: q.reason, ...(q.gaps ? { quote_gaps: q.gaps } : {}), model: r.entry.model, prompt_version: PROMPT_VERSION }) + '\n');
         }
         appendFileSync(`${out}/tasks.jsonl`, JSON.stringify({ id: t.id, source: t.source, window: t.w.index, status: 'done', claims: r.data.claims.length, model: r.entry.model }) + '\n');
       } catch (e) { stopped = e instanceof SpendCapError ? 'spend cap' : e.message; }

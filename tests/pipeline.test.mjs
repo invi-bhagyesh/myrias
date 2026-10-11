@@ -39,6 +39,15 @@ test('quote check: spacing, width, the full-stop glyph, and failures', () => {
   assert.equal(normalise('Ａ－Ｂ'), 'a-b');
 });
 
+test('quote check: an ellipsis may skip text, but every piece must be on the page, in order, and long enough', () => {
+  const page = '在确定年层时，有时会碰到在竟层内出现晤黑色的狭带，但仔细观察可以发现。另外一段：这种狭带是假年层。';
+  assert.deepEqual(checkQuote('在确定年层时，有时会碰到在竟层内出现晤黑色的狭带...这种狭带是假年层', page), { ok: true, reason: 'found', gaps: 1 });
+  assert.equal(checkQuote('在确定年层时，有时会碰到…这种狭带是假年层', page).gaps, 1);
+  assert.equal(checkQuote('这种狭带是假年层...在确定年层时，有时会碰到', page).reason, 'not_on_page');
+  assert.equal(checkQuote('在确定年层时…狭带', page).reason, 'not_on_page');
+  assert.equal(checkQuote('在确定年层时，有时会碰到...这种狭带是真年层', page).reason, 'not_on_page');
+});
+
 test('bigram overlap', () => {
   assert.equal(bigramOverlap('abcdef', 'abcdef'), 1);
   assert.ok(bigramOverlap('abcdef', 'abcdxx') < 0.8);
