@@ -1,5 +1,5 @@
 // Run a per-claim stage (map or verify) over claims.jsonl. Only claims whose quote was found on the page are sent.
-//   node pipeline/claimstage.mjs map|verify --in claims.jsonl --out out.jsonl --cap 0.20 [--only-relevant]
+//   node pipeline/claimstage.mjs map|verify --in claims.jsonl --out out.jsonl --cap 0.20 [--only-relevant] [--concurrency 6]
 // --only-relevant (verify): skip claims mapping marked as not about welfare. The export drops those anyway.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createClient, SpendCapError } from './llm.mjs';
@@ -31,7 +31,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const claims = readFileSync(arg('in'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
   const client = createClient({ capUsd: Number(arg('cap', 0)), logPath: `${arg('out')}.calls.jsonl` });
   const onlyRelevant = process.argv.includes('--only-relevant');
-  const { out, stopped } = await runClaimStage(stage, claims, client, 6, { onlyRelevant });
+  const { out, stopped } = await runClaimStage(stage, claims, client, Number(arg('concurrency', 6)), { onlyRelevant });
   writeFileSync(arg('out'), out.map(c => JSON.stringify(c)).join('\n') + '\n');
   console.log({ stage, claims: claims.length, sent: claims.filter(c => c.quote_check === 'found' && (!onlyRelevant || c.map?.welfare_relevant === true)).length, stopped, spent_usd: client.spent });
 }
