@@ -184,12 +184,12 @@ function viewOverview() {
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
         </div>
         <button type="button" class="scroll-cue" data-scroll="graph-title"><span>${esc(tr('hero.scroll'))}</span><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 7l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <aside class="hero-side" aria-hidden="true">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</aside>
+        <aside class="hero-side" aria-hidden="true"><img class="hero-art" src="art/research-desk.webp" width="1004" height="849" alt="" decoding="async">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</aside>
       </section>
-      <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
-        <figure class="band-card graph-card"><div class="graph-head"><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
-          <figcaption class="graph-note" data-gnote></figcaption></figure></section>
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
+      <section class="graph-feature" aria-labelledby="graph-title">
+        <figure class="band-card graph-card"><div class="graph-head"><h2 class="graph-name" id="graph-title">${esc(tr('graph.title'))}</h2><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
+          <figcaption class="graph-note" data-gnote></figcaption></figure></section>
 
       <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2>${d.release.sample ? `<p>${esc(tr(note))}</p>` : ''}</div>
         <ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul></section>
@@ -621,9 +621,8 @@ function updateSourceList() {
 window.addEventListener('hashchange', () => render(true));
 
 // ---------- start ----------
-let preferredLang = store('myrias-lang');
-if (!preferredLang) preferredLang = (navigator.language || 'en').toLowerCase().startsWith('zh') ? 'zh' : 'en';
-state.lang = preferredLang === 'zh' ? 'zh' : 'en';
+// English is the default; a visitor who switches to Chinese keeps that choice.
+state.lang = store('myrias-lang') === 'zh' ? 'zh' : 'en';
 let preferredTheme = store('myrias-theme');
 if (!preferredTheme) { try { preferredTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { preferredTheme = 'light'; } }
 document.documentElement.dataset.theme = preferredTheme;
