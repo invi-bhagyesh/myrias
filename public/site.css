@@ -664,3 +664,19 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .home-chart .mc-legend { margin-bottom: 12px; }
 .arena-home .graph-card h2.graph-name { margin: 0 auto 0 4px; font: 600 17px/1.2 var(--font); letter-spacing: -.01em; }
 .graph-head .graph-badge { order: 3; }
+
+/* Hero illustration (generated pixel art), with the stat tiles floating over it */
+.hero-art { display: block; width: 100%; max-width: 460px; height: auto; margin-left: auto; filter: drop-shadow(0 18px 28px color-mix(in srgb, #6a3fd0 16%, transparent)); }
+@media (min-width: 861px) {
+  .hero-side { display: block; }
+  .hero-side .hero-tile { position: absolute; min-width: 0; padding: 10px 16px; gap: 10px; }
+  .hero-side .hero-tile strong { font-size: 28px; }
+  .hero-side .hero-tile span { font-size: 11px; }
+  .hero-side .hero-tile.t0 { top: -4%; right: -2%; }
+  .hero-side .hero-tile.t1 { top: 58%; right: -8%; }
+  .hero-side .hero-tile.t2 { bottom: -2%; left: 0; }
+}
+@media (max-width: 860px) {
+  .hero-side { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hero-art { grid-column: 1 / -1; width: min(78%, 340px); margin: 0 auto 6px; }
+}
