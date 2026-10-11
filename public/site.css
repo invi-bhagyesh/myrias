@@ -662,3 +662,5 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .home-chart { min-width: 0; }
 .home-chart .mchart-wrap { margin-top: 0; }
 .home-chart .mc-legend { margin-bottom: 12px; }
+.arena-home .graph-card h2.graph-name { margin: 0 auto 0 4px; font: 600 17px/1.2 var(--font); letter-spacing: -.01em; }
+.graph-head .graph-badge { order: 3; }
