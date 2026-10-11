@@ -635,7 +635,7 @@ function setupHomeEffects() {
         handle = mountGraph(stage, g, { tr, navigate: href => { location.hash = href; } });
         home.querySelector('[data-glegend]').innerHTML = legendHtml(g, tr);
       }
-      home.querySelector('[data-gbadge]').hidden = !sample;
+      home.querySelector('[data-gbadge]').hidden = true;
       home.querySelector('[data-gnote]').textContent = sample ? tr('graph.note.placeholder') : tr('evmap.hint');
       home.querySelectorAll('[data-gview]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.gview === view)));
     };

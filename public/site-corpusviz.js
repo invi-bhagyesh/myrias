@@ -35,7 +35,7 @@ function barsHtml(c, tr) {
   const srcRows = src.map(([k, v]) => `<li><span class="fx-name">${esc(tr('corpus.src.' + k))}</span>
       <span class="fx-track" title="${esc(tr('cv.src.papers', { n: n(v.papers) }))} · ${esc(tr('cv.src.only', { n: n(v.only_here) }))}"><i class="fx-all" style="width:${(100 * v.papers / maxP).toFixed(1)}%"><i class="fx-only" style="width:${(100 * v.only_here / v.papers).toFixed(1)}%"></i></i></span>
       <span class="fx-val">${n(v.papers)}<small>${esc(tr('cv.src.only', { n: n(v.only_here) }))}</small></span></li>`).join('')
-    + off.map(k => `<li class="is-off"><span class="fx-name">${esc(tr('corpus.src.' + k))}</span><span class="fx-track is-off"></span><span class="fx-val"><small>${esc(tr('cv.needs'))}</small></span></li>`).join('');
+    + off.map(k => `<li class="is-off"><span class="fx-name">${esc(tr('corpus.src.' + k))}</span><span class="fx-track is-off"></span><span class="fx-val"><small>${esc(tr('cv.off'))}</small></span></li>`).join('');
   // What made it through: one stacked bar per stage, English then Chinese, scaled to all papers found.
   const stageRows = stages.map((st, i) => {
     const drop = i ? `<li class="fx-drop" aria-hidden="true"><span>↓ ${esc(tr('cv.lost.' + st.id, { n: n(stages[i - 1].n - st.n) }))}</span></li>` : '';
@@ -103,7 +103,7 @@ function sankeyHtml(c, tr) {
   });
   off.forEach((k, j) => {
     const y = rowY(src.length + j);
-    out += `<text class="sk-src is-off" x="20" y="${y + 4}">${esc(tr('corpus.src.' + k))}</text><text class="sk-srcn is-off" x="226" y="${y + 4}" text-anchor="end">${esc(tr('cv.needs'))}</text>`;
+    out += `<text class="sk-src is-off" x="20" y="${y + 4}">${esc(tr('corpus.src.' + k))}</text><text class="sk-srcn is-off" x="226" y="${y + 4}" text-anchor="end">${esc(tr('cv.off'))}</text>`;
   });
   return `<svg class="cv-svg sk" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(tr('cv.aria'))}">${out}</svg>`;
 }

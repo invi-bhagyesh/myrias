@@ -3,7 +3,7 @@
 // the evidence is. The layout is deterministic.
 //
 // Until a release holds enough verified claims, the page draws a clearly labelled placeholder
-// network (placeholderGraph) so the display can be judged; every placeholder node says "[Sample]".
+// network (placeholderGraph) so the display can be judged; placeholder nodes link nowhere.
 import { buildMatrix, pick, escapeHtml } from './site-lib.js';
 
 // Categorical colours, readable on both the light and the dark background.
@@ -98,20 +98,19 @@ export function buildGraph(data, lang = 'en', href = path => `#/${path}`) {
 
 // Invented network for the pre-release front page. It shares the real taxonomy (the technology
 // classes and welfare problems are the ones we will search) and nothing else: no real species,
-// no real claims. Every other node is labelled "[Sample]" and links nowhere.
+// no real claims. Every other node links nowhere.
 const SAMPLE_CLAIMS = [440, 360, 310, 270, 230, 195, 160, 130];
 export function placeholderGraph(data, lang = 'en', href = path => `#/${path}`) {
   const tax = data.taxonomy;
   const g = newGraph();
   const rng = lcg(7719);
-  const sample = lang === 'zh' ? '[示例]' : '[Sample]';
   const nClass = tax.technology_classes.length, nProb = tax.welfare_problems.length;
   addTaxonomy(g, tax, lang, href);
   const speciesIds = [];
   for (let i = 0; i < 6; i++) {
     const id = 's:sample-' + i;
     speciesIds.push(id);
-    g.add({ id, type: 'species', group: 'species', color: 'ink', label: '', tip: `${sample} ${lang === 'zh' ? '物种' : 'Species'} ${i + 1}`, href: null, r: 6, index: i });
+    g.add({ id, type: 'species', group: 'species', color: 'ink', label: '', tip: `${lang === 'zh' ? '物种' : 'Species'} ${i + 1}`, href: null, r: 6, index: i });
   }
   // Frame, as on the real page.
   for (let i = 0; i < nClass; i++) for (let j = 0; j < nProb; j++) g.link('c:' + tax.technology_classes[i].id, 'p:' + tax.welfare_problems[j].id, 'cell', 'not_collected');
@@ -125,7 +124,7 @@ export function placeholderGraph(data, lang = 'en', href = path => `#/${path}`) 
     const apps = [], weights = [];
     for (let k = 0; k < nApps; k++) {
       const id = `a:s${ci}-${k}`;
-      g.add({ id, type: 'application', group, color, label: '', tip: `${sample} ${appWord} · ${cname}`, href: null, r: 3.6 });
+      g.add({ id, type: 'application', group, color, label: '', tip: `${appWord} · ${cname}`, href: null, r: 3.6 });
       g.link(id, 'c:' + c.id, 'link');
       g.link(id, 'p:' + tax.welfare_problems[Math.floor(rng() * nProb)].id, 'far');
       if (rng() < 0.5) g.link(id, speciesIds[Math.floor(rng() * speciesIds.length)], 'far');
@@ -137,13 +136,13 @@ export function placeholderGraph(data, lang = 'en', href = path => `#/${path}`) 
     const sources = [], claims = [];
     for (let k = 0; k < nClaims; k++) {
       const id = `k:s${ci}-${k}`;
-      g.add({ id, type: 'claim', group, color, label: '', tip: `${sample} ${claimWord} · ${cname}`, href: null, r: 1.8 });
+      g.add({ id, type: 'claim', group, color, label: '', tip: `${claimWord} · ${cname}`, href: null, r: 1.8 });
       g.link(id, pickApp(), 'claim');
       let src;
       if (sources.length && rng() < 0.72) src = sources[Math.floor(rng() * sources.length)];
       else {
         src = `x:s${ci}-${sources.length}`;
-        g.add({ id: src, type: 'source', group, color: SOURCE_COLOR, label: '', tip: `${sample} ${srcWord} · ${cname}`, href: null, r: 1.6 });
+        g.add({ id: src, type: 'source', group, color: SOURCE_COLOR, label: '', tip: `${srcWord} · ${cname}`, href: null, r: 1.6 });
         sources.push(src); sourceCount++;
       }
       g.link(id, src, 'src');
