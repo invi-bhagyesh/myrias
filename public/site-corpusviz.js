@@ -63,19 +63,20 @@ function sankeyHtml(c, tr) {
     const y0 = TOP + (H0 - hEn - hZh - GAP) / 2;
     return { ...st, x: xs[i], en: { y: y0, h: hEn }, zh: { y: y0 + hEn + GAP, h: hZh } };
   });
-  // The flow is drawn as outlines only, no fill: the top edge (English), the line where English meets
-  // Chinese, and the bottom edge (Chinese). The space between them narrows as papers drop out.
+  // The flow between stages is drawn as strands, not a filled band: thin threads spread across each
+  // language's share, bunching together as papers drop out. Outer threads are a little stronger.
   const edge = (y0, y1, x0, x1) => { const m = (x0 + x1) / 2; return `M${x0},${y0} C${m},${y0} ${m},${y1} ${x1},${y1}`; };
+  const strands = (a, b, x0, x1) => { const k = Math.max(2, Math.round(Math.max(a.h, b.h) / 4)); let d = '';
+    for (let j = 0; j <= k; j++) { const t = j / k; d += edge(a.y + t * a.h, b.y + t * b.h, x0, x1) + ' '; } return d.trim(); };
   // A bar with 4px rounded outer ends: the top of English and the bottom of Chinese.
   const seg = (x, r, top, bottom) => { const rt = top ? Math.min(4, r.h / 2) : 0, rb = bottom ? Math.min(4, r.h / 2) : 0;
     return `M${x},${r.y + rt} Q${x},${r.y} ${x + rt},${r.y} L${x + BW - rt},${r.y} Q${x + BW},${r.y} ${x + BW},${r.y + rt} L${x + BW},${r.y + r.h - rb} Q${x + BW},${r.y + r.h} ${x + BW - rb},${r.y + r.h} L${x + rb},${r.y + r.h} Q${x},${r.y + r.h} ${x},${r.y + r.h - rb} Z`; };
   let out = '';
-  for (let i = 0; i < cols.length - 1; i++) {
-    const A = cols[i], B = cols[i + 1], x0 = A.x + BW + 3, x1 = B.x - 3;
-    const tip = l => `<title>${esc(tr('cv.lang.' + l))}: ${n(A.by_lang[l])} → ${n(B.by_lang[l])}</title>`;
-    out += `<path class="sk-edge" style="stroke:${LANG_COLOR.en}" d="${edge(A.en.y, B.en.y, x0, x1)}">${tip('en')}</path>`;
-    out += `<path class="sk-edge is-mid" d="${edge(A.zh.y - GAP / 2, B.zh.y - GAP / 2, x0, x1)}"/>`;
-    out += `<path class="sk-edge" style="stroke:${LANG_COLOR.zh}" d="${edge(A.zh.y + A.zh.h, B.zh.y + B.zh.h, x0, x1)}">${tip('zh')}</path>`;
+  for (let i = 0; i < cols.length - 1; i++) for (const l of ['en', 'zh']) if (cols[i + 1].by_lang[l]) {
+    const A = cols[i], B = cols[i + 1], x0 = A.x + BW + 2, x1 = B.x - 2;
+    out += `<g class="sk-flow" style="stroke:${LANG_COLOR[l]}"><title>${esc(tr('cv.lang.' + l))}: ${n(A.by_lang[l])} → ${n(B.by_lang[l])}</title>`
+      + `<path class="sk-strand" d="${strands(A[l], B[l], x0, x1)}"/>`
+      + `<path class="sk-edge" d="${edge(A[l].y, B[l].y, x0, x1)} ${edge(A[l].y + A[l].h, B[l].y + B[l].h, x0, x1)}"/></g>`;
   }
   cols.forEach((col, i) => {
     out += `<text class="sk-stage" x="${col.x + BW / 2}" y="${TOP - 40}" text-anchor="middle">${esc(tr('cv.stage.' + col.id))}</text>`;
