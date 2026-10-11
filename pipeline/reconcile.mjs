@@ -1,5 +1,7 @@
 // Reconcile (L7, first part): give one name to each intervention the claims describe in different words.
-//   node pipeline/reconcile.mjs --in final.jsonl --out reconciled.jsonl [--cap USD]
+//   node pipeline/reconcile.mjs --in final.jsonl --out reconciled.jsonl [--known STORE/claims.jsonl] [--cap USD]
+// With --known, groups already in the store stay fixed: a name seen before goes straight to its group,
+// and the model sees the existing groups so a new name can join one instead of starting a duplicate.
 // Extraction names an intervention per text window, so the same practice arrives as several names
 // (条件反射驯化, 驯食方式, 鳜驯食方法 …). One model call sees the distinct names of the claims that
 // passed (quote found, welfare-relevant) and groups only names for the same practice. Each claim keeps
@@ -24,10 +26,23 @@ export function distinctNames(claims) {
   return [...seen.entries()].map(([zh, en]) => ({ zh, en }));
 }
 
+// Groups already in the store: key → names, and every original name → its group.
+export function knownGroups(storeClaims) {
+  const byKey = new Map(), byName = new Map();
+  for (const c of storeClaims.filter(c => c.reconcile && c.intervention_key)) {
+    const g = byKey.get(c.intervention_key) || { key: c.intervention_key, name_zh: c.intervention, name_en: c.intervention_en };
+    byKey.set(c.intervention_key, g);
+    for (const n of [c.intervention_original, c.intervention]) if (n && !byName.has(n)) byName.set(n, g);
+  }
+  return { byKey, byName };
+}
+
 // Pure: apply groups to claims. Each name goes to the first group that lists it; unlisted names keep their own.
-export function applyGroups(claims, names, groups) {
-  const byName = new Map();
-  for (const g of groups) for (const m of g.members) {
+// A group whose key is already known takes the known names, so existing groups never change.
+export function applyGroups(claims, names, groups, known = { byKey: new Map(), byName: new Map() }) {
+  const byName = new Map(known.byName);
+  for (const g0 of groups) for (const m of g0.members) {
+    const g = known.byKey.get(g0.key) || g0;
     const n = names[m];
     if (n && !byName.has(n.zh)) byName.set(n.zh, g);
   }
@@ -43,13 +58,21 @@ export function applyGroups(claims, names, groups) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i < 0 ? d : process.argv[i + 1]; };
   const claims = readFileSync(arg('in'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
-  const names = distinctNames(claims);
+  const known = arg('known') ? knownGroups(readFileSync(arg('known'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l))) : { byKey: new Map(), byName: new Map() };
+  const names = distinctNames(claims).filter(n => !known.byName.has(n.zh));
   const client = createClient({ capUsd: Number(arg('cap', 0)), logPath: `${arg('out')}.calls.jsonl` });
-  const user = names.map((n, i) => `${i}. ${n.zh}${n.en ? ` (${n.en})` : ''}`).join('\n') + '\nReturn JSON.';
-  const r = await client.call('reconcile', { system: RECONCILE_SYSTEM, user, schema: RECONCILE_SCHEMA, maxTokens: 20000 });
-  if (!r.data) { console.error('reconcile: unparsed output'); process.exit(1); }
-  const out = applyGroups(claims, names, r.data.groups);
+  let groups = [];
+  if (names.length) {
+    const existing = [...known.byKey.values()].map(g => `${g.key}: ${g.name_zh} (${g.name_en})`).join('\n');
+    const user = (existing ? `Existing groups (reuse a key exactly when a new name is the same practice; do not rename them):\n${existing}\n\nNew names:\n` : '')
+      + names.map((n, i) => `${i}. ${n.zh}${n.en ? ` (${n.en})` : ''}`).join('\n') + '\nReturn JSON.';
+    const r = await client.call('reconcile', { system: RECONCILE_SYSTEM, user, schema: RECONCILE_SCHEMA, maxTokens: 20000 });
+    if (!r.data) { console.error('reconcile: unparsed output'); process.exit(1); }
+    groups = r.data.groups;
+  }
+  const out = applyGroups(claims, names, groups, known);
   writeFileSync(arg('out'), out.map(c => JSON.stringify(c)).join('\n') + '\n');
-  const assigned = new Set(r.data.groups.flatMap(g => g.members));
-  console.log({ names: names.length, groups: r.data.groups.length, unassigned: names.filter((_, i) => !assigned.has(i)).length, spent_usd: client.spent });
+  const assigned = new Set(groups.flatMap(g => g.members));
+  console.log({ known_groups: known.byKey.size, names_known: distinctNames(claims).length - names.length, new_names: names.length, groups: groups.length,
+    joined_existing: groups.filter(g => known.byKey.has(g.key)).length, unassigned: names.filter((_, i) => !assigned.has(i)).length, spent_usd: client.spent });
 }

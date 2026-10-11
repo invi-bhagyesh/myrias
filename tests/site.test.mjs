@@ -257,6 +257,7 @@ test('pipeline tab: stages are bilingual, models match the demo profile, funnel 
 });
 
 test('evidence map: every intervention is placed, empty classes and problems stay on the map', async () => {
+  const esc = L.escapeHtml;
   const { evidenceModel, evidenceMapHtml } = await import('../public/site-evmap.js');
   const live = read('release.json');
   const m = evidenceModel(live, 'en');
@@ -266,7 +267,14 @@ test('evidence map: every intervention is placed, empty classes and problems sta
   assert.equal(m.classes.reduce((s, c) => s + c.claims, 0), live.applications.reduce((s, a) => s + a.claim_ids.length, 0));
   assert.ok(m.totals.inApps <= m.totals.claims);
   const html = evidenceMapHtml(m, { tr: (k, v) => t('en', k, v), href: (p, q = {}) => '#/' + p + '?' + new URLSearchParams(q) });
-  for (const a of m.apps) assert.ok(html.includes(`data-k="a:${a.id}"`));
+  // Compact by default: no intervention rows until a technology is opened; the phone list has them all.
+  assert.ok(!m.apps.some(a => html.includes(`data-k="a:${a.id}"`)));
+  for (const a of m.apps) assert.ok(html.includes(esc(a.label)) || html.includes(a.label.slice(0, 10)));
+  for (const c of m.classes.filter(c => c.apps)) {
+    const opened = evidenceMapHtml(m, { tr: (k, v) => t('en', k, v), href: p => '#/' + p, open: c.id });
+    for (const a of m.apps.filter(a => a.cls === c.id)) assert.ok(opened.includes(`data-k="a:${a.id}"`));
+    assert.ok(opened.includes('aria-expanded="true"'));
+  }
   assert.ok(!/\{\w+\}/.test(html), 'no unfilled placeholders');
   const empty = evidenceModel(release, 'zh');
   assert.equal(empty.apps.length, 0);
