@@ -970,3 +970,21 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .fx-sankey .cv-list { display: none; }
 .fx-keep-row { margin: 4px 20px 14px; }
 @media (max-width: 700px) { .fx-sankey { display: none; } .fx-phone { display: block; } }
+
+/* Ribbon flow, restyled: slim bars, tinted ribbons, labels in ink */
+.sk { font-family: var(--font); }
+.sk-edge { fill: none; stroke-width: 1.5; stroke-linecap: round; pointer-events: stroke; }
+.sk-edge:hover { stroke-width: 2.5; }
+.sk-edge.is-mid { stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 2 3; }
+.sk-stage { font: 500 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; fill: var(--soft); }
+.sk-n { font: 600 17px var(--font); letter-spacing: -.02em; fill: var(--ink); }
+.sk-split { font: 11px var(--mono); fill: var(--soft); }
+.sk-drop { font: 11px var(--mono); fill: var(--soft); }
+.sk-link { fill: none; stroke: var(--line-strong); stroke-width: 1; opacity: .7; }
+.sk-src { font-size: 13px; font-weight: 600; fill: var(--ink); }
+.sk-src.is-off { font-weight: 500; fill: var(--soft); }
+.sk-srcn { font: 11px var(--mono); fill: var(--soft); }
+.sk-srcn.is-off { font-size: 10px; }
+.sk-srcbar { fill: color-mix(in srgb, var(--accent) 45%, transparent); }
+.fx-sankey { padding: 14px 18px 0; }
+.fx-sankey .fx-keep-row { margin: 0 2px 14px; }
