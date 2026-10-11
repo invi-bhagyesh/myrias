@@ -4,7 +4,8 @@ import { pixelHills } from './site-art.js';
 import { STAGES, funnel } from './site-pipeline.js';
 import { matrixChart } from './site-chart.js';
 
-import { buildGraph, placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
+import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
+import { evidenceModel, evidenceMapHtml, mountEvidenceMap } from './site-evmap.js';
 
 const { escapeHtml: esc, safeUrl, pick } = L;
 const ISSUES_URL = 'https://github.com/invi-bhagyesh/myrias/issues/new';
@@ -187,7 +188,7 @@ function viewOverview() {
         <aside class="hero-side" aria-hidden="true">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</aside>
       </section>
       <section class="graph-feature" aria-labelledby="graph-title"><h2 class="vh" id="graph-title">${esc(tr('graph.title'))}</h2>
-        <figure class="band-card graph-card"><div class="graph-head"><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${isPlaceholder(d) && graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
+        <figure class="band-card graph-card"><div class="graph-head"><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
           <figcaption class="graph-note" data-gnote></figcaption></figure></section>
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
 
@@ -481,7 +482,6 @@ const GRAPH_VIEWS = ['full', 'simple', 'today'];
 const isPlaceholder = d => d.claims.length < MIN_REAL_CLAIMS;
 const graphView = d => (GRAPH_VIEWS.includes(state.graphView) ? state.graphView : isPlaceholder(d) ? 'full' : 'today');
 function viewGraph(d, lang, view) {
-  if (view === 'today') return buildGraph(d, lang, link);
   const g = placeholderGraph(d, lang, link);
   return view === 'simple' ? simplifyGraph(g) : g;
 }
@@ -516,14 +516,21 @@ function setupHomeEffects() {
   if (stage && state.data) {
     let handle = null;
     const show = () => {
-      const d = state.data, view = graphView(d), g = viewGraph(d, state.lang, view);
-      const sample = view !== 'today' && isPlaceholder(d);
+      const d = state.data, view = graphView(d);
+      // "Full picture" and "Simple" are always invented data, so they always carry the badge.
+      const sample = view !== 'today';
       if (handle) handle.destroy();
-      handle = mountGraph(stage, g, { tr, navigate: href => { location.hash = href; } });
-      home.querySelector('[data-glegend]').innerHTML = legendHtml(g, tr);
+      stage.style.height = '';
+      if (view === 'today') {
+        handle = mountEvidenceMap(stage, evidenceMapHtml(evidenceModel(d, state.lang), { tr, href: link }));
+        home.querySelector('[data-glegend]').innerHTML = '';
+      } else {
+        const g = viewGraph(d, state.lang, view);
+        handle = mountGraph(stage, g, { tr, navigate: href => { location.hash = href; } });
+        home.querySelector('[data-glegend]').innerHTML = legendHtml(g, tr);
+      }
       home.querySelector('[data-gbadge]').hidden = !sample;
-      const note = sample ? tr('graph.note.placeholder') : (view === 'today' && !d.claims.length ? tr('graph.note.empty') : '');
-      home.querySelector('[data-gnote]').textContent = tr('graph.hint');
+      home.querySelector('[data-gnote]').textContent = sample ? tr('graph.note.placeholder') : tr('evmap.hint');
       home.querySelectorAll('[data-gview]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.gview === view)));
     };
     home.querySelectorAll('[data-gview]').forEach(btn => btn.addEventListener('click', () => { state.graphView = btn.dataset.gview; show(); }));
