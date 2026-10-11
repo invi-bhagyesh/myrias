@@ -38,6 +38,150 @@
   "files": 164,
   "bytes": 138435071
  },
+ "charts": {
+  "stages": [
+   {
+    "id": "found",
+    "n": 2005,
+    "by_lang": {
+     "en": 1636,
+     "zh": 369
+    }
+   },
+   {
+    "id": "about",
+    "n": 964,
+    "by_lang": {
+     "en": 848,
+     "zh": 116
+    }
+   },
+   {
+    "id": "tried",
+    "n": 964,
+    "by_lang": {
+     "en": 848,
+     "zh": 116
+    }
+   },
+   {
+    "id": "full_text",
+    "n": 176,
+    "by_lang": {
+     "en": 170,
+     "zh": 6
+    },
+    "by_route": {
+     "europepmc_xml": 101,
+     "landing_meta": 18,
+     "pdf": 57
+    }
+   }
+  ],
+  "sources": {
+   "europepmc": {
+    "papers": 838,
+    "only_here": 117,
+    "zh": 74
+   },
+   "crossref": {
+    "papers": 724,
+    "only_here": 4,
+    "zh": 11
+   },
+   "openalex": {
+    "papers": 1751,
+    "only_here": 460,
+    "zh": 344
+   },
+   "semanticscholar": {
+    "papers": 1285,
+    "only_here": 56,
+    "zh": 70
+   },
+   "doaj": {
+    "papers": 266,
+    "only_here": 17,
+    "zh": 4
+   }
+  },
+  "topics": {
+   "disease_parasites": {
+    "en": 417,
+    "zh": 41
+   },
+   "feeding": {
+    "en": 294,
+    "zh": 45
+   },
+   "breeding": {
+    "en": 221,
+    "zh": 25
+   },
+   "water_quality": {
+    "en": 157,
+    "zh": 23
+   },
+   "procedures": {
+    "en": 106,
+    "zh": 7
+   },
+   "stress_behaviour": {
+    "en": 108,
+    "zh": 3
+   },
+   "stocking_density": {
+    "en": 64,
+    "zh": 20
+   },
+   "handling_transport": {
+    "en": 10,
+    "zh": 3
+   },
+   "stunning_slaughter": {
+    "en": 3,
+    "zh": 0
+   }
+  },
+  "decades": {
+   "1930s": {
+    "en": 1,
+    "zh": 0
+   },
+   "1950s": {
+    "en": 2,
+    "zh": 0
+   },
+   "1960s": {
+    "en": 3,
+    "zh": 0
+   },
+   "1970s": {
+    "en": 0,
+    "zh": 1
+   },
+   "1980s": {
+    "en": 7,
+    "zh": 0
+   },
+   "1990s": {
+    "en": 44,
+    "zh": 60
+   },
+   "2000s": {
+    "en": 262,
+    "zh": 131
+   },
+   "2010s": {
+    "en": 556,
+    "zh": 164
+   },
+   "2020s": {
+    "en": 761,
+    "zh": 13
+   }
+  }
+ },
  "folders": [
   {
    "path": "",
@@ -490,5 +634,10 @@
    "about": "Open-access PDFs, named by record id",
    "items": []
   }
+ ],
+ "paper_files": [
+  "corpus-papers-0.json",
+  "corpus-papers-1.json",
+  "corpus-papers-2.json"
  ]
 }

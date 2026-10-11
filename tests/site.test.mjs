@@ -272,3 +272,22 @@ test('evidence map: every intervention is placed, empty classes and problems sta
   assert.equal(empty.apps.length, 0);
   assert.ok(evidenceMapHtml(empty, { tr: (k, v) => t('zh', k, v), href: p => '#/' + p }).includes(t('zh', 'evmap.noapps')));
 });
+
+test('corpus list: unpacks the column format, filters and sorts', async () => {
+  const { unpackPapers, filterPapers, FILTER_DEFAULTS } = await import('../public/site-corpuslist.js');
+  const j = { fields: ['id', 'title', 'year', 'lang', 'authors', 'topics', 'about', 'full_text', 'set', 'file'],
+    rows: [['a', 'Feed training of mandarin fish', 2001, 'en', ['Li X'], ['feeding'], true, 'pdf', 'intake', 'x'],
+      ['b', '鳜鱼人工繁殖', 1983, 'zh', null, null, true, null, 'intake', null], ['c', 'Genome', 2020, 'en', null, null, false, null, 'intake', null]] };
+  const papers = unpackPapers(j);
+  assert.equal(papers[0].file, 'intake/xml-pages.jsonl');
+  assert.deepEqual(papers[1].topics, []);
+  assert.deepEqual(filterPapers(papers, FILTER_DEFAULTS).map(p => p.id), ['a', 'b']);
+  assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, about: false, sort: 'old' }).map(p => p.id), ['b', 'a', 'c']);
+  assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, q: 'li x' }).map(p => p.id), ['a']);
+  assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, lang: 'zh' }).map(p => p.id), ['b']);
+  assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, ft: 'with' }).map(p => p.id), ['a']);
+  for (const f of readdirSync(new URL('../public/data', import.meta.url)).filter(f => f.startsWith('corpus-papers'))) {
+    const rows = unpackPapers(read(f));
+    assert.ok(rows.length && rows.every(p => p.id && p.title && !('abstract' in p)), f);
+  }
+});

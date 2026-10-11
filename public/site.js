@@ -6,6 +6,8 @@ import { matrixChart } from './site-chart.js';
 
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 import { evidenceModel, evidenceMapHtml, mountEvidenceMap } from './site-evmap.js';
+import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, LANG_COLOR } from './site-corpusviz.js';
+import { controlsHtml, mountCorpusList, FILTER_DEFAULTS, unpackPapers } from './site-corpuslist.js';
 
 const { escapeHtml: esc, safeUrl, pick } = L;
 const ISSUES_URL = 'https://github.com/invi-bhagyesh/myrias/issues/new';
@@ -112,11 +114,32 @@ function viewCorpus() {
       <span class="ct-desc">${esc(k ? tr('corpus.part.' + k) : tr('corpus.part.top'))}</span></summary>${list.map(folder).join('')}</details>`;
   }).join('');
   const where = `<p class="small-note">${esc(tr(c.private ? 'corpus.private' : 'corpus.public'))} <a href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer">${esc(c.repo)} ↗</a> · ${esc(tr('corpus.asof', { d: c.as_of }))}</p>`;
+  let charts = '';
+  if (c.charts) {
+    const st = Object.fromEntries(c.charts.stages.map(x => [x.id, x]));
+    const top = Object.entries(c.charts.sources).sort((a, b) => b[1].only_here - a[1].only_here)[0];
+    const legend = `<p class="cv-legend">${['en', 'zh'].map(l => `<span><i style="background:${LANG_COLOR[l]}"></i>${esc(tr('cv.lang.' + l))}</span>`).join('')}</p>`;
+    const total = Object.values(c.charts.decades).reduce((a, v) => a + v.en + v.zh, 0);
+    charts = `<h2>${esc(tr('cv.title'))}</h2>${legend}<div class="cv-card">${corpusFlowHtml(c, tr)}</div>
+      <p class="cv-note">${esc(tr('cv.note', { top: tr('corpus.src.' + top[0]), only: n(top[1].only_here), zf: n(st.found.by_lang.zh), za: n(st.about.by_lang.zh), zt: n(st.full_text.by_lang.zh) }))}</p>
+      <div class="cv-two"><section><h3>${esc(tr('cv.topics'))}</h3>${topicBarsHtml(c.charts.topics, k => tr('cv.topic.' + k))}<p class="cv-note">${esc(tr('cv.topics.note', { n: n(st.about.n) }))}</p></section>
+      <section><h3>${esc(tr('cv.decades'))}</h3>${decadeColumnsHtml(c.charts.decades)}<p class="cv-note">${esc(tr('cv.decades.note', { n: n(total) }))}</p></section></div>`;
+  }
+  // The paper list loads on first visit (about 1 MB of bibliographic details).
+  if (state.papers === undefined) {
+    state.papers = null;
+    Promise.all((c.paper_files || []).map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : { rows: [], fields: [] }))))
+      .then(parts => { state.papers = parts.flatMap(unpackPapers); if (parseHash().parts[0] === 'corpus') render(); }).catch(() => { state.papers = []; });
+  }
+  const topics = c.charts ? Object.keys(c.charts.topics) : [];
+  const listBlock = `<h2 id="papers">${esc(tr('cl.title'))}</h2><p class="cv-note">${esc(tr('cl.lead'))}</p>` + (state.papers
+    ? `<div class="cl-root" data-cl-root>${controlsHtml(state.corpusFilter || FILTER_DEFAULTS, topics, tr)}<p class="cl-count" data-cl-count></p><ul class="cl-list" data-cl-list></ul><button type="button" class="button small" data-cl-more hidden></button></div>`
+    : `<p class="loading">${esc(tr('loading'))}</p>`);
   return {
     title: tr('nav.corpus'),
     html: lead(tr('corpus.kicker'), tr('corpus.title'), tr('corpus.lead')) + where +
-      `<ul class="corpus-tiles">${tiles.map(([v, k]) => `<li><strong>${n(v)}</strong><span>${esc(tr(k))}</span></li>`).join('')}</ul>` +
-      `<h2>${esc(tr('corpus.sources'))}</h2><ul class="corpus-sources">${srcs}</ul>` +
+      `<ul class="corpus-tiles">${tiles.map(([v, k]) => `<li><strong>${n(v)}</strong><span>${esc(tr(k))}</span></li>`).join('')}</ul>` + charts +
+      `<div class="corpus-sources-wrap"><h2>${esc(tr('corpus.sources'))}</h2><ul class="corpus-sources">${srcs}</ul></div>` + listBlock +
       `<h2>${esc(tr('corpus.tree'))}</h2><p class="small-note">${esc(tr('corpus.tree.note', { n: n(h.files), size: fmtBytes(h.bytes) }))}</p><div class="corpus-tree">${parts}</div>`
   };
 }
@@ -498,6 +521,10 @@ function render(navigated = false) {
   else if (navigated && params.get('cell')) { const panel = $('.cell-panel'); if (panel) panel.scrollIntoView({ block: 'nearest' }); }
   state.lastPath = pathKey;
   if (!parts[0] || parts[0] === 'content') setupHomeEffects();
+  if (parts[0] === 'corpus' && state.papers && state.corpus) {
+    const root = document.querySelector('[data-cl-root]');
+    if (root) { const holder = { filter: state.corpusFilter }; mountCorpusList(root, state.papers, state.corpus, tr, holder); state.corpusFilter = holder.filter; }
+  }
 }
 
 // ---------- footer and home-page effects ----------
