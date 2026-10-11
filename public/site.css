@@ -1070,3 +1070,41 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .sp-more[open] > summary::before { content: "− "; }
 .sp-more table { width: 100%; }
 .sp-more .sp-papers { margin-top: 8px; }
+
+/* ===== Moss theme: shaded stone (light) and charcoal green (dark), muted colours ===== */
+:root {
+  --bg: #E3E1D3; --card: #ECEADF; --card-bg: #ECEADF; --ink: #1D2318; --soft: #4F5649;
+  --line: #CFCCB8; --line-strong: #B5B29C; --accent: #3F5F2A; --accent-soft: #D5DDC2; --danger: #A23E22;
+  --band-sage: #DADEC9; --band-sand: #E6DECA; --band-clay: #E4D9CA; --band-mint: #D8DFD0;
+  --hill-1: #D6DAC4; --hill-2: #C3CCAD; --hill-3: #D6BC9E; --hill-edge: #E3E1D3;
+  --card-line: #1D231814; --footer-panel: #D8D5C4; --wordmark: #F1EFE4b3;
+  --card-shadow: inset 0 1px 0 #ffffff4d, 0 10px 30px #2a2a1a12; --card-shadow-hover: inset 0 1px 0 #ffffff4d, 0 18px 40px #2a2a1a1f;
+  --pattern: color-mix(in srgb, var(--ink) 14%, transparent);
+  --lang-en: #2A67A4; --lang-zh: #B5562A;
+  --on-accent: #F1EFE4;
+}
+:root[data-theme="dark"] {
+  --bg: #181B15; --card: #20241C; --card-bg: #20241C; --ink: #DDDDCF; --soft: #A2A693;
+  --line: #2F3529; --line-strong: #3A4033; --accent: #8DA371; --accent-soft: #2D3626; --danger: #D98A6A;
+  --band-sage: #1C2118; --band-sand: #221F18; --band-clay: #211C18; --band-mint: #1A201B;
+  --hill-1: #1F251B; --hill-2: #273021; --hill-3: #3A2C22; --hill-edge: #3F4A36;
+  --card-line: #ffffff0d; --footer-panel: #1C2019; --wordmark: #ffffff12;
+  --card-shadow: inset 0 1px 0 #ffffff08, 0 10px 30px #00000033; --card-shadow-hover: inset 0 1px 0 #ffffff08, 0 18px 40px #00000047;
+  --pattern: color-mix(in srgb, var(--ink) 10%, transparent);
+  --lang-en: #5C8ECE; --lang-zh: #C47448;
+  --on-accent: #181B15;
+}
+.arena-home .hero-hills, :root[data-theme="dark"] .arena-home .hero-hills { --hill-1: var(--band-sage); --hill-2: var(--band-mint); --hill-3: var(--band-clay); --hill-edge: var(--bg); }
+.hero-aurora { background:
+    radial-gradient(ellipse 46% 64% at 88% 12%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    radial-gradient(ellipse 38% 56% at 4% 96%, color-mix(in srgb, var(--lang-zh) 14%, transparent), transparent 70%),
+    radial-gradient(ellipse 34% 50% at 52% 104%, color-mix(in srgb, var(--lang-en) 10%, transparent), transparent 72%); }
+.arena-home .hero h1 { background: linear-gradient(100deg, var(--ink) 30%, var(--accent) 70%, var(--lang-zh) 100%); -webkit-background-clip: text; background-clip: text; }
+.hero-tile.t0 { --c: var(--lang-en); } .hero-tile.t1 { --c: var(--lang-zh); } .hero-tile.t2 { --c: var(--accent); }
+.hero-art, .sp-art img { filter: drop-shadow(0 18px 28px color-mix(in srgb, var(--ink) 14%, transparent)); }
+.funnel-bar i { background: linear-gradient(90deg, var(--accent), var(--lang-zh)); }
+.ev-1 { fill: #B5562A; background: #B5562A; } .ev-2 { fill: #6E8F55; background: #6E8F55; } .ev-3 { fill: #3F5F2A; background: #3F5F2A; }
+.button.primary, .sp-step.is-done .sp-step-n, .mc-n { color: var(--on-accent); }
+.mc-n { fill: var(--on-accent); }
+.home-actions .button-primary { color: var(--on-accent); }
+.cl-tag.t-first { color: var(--on-accent); background: var(--lang-zh); border-color: var(--lang-zh); }
