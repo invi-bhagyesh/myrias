@@ -61,8 +61,8 @@
       "reconcile": {
         "model": "anthropic/claude-sonnet-5.5",
         "temperature": 0,
-        "reasoning": {
-          "effort": "low"
+        "provider": {
+          "require_parameters": false
         }
       },
       "translate": {

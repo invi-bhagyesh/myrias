@@ -49,7 +49,7 @@ export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, 
     try {
     const body = {
       model, messages, ...(maxTokens ? { max_tokens: maxTokens } : {}), temperature: setting.temperature ?? 0,
-      provider: CONFIG.provider, usage: { include: true },
+      provider: { ...CONFIG.provider, ...(setting.provider || {}) }, usage: { include: true },
       ...(setting.reasoning ? { reasoning: setting.reasoning } : {}),
       ...(schema ? { response_format: { type: 'json_schema', json_schema: { name: stage, strict: true, schema } } } : {})
     };
