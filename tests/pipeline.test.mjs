@@ -39,6 +39,15 @@ test('quote check: spacing, width, the full-stop glyph, and failures', () => {
   assert.equal(normalise('Ａ－Ｂ'), 'a-b');
 });
 
+test('quote check: an ellipsis may skip text, but every piece must be on the page, in order, and long enough', () => {
+  const page = '在确定年层时，有时会碰到在竟层内出现晤黑色的狭带，但仔细观察可以发现。另外一段：这种狭带是假年层。';
+  assert.deepEqual(checkQuote('在确定年层时，有时会碰到在竟层内出现晤黑色的狭带...这种狭带是假年层', page), { ok: true, reason: 'found', gaps: 1 });
+  assert.equal(checkQuote('在确定年层时，有时会碰到…这种狭带是假年层', page).gaps, 1);
+  assert.equal(checkQuote('这种狭带是假年层...在确定年层时，有时会碰到', page).reason, 'not_on_page');
+  assert.equal(checkQuote('在确定年层时…狭带', page).reason, 'not_on_page');
+  assert.equal(checkQuote('在确定年层时，有时会碰到...这种狭带是真年层', page).reason, 'not_on_page');
+});
+
 test('bigram overlap', () => {
   assert.equal(bigramOverlap('abcdef', 'abcdef'), 1);
   assert.ok(bigramOverlap('abcdef', 'abcdxx') < 0.8);
@@ -47,8 +56,8 @@ test('bigram overlap', () => {
 
 const okFetch = (content, cost = 0.001) => async () => ({ ok: true, status: 200, json: async () => ({ model: 'm/x', choices: [{ message: { content } }], usage: { prompt_tokens: 10, completion_tokens: 5, cost } }) });
 
-test('client: needs a cap, logs fields, never logs the key, parses JSON schema output', async () => {
-  assert.throws(() => createClient({ apiKey: 'k' }), /capUsd/);
+test('client: no cap unless given, logs fields, never logs the key, parses JSON schema output', async () => {
+  assert.equal(createClient({ apiKey: 'k' }).capUsd, Infinity);
   const calls = [];
   const client = createClient({ apiKey: 'sk-secret', capUsd: 1, fetchImpl: async (u, o) => { calls.push({ u, o }); return okFetch('{"claims":[]}')(); } });
   const out = await client.call('extract', { user: 'hi', schema: EXTRACT_SCHEMA });
@@ -120,6 +129,19 @@ test('claim stage: only quote-checked claims are sent, results attached with the
   assert.equal(sent.length, 1);
   assert.equal(out[0].verify.verdict, 'supported');
   assert.equal(out[1].verify, undefined);
+});
+
+test('claim stage: --only-relevant verifies only claims mapped as about welfare', async () => {
+  const sent = [];
+  const fetchImpl = async (u, o) => { sent.push(JSON.parse(o.body)); return okFetch('{"verdict":"supported","note":"x"}')(); };
+  const client = createClient({ apiKey: 'k', capUsd: 1, fetchImpl });
+  const claims = [{ quote: 'a', statement: 's', quote_check: 'found', map: { welfare_relevant: true } },
+    { quote: 'b', statement: 't', quote_check: 'found', map: { welfare_relevant: false } }, { quote: 'c', statement: 'u', quote_check: 'found' }];
+  const { out } = await runClaimStage('verify', claims, client, 2, { onlyRelevant: true });
+  assert.equal(sent.length, 1);
+  assert.equal(out[0].verify.verdict, 'supported');
+  assert.equal(out[1].verify, undefined);
+  assert.equal(out[2].verify, undefined);
 });
 
 test('suggestions skip claims judged irrelevant or unsupported when those stages ran', () => {
@@ -340,4 +362,24 @@ test('intake: species filter, topics, merging, JATS sections and PDF meta tags',
   assert.equal(I.pdfMeta('<meta name="citation_pdf_url" content="https://j.cn/a.pdf">'), 'https://j.cn/a.pdf');
   assert.equal(I.pdfMeta('<meta content="/b.pdf" name="citation_pdf_url" />'), '/b.pdf');
   assert.equal(I.pdfMeta('<html></html>'), null);
+});
+
+test('reconcile: one name per practice, originals kept, every name in one group at most', async () => {
+  const { distinctNames, applyGroups } = await import('../pipeline/reconcile.mjs');
+  const c = (iv, extra = {}) => ({ quote_check: 'found', map: { welfare_relevant: true }, intervention: iv, intervention_en: iv + '-en', intervention_key: 'k-' + iv, ...extra });
+  const claims = [c('条件反射驯化'), c('驯食方式'), c('条件反射驯化'), c('孔雀石绿药浴'), c('无关', { map: { welfare_relevant: false } }), c('未分组')];
+  const names = distinctNames(claims);
+  assert.deepEqual(names.map(n => n.zh), ['条件反射驯化', '驯食方式', '孔雀石绿药浴', '未分组']);
+  const out = applyGroups(claims, names, [
+    { key: 'Feed Training', name_zh: '驯食', name_en: 'feed training', members: [0, 1] },
+    { key: 'malachite-green', name_zh: '孔雀石绿药浴', name_en: 'malachite green bath', members: [2, 0] }
+  ]);
+  assert.equal(out[0].intervention, '驯食');
+  assert.equal(out[0].intervention_key, 'feed-training');
+  assert.equal(out[0].intervention_original, '条件反射驯化');
+  assert.equal(out[1].intervention_key, 'feed-training');
+  assert.equal(out[3].intervention_en, 'malachite green bath');
+  assert.equal(out[4].intervention, '无关');
+  assert.equal(out[4].reconcile, undefined);
+  assert.equal(out[5].intervention, '未分组');
 });

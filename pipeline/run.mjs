@@ -77,7 +77,7 @@ async function main() {
         for (const c of r.data.claims) {
           const q = checkQuote(c.quote, t.w.text);
           const page = q.ok ? (locatePage(c.quote, t.pages) ?? t.w.page_start) : t.w.page_start;
-          appendFileSync(`${out}/raw-claims.jsonl`, JSON.stringify({ source: t.source, page, window: t.w.index, task: t.id, ...c, quote_check: q.reason, model: r.entry.model, prompt_version: PROMPT_VERSION }) + '\n');
+          appendFileSync(`${out}/raw-claims.jsonl`, JSON.stringify({ source: t.source, page, window: t.w.index, task: t.id, ...c, quote_check: q.reason, ...(q.gaps ? { quote_gaps: q.gaps } : {}), model: r.entry.model, prompt_version: PROMPT_VERSION }) + '\n');
         }
         appendFileSync(`${out}/tasks.jsonl`, JSON.stringify({ id: t.id, source: t.source, window: t.w.index, status: 'done', claims: r.data.claims.length, model: r.entry.model }) + '\n');
       } catch (e) { stopped = e instanceof SpendCapError ? 'spend cap' : e.message; }
@@ -100,7 +100,7 @@ async function main() {
     tasks_done: count('done'), tasks_truncated: count('truncated'), tasks_unparsed: count('unparsed'), tasks_pending: tasks.length - last.size,
     claims_raw: raw.length, claims_after_merge: claims.length, quote_found: claims.filter(c => c.quote_check === 'found').length,
     recall: r, gate: gold.length ? (r >= minRecall ? 'pass' : 'fail') : 'not_measured',
-    stopped, spent_usd_this_run: client.spent, cap_usd: cap, config_hash: configHash
+    stopped, spent_usd_this_run: client.spent, cap_usd: cap > 0 ? cap : null, config_hash: configHash
   };
   writeFileSync(`${out}/summary.json`, JSON.stringify(summary, null, 2));
   console.log(summary);

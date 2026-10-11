@@ -31,7 +31,8 @@ export function estimateCost(model, input, maxOutputTokens) {
 }
 
 export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, logPath, fetchImpl = fetch, profile, retryMs = 8000, retries = 2 } = {}) {
-  if (!(capUsd > 0)) throw new Error('capUsd is required: every run has a hard spend cap');
+  // No cap unless one is given: spending is still tracked, logged per call and reported.
+  if (!(capUsd > 0)) capUsd = Infinity;
   // Budget reservation: a call reserves its worst-case cost before it is sent and releases it when
   // the real cost is known, so concurrent calls can never take the run past the cap.
   let spent = 0, reserved = 0, calls = 0, inFlight = 0;

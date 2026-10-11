@@ -1,21 +1,86 @@
 {
   "id": "mandarin-fish-run-2",
-  "status": "planned",
+  "status": "in_progress",
   "species": "mandarin-fish",
   "planned_on": "2026-10-11",
   "goal_en": "Rebuild the mandarin fish release from the new corpus: Chinese papers re-read with the current extraction (the Chinese text is the record, English is a checked rendering), then every open full-text paper the search found.",
   "goal_zh": "用新语料重建鳜鱼版本：先用当前提取流程重读中文论文（中文原文为记录，英文为经核对的译文），再处理检索到的全部开放全文论文。",
   "profile": "demo",
-  "provider": { "router": "OpenRouter", "data_collection": "deny", "require_parameters": true },
-  "window": { "size_chars": 1800, "overlap_chars": 300 },
-  "prompt_versions": { "extract": "extract-0.3", "render": "render-0.1" },
+  "provider": {
+    "router": "OpenRouter",
+    "data_collection": "deny",
+    "require_parameters": true
+  },
+  "window": {
+    "size_chars": 1800,
+    "overlap_chars": 300
+  },
+  "prompt_versions": {
+    "extract": "extract-0.3",
+    "render": "render-0.1"
+  },
   "stages": [
-    { "id": "extract", "model": "qwen/qwen3.8-flash", "fallback": ["deepseek/deepseek-v4.1-flash"], "reasoning": "off", "max_output_tokens": 6000, "per": "window" },
-    { "id": "quote_check", "model": null, "per": "claim", "note_en": "Code: the quote must be on the page it cites", "note_zh": "代码核对：引文必须在所引页面上" },
-    { "id": "map", "model": "qwen/qwen3.8-flash", "fallback": ["deepseek/deepseek-v4.1-flash"], "reasoning": "off", "max_output_tokens": 800, "per": "claim with quote found" },
-    { "id": "verify", "model": "z-ai/glm-5.3", "reasoning": "low", "max_output_tokens": 4000, "per": "welfare-relevant claim", "note_en": "A different lab from the extractor", "note_zh": "与提取模型不同厂商" },
-    { "id": "render", "model": "qwen/qwen3.8-flash", "reasoning": "off", "max_output_tokens": 600, "per": "Chinese claim", "note_en": "English shown only if every number survives", "note_zh": "所有数字都保留时才显示英文" },
-    { "id": "export", "model": null, "per": "release", "note_en": "Validator rejects full text and unchecked claims", "note_zh": "校验器拒绝全文和未核对的论断" }
+    {
+      "id": "extract",
+      "model": "qwen/qwen3.8-flash",
+      "fallback": [
+        "deepseek/deepseek-v4.1-flash"
+      ],
+      "reasoning": "off",
+      "max_output_tokens": 6000,
+      "per": "window"
+    },
+    {
+      "id": "quote_check",
+      "model": null,
+      "per": "claim",
+      "note_en": "Code: the quote must be on the page it cites",
+      "note_zh": "代码核对：引文必须在所引页面上"
+    },
+    {
+      "id": "map",
+      "model": "qwen/qwen3.8-flash",
+      "fallback": [
+        "deepseek/deepseek-v4.1-flash"
+      ],
+      "reasoning": "off",
+      "max_output_tokens": 800,
+      "per": "claim with quote found"
+    },
+    {
+      "id": "verify",
+      "model": "z-ai/glm-5.3",
+      "reasoning": "low",
+      "max_output_tokens": 4000,
+      "per": "welfare-relevant claim",
+      "note_en": "A different lab from the extractor",
+      "note_zh": "与提取模型不同厂商"
+    },
+    {
+      "id": "render",
+      "model": "qwen/qwen3.8-flash",
+      "reasoning": "off",
+      "max_output_tokens": 600,
+      "per": "Chinese claim",
+      "note_en": "English shown only if every number survives",
+      "note_zh": "所有数字都保留时才显示英文"
+    },
+    {
+      "id": "reconcile",
+      "model": "qwen/qwen3.8-max-0902",
+      "reasoning": "low",
+      "max_output_tokens": 20000,
+      "per": "run (one call over the distinct intervention names)",
+      "note_en": "Groups names for the same practice; originals kept",
+      "note_zh": "合并同一做法的不同名称；保留原名"
+    },
+    {
+      "id": "export",
+      "model": null,
+      "per": "release",
+      "note_en": "Validator rejects full text and unchecked claims",
+      "note_zh": "校验器拒绝全文和未核对的论断"
+    }
   ],
   "phases": [
     {
@@ -23,58 +88,115 @@
       "name_en": "Chinese papers, current extraction",
       "name_zh": "中文论文，当前提取流程",
       "input": "first-run/pages/pages-used-in-run.jsonl",
-      "papers": 19, "windows": 103,
-      "estimate_usd": { "low": 0.15, "high": 0.4 },
-      "cap_usd": 0.5,
+      "papers": 19,
+      "windows": 103,
+      "estimate_usd": {
+        "low": 0.15,
+        "high": 0.4
+      },
+      "cap_usd": null,
       "minutes": 10,
       "why_en": "Replaces the current release, which was extracted with an older prompt: Chinese records, Chinese intervention names, English renderings with a number check, and no research methods (such as histopathology) counted as interventions.",
       "why_zh": "替换用旧版提示词提取的当前版本：中文记录、中文干预名称、经数字核对的英文译文，不再把研究方法（如组织病理学）当作干预措施。",
       "commands": [
-        "node pipeline/run.mjs --pages $CORPUS/first-run/pages/pages-used-in-run.jsonl --out $OUT/A --cap 0.30",
-        "node pipeline/claimstage.mjs map --in $OUT/A/claims.jsonl --out $OUT/A/mapped.jsonl --cap 0.05",
-        "node pipeline/claimstage.mjs verify --in $OUT/A/mapped.jsonl --out $OUT/A/verified.jsonl --cap 0.10 --only-relevant",
-        "node pipeline/render.mjs --in $OUT/A/verified.jsonl --out $OUT/A/final.jsonl --cap 0.05",
-        "node pipeline/export.mjs --claims $OUT/A/final.jsonl --base public/data/release.json --meta pipeline/sources-meta.json --out public/data/release.json"
-      ]
+        "node pipeline/run.mjs --pages $OUT/pages-A.jsonl (text layer with every hand transcription swapped in) --out $OUT/A",
+        "node pipeline/claimstage.mjs map --in $OUT/A/claims.jsonl --out $OUT/A/mapped.jsonl",
+        "node pipeline/claimstage.mjs verify --in $OUT/A/mapped.jsonl --out $OUT/A/verified.jsonl --only-relevant",
+        "node pipeline/render.mjs --in $OUT/A/verified.jsonl --out $OUT/A/final.jsonl",
+        "node pipeline/reconcile.mjs --in $OUT/A/final.jsonl --out $OUT/A/reconciled.jsonl",
+        "node pipeline/export.mjs --claims $OUT/A/reconciled.jsonl --base public/data/release.json --meta pipeline/sources-meta.json --out public/data/release.json"
+      ],
+      "status": "done",
+      "actual": {
+        "spent_usd": 0.356,
+        "claims_extracted": 407,
+        "claims_quote_found": 310,
+        "claims_relevant": 127,
+        "claims_released": 127,
+        "claims_supported": 106,
+        "sources_released": 16,
+        "interventions": 21
+      },
+      "notes_en": "First attempt read pages where the hand transcriptions had not been swapped in; it was redone. The quote check now accepts \"...\" gaps when every piece is on the page. Four papers with a garbled text layer lose most of their quotes and need OCR. One scanned paper has no text layer at all.",
+      "notes_zh": "第一次尝试读取的页面没有换入人工转写文本，因此重做。引文核对现在接受“……”省略，前提是每一段都在页面上。四篇文本层乱码的论文大部分引文无法核对，需要 OCR；一篇扫描版论文完全没有文本层。"
     },
     {
       "id": "B",
       "name_en": "Every open full-text paper from the search",
       "name_zh": "检索到的全部开放全文论文",
       "input": "intake/pages.jsonl (reference lists trimmed)",
-      "papers": 176, "windows": 4054,
-      "estimate_usd": { "low": 3.5, "high": 7.5 },
-      "cap_usd": 8,
+      "papers": 176,
+      "windows": 4054,
+      "estimate_usd": {
+        "low": 3.5,
+        "high": 7.5
+      },
+      "cap_usd": null,
       "minutes": 120,
       "why_en": "The first run read 19 Chinese papers. This reads the 176 papers with open full text (170 English, 6 Chinese), so the release covers what English research says too.",
       "why_zh": "第一次运行读了 19 篇中文论文。这一阶段读取 176 篇有开放全文的论文（英文 170 篇，中文 6 篇），使版本也涵盖英文研究的内容。",
       "commands": [
         "node pipeline/prepare.mjs --pages $CORPUS/intake/pages.jsonl --trim-references --out $OUT/B/pages.jsonl",
-        "node pipeline/run.mjs --pages $OUT/B/pages.jsonl --out $OUT/B --cap 3.50",
-        "node pipeline/claimstage.mjs map --in $OUT/B/claims.jsonl --out $OUT/B/mapped.jsonl --cap 1.00",
-        "node pipeline/claimstage.mjs verify --in $OUT/B/mapped.jsonl --out $OUT/B/verified.jsonl --cap 2.50 --only-relevant",
-        "node pipeline/render.mjs --in $OUT/B/verified.jsonl --out $OUT/B/final.jsonl --cap 0.20",
+        "node pipeline/run.mjs --pages $OUT/B/pages.jsonl --out $OUT/B",
+        "node pipeline/claimstage.mjs map --in $OUT/B/claims.jsonl --out $OUT/B/mapped.jsonl",
+        "node pipeline/claimstage.mjs verify --in $OUT/B/mapped.jsonl --out $OUT/B/verified.jsonl --only-relevant",
+        "node pipeline/render.mjs --in $OUT/B/verified.jsonl --out $OUT/B/final.jsonl",
+        "node pipeline/reconcile.mjs --in $OUT/B/final.jsonl --out $OUT/B/reconciled.jsonl",
         "node pipeline/export.mjs --claims $OUT/A/final.jsonl,$OUT/B/final.jsonl --base public/data/release.json --meta pipeline/sources-meta.json --records $CORPUS/intake/records.jsonl --out public/data/release.json"
-      ]
+      ],
+      "status": "planned"
     }
   ],
   "estimate_basis_en": "Per-call costs measured in the first run: extract about $0.0006 per window (raised by half for the longer v0.3 output), map $0.0001 and verify $0.00035 per claim; about 2.2 claims per window, 85% with the quote found, about 60% welfare-relevant.",
   "estimate_basis_zh": "按第一次运行实测的单次费用估算：提取每个窗口约 0.0006 美元（因 v0.3 输出更长上调一半），归类每条 0.0001 美元，核验每条 0.00035 美元；每个窗口约 2.2 条论断，85% 引文可找到，约 60% 与福利相关。",
   "gates": [
-    { "id": "spend_cap", "status": "ready", "en": "Each command stops at its cap; worst-case cost is reserved before every call", "zh": "每条命令到达上限即停止；每次调用前预留最坏情况的费用" },
-    { "id": "resume", "status": "ready", "en": "Stopped runs resume from their checkpoint; changed settings cannot mix into an old run", "zh": "中断后从检查点继续；设置改变后不会与旧结果混在一起" },
-    { "id": "recall", "status": "missing", "en": "No gold set yet, so recall is not measured. 20-30 hand-checked passages are needed", "zh": "尚无标准集，无法衡量召回率。需要 20-30 段人工核对的文本" },
-    { "id": "expert_audit", "status": "missing", "en": "No expert has audited a sample, so no error rate can be published", "zh": "尚无专家抽样审核，无法公布错误率" }
+    {
+      "id": "cost_log",
+      "status": "ready",
+      "en": "Every call logs its model, tokens and cost; totals are reported after each step",
+      "zh": "每次调用记录模型、token 和费用；每一步结束后报告总额"
+    },
+    {
+      "id": "resume",
+      "status": "ready",
+      "en": "Stopped runs resume from their checkpoint; changed settings cannot mix into an old run",
+      "zh": "中断后从检查点继续；设置改变后不会与旧结果混在一起"
+    },
+    {
+      "id": "recall",
+      "status": "missing",
+      "en": "No gold set yet, so recall is not measured. 20-30 hand-checked passages are needed",
+      "zh": "尚无标准集，无法衡量召回率。需要 20-30 段人工核对的文本"
+    },
+    {
+      "id": "expert_audit",
+      "status": "missing",
+      "en": "No expert has audited a sample, so no error rate can be published",
+      "zh": "尚无专家抽样审核，无法公布错误率"
+    }
   ],
   "to_build_first": [
-    { "en": "verify --only-relevant: skip claims mapping marked as not about welfare (about 40% fewer verify calls)", "zh": "verify --only-relevant：跳过归类为与福利无关的论断（核验调用约减少 40%）" },
-    { "en": "prepare.mjs: join the corpus pages and trim reference lists", "zh": "prepare.mjs：合并语料页面并去掉参考文献" },
-    { "en": "export --records: take each new paper's title, year, venue and DOI from the intake records, and accept several claim files", "zh": "export --records：从检索记录中读取每篇新论文的标题、年份、期刊和 DOI，并接受多个论断文件" }
+    {
+      "en": "prepare.mjs: join the corpus pages and trim reference lists",
+      "zh": "prepare.mjs：合并语料页面并去掉参考文献"
+    },
+    {
+      "en": "export --records: take each new paper's title, year, venue and DOI from the intake records, and accept several claim files",
+      "zh": "export --records：从检索记录中读取每篇新论文的标题、年份、期刊和 DOI，并接受多个论断文件"
+    }
   ],
   "outputs": [
-    { "en": "A new release.json for the site", "zh": "供网站使用的新 release.json" },
-    { "en": "Every claim, verdict, rendering and model call uploaded to the dataset under mandarin-fish/run-2/", "zh": "所有论断、核验结论、译文和模型调用记录上传到数据集的 mandarin-fish/run-2/" }
+    {
+      "en": "A new release.json for the site",
+      "zh": "供网站使用的新 release.json"
+    },
+    {
+      "en": "Every claim, verdict, rendering and model call uploaded to the dataset under mandarin-fish/run-2/",
+      "zh": "所有论断、核验结论、译文和模型调用记录上传到数据集的 mandarin-fish/run-2/"
+    }
   ],
   "not_in_this_run_en": "Chinese papers behind CNKI and Wanfang (needs a licence decision), papers without open full text (788 of the 964 in focus), and the reconcile and suggest stages.",
-  "not_in_this_run_zh": "知网和万方中的中文论文（需要授权决定）、没有开放全文的论文（重点范围 964 篇中的 788 篇），以及整合和建议阶段。"
+  "not_in_this_run_zh": "知网和万方中的中文论文（需要授权决定）、没有开放全文的论文（重点范围 964 篇中的 788 篇），以及整合和建议阶段。",
+  "budget_en": "No spending cap: every call is logged with its cost and the total is reported after each step.",
+  "budget_zh": "不设费用上限：每次调用都记录费用，每一步结束后报告总额。"
 }

@@ -9,7 +9,8 @@
   "first-run": "The first run on 20 Chinese papers: source PDFs, page text, extraction, verification, mapping, English statements, model calls",
   "gap-pilot": "Language-gap pilot: English evidence for each intervention found in Chinese",
   "ground-truth": "Checked answers to score the pipeline against",
-  "config": "Settings"
+  "config": "Settings",
+  "run-2": "Run 2: phase A re-read the Chinese papers with the current extraction; phase B is planned"
  },
  "headline": {
   "papers_found": 2005,
@@ -35,8 +36,8 @@
   "first_run_papers": 20,
   "first_run_claims": 231,
   "links": 2715,
-  "files": 164,
-  "bytes": 138435071
+  "files": 195,
+  "bytes": 143176098
  },
  "charts": {
   "stages": [
@@ -633,6 +634,83 @@
    "bytes": 108263201,
    "about": "Open-access PDFs, named by record id",
    "items": []
+  },
+  {
+   "path": "run-2",
+   "files": 2,
+   "bytes": 261389,
+   "about": "",
+   "items": [
+    {
+     "name": "plan.json",
+     "bytes": 9670,
+     "rows": null,
+     "about": "The run plan and settings, with actual results"
+    },
+    {
+     "name": "release.json",
+     "bytes": 251719,
+     "rows": null,
+     "about": "The release built from this run, as the site shows it"
+    }
+   ]
+  },
+  {
+   "path": "run-2/A",
+   "files": 22,
+   "bytes": 3755591,
+   "about": "Every model call of that step: model, tokens, cost, finish reason",
+   "items": []
+  },
+  {
+   "path": "run-2/A-attempt-1",
+   "files": 7,
+   "bytes": 724047,
+   "about": "",
+   "items": [
+    {
+     "name": "calls.jsonl",
+     "bytes": 26364,
+     "rows": 103,
+     "about": "Every model call of that step: model, tokens, cost, finish reason"
+    },
+    {
+     "name": "claims.jsonl",
+     "bytes": 325159,
+     "rows": 407,
+     "about": "Claims after merging: Chinese record, quote, page, labels, quote check"
+    },
+    {
+     "name": "manifest.json",
+     "bytes": 608,
+     "rows": null,
+     "about": "Settings and input hash the run was started with"
+    },
+    {
+     "name": "raw-claims.jsonl",
+     "bytes": 353127,
+     "rows": 444,
+     "about": "Every claim as extracted, before overlapping windows were merged"
+    },
+    {
+     "name": "run.log",
+     "bytes": 350,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "summary.json",
+     "bytes": 381,
+     "rows": null,
+     "about": "Counts and cost of the extraction step"
+    },
+    {
+     "name": "tasks.jsonl",
+     "bytes": 18058,
+     "rows": 103,
+     "about": "One line per text window: done, truncated or unparsed"
+    }
+   ]
   }
  ],
  "paper_files": [

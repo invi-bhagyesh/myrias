@@ -16,11 +16,21 @@ export function normalise(text) {
 }
 
 // Returns { ok, reason }. reason: 'found' | 'empty' | 'too_short' | 'not_on_page'
-export function checkQuote(quote, pageText, { minChars = 8 } = {}) {
+// A quote may skip text with an ellipsis ("…" or "..."): it passes only if every piece is on the page,
+// in order, and each piece is long enough not to match by chance. `gaps` says how many were skipped.
+export function checkQuote(quote, pageText, { minChars = 8, minPiece = 6 } = {}) {
   const q = normalise(quote);
   if (!q) return { ok: false, reason: 'empty' };
   if (q.length < minChars) return { ok: false, reason: 'too_short' };
-  return normalise(pageText).includes(q) ? { ok: true, reason: 'found' } : { ok: false, reason: 'not_on_page' };
+  const page = normalise(pageText);
+  if (page.includes(q)) return { ok: true, reason: 'found' };
+  const pieces = String(quote).split(/\s*(?:…+|\.{3,}|。{3,})\s*/).map(normalise).filter(Boolean);
+  if (pieces.length > 1 && pieces.every(x => x.length >= minPiece)) {
+    let at = 0;
+    for (const x of pieces) { const i = page.indexOf(x, at); if (i < 0) return { ok: false, reason: 'not_on_page' }; at = i + x.length; }
+    return { ok: true, reason: 'found', gaps: pieces.length - 1 };
+  }
+  return { ok: false, reason: 'not_on_page' };
 }
 
 // Overlap of two quotes as a share of character bigrams, used to match a model quote to a gold quote.
