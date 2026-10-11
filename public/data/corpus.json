@@ -1,0 +1,494 @@
+{
+ "species": "mandarin-fish",
+ "repo": "invi-bhagyesh/myrias-corpus",
+ "url": "https://huggingface.co/datasets/invi-bhagyesh/myrias-corpus",
+ "private": true,
+ "as_of": "2026-10-11",
+ "parts": {
+  "intake": "New search across Europe PMC, Crossref, DOAJ, OpenAlex and Semantic Scholar, with the open full text it could fetch",
+  "first-run": "The first run on 20 Chinese papers: source PDFs, page text, extraction, verification, mapping, English statements, model calls",
+  "gap-pilot": "Language-gap pilot: English evidence for each intervention found in Chinese",
+  "ground-truth": "Checked answers to score the pipeline against",
+  "config": "Settings"
+ },
+ "headline": {
+  "papers_found": 2005,
+  "by_language": {
+   "en": 1636,
+   "zh": 369
+  },
+  "about_species_and_welfare": {
+   "en": 848,
+   "zh": 116
+  },
+  "full_text": 176,
+  "sources": {
+   "europepmc": "ok",
+   "crossref": "ok",
+   "doaj": "ok",
+   "openalex": "ok",
+   "semanticscholar": "ok",
+   "cnki": "not_searched",
+   "wanfang": "not_searched",
+   "cqvip": "not_searched"
+  },
+  "first_run_papers": 20,
+  "first_run_claims": 231,
+  "links": 2715,
+  "files": 164,
+  "bytes": 138435071
+ },
+ "folders": [
+  {
+   "path": "",
+   "files": 1,
+   "bytes": 815092,
+   "about": "",
+   "items": [
+    {
+     "name": "links.csv",
+     "bytes": 815092,
+     "rows": 2716,
+     "about": "Every link in one table: intake records, gap-pilot English papers and first-run papers"
+    }
+   ]
+  },
+  {
+   "path": "config",
+   "files": 2,
+   "bytes": 9986,
+   "about": "",
+   "items": [
+    {
+     "name": "models.json",
+     "bytes": 4354,
+     "rows": null,
+     "about": "Model profile and species search terms used"
+    },
+    {
+     "name": "species.json",
+     "bytes": 5632,
+     "rows": null,
+     "about": "Model profile and species search terms used"
+    }
+   ]
+  },
+  {
+   "path": "first-run",
+   "files": 3,
+   "bytes": 219136,
+   "about": "",
+   "items": [
+    {
+     "name": "release.json",
+     "bytes": 164375,
+     "rows": null,
+     "about": "The release the public site shows"
+    },
+    {
+     "name": "sources-meta.json",
+     "bytes": 1972,
+     "rows": null,
+     "about": "Year and venue of each first-run paper"
+    },
+    {
+     "name": "suggestions.json",
+     "bytes": 52789,
+     "rows": null,
+     "about": "Draft suggested actions, not reviewed"
+    }
+   ]
+  },
+  {
+   "path": "first-run/extraction",
+   "files": 4,
+   "bytes": 1055031,
+   "about": "",
+   "items": [
+    {
+     "name": "1-extracted.jsonl",
+     "bytes": 271677,
+     "rows": 231,
+     "about": "Claims as extracted: Chinese quote, page, English statement, intervention, quote check"
+    },
+    {
+     "name": "2-verified.jsonl",
+     "bytes": 271677,
+     "rows": 231,
+     "about": "Plus the second model's verdict on whether the quote supports the statement"
+    },
+    {
+     "name": "3-mapped.jsonl",
+     "bytes": 211106,
+     "rows": 231,
+     "about": "Plus the taxonomy labels: technology, welfare problem, kind, link to welfare, outcome evidence"
+    },
+    {
+     "name": "4-final.jsonl",
+     "bytes": 300571,
+     "rows": 231,
+     "about": "The final claims the release was built from"
+    }
+   ]
+  },
+  {
+   "path": "first-run/extraction/trial-runs/run0",
+   "files": 2,
+   "bytes": 10049,
+   "about": "",
+   "items": [
+    {
+     "name": "calls.jsonl",
+     "bytes": 7816,
+     "rows": 30,
+     "about": "Earlier trial runs, kept for comparison"
+    },
+    {
+     "name": "claims.jsonl",
+     "bytes": 2233,
+     "rows": 4,
+     "about": "Earlier trial runs, kept for comparison"
+    }
+   ]
+  },
+  {
+   "path": "first-run/extraction/trial-runs/run1",
+   "files": 2,
+   "bytes": 37049,
+   "about": "",
+   "items": [
+    {
+     "name": "calls.jsonl",
+     "bytes": 2855,
+     "rows": 11,
+     "about": "Earlier trial runs, kept for comparison"
+    },
+    {
+     "name": "claims.jsonl",
+     "bytes": 34194,
+     "rows": 61,
+     "about": "Earlier trial runs, kept for comparison"
+    }
+   ]
+  },
+  {
+   "path": "first-run/extraction/trial-runs/run2",
+   "files": 2,
+   "bytes": 74503,
+   "about": "",
+   "items": [
+    {
+     "name": "calls.jsonl",
+     "bytes": 6263,
+     "rows": 24,
+     "about": "Earlier trial runs, kept for comparison"
+    },
+    {
+     "name": "claims.jsonl",
+     "bytes": 68240,
+     "rows": 123,
+     "about": "Earlier trial runs, kept for comparison"
+    }
+   ]
+  },
+  {
+   "path": "first-run/extraction/trial-runs/run3",
+   "files": 2,
+   "bytes": 72260,
+   "about": "",
+   "items": [
+    {
+     "name": "calls.jsonl",
+     "bytes": 8323,
+     "rows": 32,
+     "about": "Earlier trial runs, kept for comparison"
+    },
+    {
+     "name": "claims.jsonl",
+     "bytes": 63937,
+     "rows": 108,
+     "about": "Earlier trial runs, kept for comparison"
+    }
+   ]
+  },
+  {
+   "path": "first-run/model-calls",
+   "files": 4,
+   "bytes": 159101,
+   "about": "",
+   "items": [
+    {
+     "name": "final-calls.jsonl",
+     "bytes": 52449,
+     "rows": 206,
+     "about": "Every model call: model, tokens, cost, finish reason"
+    },
+    {
+     "name": "mapped-calls.jsonl",
+     "bytes": 52446,
+     "rows": 206,
+     "about": "Every model call: model, tokens, cost, finish reason"
+    },
+    {
+     "name": "suggest-calls.jsonl",
+     "bytes": 4918,
+     "rows": 19,
+     "about": "Every model call: model, tokens, cost, finish reason"
+    },
+    {
+     "name": "verified-calls.jsonl",
+     "bytes": 49288,
+     "rows": 206,
+     "about": "Every model call: model, tokens, cost, finish reason"
+    }
+   ]
+  },
+  {
+   "path": "first-run/pages",
+   "files": 4,
+   "bytes": 901375,
+   "about": "",
+   "items": [
+    {
+     "name": "pages-hand-transcribed.jsonl",
+     "bytes": 61160,
+     "rows": 24,
+     "about": "Pages transcribed by hand where the text layer was broken"
+    },
+    {
+     "name": "pages-pymupdf.jsonl",
+     "bytes": 417781,
+     "rows": 89,
+     "about": "Page text read from the PDF text layer"
+    },
+    {
+     "name": "pages-used-in-run.jsonl",
+     "bytes": 417915,
+     "rows": 89,
+     "about": "The page text the run actually read (text layer, with hand transcriptions swapped in)"
+    },
+    {
+     "name": "pdf-conversion-report.json",
+     "bytes": 4519,
+     "rows": null,
+     "about": "PDF to text conversion report"
+    }
+   ]
+  },
+  {
+   "path": "first-run/pages/markdown",
+   "files": 20,
+   "bytes": 308700,
+   "about": "Each paper as Markdown with page markers",
+   "items": []
+  },
+  {
+   "path": "first-run/pages/markdown-hand-transcribed",
+   "files": 6,
+   "bytes": 59585,
+   "about": "",
+   "items": [
+    {
+     "name": "07c1c3da11.md",
+     "bytes": 12521,
+     "rows": null,
+     "about": "Hand-transcribed papers as Markdown"
+    },
+    {
+     "name": "0e3971319f.md",
+     "bytes": 11354,
+     "rows": null,
+     "about": "Hand-transcribed papers as Markdown"
+    },
+    {
+     "name": "1fd2d0c305.md",
+     "bytes": 11902,
+     "rows": null,
+     "about": "Hand-transcribed papers as Markdown"
+    },
+    {
+     "name": "4812df508d.md",
+     "bytes": 5141,
+     "rows": null,
+     "about": "Hand-transcribed papers as Markdown"
+    },
+    {
+     "name": "5f36b469e4.md",
+     "bytes": 9129,
+     "rows": null,
+     "about": "Hand-transcribed papers as Markdown"
+    },
+    {
+     "name": "820c4c1c4b.md",
+     "bytes": 9538,
+     "rows": null,
+     "about": "Hand-transcribed papers as Markdown"
+    }
+   ]
+  },
+  {
+   "path": "first-run/source-pdfs",
+   "files": 20,
+   "bytes": 8937747,
+   "about": "The Chinese papers the first run read, as supplied",
+   "items": []
+  },
+  {
+   "path": "first-run/translation",
+   "files": 1,
+   "bytes": 138200,
+   "about": "",
+   "items": [
+    {
+     "name": "english-statements.jsonl",
+     "bytes": 138200,
+     "rows": 231,
+     "about": "Each Chinese quote beside its English statement"
+    }
+   ]
+  },
+  {
+   "path": "gap-pilot",
+   "files": 1,
+   "bytes": 5632,
+   "about": "",
+   "items": [
+    {
+     "name": "intervention-map.json",
+     "bytes": 5632,
+     "rows": null,
+     "about": "The 12 interventions and the search terms used for each"
+    }
+   ]
+  },
+  {
+   "path": "gap-pilot/run1",
+   "files": 3,
+   "bytes": 905070,
+   "about": "",
+   "items": [
+    {
+     "name": "english-records.json",
+     "bytes": 783448,
+     "rows": null,
+     "about": "English papers found for each intervention, with the model's judgment"
+    },
+    {
+     "name": "gap.json",
+     "bytes": 17888,
+     "rows": null,
+     "about": "Result per intervention: Chinese only, related English only, or both"
+    },
+    {
+     "name": "judge-calls.jsonl",
+     "bytes": 103734,
+     "rows": 382,
+     "about": "Every judging call"
+    }
+   ]
+  },
+  {
+   "path": "gap-pilot/run2-final",
+   "files": 3,
+   "bytes": 1349173,
+   "about": "",
+   "items": [
+    {
+     "name": "english-records.json",
+     "bytes": 1016045,
+     "rows": null,
+     "about": "English papers found for each intervention, with the model's judgment"
+    },
+    {
+     "name": "gap.json",
+     "bytes": 19638,
+     "rows": null,
+     "about": "Result per intervention: Chinese only, related English only, or both"
+    },
+    {
+     "name": "judge-calls.jsonl",
+     "bytes": 313490,
+     "rows": 1154,
+     "about": "Every judging call"
+    }
+   ]
+  },
+  {
+   "path": "ground-truth",
+   "files": 2,
+   "bytes": 2444,
+   "about": "",
+   "items": [
+    {
+     "name": "README.md",
+     "bytes": 343,
+     "rows": null,
+     "about": "No expert gold set yet; a non-expert spot-check of the gap pilot"
+    },
+    {
+     "name": "gap-pilot-spot-check.json",
+     "bytes": 2101,
+     "rows": null,
+     "about": "No expert gold set yet; a non-expert spot-check of the gap pilot"
+    }
+   ]
+  },
+  {
+   "path": "intake",
+   "files": 7,
+   "bytes": 15111737,
+   "about": "",
+   "items": [
+    {
+     "name": "fetch.jsonl",
+     "bytes": 103112,
+     "rows": 964,
+     "about": "For each paper we tried to download: how the full text was found, or why not"
+    },
+    {
+     "name": "pages.jsonl",
+     "bytes": 7133594,
+     "rows": 1823,
+     "about": "All intake full text as {source, page, locator, text}, ready for the extract stage"
+    },
+    {
+     "name": "pdf-conversion-report.json",
+     "bytes": 12828,
+     "rows": null,
+     "about": "PDF to text conversion report"
+    },
+    {
+     "name": "records.jsonl",
+     "bytes": 3441888,
+     "rows": 2005,
+     "about": "Every paper found, merged across sources: title, abstract, authors, year, venue, language, DOI/PMID/PMCID, which sources found it, welfare topics, open-access links"
+    },
+    {
+     "name": "status.json",
+     "bytes": 1094,
+     "rows": null,
+     "about": "What each source returned, or why it was not searched"
+    },
+    {
+     "name": "summary.json",
+     "bytes": 2153,
+     "rows": null,
+     "about": "Counts by source, language, decade, topic and access"
+    },
+    {
+     "name": "xml-pages.jsonl",
+     "bytes": 4417068,
+     "rows": 1022,
+     "about": "Europe PMC full text, one \"page\" per article section"
+    }
+   ]
+  },
+  {
+   "path": "intake/pdf",
+   "files": 75,
+   "bytes": 108263201,
+   "about": "Open-access PDFs, named by record id",
+   "items": []
+  }
+ ]
+}
