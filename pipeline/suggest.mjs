@@ -29,7 +29,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const client = createClient({ capUsd: Number(arg('cap', 0)), logPath: `${arg('out')}/suggest-calls.jsonl` });
   const out = [];
   for (const [intervention, group] of groupClaims(claims)) {
-    const r = await client.call('suggest', { system: SUGGEST_SYSTEM, user: suggestUser(group), schema: SUGGEST_SCHEMA, maxTokens: 8000 });
+    const r = await client.call('suggest', { system: SUGGEST_SYSTEM, user: suggestUser(group), schema: SUGGEST_SCHEMA });
     for (const x of cleanSuggestions(r.data?.suggestions || [], group)) out.push({ ...x, intervention, status: 'draft', model: r.entry.model, claims: group.filter(c => x.claim_ids.includes(c.id)) });
   }
   writeFileSync(`${arg('out')}/suggestions.json`, JSON.stringify(out, null, 1));

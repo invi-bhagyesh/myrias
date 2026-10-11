@@ -27,7 +27,7 @@
         "deepseek/deepseek-v4.1-flash"
       ],
       "reasoning": "off",
-      "max_output_tokens": 6000,
+      "max_output_tokens": null,
       "per": "window"
     },
     {
@@ -44,14 +44,14 @@
         "deepseek/deepseek-v4.1-flash"
       ],
       "reasoning": "off",
-      "max_output_tokens": 800,
+      "max_output_tokens": null,
       "per": "claim with quote found"
     },
     {
       "id": "verify",
       "model": "z-ai/glm-5.3",
       "reasoning": "low",
-      "max_output_tokens": 4000,
+      "max_output_tokens": null,
       "per": "welfare-relevant claim",
       "note_en": "A different lab from the extractor",
       "note_zh": "与提取模型不同厂商"
@@ -60,7 +60,7 @@
       "id": "render",
       "model": "qwen/qwen3.8-flash",
       "reasoning": "off",
-      "max_output_tokens": 600,
+      "max_output_tokens": null,
       "per": "Chinese claim",
       "note_en": "English shown only if every number survives",
       "note_zh": "所有数字都保留时才显示英文"
@@ -69,7 +69,7 @@
       "id": "reconcile",
       "model": "qwen/qwen3.8-max-0902",
       "reasoning": "low",
-      "max_output_tokens": 20000,
+      "max_output_tokens": null,
       "per": "run (one call over the distinct intervention names)",
       "note_en": "Groups names for the same practice; originals kept",
       "note_zh": "合并同一做法的不同名称；保留原名"

@@ -18,7 +18,7 @@ export async function runClaimStage(stage, claims, client, concurrency = 6, { on
     while (queue.length && !stopped) {
       const [c, i] = queue.shift();
       try {
-        const r = await client.call(stage, { system, user: user(c), schema, maxTokens: stage === 'verify' ? 4000 : 800 });
+        const r = await client.call(stage, { system, user: user(c), schema });
         out[i][stage] = r.data ? { ...r.data, model: r.entry.model } : { error: 'unparsed' };
         onResult(i, out[i][stage]);
       } catch (e) { stopped = e instanceof SpendCapError ? 'spend cap' : e.message; }

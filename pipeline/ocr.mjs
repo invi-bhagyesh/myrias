@@ -9,6 +9,6 @@ export const OCR_USER = 'Transcribe this page.';
 export const imageUrl = path => `data:image/png;base64,${readFileSync(path).toString('base64')}`;
 
 export async function ocrPage(client, path, model) {
-  const r = await client.call('ocr', { system: OCR_SYSTEM, user: OCR_USER, images: [imageUrl(path)], maxTokens: 6000, model });
+  const r = await client.call('ocr', { system: OCR_SYSTEM, user: OCR_USER, images: [imageUrl(path)], model });
   return { text: r.text.trim(), entry: r.entry };
 }
