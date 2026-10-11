@@ -31,11 +31,9 @@ function barsHtml(c, tr) {
   // Where we searched: bar = papers each source found; the darker part is what no other source had.
   const src = Object.entries(ch.sources).sort((a, b) => b[1].papers - a[1].papers);
   const maxP = Math.max(...src.map(([, v]) => v.papers), 1);
-  const off = Object.entries(c.headline.sources || {}).filter(([, v]) => v !== 'ok').map(([k]) => k);
   const srcRows = src.map(([k, v]) => `<li><span class="fx-name">${esc(tr('corpus.src.' + k))}</span>
       <span class="fx-track" title="${esc(tr('cv.src.papers', { n: n(v.papers) }))} · ${esc(tr('cv.src.only', { n: n(v.only_here) }))}"><i class="fx-all" style="width:${(100 * v.papers / maxP).toFixed(1)}%"><i class="fx-only" style="width:${(100 * v.only_here / v.papers).toFixed(1)}%"></i></i></span>
-      <span class="fx-val">${n(v.papers)}<small>${esc(tr('cv.src.only', { n: n(v.only_here) }))}</small></span></li>`).join('')
-    + off.map(k => `<li class="is-off"><span class="fx-name">${esc(tr('corpus.src.' + k))}</span><span class="fx-track is-off"></span><span class="fx-val"><small>${esc(tr('cv.needs'))}</small></span></li>`).join('');
+      <span class="fx-val">${n(v.papers)}<small>${esc(tr('cv.src.only', { n: n(v.only_here) }))}</small></span></li>`).join('');
   // What made it through: one stacked bar per stage, English then Chinese, scaled to all papers found.
   const stageRows = stages.map((st, i) => {
     const drop = i ? `<li class="fx-drop" aria-hidden="true"><span>↓ ${esc(tr('cv.lost.' + st.id, { n: n(stages[i - 1].n - st.n) }))}</span></li>` : '';
@@ -89,8 +87,7 @@ function sankeyHtml(c, tr) {
   });
   // Sources: compact rows, a small bar for papers found, hairlines into the first stage.
   const src = Object.entries(ch.sources).sort((a, b) => b[1].papers - a[1].papers);
-  const off = Object.entries(c.headline.sources || {}).filter(([, v]) => v !== 'ok').map(([k]) => k);
-  const rows = src.length + off.length, maxP = Math.max(...src.map(([, v]) => v.papers), 1);
+  const rows = src.length, maxP = Math.max(...src.map(([, v]) => v.papers), 1);
   const rowY = i => TOP + 8 + (H0 - 16) * (rows === 1 ? 0.5 : i / (rows - 1));
   const target = cols[0].en.y + (cols[0].en.h + cols[0].zh.h) / 2;
   out += `<text class="sk-stage" x="20" y="${TOP - 40}">${esc(tr('cv.col.sources.title'))}</text>`;
@@ -100,10 +97,6 @@ function sankeyHtml(c, tr) {
     out += `<text class="sk-src" x="20" y="${y + 4}">${esc(tr('corpus.src.' + k))}</text>`;
     out += `<rect class="sk-srcbar" x="${232}" y="${y - 3}" width="${bw.toFixed(1)}" height="6" rx="3"><title>${esc(tr('cv.src.papers', { n: n(v.papers) }))} · ${esc(tr('cv.src.only', { n: n(v.only_here) }))}</title></rect>`;
     out += `<text class="sk-srcn" x="${226}" y="${y + 4}" text-anchor="end">${n(v.papers)}</text>`;
-  });
-  off.forEach((k, j) => {
-    const y = rowY(src.length + j);
-    out += `<text class="sk-src is-off" x="20" y="${y + 4}">${esc(tr('corpus.src.' + k))}</text><text class="sk-srcn is-off" x="226" y="${y + 4}" text-anchor="end">${esc(tr('cv.needs'))}</text>`;
   });
   return `<svg class="cv-svg sk" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(tr('cv.aria'))}">${out}</svg>`;
 }

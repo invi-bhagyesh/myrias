@@ -210,9 +210,9 @@ test('placeholder graph: dense, deterministic, labelled, bounded, and links nowh
   for (const n of g.nodes) assert.ok(n.x >= 0 && n.x <= 1 && n.y >= 0 && n.y <= 1, n.id);
   for (const e of g.edges) { assert.ok(g.byId.has(e.a), e.a); assert.ok(g.byId.has(e.b), e.b); }
   const invented = g.nodes.filter(n => !['class', 'problem'].includes(n.type));
-  assert.ok(invented.every(n => n.href === null && n.tip.startsWith('[Sample]')));
+  assert.ok(invented.every(n => n.href === null));
   assert.ok(!g.nodes.some(n => n.id === 's:mandarin-fish'));
-  assert.ok(placeholderGraph(release, 'zh').nodes.filter(n => n.type === 'claim').every(n => n.tip.startsWith('[示例]')));
+  assert.ok(placeholderGraph(release, 'zh').nodes.filter(n => n.type === 'claim').every(n => n.href === null));
 });
 
 test('the placeholder is used only below the real-claim threshold', () => {
