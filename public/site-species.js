@@ -30,10 +30,13 @@ export function speciesModel(data, id, { corpus = null, nextRun = null } = {}) {
   for (const c of claims) verdicts[c.verification] = (verdicts[c.verification] || 0) + 1;
   const interventions = new Map((data.interventions || []).map(i => [i.id, i]));
   const byIntervention = new Map();
+  // One row per practice name within a technology class: two records with the same name are one practice.
   for (const a of apps) {
-    const row = byIntervention.get(a.intervention_id) || { id: a.intervention_id, intervention: interventions.get(a.intervention_id), cls: a.technology_class, problems: new Set(), claims: new Set() };
+    const iv = interventions.get(a.intervention_id);
+    const key = `${a.technology_class}|${(iv?.name_en || iv?.name_zh || a.intervention_id).toLowerCase()}`;
+    const row = byIntervention.get(key) || { id: a.intervention_id, intervention: iv, cls: a.technology_class, problems: new Set(), claims: new Set() };
     row.problems.add(a.welfare_problem); a.claim_ids.forEach(c => row.claims.add(c));
-    byIntervention.set(a.intervention_id, row);
+    byIntervention.set(key, row);
   }
   const claimById = new Map(claims.map(c => [c.id, c]));
   const top = [...byIntervention.values()].map(r => {
