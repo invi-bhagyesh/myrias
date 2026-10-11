@@ -43,7 +43,7 @@ export async function runRender(claims, client, concurrency = 6) {
       const lang = sourceLang(c.statement);
       if (lang === 'en') { out[i].statement_en = c.statement; out[i].intervention_en = c.intervention; out[i].rendering = null; continue; }
       try {
-        const r = await client.call('translate', { system: RENDER_SYSTEM, user: renderUser(c), schema: RENDER_SCHEMA, maxTokens: 600 });
+        const r = await client.call('translate', { system: RENDER_SYSTEM, user: renderUser(c), schema: RENDER_SCHEMA });
         if (!r.data) { out[i].rendering = { from: lang, model: r.entry.model, version: RENDER_VERSION, check: 'unparsed' }; continue; }
         const chk = numbersPreserved(c.statement, r.data.statement_en);
         out[i].statement_en = r.data.statement_en;

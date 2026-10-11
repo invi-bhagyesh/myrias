@@ -11,7 +11,7 @@ import { speciesModel, speciesSteps, speciesPageHtml, PROFILES } from '../public
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url), 'utf8'));
 // The pre-release export with no records, kept as a fixture; the live release.json now holds real claims.
 const release = JSON.parse(readFileSync(new URL('./empty-release.json', import.meta.url), 'utf8'));
-const live = read('release.json');
+const live = (r => (r.claim_files ? { ...r, claims: r.claim_files.flatMap(f => read(f)) } : r))(read('release.json'));
 const sample = read('sample.json');
 const clone = x => structuredClone(x);
 
@@ -260,7 +260,7 @@ test('pipeline tab: stages are bilingual, models match the demo profile, funnel 
 test('evidence map: every intervention is placed, empty classes and problems stay on the map', async () => {
   const esc = L.escapeHtml;
   const { evidenceModel, evidenceMapHtml } = await import('../public/site-evmap.js');
-  const live = read('release.json');
+  const live = (r => (r.claim_files ? { ...r, claims: r.claim_files.flatMap(f => read(f)) } : r))(read('release.json'));
   const m = evidenceModel(live, 'en');
   assert.equal(m.apps.length, live.applications.length);
   assert.equal(m.classes.length, live.taxonomy.technology_classes.length);
@@ -268,12 +268,17 @@ test('evidence map: every intervention is placed, empty classes and problems sta
   assert.equal(m.classes.reduce((s, c) => s + c.claims, 0), live.applications.reduce((s, a) => s + a.claim_ids.length, 0));
   assert.ok(m.totals.inApps <= m.totals.claims);
   const html = evidenceMapHtml(m, { tr: (k, v) => t('en', k, v), href: (p, q = {}) => '#/' + p + '?' + new URLSearchParams(q) });
-  // Compact by default: no intervention rows until a technology is opened; the phone list has them all.
+  // Compact by default: no intervention rows until a technology is opened. Opened, a technology shows
+  // its practices merged by name, biggest first, at most 12, and links to the full table for the rest.
   assert.ok(!m.apps.some(a => html.includes(`data-k="a:${a.id}"`)));
-  for (const a of m.apps) assert.ok(html.includes(esc(a.label)) || html.includes(a.label.slice(0, 10)));
   for (const c of m.classes.filter(c => c.apps)) {
     const opened = evidenceMapHtml(m, { tr: (k, v) => t('en', k, v), href: p => '#/' + p, open: c.id });
-    for (const a of m.apps.filter(a => a.cls === c.id)) assert.ok(opened.includes(`data-k="a:${a.id}"`));
+    const totals = new Map();
+    for (const a of m.apps.filter(a => a.cls === c.id)) totals.set(a.label, (totals.get(a.label) || 0) + a.claims);
+    const top = [...totals.entries()].sort((x, y) => y[1] - x[1]).slice(0, 12);
+    for (const [label] of top) assert.ok(opened.includes(esc(label.length > 44 ? label.slice(0, 43) : label)), label);
+    assert.equal((opened.match(/class="em-label em-app"/g) || []).length, top.length);
+    if (totals.size > 12) assert.ok(opened.includes(t('en', 'evmap.more', { n: totals.size - 12 })));
     assert.ok(opened.includes('aria-expanded="true"'));
   }
   assert.ok(!/\{\w+\}/.test(html), 'no unfilled placeholders');

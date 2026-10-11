@@ -125,7 +125,7 @@ async function main() {
   for (const iv of map.interventions) for (const rec of cache[iv.id]) {
     if (rec.verdict || stopped) continue;
     try {
-      const r = await client.call('screen', { system: JUDGE_SYSTEM, user: judgeUser(iv, map.species, rec), schema: JUDGE_SCHEMA, maxTokens: 400 });
+      const r = await client.call('screen', { system: JUDGE_SYSTEM, user: judgeUser(iv, map.species, rec), schema: JUDGE_SCHEMA });
       rec.verdict = r.data ? { ...r.data, model: r.entry.model } : { match: 'no', measured: false, reason: 'unparsed', model: r.entry.model };
       if (++judged % 20 === 0) writeFileSync(cachePath, JSON.stringify(cache, null, 1)); // checkpoint
     } catch (e) { stopped = e instanceof SpendCapError ? 'spend cap' : e.message; }

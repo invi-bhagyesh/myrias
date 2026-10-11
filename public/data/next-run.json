@@ -1,6 +1,6 @@
 {
   "id": "mandarin-fish-run-2",
-  "status": "in_progress",
+  "status": "done",
   "species": "mandarin-fish",
   "planned_on": "2026-10-11",
   "goal_en": "Rebuild the mandarin fish release from the new corpus: Chinese papers re-read with the current extraction (the Chinese text is the record, English is a checked rendering), then every open full-text paper the search found.",
@@ -27,7 +27,7 @@
         "deepseek/deepseek-v4.1-flash"
       ],
       "reasoning": "off",
-      "max_output_tokens": 6000,
+      "max_output_tokens": null,
       "per": "window"
     },
     {
@@ -44,14 +44,14 @@
         "deepseek/deepseek-v4.1-flash"
       ],
       "reasoning": "off",
-      "max_output_tokens": 800,
+      "max_output_tokens": null,
       "per": "claim with quote found"
     },
     {
       "id": "verify",
       "model": "z-ai/glm-5.3",
       "reasoning": "low",
-      "max_output_tokens": 4000,
+      "max_output_tokens": null,
       "per": "welfare-relevant claim",
       "note_en": "A different lab from the extractor",
       "note_zh": "与提取模型不同厂商"
@@ -60,16 +60,15 @@
       "id": "render",
       "model": "qwen/qwen3.8-flash",
       "reasoning": "off",
-      "max_output_tokens": 600,
+      "max_output_tokens": null,
       "per": "Chinese claim",
       "note_en": "English shown only if every number survives",
       "note_zh": "所有数字都保留时才显示英文"
     },
     {
       "id": "reconcile",
-      "model": "qwen/qwen3.8-max-0902",
-      "reasoning": "low",
-      "max_output_tokens": 20000,
+      "model": "anthropic/claude-sonnet-5.5",
+      "max_output_tokens": null,
       "per": "run (one call over the distinct intervention names)",
       "note_en": "Groups names for the same practice; originals kept",
       "note_zh": "合并同一做法的不同名称；保留原名"
@@ -144,7 +143,19 @@
         "node pipeline/reconcile.mjs --in $OUT/B/final.jsonl --out $OUT/B/reconciled.jsonl",
         "node pipeline/export.mjs --claims $OUT/A/final.jsonl,$OUT/B/final.jsonl --base public/data/release.json --meta pipeline/sources-meta.json --records $CORPUS/intake/records.jsonl --out public/data/release.json"
       ],
-      "status": "in_progress"
+      "status": "done",
+      "actual": {
+        "spent_usd": 8.83,
+        "claims_extracted": 10695,
+        "claims_quote_found": 9849,
+        "claims_relevant": 4359,
+        "claims_released": 4333,
+        "claims_supported": 4066,
+        "sources_released": 160,
+        "interventions": 531
+      },
+      "notes_en": "Cost includes $1.02 lost when the map step was stopped before it saved, and $0.96 on reconcile attempts that ran out of output room before switching to batches on Claude Sonnet 5.5. Both are fixed: steps now save as they go, and no step has an output limit.",
+      "notes_zh": "费用包含两部分损失：映射步骤在保存前被中断，损失 1.02 美元；整合步骤在改为分批并换用 Claude Sonnet 5.5 之前因输出空间不足失败，花费 0.96 美元。两处都已修复：各步骤现在边做边保存，且不再设输出上限。"
     }
   ],
   "estimate_basis_en": "Per-call costs measured in the first run: extract about $0.0006 per window (raised by half for the longer v0.3 output), map $0.0001 and verify $0.00035 per claim; about 2.2 claims per window, 85% with the quote found, about 60% welfare-relevant.",

@@ -33,7 +33,7 @@ export function summarise(rows) {
 export async function runModel(model, golds, client) {
   const rows = []; let parseFailures = 0;
   for (const g of golds) {
-    const out = await client.call('extract', { model, system: EXTRACT_SYSTEM, user: extractUser(g.text), schema: EXTRACT_SCHEMA, maxTokens: 1500 });
+    const out = await client.call('extract', { model, system: EXTRACT_SYSTEM, user: extractUser(g.text), schema: EXTRACT_SCHEMA });
     if (!out.data) { parseFailures++; rows.push({ returned: 0, valid: 0, gold: g.claims.length, found: 0 }); continue; }
     rows.push(scorePassage(g, out.data.claims));
   }

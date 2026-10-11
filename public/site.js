@@ -31,6 +31,11 @@ async function load() {
     const response = await fetch(useSample ? 'data/sample.json' : 'data/release.json', { cache: 'no-cache' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    // Claims live in numbered files beside the release (release-claims-N.json); join them first.
+    if (data.claim_files?.length) {
+      const parts = await Promise.all(data.claim_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
+      data.claims = parts.flat();
+    }
     const problems = L.validateExport(data);
     if (problems.length) throw new Error('Invalid export: ' + problems.slice(0, 3).join('; '));
     state.data = data;

@@ -6,7 +6,8 @@
 // With --store the release is built from the species store (pipeline/merge.mjs): every claim that has
 // passed in any run, with public ids that never change, paper details from the intake records, and one
 // changelog line per merge.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs';
+import { dirname, basename, join } from 'node:path';
 import { validateExport } from '../public/site-lib.js';
 import { readStore } from './merge.mjs';
 
@@ -42,7 +43,7 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
     quote: c.quote.trim(), quote_lang: lang(c.quote), ...statementFields(c), kind: c.basis || c.map.kind,
     population: { species: c.species || 'Siniperca chuatsi', life_stage: null, system: c.production_system || null }, intervention: c.intervention_en || c.intervention || null, ...(c.intervention_en && c.intervention && c.intervention_en !== c.intervention ? { intervention_record: c.intervention } : {}),
     comparator: null, outcome: c.welfare_relevance || null, direction: null, magnitude: null,
-    ...(c.polarity ? { polarity: c.polarity } : {}), ...(c.limitations ? { limitations: c.limitations } : {}), ...(c.counterevidence ? { counterevidence: c.counterevidence } : {}), welfare_link: c.map.welfare_link, welfare_link_note: c.map.reason || null,
+    ...(c.polarity ? { polarity: c.polarity } : {}), ...(c.limitations ? { limitations: c.limitations } : {}), ...(c.counterevidence ? { counterevidence: c.counterevidence } : {}), welfare_link: c.map.welfare_link,
     verification: c.verify.verdict, audit: 'not_audited', _cell: c.map.technology_class + '|' + c.map.welfare_problem, _ev: c.map.outcome_evidence, _key: c.intervention_key || '', _status: c.candidate_status || ''
   }));
   // Applications: within each technology x problem cell, one per intervention key (WelfareLens-style
@@ -75,7 +76,7 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
   for (const c of out) { delete c._cell; delete c._ev; delete c._key; delete c._status; }
   const extracted = store ? store.runs.reduce((n, r) => n + (r.claims_in || 0), 0) : claims.length;
   const run = { ...base.runs[0], status: 'in_progress', focus_en: store ? `Welfare-technology claims from ${sources.length} papers in Chinese and English, added run by run (machine-extracted and machine-verified; no expert audit yet).` : 'All welfare-technology claims in the first 14 Chinese-language papers (machine-extracted and machine-verified; no expert audit yet).', focus_zh: store ? `来自 ${sources.length} 篇中英文论文的福利技术论断，逐次运行累加（由模型提取和核验，尚无专家审核）。` : null,
-    counts: store ? { documents_collected: base.runs[0].counts.documents_collected, documents_processed: Object.keys(store.sources).length, sources_released: sources.length, claims_extracted: extracted,
+    counts: store ? { documents_collected: Math.max(base.runs[0].counts.documents_collected, Object.keys(store.sources).length), documents_processed: Object.keys(store.sources).length, sources_released: sources.length, claims_extracted: extracted,
         claims_quote_found: store.runs.reduce((n, r) => n + (r.claims_quote_found ?? 0), 0) || null, claims_relevant: store.runs.reduce((n, r) => n + (r.claims_relevant ?? 0), 0) || null, claims_released: out.length, claims_supported: out.filter(c => c.verification === 'supported').length }
       : { documents_collected: base.runs[0].counts.documents_collected, documents_processed: new Set(claims.map(c => c.source)).size, sources_released: sources.length, claims_extracted: extracted, claims_quote_found: claims.filter(c => c.quote_check === 'found').length, claims_relevant: claims.filter(c => c.quote_check === 'found' && c.map?.welfare_relevant === true).length, claims_released: out.length, claims_supported: out.filter(c => c.verification === 'supported').length }, models, audit: null,
     changelog: store ? store.runs.map(r => ({ date: r.date, text_en: `${r.run} phase ${r.phase}: ${r.claims_added} claims added, ${r.claims_already_present} already present, ${r.sources_added} papers added.`, text_zh: `${r.run} 阶段 ${r.phase}：新增 ${r.claims_added} 条论断，${r.claims_already_present} 条已存在，新增 ${r.sources_added} 篇论文。` }))
@@ -91,10 +92,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = n => { const i = process.argv.indexOf('--' + n); return i < 0 ? null : process.argv[i + 1]; };
   const store = arg('store') ? readStore(arg('store')) : null;
   const claims = store ? store.claims : readFileSync(arg('claims'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
-  const models = [...new Set(claims.flatMap(c => [c.model && `${c.model} (extract)`, c.map?.model && `${c.map.model} (map)`, c.verify?.model && `${c.verify.model} (verify)`]).filter(Boolean))];
+  const models = [...new Set(claims.flatMap(c => [c.model && `${c.model} (extract)`, c.map?.model && `${c.map.model} (map)`, c.verify?.model && `${c.verify.model} (verify)`, c.rendering?.model && `${c.rendering.model} (render)`]).filter(Boolean))];
   const rel = buildRelease({ claims, store, base: JSON.parse(readFileSync(arg('base'), 'utf8')), meta: arg('meta') ? JSON.parse(readFileSync(arg('meta'), 'utf8')) : {}, models });
   const errors = validateExport(rel);
   if (errors.length) { console.error(errors.slice(0, 20).join('\n')); process.exit(1); }
-  writeFileSync(arg('out'), JSON.stringify(rel, null, 1) + '\n');
+  // Claims go in numbered files beside the release, each under 350 KB, so no single file is large;
+  // release.json lists them in claim_files and the site joins them before it validates.
+  const dir = dirname(arg('out')), stem = basename(arg('out')).replace(/\.json$/, '');
+  for (const f of readdirSync(dir)) if (new RegExp(`^${stem}-claims-\\d+\\.json$`).test(f)) unlinkSync(join(dir, f));
+  const files = [];
+  let part = [], size = 0;
+  const flush = () => { if (!part.length) return; const f = `${stem}-claims-${files.length}.json`; writeFileSync(join(dir, f), JSON.stringify(part) + '\n'); files.push(f); part = []; size = 0; };
+  for (const c of rel.claims) { const n = Buffer.byteLength(JSON.stringify(c)); if (size + n > 350_000) flush(); part.push(c); size += n + 1; }
+  flush();
+  writeFileSync(arg('out'), JSON.stringify({ ...rel, claims: [], claim_files: files }, null, 1) + '\n');
   console.log({ sources: rel.sources.length, claims: rel.claims.length, applications: rel.applications.length, models });
 }

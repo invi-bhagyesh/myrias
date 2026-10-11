@@ -44,7 +44,7 @@ export const STAGES = [
   { id: 'L7', status: 'planned', name: ['Reconcile', '整合'],
     what: ['Merge duplicates, flag claims that disagree, carry nothing across species.', '合并重复内容，标出相互矛盾的论断，不跨物种外推。'],
     how: ['Planned, with the strongest model in the profile.', '计划中，使用配置中最强的模型。'],
-    model: 'qwen/qwen3.8-max-0902', out: ['A reconciled set per species.', '每个物种一组整合后的论断。'] },
+    model: 'anthropic/claude-sonnet-5.5', out: ['A reconciled set per species.', '每个物种一组整合后的论断。'] },
   { id: 'L8', status: 'partial', name: ['Gates', '关卡'],
     what: ['Expert audit of a sample, recall check, saturation and gap probes before anything is released.', '发布前：专家抽样审核、召回检查、饱和度与缺口探测。'],
     how: ['The recall gate is built: a run can be scored against a hand-checked gold set and fail below a threshold. The gold set itself does not exist yet, and nobody has audited the current claims.', '召回关卡已实现：运行结果可与人工核对的标准集比较，低于阈值即不通过。但标准集尚未建立，目前的论断也尚无人审核。'],

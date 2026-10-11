@@ -40,7 +40,7 @@ async function main() {
   const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i < 0 ? d : process.argv[i + 1]; };
   const out = arg('out'); mkdirSync(out, { recursive: true });
   const profile = arg('profile', 'demo'), size = Number(arg('window', 1800)), overlap = Number(arg('overlap', 300));
-  const maxTokens = Number(arg('max-tokens', 6000)), cap = Number(arg('cap', 0));
+  const maxTokens = arg('max-tokens') ? Number(arg('max-tokens')) : null, cap = Number(arg('cap', 0));
   const allPages = readJsonl(arg('pages'));
 
   // Stage 0

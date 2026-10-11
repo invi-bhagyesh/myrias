@@ -36,20 +36,20 @@ export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, 
   // Budget reservation: a call reserves its worst-case cost before it is sent and releases it when
   // the real cost is known, so concurrent calls can never take the run past the cap.
   let spent = 0, reserved = 0, calls = 0, inFlight = 0;
-  async function call(stage, { system, user, images, schema, maxTokens = 2000, model: override } = {}) {
+  async function call(stage, { system, user, images, schema, maxTokens = null, model: override } = {}) {
     if (!apiKey) throw new Error('OPENROUTER_API_KEY is not set');
     const setting = stageSetting(stage, profile);
     const model = override || setting.model;
     const messages = [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content: images?.length ? [{ type: 'text', text: user }, ...images.map(url => ({ type: 'image_url', image_url: { url } }))] : user }];
     const candidates = [model, ...(override ? [] : setting.fallback || [])];
     const inputText = messages.map(m => (typeof m.content === 'string' ? m.content : m.content.map(p => p.text || '').join(''))).join('\n');
-    const worst = Math.max(...candidates.map(m => estimateCost(m, inputText, maxTokens))) + (images?.length || 0) * 0.002;
+    const worst = Math.max(...candidates.map(m => estimateCost(m, inputText, maxTokens ?? 32000))) + (images?.length || 0) * 0.002;
     if (spent + reserved + worst > capUsd) throw new SpendCapError(`spend cap $${capUsd} would be exceeded (spent $${spent.toFixed(4)}, reserved $${reserved.toFixed(4)}, this call up to $${worst.toFixed(4)})`);
     reserved += worst; inFlight++;
     try {
     const body = {
-      model, messages, max_tokens: maxTokens, temperature: setting.temperature ?? 0,
-      provider: CONFIG.provider, usage: { include: true },
+      model, messages, ...(maxTokens ? { max_tokens: maxTokens } : {}), temperature: setting.temperature ?? 0,
+      provider: { ...CONFIG.provider, ...(setting.provider || {}) }, usage: { include: true },
       ...(setting.reasoning ? { reasoning: setting.reasoning } : {}),
       ...(schema ? { response_format: { type: 'json_schema', json_schema: { name: stage, strict: true, schema } } } : {})
     };
