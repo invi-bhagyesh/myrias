@@ -31,7 +31,7 @@ A static, read-only site that renders one data file, `public/data/release.json`:
   light and dark mode, works on phones.
 
 Status: pre-release. `release.json` holds the taxonomy and one species run in preparation; nothing
-has been verified yet, and the site says so. The data format is in `docs/export-schema.md`.
+has been verified yet, and the site says so. The data format is in `docs/export-schema.md`; the sources read and searched are in `docs/sources.md`.
 `index.html?data=sample` loads clearly marked placeholder records so the layout can be tested.
 
 ## Staff workspace (`public/workspace.html`)
