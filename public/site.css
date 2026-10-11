@@ -680,3 +680,17 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
   .hero-side { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .hero-art { grid-column: 1 / -1; width: min(78%, 340px); margin: 0 auto 6px; }
 }
+
+/* Hero spans the same width as the top bar instead of the narrow reading column */
+@media (min-width: 861px) {
+  .arena-home .hero-with-hills { --hero-w: min(1280px, calc(100vw - 40px)); width: var(--hero-w); margin-left: calc((100% - var(--hero-w)) / 2); padding-left: 24px; padding-right: 24px; box-sizing: border-box;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 48px; }
+  .hero-art { max-width: 540px; }
+  .arena-home .hero h1 { font-size: clamp(38px, 4.3vw, 60px); max-width: none; line-height: 1.05; }
+  .arena-home .hero-sub { font-size: clamp(17px, 1.45vw, 20px); max-width: 620px; }
+  /* The tiles sit on the picture itself, so they move with it */
+  .hero-side { justify-self: end; width: min(100%, 540px); }
+  .hero-side .hero-tile.t0 { top: 0; left: -6%; right: auto; }
+  .hero-side .hero-tile.t1 { top: 12%; right: -4%; }
+  .hero-side .hero-tile.t2 { bottom: 2%; left: -6%; }
+}
