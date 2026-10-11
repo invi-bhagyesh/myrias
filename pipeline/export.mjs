@@ -10,6 +10,16 @@ const RANK = { none: 0, detection_only: 1, proxy_improved: 2, outcome_improved: 
 const pad = (n, w) => String(n).padStart(w, '0');
 const lang = q => ((q.match(/[一-鿿]/g) || []).length > q.length / 4 ? 'zh' : 'en');
 
+// The record is the statement in the source's language (extract v0.3+). English is the derived
+// rendering, kept only when its number check passed. Older claims carry an English statement only.
+export function statementFields(c) {
+  if (!c.statement) return { text_en: c.statement_en, text_zh: null };
+  const recLang = lang(c.statement);
+  const rendered = recLang === 'en' ? c.statement : (c.rendering?.check === 'numbers_ok' ? c.statement_en : null);
+  return { statement: c.statement, statement_lang: recLang, text_zh: recLang === 'zh' ? c.statement : null, text_en: rendered || null,
+    ...(recLang !== 'en' && rendered ? { rendering: { model: c.rendering.model, version: c.rendering.version, check: c.rendering.check } } : {}) };
+}
+
 export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fish', models = [] }) {
   const keep = claims.filter(c => c.quote_check === 'found' && c.map?.welfare_relevant === true && ['supported', 'partial'].includes(c.verify?.verdict) && c.quote.length <= 600);
   const sourceNames = [...new Set(keep.map(c => c.source))].sort();
@@ -21,8 +31,8 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
   const sid = new Map(sourceNames.map((n, i) => [n, sources[i].id]));
   const out = keep.map((c, i) => ({
     id: 'C' + pad(i + 1, 3), source_id: sid.get(c.source), species_id: speciesId, locator: { page: c.page },
-    quote: c.quote.trim(), quote_lang: lang(c.quote), text_en: c.statement_en, text_zh: null, kind: c.basis || c.map.kind,
-    population: { species: c.species || 'Siniperca chuatsi', life_stage: null, system: c.production_system || null }, intervention: c.intervention || null,
+    quote: c.quote.trim(), quote_lang: lang(c.quote), ...statementFields(c), kind: c.basis || c.map.kind,
+    population: { species: c.species || 'Siniperca chuatsi', life_stage: null, system: c.production_system || null }, intervention: c.intervention_en || c.intervention || null, ...(c.intervention_en && c.intervention && c.intervention_en !== c.intervention ? { intervention_record: c.intervention } : {}),
     comparator: null, outcome: c.welfare_relevance || null, direction: null, magnitude: null,
     ...(c.polarity ? { polarity: c.polarity } : {}), ...(c.limitations ? { limitations: c.limitations } : {}), ...(c.counterevidence ? { counterevidence: c.counterevidence } : {}), welfare_link: c.map.welfare_link, welfare_link_note: c.map.reason || null,
     verification: c.verify.verdict, audit: 'not_audited', _cell: c.map.technology_class + '|' + c.map.welfare_problem, _ev: c.map.outcome_evidence, _key: c.intervention_key || '', _status: c.candidate_status || ''
@@ -45,7 +55,9 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
     const counts = {}; for (const c of formers) if (c.intervention) counts[c.intervention.toLowerCase()] = (counts[c.intervention.toLowerCase()] || 0) + 1;
     const name = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || key.replace(/-/g, ' ') || 'unspecified';
     const iid = 'I' + pad(interventions.length + 1, 2);
-    interventions.push({ id: iid, name_en: name, name_zh: null, technology_class: t, ...(key ? { key } : {}) });
+    const recs = {}; for (const c of formers) if (c.intervention_record) recs[c.intervention_record] = (recs[c.intervention_record] || 0) + 1;
+    const nameRecord = Object.entries(recs).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+    interventions.push({ id: iid, name_en: name, name_zh: nameRecord, technology_class: t, ...(key ? { key } : {}) });
     const ev = list.reduce((m, c) => (RANK[c._ev] > RANK[m] ? c._ev : m), 'none');
     applications.push({ id: 'A' + pad(applications.length + 1, 2), intervention_id: iid, species_id: speciesId, technology_class: t, welfare_problem: p, maturity: 'research', outcome_evidence: ev, claim_ids: list.map(c => c.id) });
   });

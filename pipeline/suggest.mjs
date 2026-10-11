@@ -12,7 +12,7 @@ export function groupClaims(claims) {
   claims.filter(c => c.quote_check === 'found' && c.intervention && (!c.map || c.map.welfare_relevant === true) && (!c.verify || c.verify.verdict === 'supported')).forEach((c, i) => {
     const key = c.map ? `${c.map.technology_class}|${c.map.welfare_problem}` : c.intervention.trim().toLowerCase();
     if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push({ id: `c${i}`, statement_en: c.statement_en, source: c.source, page: c.page });
+    groups.get(key).push({ id: `c${i}`, statement: c.statement, statement_en: c.statement_en, source: c.source, page: c.page });
   });
   return groups;
 }

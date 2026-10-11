@@ -226,3 +226,73 @@ test('run end to end with a fake model: dedup, windows, quote check, resume with
   const mixed = run('--window', '900');
   assert.equal(mixed.status, 2);
 });
+
+import { numbersPreserved, runRender } from '../pipeline/render.mjs';
+import { statementFields } from '../pipeline/export.mjs';
+import { claimText } from '../public/site-lib.js';
+import { verifyUser } from '../pipeline/prompts.mjs';
+
+test('the record is extracted in the source language; verification reads the record', () => {
+  const item = EXTRACT_SCHEMA.properties.claims.items;
+  assert.ok(item.required.includes('statement'));
+  assert.ok(!item.required.includes('statement_en'));
+  assert.match(verifyUser({ quote: 'q', statement: '记录', statement_en: 'rendering' }), /记录/);
+});
+
+test('number check: every number in the record must survive into English', () => {
+  assert.ok(numbersPreserved('获受精卵25万粒，受精率为68.4%', 'Obtained 250,000 fertilised eggs at a 68.4% rate').ok);
+  assert.ok(numbersPreserved('水温23～26℃', 'water at 23 to 26 °C').ok);
+  assert.deepEqual(numbersPreserved('驯化率达74%', 'rate reached 47%').missing, ['74']);
+  assert.ok(numbersPreserved('无数字的句子', 'A sentence without numbers').ok);
+});
+
+test('render: English is added beside the record with provenance; the record is untouched; English sources pass through', async () => {
+  const fetchImpl = async (u, o) => { const user = JSON.parse(o.body).messages.at(-1).content; const en = user.includes('74') ? 'Rate reached 47%.' : 'Rate reached 70%.'; return okFetch(JSON.stringify({ statement_en: en, intervention_en: 'feed training' }))(); };
+  const client = createClient({ apiKey: 'k', capUsd: 1, fetchImpl });
+  const claims = [
+    { quote: 'q', quote_check: 'found', statement: '驯化率可达70%', intervention: '驯化' },
+    { quote: 'q', quote_check: 'found', statement: '驯化率达74%', intervention: '驯化' },
+    { quote: 'q', quote_check: 'found', statement: 'Survival was 90% in RAS.', intervention: 'RAS' },
+    { quote: 'q', quote_check: 'not_on_page', statement: '不发送' }];
+  const { out } = await runRender(claims, client, 2);
+  assert.equal(out[0].statement, '驯化率可达70%');
+  assert.equal(out[0].statement_en, 'Rate reached 70%.');
+  assert.equal(out[0].rendering.check, 'numbers_ok');
+  assert.equal(out[0].rendering.from, 'zh');
+  assert.ok(out[0].rendering.model);
+  assert.equal(out[1].rendering.check, 'numbers_mismatch');
+  assert.deepEqual(out[1].rendering.missing, ['74']);
+  assert.equal(out[2].statement_en, 'Survival was 90% in RAS.');
+  assert.equal(out[2].rendering, null);
+  assert.equal(out[3].statement_en, undefined);
+});
+
+test('export and validator: record kept, rendering only with provenance and a passed check', () => {
+  const ok = statementFields({ statement: '驯化率可达70%', statement_en: 'Rate reached 70%.', rendering: { model: 'm', version: 'v', check: 'numbers_ok' } });
+  assert.equal(ok.text_zh, '驯化率可达70%'); assert.equal(ok.statement_lang, 'zh'); assert.equal(ok.text_en, 'Rate reached 70%.'); assert.equal(ok.rendering.model, 'm');
+  const bad = statementFields({ statement: '驯化率达74%', statement_en: 'Rate reached 47%.', rendering: { model: 'm', check: 'numbers_mismatch' } });
+  assert.equal(bad.text_en, null); assert.equal(bad.rendering, undefined);
+  const legacy = statementFields({ statement_en: 'Old English statement.' });
+  assert.equal(legacy.text_en, 'Old English statement.'); assert.equal(legacy.statement, undefined);
+
+  const base = JSON.parse(readFileSync(new URL('../public/data/sample.json', import.meta.url), 'utf8'));
+  const withRecord = structuredClone(base);
+  Object.assign(withRecord.claims[0], ok);
+  assert.deepEqual(validateExport(withRecord), []);
+  const replaced = structuredClone(withRecord); replaced.claims[0].text_zh = '被改写的中文';
+  assert.ok(validateExport(replaced).some(e => /differs from the record/.test(e)));
+  const noProv = structuredClone(withRecord); delete noProv.claims[0].rendering;
+  assert.ok(validateExport(noProv).some(e => /without provenance/.test(e)));
+  const failed = structuredClone(withRecord); failed.claims[0].rendering.check = 'numbers_mismatch';
+  assert.ok(validateExport(failed).some(e => /failed its check/.test(e)));
+  const recordOnly = structuredClone(withRecord); delete recordOnly.claims[0].text_en; delete recordOnly.claims[0].rendering;
+  assert.deepEqual(validateExport(recordOnly), []);
+});
+
+test('display: Chinese view shows the record, English view the rendering, falling back to the record', () => {
+  const c = { statement: '驯化率可达70%', statement_lang: 'zh', text_zh: '驯化率可达70%', text_en: 'Rate reached 70%.', rendering: { model: 'm', check: 'numbers_ok' } };
+  assert.deepEqual(claimText(c, 'zh'), { text: '驯化率可达70%', derived: false });
+  assert.deepEqual(claimText(c, 'en'), { text: 'Rate reached 70%.', derived: true });
+  assert.deepEqual(claimText({ ...c, text_en: null }, 'en'), { text: '驯化率可达70%', derived: false });
+  assert.deepEqual(claimText({ text_en: 'Old.' }, 'en'), { text: 'Old.', derived: false });
+});

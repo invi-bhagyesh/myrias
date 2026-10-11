@@ -74,7 +74,11 @@ export function claimRow(claim, data) {
     char_end: claim.locator?.end ?? '',
     quote: claim.quote,
     quote_lang: claim.quote_lang,
-    statement_en: claim.text_en,
+    statement_record: claim.statement || '',
+    statement_record_lang: claim.statement_lang || '',
+    statement_en: claim.text_en || '',
+    statement_en_derived: claim.rendering ? 'yes' : (claim.statement && claim.statement_lang !== 'en' ? '' : 'no'),
+    rendering_model: claim.rendering?.model || '',
     statement_zh: claim.text_zh || '',
     kind: claim.kind,
     outcome: claim.outcome || '',
@@ -84,6 +88,17 @@ export function claimRow(claim, data) {
     verification: claim.verification,
     audit: claim.audit
   };
+}
+
+// The text to show for a claim: in the Chinese view the record; in the English view the derived
+// rendering, falling back to the record when there is none. Says which one it returned.
+export function claimText(claim, lang) {
+  if (lang === 'zh') {
+    const t = claim.text_zh || (claim.statement_lang === 'zh' ? claim.statement : '') || claim.text_en || claim.statement || '';
+    return { text: t, derived: !claim.text_zh && !(claim.statement_lang === 'zh') && !!claim.text_en };
+  }
+  if (claim.text_en) return { text: claim.text_en, derived: !!(claim.statement && claim.statement_lang !== 'en') };
+  return { text: claim.statement || '', derived: false };
 }
 
 export function formatLocator(locator) {
@@ -154,7 +169,15 @@ export function validateExport(data) {
     if (!c.locator || c.locator.page === undefined) fail(`claim ${c.id}: missing locator`);
     if (!KINDS.includes(c.kind)) fail(`claim ${c.id}: unknown kind ${c.kind}`);
     if (!VERIFICATION.includes(c.verification)) fail(`claim ${c.id}: unknown verification ${c.verification}`);
-    if (!c.text_en) fail(`claim ${c.id}: missing English statement`);
+    // The source-language statement is the record; English is a derived view beside it. A claim
+    // needs either an English statement (older releases, English sources) or a record.
+    if (!c.text_en && !c.statement) fail(`claim ${c.id}: missing statement`);
+    if (c.statement && !c.statement_lang) fail(`claim ${c.id}: record statement without its language`);
+    if (c.statement && c.statement_lang !== 'en' && c.text_en) {
+      if (!c.rendering || !c.rendering.model || !c.rendering.check) fail(`claim ${c.id}: English rendering without provenance`);
+      else if (c.rendering.check !== 'numbers_ok') fail(`claim ${c.id}: English rendering failed its check (${c.rendering.check})`);
+    }
+    if (c.statement && c.statement_lang === 'zh' && c.text_zh && c.text_zh !== c.statement) fail(`claim ${c.id}: Chinese text differs from the record`);
     if (c.polarity != null && !POLARITY.includes(c.polarity)) fail(`claim ${c.id}: unknown polarity ${c.polarity}`);
     if (data.release.sample === false && !PUBLIC_VERIFICATION.includes(c.verification)) {
       fail(`claim ${c.id}: ${c.verification} claims must not be published`);

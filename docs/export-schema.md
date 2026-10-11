@@ -22,6 +22,14 @@ testing the layout; open `index.html?data=sample` to see it.
 | `methods` | `limits_en[]`, `limits_zh[]` (added to the fixed limits shown on the methods page) |
 
 ## Claim
+
+**The source language is the record.** For a claim from a Chinese source, `statement` holds the
+statement in Chinese, written at extraction, with `statement_lang: "zh"`; `text_zh` equals it. The
+English `text_en` is a derived view beside it, never a replacement: it carries `rendering {model,
+version, check}`, and a rendering is published only when its number check passed (every number in
+the record appears in the English). Without one, the site shows the record. Claims from releases
+before extract v0.3 have an English `text_en` written at extraction and no `statement`.
+
 `{id, source_id, species_id, locator{page, start, end}, quote, quote_lang, text_en, text_zh,
 kind, population{species, life_stage, system}, intervention, comparator, outcome, direction,
 magnitude, welfare_link, welfare_link_note, verification, audit}`
@@ -34,8 +42,10 @@ magnitude, welfare_link, welfare_link_note, verification, audit}`
 ## Publishing rules (enforced)
 - A real release (`sample: false`) may contain only `supported` and `partial` claims. Unsupported
   and unchecked claims stay in the pipeline store.
-- Every claim has a source, a locator, a verbatim quote of at most 600 characters, and an English
-  statement.
+- Every claim has a source, a locator, a verbatim quote of at most 600 characters, and a statement:
+  the record in its source language, an English statement, or both. An English rendering of a
+  non-English record must carry its provenance and a passed check, and `text_zh` may never differ
+  from a Chinese record.
 - No full text: keys such as `fulltext`, `full_text`, `body_text`, `pdf`, `markdown` are rejected
   anywhere in the export.
 - Every application cites at least one claim; all ids resolve; ids are unique.

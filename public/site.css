@@ -618,3 +618,8 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .scroll-cue:hover { color: var(--accent); }
 @media (prefers-reduced-motion: no-preference) { .scroll-cue svg { animation: cue 1.8s ease-in-out infinite; } @keyframes cue { 0%, 100% { translate: 0 0; } 50% { translate: 0 5px; } } }
 @media (max-width: 860px) { .arena-home .hero-with-hills { min-height: calc(100svh - 150px); padding: 16px 0 72px; align-content: center; } }
+.record-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0 6px; }
+.record-pair > div { padding: 12px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--card-bg); }
+.record-pair > div:first-child { border-left: 3px solid var(--accent); }
+.record-pair p { margin: 6px 0 0; }
+@media (max-width: 640px) { .record-pair { grid-template-columns: 1fr; } }

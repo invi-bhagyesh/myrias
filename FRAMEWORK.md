@@ -130,6 +130,12 @@ the quote to appear on the cited page. Failures are labelled fabrication; claims
 different source than the one cited are labelled misattribution (the split in arXiv 2601.22984).
 Support that exists only in the other language needs a defined rule.
 
+**Language of record.** The source's original language is the record. Extraction writes the
+statement, intervention and every free-text field in the source language; verification, mapping and
+deduplication read the record. English is a derived view stored beside it, with its model, version
+and a check that every number survives; it never replaces the record and is regenerated rather than
+edited. Work can happen in English without the corpus degrading.
+
 **Backend.** OpenRouter through one provider-agnostic interface. Model per stage set in config;
 model, parameters and cost logged per run; hard per-run spend cap; option to restrict to providers
 that do not retain data. `OPENROUTER_API_KEY` is present in the cloud environment; its validity and

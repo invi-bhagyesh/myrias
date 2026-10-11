@@ -220,7 +220,7 @@ function applicationCard(app) {
   return `<article class="run-entry"><span class="record-type">${esc(speciesName(app.species_id))}</span>
     <h3>${esc(interventionName(app.intervention_id))}</h3>
     <p class="badges">${badge('b-plain', `${tr('app.maturity')}: ${taxonomyLabel('maturity', app.maturity)}`)} ${badge('b-plain', `${tr('app.outcome')}: ${taxonomyLabel('outcome_evidence', app.outcome_evidence)}`)}</p>
-    <ul class="claim-list">${claims.map(c => `<li><a href="${link('claims/' + encodeURIComponent(c.id))}">${esc(pick(c, 'text', state.lang))}</a> ${verBadge(c.verification)}</li>`).join('')}</ul></article>`;
+    <ul class="claim-list">${claims.map(c => `<li><a href="${link('claims/' + encodeURIComponent(c.id))}">${esc(L.claimText(c, state.lang).text)}</a> ${verBadge(c.verification)}</li>`).join('')}</ul></article>`;
 }
 
 function viewSpeciesList() {
@@ -313,7 +313,7 @@ function viewSource(id) {
           [tr('src.lang'), esc(tr('lang.' + s.lang))], [tr('src.access'), esc(tr('access.' + s.access))], [tr('src.licence'), orUnknown(s.licence_note)]]) +
       (url ? `<p><a class="button small" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(tr('src.link'))} ↗</a></p>` : '') +
       `<h2>${esc(tr('src.claims'))}</h2>` +
-      (claims.length ? `<ul class="claim-list">${claims.map(c => `<li><a href="${link('claims/' + encodeURIComponent(c.id))}">${esc(pick(c, 'text', state.lang))}</a> ${verBadge(c.verification)}</li>`).join('')}</ul>` : `<p>${esc(tr('src.noclaims'))}</p>`)
+      (claims.length ? `<ul class="claim-list">${claims.map(c => `<li><a href="${link('claims/' + encodeURIComponent(c.id))}">${esc(L.claimText(c, state.lang).text)}</a> ${verBadge(c.verification)}</li>`).join('')}</ul>` : `<p>${esc(tr('src.noclaims'))}</p>`)
   };
 }
 
@@ -327,8 +327,9 @@ function viewClaim(id) {
   return {
     title: `${tr('claim.kicker')} ${c.id}`,
     html: `<p class="meta"><a href="${s ? link('sources/' + encodeURIComponent(s.id)) : link('sources')}">← ${esc(s ? s.title : tr('nav.sources'))}</a></p>
-      <header class="species-title"><div class="record-type">${esc(tr('claim.kicker'))} ${esc(c.id)}</div><h1>${esc(pick(c, 'text', state.lang))}</h1>
+      <header class="species-title"><div class="record-type">${esc(tr('claim.kicker'))} ${esc(c.id)}</div><h1>${esc(L.claimText(c, state.lang).text)}</h1>
         <p class="badges">${verBadge(c.verification)} ${kindBadge(c.kind)} ${auditBadge(c.audit)}</p></header>
+      ${recordBlock(c)}
       <h2>${esc(tr('claim.quote'))}</h2>
       <blockquote class="quote" lang="${esc(c.quote_lang || 'und')}">${esc(c.quote)}</blockquote>
       <p class="meta">${esc(tr('claim.locator'))}: ${esc(L.formatLocator(c.locator))} · ${esc(tr('claim.source'))}: ${s ? `<a href="${link('sources/' + encodeURIComponent(s.id))}" lang="${esc(s.lang)}">${esc(s.title)}</a>` : esc(c.source_id)}</p>
@@ -342,6 +343,15 @@ function viewClaim(id) {
       `<p><a class="button small" href="${esc(issueLink(`Correction: claim ${c.id}`, reportBody))}" target="_blank" rel="noopener noreferrer">${esc(tr('claim.report'))} ↗</a></p>
        <p class="small-note">${esc(tr('claim.report.note'))}</p>`
   };
+}
+
+// The record and its English view, side by side. The record is never replaced by the rendering.
+function recordBlock(c) {
+  if (!c.statement || c.statement_lang === 'en') return '';
+  const shown = L.claimText(c, state.lang);
+  const rec = `<div class="record-pair"><div><div class="record-type">${esc(tr('claim.record', { lang: tr('lang.' + c.statement_lang) }))}</div><p lang="${esc(c.statement_lang)}">${esc(c.statement)}</p></div>`;
+  const ren = c.text_en ? `<div><div class="record-type">${esc(tr('claim.rendering', { model: c.rendering?.model || '' }))}</div><p lang="en">${esc(c.text_en)}</p></div>` : `<div><p class="small-note">${esc(tr('claim.norender'))}</p></div>`;
+  return shown.text === c.statement && state.lang === 'zh' && !c.text_en ? rec + '</div>' : rec + ren + '</div>';
 }
 
 function viewMethods() {

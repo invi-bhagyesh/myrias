@@ -46,6 +46,19 @@ changed. The new fields appear on claim pages once claims are re-extracted. Test
 an end-to-end run against a fake model (dedup, windows, quote check, resume without new calls,
 refusal to mix settings, recall gate).
 
+## Chinese original as the record (built and tested; not yet run on real data)
+
+The source's original language is the record; any English rendering sits beside it as a derived
+view and never replaces it. Extraction v0.3 writes the statement and intervention in Chinese for a
+Chinese paper. Verification compares the Chinese quote with the Chinese statement, so a verdict
+never depends on a translation. A separate render step adds English with its model and version,
+and code checks that every number in the record (including 万 and ranges) survives into the
+English; a rendering that fails is not published and the site shows the Chinese record instead.
+Claim pages show the record and the English rendering side by side. The validator rejects an
+English rendering without provenance or with a failed check, and Chinese text that differs from
+the record. Code: `pipeline/prompts.mjs`, `pipeline/render.mjs`, `pipeline/export.mjs`,
+`public/site-lib.js`.
+
 ## Still to do
 
 1. Build the gold set (6 to 8 papers, every claim listed by a bilingual reader) and set the recall threshold.
