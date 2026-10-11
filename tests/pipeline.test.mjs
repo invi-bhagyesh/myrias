@@ -437,3 +437,16 @@ test('reconcile with known groups: seen names map without a call, existing keys 
   assert.equal(out[1].intervention_en, 'feed training');
   assert.equal(out[2].intervention_key, 'malachite-green');
 });
+
+test('claim stage resumes: claims already done are not sent again', async () => {
+  const claims = [{ quote_check: 'found', q: 'a' }, { quote_check: 'found', q: 'b' }, { quote_check: 'not_found', q: 'c' }];
+  const sent = [], saved = [];
+  const client = { call: async (stage, { user }) => { sent.push(user); return { data: { welfare_relevant: true }, entry: { model: 'm' } }; } };
+  const done = new Map([[0, { welfare_relevant: false, model: 'm' }]]);
+  const { out } = await runClaimStage('map', claims, client, 2, { done, onResult: (i, r) => saved.push(i) });
+  assert.equal(sent.length, 1);
+  assert.deepEqual(saved, [1]);
+  assert.equal(out[0].map.welfare_relevant, false);
+  assert.equal(out[1].map.welfare_relevant, true);
+  assert.equal(out[2].map, undefined);
+});
