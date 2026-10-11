@@ -46,7 +46,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const names = distinctNames(claims);
   const client = createClient({ capUsd: Number(arg('cap', 0)), logPath: `${arg('out')}.calls.jsonl` });
   const user = names.map((n, i) => `${i}. ${n.zh}${n.en ? ` (${n.en})` : ''}`).join('\n') + '\nReturn JSON.';
-  const r = await client.call('reconcile', { system: RECONCILE_SYSTEM, user, schema: RECONCILE_SCHEMA, maxTokens: 6000 });
+  const r = await client.call('reconcile', { system: RECONCILE_SYSTEM, user, schema: RECONCILE_SCHEMA, maxTokens: 20000 });
   if (!r.data) { console.error('reconcile: unparsed output'); process.exit(1); }
   const out = applyGroups(claims, names, r.data.groups);
   writeFileSync(arg('out'), out.map(c => JSON.stringify(c)).join('\n') + '\n');
