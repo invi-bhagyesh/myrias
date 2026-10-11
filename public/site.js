@@ -165,7 +165,6 @@ function viewOverview() {
   const matrix = L.buildMatrix(d, 'all');
   const cells = matrix.rows.flatMap(r => r.cells);
   const count = s => cells.filter(c => c.status === s).length;
-  const mini = matrix.rows.map(r => r.cells.map(c => `<span class="mini-cell st-${c.status}"></span>`).join('')).join('');
   const issue = (title, body) => esc(issueLink(title, `${body}\nRelease: ${d.release.version} (${d.release.as_of})\n\n`));
   const some = count('has_records') > 0;
   const notes = [
@@ -199,7 +198,7 @@ function viewOverview() {
         <div class="band-card"><dl class="arena-protocol">${[1, 2, 3].map(i => `<div><dt>${esc(tr(`how.${i}.t`))}</dt><dd>${esc(tr(`how.${i}.d`))}</dd></div>`).join('')}</dl></div></section>
 
       <section class="band-section" id="map" style="${band(3)}"><div class="story-copy"><h2>${esc(tr('fig.title'))}</h2><p>${esc(tr('map.lead'))}</p></div>
-        <div class="band-split"><div class="band-card"><a class="mini" style="--cols:${matrix.columns.length}" href="${link('explore')}" aria-label="${esc(tr('fig.cta'))}">${mini}</a>
+        <div class="band-split is-wide"><div class="home-chart">${matrixChart({ matrix, data: d, lang: state.lang, selected: null, speciesId: 'all', link, tr })}
           <a class="button small" href="${link('explore')}">${esc(tr('fig.cta'))}</a></div>
           <aside class="band-notes" aria-label="${esc(tr('fig.title'))}">${notes.map(([k, t, text]) => `<div class="band-note"><span class="band-note-dot" aria-hidden="true"></span><p class="band-note-kicker">${esc(tr(k))}</p><h3>${esc(t)}</h3><p>${esc(text)}</p></div>`).join('')}</aside></div></section>
 

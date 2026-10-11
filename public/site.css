@@ -654,3 +654,11 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
   .em-svg { display: none; }
   .em-list { display: block; }
 }
+
+/* Home-page map section: the labelled explorer chart, notes in a row beneath */
+.band-split.is-wide { grid-template-columns: minmax(0, 1fr); }
+.band-split.is-wide .band-notes { grid-template-rows: none; }
+@media (min-width: 900px) { .band-split.is-wide .band-notes { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.home-chart { min-width: 0; }
+.home-chart .mchart-wrap { margin-top: 0; }
+.home-chart .mc-legend { margin-bottom: 12px; }
