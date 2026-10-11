@@ -1,0 +1,216 @@
+{
+  "_note": "Canonical welfare-relevant interventions found in the Chinese mandarin fish corpus, with the patterns that map extracted claims to them and the English search terms used to look for the same intervention in English-language literature. Experimental methods (histopathology, infection routes, electron microscopy, eye removal) are excluded: they are research techniques, not welfare technologies.",
+  "species": {
+    "id": "mandarin-fish",
+    "scientific": "Siniperca chuatsi",
+    "english_terms": [
+      "Siniperca chuatsi",
+      "mandarin fish",
+      "Chinese perch",
+      "Siniperca"
+    ],
+    "exclude_terms": [
+      "Synchiropus",
+      "green mandarin",
+      "mandarin dragonet"
+    ]
+  },
+  "interventions": [
+    {
+      "id": "feed-training",
+      "en": "Feed training (weaning) onto dead fish or compound feed",
+      "zh": "驯食（转食死饵或配合饲料）",
+      "claim_patterns": [
+        "domestic",
+        "conditioned reflex",
+        "conditional reflex",
+        "eating reflex",
+        "feeding-taming",
+        "feeding training",
+        "weaning",
+        "acclimation to feeding",
+        "compound feed",
+        "artificial diet",
+        "blending transition",
+        "fish pieces",
+        "dead fish",
+        "associative learning",
+        "staged domestication",
+        "broadcast feeding"
+      ],
+      "english_terms": [
+        "feed training",
+        "weaning",
+        "artificial diet",
+        "formulated feed",
+        "compound feed",
+        "dead prey",
+        "feeding habit domestication",
+        "food habituation"
+      ]
+    },
+    {
+      "id": "starvation-before-training",
+      "en": "Starvation period before feed training",
+      "zh": "驯食前饥饿处理",
+      "claim_patterns": [
+        "starvation",
+        "fasting",
+        "hunger"
+      ],
+      "english_terms": [
+        "starvation",
+        "fasting",
+        "food deprivation"
+      ]
+    },
+    {
+      "id": "first-feeding-live-prey",
+      "en": "Timed first-feeding with live prey fry",
+      "zh": "开口饵料鱼的适时供应",
+      "claim_patterns": [
+        "bait fish",
+        "live bait",
+        "blunt snout bream",
+        "first-feeding",
+        "live feed",
+        "palatable bait"
+      ],
+      "english_terms": [
+        "first feeding",
+        "live prey",
+        "prey fish",
+        "larval rearing",
+        "bream larvae"
+      ]
+    },
+    {
+      "id": "temperature-management-iskv",
+      "en": "Water temperature management, including against ISKNV disease",
+      "zh": "养殖水温管理（包括预防传染性脾肾坏死病）",
+      "claim_patterns": [
+        "temperature"
+      ],
+      "english_terms": [
+        "ISKNV",
+        "infectious spleen and kidney necrosis virus",
+        "water temperature"
+      ]
+    },
+    {
+      "id": "flowing-water-rearing",
+      "en": "Flowing-water rearing and flow control for eggs and fry",
+      "zh": "流水孵化与流水育苗",
+      "claim_patterns": [
+        "flowing water",
+        "water flow",
+        "circular channel",
+        "incubation jar",
+        "hatching"
+      ],
+      "english_terms": [
+        "flowing water",
+        "water flow",
+        "hatching",
+        "larval rearing",
+        "incubation"
+      ]
+    },
+    {
+      "id": "malachite-green",
+      "en": "Malachite green against water mould",
+      "zh": "孔雀石绿防治水霉病",
+      "claim_patterns": [
+        "malachite green"
+      ],
+      "english_terms": [
+        "malachite green",
+        "Saprolegnia",
+        "saprolegniasis"
+      ]
+    },
+    {
+      "id": "copper-sulfate",
+      "en": "Copper sulfate (with ferrous sulfate) against parasites",
+      "zh": "硫酸铜（硫酸亚铁合剂）防治寄生虫",
+      "claim_patterns": [
+        "copper sulfate",
+        "ferrous sulfate"
+      ],
+      "english_terms": [
+        "copper sulfate",
+        "Trichodina",
+        "Ichthyophthirius",
+        "parasite treatment"
+      ]
+    },
+    {
+      "id": "dichlorvos",
+      "en": "Dichlorvos against copepods",
+      "zh": "敌敌畏杀灭剑水蚤",
+      "claim_patterns": [
+        "dichlorvos"
+      ],
+      "english_terms": [
+        "dichlorvos",
+        "copepod",
+        "organophosphate"
+      ]
+    },
+    {
+      "id": "polyculture",
+      "en": "Polyculture in carp ponds",
+      "zh": "与家鱼混养",
+      "claim_patterns": [
+        "polyculture"
+      ],
+      "english_terms": [
+        "polyculture",
+        "carp pond"
+      ]
+    },
+    {
+      "id": "stocking-density",
+      "en": "Stocking density",
+      "zh": "放养密度",
+      "claim_patterns": [
+        "stocking density",
+        "density"
+      ],
+      "english_terms": [
+        "stocking density"
+      ]
+    },
+    {
+      "id": "light-control",
+      "en": "Light control for feeding",
+      "zh": "光照控制促进摄食",
+      "claim_patterns": [
+        "light control",
+        "low-light",
+        "light"
+      ],
+      "english_terms": [
+        "light intensity",
+        "photoperiod",
+        "light condition"
+      ]
+    },
+    {
+      "id": "selection-feed-acceptance",
+      "en": "Selective breeding for acceptance of artificial feed",
+      "zh": "选育易驯食品系",
+      "claim_patterns": [
+        "gwas",
+        "growth selection",
+        "selection and feed"
+      ],
+      "english_terms": [
+        "selective breeding",
+        "GWAS",
+        "genetic",
+        "feeding habit"
+      ]
+    }
+  ]
+}

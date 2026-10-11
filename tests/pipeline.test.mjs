@@ -296,3 +296,16 @@ test('display: Chinese view shows the record, English view the rendering, fallin
   assert.deepEqual(claimText({ ...c, text_en: null }, 'en'), { text: '驯化率可达70%', derived: false });
   assert.deepEqual(claimText({ text_en: 'Old.' }, 'en'), { text: 'Old.', derived: false });
 });
+
+import { mapClaim, namesSpecies, classify } from '../pipeline/gap.mjs';
+test('gap: claims map to canonical interventions; species filter; gap categories', () => {
+  const map = JSON.parse(readFileSync(new URL('../pipeline/gap/mandarin-fish.json', import.meta.url), 'utf8'));
+  assert.deepEqual(mapClaim({ intervention: 'conditioned reflex domestication', statement_en: '' }, map.interventions), ['feed-training']);
+  assert.deepEqual(mapClaim({ intervention: 'histopathology', statement_en: 'Spleen cells were enlarged.' }, map.interventions), []);
+  assert.ok(namesSpecies({ title: 'Weaning of Siniperca chuatsi onto pellets', abstract: '' }, map.species.english_terms));
+  assert.ok(!namesSpecies({ title: 'Larval rearing of the green mandarin fish Synchiropus splendidus', abstract: '' }, map.species.english_terms, map.species.exclude_terms));
+  assert.equal(classify({ measured: 2 }, []).status, 'chinese_only');
+  assert.equal(classify({ measured: 2 }, [{ verdict: { match: 'partial', measured: false } }]).status, 'english_partial_only');
+  assert.equal(classify({ measured: 2 }, [{ verdict: { match: 'yes', measured: false } }]).status, 'english_unmeasured');
+  assert.equal(classify({ measured: 2 }, [{ verdict: { match: 'yes', measured: true } }]).status, 'both');
+});

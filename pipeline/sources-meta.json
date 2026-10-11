@@ -1,9 +1,64 @@
 {
-  "_note": "Bibliographic details read from the papers' own headers. Missing years and venues are null, not guessed.",
-  "鳜鱼人工繁殖和夏花培育研究": { "year": 1996, "venue": "淡水渔业 26(3)" },
-  "鳜鱼人工繁殖及其养殖的研究": { "year": 1983, "venue": null },
-  "用摄食条件反射研究鳜鱼食性的驯化": { "year": 1998, "venue": "浙江农村技术师范专科学校学报 (1)" },
-  "传染性脾肾坏死病毒(ISKNV)感染途径": { "year": 1999, "venue": "中国病毒学 14(4)" },
-  "鳜鱼人工繁殖的生态生理学特性": { "year": 1992, "venue": "水生生物学报 16(1)" },
-  "鳜鱼口咽腔味蕾和行为反应特性及其对捕食习性的适应": { "year": 1996, "venue": "动物学报 42(1)" }
+  "_note": "Bibliographic details read from the papers' own pages. A year with year_basis is a received date or approximate, not the printed publication year. Missing values are null, not guessed.",
+  "鳜鱼人工繁殖和夏花培育研究": {
+    "year": 1996,
+    "venue": "淡水渔业 26(3)"
+  },
+  "鳜鱼人工繁殖及其养殖的研究": {
+    "year": 1983,
+    "venue": null
+  },
+  "用摄食条件反射研究鳜鱼食性的驯化": {
+    "year": 1998,
+    "venue": "浙江农村技术师范专科学校学报 (1)"
+  },
+  "传染性脾肾坏死病毒(ISKNV)感染途径": {
+    "year": 1999,
+    "venue": "中国病毒学 14(4)"
+  },
+  "鳜鱼人工繁殖的生态生理学特性": {
+    "year": 1992,
+    "venue": "水生生物学报 16(1)"
+  },
+  "鳜鱼口咽腔味蕾和行为反应特性及其对捕食习性的适应": {
+    "year": 1996,
+    "venue": "动物学报 42(1)"
+  },
+  "不同驯食方式对鳜鱼胃肠道消化酶活性的影响": {
+    "year": 1997,
+    "venue": null,
+    "year_basis": "received 1997-06-27"
+  },
+  "鳜食性驯化的研究": {
+    "year": 2001,
+    "venue": null,
+    "year_basis": "received 2001-12-28"
+  },
+  "鳜鱼感官发育与摄食行为模式定向调控技术": {
+    "year": 2005,
+    "venue": null,
+    "year_basis": "received 2005-03-01"
+  },
+  "鳜野生群体与养殖群体的RAPD分析": {
+    "year": 2005,
+    "venue": "大连水产学院学报 20(1)"
+  },
+  "鳜雌雄生长差异的研究": {
+    "year": 2006,
+    "venue": "淡水渔业 36(3)"
+  },
+  "鳜鱼生殖生长调控与良种培育技术研究进展": {
+    "year": 2025,
+    "venue": "中山大学学报（自然科学版中英文）64(1)"
+  },
+  "鳜鱼早繁新技术研究": {
+    "year": 2007,
+    "venue": null,
+    "year_basis": "latest year in the text (approximate)"
+  },
+  "鳜鱼病毒病原及细胞感染特性的研究": {
+    "year": 2000,
+    "venue": null,
+    "year_basis": "latest year in the text (approximate)"
+  }
 }
