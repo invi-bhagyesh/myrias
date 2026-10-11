@@ -7,7 +7,7 @@
 import { buildMatrix, pick, escapeHtml } from './site-lib.js';
 
 // Categorical colours, readable on both the light and the dark background.
-export const PALETTE = ['#7a4be0', '#f08a2c', '#c24fd0', '#e0527a', '#2f9e6b', '#f2b13a', '#5b8def', '#e4572e'];
+export const PALETTE = ['#8457a8', '#008c80', '#97761f', '#6a62b8', '#b5562a', '#2a67a4', '#4e8a3a', '#b04a6e'];
 export const MIN_REAL_CLAIMS = 50;
 const SOURCE_COLOR = '#8d9aa3';
 const MAX_TIP = 110;
