@@ -17,6 +17,8 @@
     ],
     "exclude_terms": [
       "Synchiropus",
+      "Synchropus",
+      "dragonet",
       "green mandarin",
       "mandarin dragonet"
     ]

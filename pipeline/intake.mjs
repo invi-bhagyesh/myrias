@@ -13,6 +13,7 @@
 // --fetch            DIR/pdf/<id>.pdf for open PDFs, DIR/xml-pages.jsonl for Europe PMC full text
 //                    (one "page" per article section; normalize.py turns the PDFs into pages.jsonl)
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 const UA = 'myrias-intake/0.1 (research; https://github.com/invi-bhagyesh/myrias)';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -41,7 +42,7 @@ export const TOPICS = {
   feeding: ['feed', 'feeding', 'diet', 'live prey', 'forage', 'pellet', 'starv', 'food habit', '驯食', '驯化', '饲料', '投喂', '摄食', '饵料', '饥饿', '食性'],
   stocking_density: ['stocking density', 'rearing density', 'density', '密度', '放养'],
   water_quality: ['water quality', 'dissolved oxygen', 'hypoxi', 'ammonia', 'nitrite', 'temperature', 'thermal', 'salinity', 'recirculat', '水质', '溶氧', '溶解氧', '缺氧', '氨氮', '亚硝酸', '水温', '温度', '低温', '高温', '盐度', '循环水'],
-  handling_transport: ['transport', 'handling', 'anesthe', 'anaesthe', 'ms-222', 'eugenol', 'crowding', '运输', '麻醉', '捕捞', '拥挤'],
+  handling_transport: ['live transport', 'transportation', 'transported', 'simulated transport', 'handling stress', 'handling', 'anesthe', 'anaesthe', 'ms-222', 'eugenol', 'crowding', '运输', '麻醉', '捕捞', '拥挤'],
   stunning_slaughter: ['slaughter', 'stunning', 'euthan', 'pre-slaughter', 'post-mortem', 'postmortem', '屠宰', '致晕', '宰杀', '宰前'],
   disease_parasites: ['virus', 'viral', 'isknv', 'iridovir', 'bacteri', 'aeromonas', 'parasit', 'infect', 'immun', 'vaccin', 'disease', 'pathogen', 'antibiotic', 'drug', '病毒', '疾病', '寄生虫', '细菌', '感染', '免疫', '疫苗', '病害', '药物'],
   procedures: ['induced spawning', 'hormone', 'injection', 'sex revers', 'triploid', 'tagging', 'artificial propagation', 'artificial breeding', '催产', '注射', '人工繁殖', '三倍体', '性逆转'],
@@ -59,6 +60,11 @@ export function namesSpecies(rec, sp) {
   const low = t.toLowerCase();
   const hit = sp.english_terms.some(x => low.includes(x.toLowerCase())) || (sp.chinese_terms || []).some(x => t.includes(x));
   return hit && !(sp.exclude_terms || []).some(x => low.includes(x.toLowerCase()));
+}
+// The species is the subject of the paper, not a passing mention in the abstract.
+export function inTitle(rec, sp) {
+  const t = String(rec.title || '');
+  return sp.english_terms.some(x => t.toLowerCase().includes(x.toLowerCase())) || (sp.chinese_terms || []).some(x => t.includes(x));
 }
 export const titleKey = s => String(s || '').toLowerCase().replace(/[^a-z0-9一-鿿]+/g, '');
 export function keyOf(r) { return r.doi ? 'doi:' + r.doi.toLowerCase() : r.pmid ? 'pmid:' + r.pmid : 't:' + titleKey(r.title).slice(0, 120); }
@@ -284,16 +290,19 @@ async function main() {
   for (const [name, why] of Object.entries(NOT_SEARCHED)) status[name] = { status: 'not_searched', reason: why };
 
   const merged = mergeRecords(all.filter(r => r.title)).filter(r => namesSpecies(r, sp));
-  merged.forEach((r, i) => {
-    r.id = 'R' + String(i + 1).padStart(4, '0');
+  merged.forEach(r => {
+    // Stable across reruns, so an interrupted fetch resumes where it stopped.
+    r.id = 'R' + createHash('sha1').update(keyOf(r)).digest('hex').slice(0, 10);
     r.lang = langOf(r.title, r.language);
     r.topics = topicsOf(r);
     r.welfare_relevant = r.topics.length > 0;
+    r.species_in_title = inTitle(r, sp);
     r.open_access = Boolean(r.oa.epmc_xml || r.oa.pdf);
   });
 
   if (has('fetch')) {
-    const want = merged.filter(r => has('fetch-all') || r.welfare_relevant).slice(0, Number(arg('max-fetch', 100000)));
+    // By default only papers about the species (named in the title) that touch a welfare topic.
+    const want = merged.filter(r => has('fetch-all') || (r.welfare_relevant && r.species_in_title)).slice(0, Number(arg('max-fetch', 100000)));
     const done = existsSync(`${out}/fetch.jsonl`) ? new Set(readFileSync(`${out}/fetch.jsonl`, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l).id)) : new Set();
     const queue = want.filter(r => !done.has(r.id));
     const worker = async () => { while (queue.length) { const r = queue.shift(); const f = await fetchOne(r, out); appendFileSync(`${out}/fetch.jsonl`, JSON.stringify({ id: r.id, ...f }) + '\n'); await sleep(400); } };
@@ -306,10 +315,11 @@ async function main() {
   writeFileSync(`${out}/status.json`, JSON.stringify(status, null, 2));
   const count = f => merged.reduce((m, r) => { for (const k of [].concat(f(r))) m[k] = (m[k] || 0) + 1; return m; }, {});
   const summary = {
-    species: sp.scientific, papers: merged.length, by_language: count(r => r.lang), welfare_relevant: merged.filter(r => r.welfare_relevant).length,
+    species: sp.scientific, papers: merged.length, by_language: count(r => r.lang), species_in_title: merged.filter(r => r.species_in_title).length,
+    welfare_relevant: merged.filter(r => r.welfare_relevant).length, about_species_and_welfare: count(r => (r.species_in_title && r.welfare_relevant ? r.lang : [])),
     by_topic: count(r => r.topics), by_source: count(r => r.sources), found_by_one_source_only: merged.filter(r => r.sources.length === 1).length,
     by_decade: count(r => (r.year ? Math.floor(r.year / 10) * 10 + 's' : 'unknown')), open_access: merged.filter(r => r.open_access).length,
-    fetched: count(r => r.fetched || (has('fetch') && (has('fetch-all') || r.welfare_relevant) ? 'not_fetched' : [])), sources: status
+    fetched: count(r => r.fetched || (has('fetch') && (has('fetch-all') || (r.welfare_relevant && r.species_in_title)) ? 'not_fetched' : [])), sources: status
   };
   writeFileSync(`${out}/summary.json`, JSON.stringify(summary, null, 2));
   console.log(JSON.stringify(summary, null, 2));
