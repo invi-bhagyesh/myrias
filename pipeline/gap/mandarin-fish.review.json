@@ -1,0 +1,48 @@
+{
+  "_note": "Corrections to the automated judge, made by the project author reading the title and abstract. Not an expert review. Applied on top of the model's verdicts; both counts are reported.",
+  "reviewer": "project author (non-expert spot-check), 2026-10-11",
+  "overrides": [
+    {
+      "intervention": "temperature-management-iskv",
+      "title_contains": "Comparative transcriptomic analysis reveals immune regulation",
+      "match": "partial",
+      "note": "Temperature effects on immunity, not temperature management against ISKNV."
+    },
+    {
+      "intervention": "temperature-management-iskv",
+      "title_contains": "Low-Temperature Immersion Immunization",
+      "match": "partial",
+      "note": "Uses low temperature to attenuate infection for immunization; related evidence that ISKNV is temperature-dependent, not water-temperature management."
+    },
+    {
+      "intervention": "malachite-green",
+      "title_contains": "Malachite green and chloramphenicol in aquatic products",
+      "match": "no",
+      "note": "Residue survey of market fish, not use as a treatment."
+    },
+    {
+      "intervention": "selection-feed-acceptance",
+      "title_contains": "Whole-genome resequencing and bisulfite sequencing",
+      "match": "partial",
+      "note": "Genetic basis of feeding-habit domestication; not a breeding programme."
+    },
+    {
+      "intervention": "selection-feed-acceptance",
+      "title_contains": "digestive system of mandarin fish (Siniperca chuatsi) can adapt",
+      "match": "partial",
+      "note": "Physiological adaptation to artificial diet; not selective breeding."
+    },
+    {
+      "intervention": "stocking-density",
+      "title_contains": "Relationships among planktons DNA sequence diversity",
+      "match": "partial",
+      "note": "Density mentioned as a pond factor; not a stocking-density study."
+    },
+    {
+      "intervention": "malachite-green",
+      "title_contains": "Residual Malachite Green in Aquaculture Sediments",
+      "match": "no",
+      "note": "Residue modelling in sediment, not use as a treatment."
+    }
+  ]
+}
