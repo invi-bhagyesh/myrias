@@ -421,7 +421,19 @@ function applyChrome() {
   $('#release-status').textContent = d && d.release.sample ? statusText(d) : '';
 }
 
+// Phone header: one row (brand + menu button); the sections and tools fold out beneath it.
+function setMenu(open) {
+  const bar = document.querySelector('.topbar'), btn = $('#menu-toggle');
+  if (!bar || !btn) return;
+  bar.classList.toggle('is-open', open);
+  btn.setAttribute('aria-expanded', String(open));
+  btn.setAttribute('aria-label', tr(open ? 'nav.close' : 'nav.menu'));
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.topbar.is-open')) { setMenu(false); $('#menu-toggle').focus(); } });
+document.addEventListener('click', e => { if (!e.target.closest('.topbar')) setMenu(false); });
+
 function render(navigated = false) {
+  setMenu(false);
   observers.forEach(o => o.disconnect()); observers = [];
   applyChrome();
   const { parts, params } = parseHash();
@@ -592,7 +604,8 @@ function handleDownload(kind) {
 document.addEventListener('click', event => {
   const target = event.target.closest('button, a');
   if (!target) return;
-  if (target.id === 'lang-toggle') { state.lang = state.lang === 'zh' ? 'en' : 'zh'; store('myrias-lang', state.lang); render(); }
+  if (target.id === 'menu-toggle') setMenu(!document.querySelector('.topbar').classList.contains('is-open'));
+  else if (target.id === 'lang-toggle') { state.lang = state.lang === 'zh' ? 'en' : 'zh'; store('myrias-lang', state.lang); render(); }
   else if (target.id === 'theme-toggle') {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next; store('myrias-theme', next); applyChrome();
