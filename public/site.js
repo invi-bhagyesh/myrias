@@ -40,6 +40,8 @@ async function load() {
     state.data = null;
     state.error = error.message;
   }
+  // What the private corpus on Hugging Face holds: names, counts and sizes only, never text.
+  try { const r = await fetch('data/corpus.json', { cache: 'no-cache' }); state.corpus = r.ok ? await r.json() : null; } catch { state.corpus = null; }
 }
 
 const taxonomyLabel = (kind, id) => {
@@ -88,6 +90,35 @@ function viewPipeline() {
   const steps = funnel(run), top = steps.length ? Math.max(...steps.map(x => x.value)) : 1;
   const bars = steps.length ? `<h2>${esc(tr('pipe.funnel'))}</h2><p class="small-note">${esc(tr('pipe.funnel.note'))}</p><ol class="funnel">${steps.map(x => `<li><span class="funnel-label">${esc(x.label[i])}</span><span class="funnel-bar"><i style="width:${Math.max(3, Math.round(100 * x.value / top))}%"></i></span><b>${x.value}</b></li>`).join('')}</ol>` : '';
   return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pipe.lead')) + bars + `<h2>${esc(tr('pipe.stages'))}</h2><div class="pipe-flow">${stages}</div>` };
+}
+
+const fmtBytes = n => (n >= 1e6 ? (n / 1e6).toFixed(1) + ' MB' : n >= 1e3 ? Math.round(n / 1e3) + ' KB' : n + ' B');
+function viewCorpus() {
+  const c = state.corpus;
+  if (!c) return { title: tr('nav.corpus'), html: lead(tr('corpus.kicker'), tr('corpus.title'), tr('corpus.lead')) + `<p>${esc(tr('corpus.none'))}</p>` };
+  const h = c.headline, n = x => (x === null || x === undefined ? '—' : Number(x).toLocaleString());
+  const tiles = [[h.papers_found, 'corpus.h.papers'], [(h.about_species_and_welfare?.en || 0) + (h.about_species_and_welfare?.zh || 0), 'corpus.h.relevant'],
+    [h.full_text, 'corpus.h.fulltext'], [h.by_language?.zh, 'corpus.h.zh'], [h.first_run_claims, 'corpus.h.claims'], [h.links, 'corpus.h.links']];
+  const srcs = Object.entries(h.sources || {}).map(([k, v]) => `<li class="src-${esc(v)}"><b>${esc(tr('corpus.src.' + k))}</b><span>${esc(tr('corpus.status.' + v))}</span></li>`).join('');
+  const groups = new Map();
+  for (const f of c.folders) { const top = f.path.split('/')[0] || ''; (groups.get(top) || groups.set(top, []).get(top)).push(f); }
+  const order = [...Object.keys(c.parts), ''].filter(k => groups.has(k));
+  const item = it => `<li><code>${esc(it.name)}</code><span class="ct-meta">${it.rows !== null && it.rows !== undefined ? esc(tr('corpus.rows', { n: n(it.rows) })) + ' · ' : ''}${fmtBytes(it.bytes)}</span>${it.about ? `<span class="ct-about">${esc(it.about)}</span>` : ''}</li>`;
+  const folder = f => `<div class="ct-folder"><div class="ct-row"><code>${esc(c.species)}/${esc(f.path ? f.path + '/' : '')}</code><span class="ct-meta">${esc(tr('corpus.files', { n: n(f.files) }))} · ${fmtBytes(f.bytes)}</span></div>
+    ${f.items.length ? `<ul class="ct-items">${f.items.map(item).join('')}</ul>` : `<p class="ct-about">${esc(f.about)}</p>`}</div>`;
+  const parts = order.map(k => {
+    const list = groups.get(k), files = list.reduce((a, f) => a + f.files, 0), bytes = list.reduce((a, f) => a + f.bytes, 0);
+    return `<details class="ct-part" ${k === 'intake' || k === 'first-run' ? 'open' : ''}><summary><span class="ct-name">${esc(k ? k + '/' : tr('corpus.top'))}</span><span class="ct-meta">${esc(tr('corpus.files', { n: n(files) }))} · ${fmtBytes(bytes)}</span>
+      <span class="ct-desc">${esc(k ? tr('corpus.part.' + k) : tr('corpus.part.top'))}</span></summary>${list.map(folder).join('')}</details>`;
+  }).join('');
+  const where = `<p class="small-note">${esc(tr(c.private ? 'corpus.private' : 'corpus.public'))} <a href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer">${esc(c.repo)} ↗</a> · ${esc(tr('corpus.asof', { d: c.as_of }))}</p>`;
+  return {
+    title: tr('nav.corpus'),
+    html: lead(tr('corpus.kicker'), tr('corpus.title'), tr('corpus.lead')) + where +
+      `<ul class="corpus-tiles">${tiles.map(([v, k]) => `<li><strong>${n(v)}</strong><span>${esc(tr(k))}</span></li>`).join('')}</ul>` +
+      `<h2>${esc(tr('corpus.sources'))}</h2><ul class="corpus-sources">${srcs}</ul>` +
+      `<h2>${esc(tr('corpus.tree'))}</h2><p class="small-note">${esc(tr('corpus.tree.note', { n: n(h.files), size: fmtBytes(h.bytes) }))}</p><div class="corpus-tree">${parts}</div>`
+  };
 }
 
 function viewExplore(params) {
@@ -447,6 +478,7 @@ function render(navigated = false) {
     else if (head === 'sources') view = id ? viewSource(id) : viewSources(params);
     else if (head === 'claims' && id) view = viewClaim(id);
     else if (head === 'pipeline') view = viewPipeline();
+    else if (head === 'corpus') view = viewCorpus();
     else if (head === 'methods') view = viewMethods();
     else if (head === 'download') view = viewDownload();
     else view = viewNotFound();
@@ -458,7 +490,7 @@ function render(navigated = false) {
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   moveBlob(true);
-  const wide = !parts[0] || ['content', 'explore', 'pipeline'].includes(parts[0]);
+  const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus'].includes(parts[0]);
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   document.title = `${view.title} — ${tr('site.title')}`;
   const pathKey = parts.join('/');

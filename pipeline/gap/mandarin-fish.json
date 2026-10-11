@@ -9,8 +9,16 @@
       "Chinese perch",
       "Siniperca"
     ],
+    "chinese_terms": [
+      "鳜"
+    ],
+    "chinese_query_terms": [
+      "鳜鱼"
+    ],
     "exclude_terms": [
       "Synchiropus",
+      "Synchropus",
+      "dragonet",
       "green mandarin",
       "mandarin dragonet"
     ]

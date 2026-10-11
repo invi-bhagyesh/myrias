@@ -309,3 +309,35 @@ test('gap: claims map to canonical interventions; species filter; gap categories
   assert.equal(classify({ measured: 2 }, [{ verdict: { match: 'yes', measured: false } }]).status, 'english_unmeasured');
   assert.equal(classify({ measured: 2 }, [{ verdict: { match: 'yes', measured: true } }]).status, 'both');
 });
+
+// ---------- intake ----------
+test('intake: species filter, topics, merging, JATS sections and PDF meta tags', async () => {
+  const I = await import('../pipeline/intake.mjs');
+  const sp = { english_terms: ['Siniperca chuatsi', 'mandarin fish', 'Siniperca'], chinese_terms: ['鳜'], exclude_terms: ['Synchiropus', 'green mandarin'] };
+  assert.ok(I.namesSpecies({ title: 'Feed training of mandarin fish', abstract: '' }, sp));
+  assert.ok(I.namesSpecies({ title: '鳜鱼人工繁殖的研究', abstract: '' }, sp));
+  assert.ok(!I.namesSpecies({ title: 'Green mandarin fish (Synchiropus splendidus) in aquaria', abstract: '' }, sp));
+  assert.deepEqual(I.topicsOf({ title: 'Effects of stocking density on cortisol in Siniperca chuatsi', abstract: '' }), ['stocking_density', 'stress_behaviour']);
+  assert.deepEqual(I.topicsOf({ title: '鳜鱼驯食与饲料', abstract: '' }), ['feeding']);
+  assert.deepEqual(I.topicsOf({ title: 'Complete mitochondrial genome of Siniperca', abstract: '' }), []);
+  assert.equal(I.langOf('鳜鱼人工繁殖', null), 'zh');
+  assert.equal(I.langOf('Feed training', 'eng'), 'en');
+  const merged = I.mergeRecords([
+    { source: 'crossref', doi: '10.1/ABC', title: 'A study', abstract: '', oa: { landing: 'https://x' } },
+    { source: 'europepmc', doi: '10.1/abc', pmid: '9', title: 'A study', abstract: 'Text', oa: { epmc_xml: 'PMC1' } },
+    { source: 'openalex', pmid: '9', title: 'A Study.', oa: {} },
+    { source: 'doaj', title: 'Another paper', oa: {} }
+  ]);
+  assert.equal(merged.length, 2);
+  assert.deepEqual(merged[0].sources, ['crossref', 'europepmc', 'openalex']);
+  assert.equal(merged[0].abstract, 'Text');
+  assert.deepEqual(merged[0].oa, { landing: 'https://x', epmc_xml: 'PMC1' });
+  const xml = '<article><article-title>Title here</article-title><abstract><p>An abstract long enough to keep as a page of text.</p></abstract><body><sec><title>Methods</title><p>Fish were fed for thirty days at two stocking densities.</p><sec><p>Nested part of the methods section text.</p></sec></sec><sec><title>Results</title><p>Growth was higher at the lower density in every tank.</p></sec></body></article>';
+  const secs = I.jatsSections(xml);
+  assert.equal(secs.length, 3);
+  assert.ok(secs[1].includes('Methods') && secs[1].includes('Nested part'));
+  assert.ok(secs[2].startsWith('Results'));
+  assert.equal(I.pdfMeta('<meta name="citation_pdf_url" content="https://j.cn/a.pdf">'), 'https://j.cn/a.pdf');
+  assert.equal(I.pdfMeta('<meta content="/b.pdf" name="citation_pdf_url" />'), '/b.pdf');
+  assert.equal(I.pdfMeta('<html></html>'), null);
+});
