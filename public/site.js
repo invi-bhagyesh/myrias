@@ -177,7 +177,7 @@ function viewOverview() {
   return {
     title: tr('site.title'),
     html: `<div class="arena-home">
-      <section class="hero hero-with-hills" aria-labelledby="home-title"><div class="hero-aurora" aria-hidden="true"></div>
+      <section class="hero hero-with-hills" aria-labelledby="home-title"><div class="hero-hills" aria-hidden="true">${pixelHills('hero')}</div>
         <div class="hero-copy">
         ${d.release.sample ? `<span class="pill">${esc(statusText(d))}</span>` : ''}<div class="record-type">${esc(tr('hero.kicker'))}</div>
         <h1 id="home-title">${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>

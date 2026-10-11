@@ -715,3 +715,12 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
   .topbar.is-open .tools { display: flex; grid-column: 1 / -1; grid-row: 3; justify-self: stretch; justify-content: center; gap: 8px; }
   .topbar.is-open .tools .chip { font-size: 14px; padding: 10px 18px; }
 }
+
+/* Hero background: stepped pixel sheets rising across the top right (as on ValueArena), no glow */
+.arena-home .hero-hills { top: 0; height: auto; }
+.arena-home .hero-hills .pixel-hills { opacity: .9; }
+/* The wordmark sat so low that the descender of the y was cut off */
+.site-footer-wordmark { bottom: .02em; line-height: 1.12; }
+.arena-home .hero-hills { --hill-1: #f1ebfa; --hill-2: #e5daf7; --hill-3: #f9dcc6; --hill-edge: #fbf9f4; }
+:root[data-theme="dark"] .arena-home .hero-hills { --hill-1: #19142a; --hill-2: #221a3b; --hill-3: #3a2a20; --hill-edge: #3b2f63; }
+.site-footer-wordmark { bottom: .08em; }
