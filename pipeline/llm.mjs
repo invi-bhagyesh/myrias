@@ -81,5 +81,22 @@ export function createClient({ apiKey = process.env.OPENROUTER_API_KEY, capUsd, 
     return { text, data, entry };
     } finally { inFlight--; reserved = inFlight ? Math.max(0, reserved - worst) : 0; }
   }
-  return { call, get spent() { return spent; }, get reserved() { return reserved; }, get calls() { return calls; }, capUsd };
+  // Embeddings for a list of texts, in batches; logged and costed like any other call.
+  async function embed(stage, texts, { model, batch = 64 } = {}) {
+    if (!apiKey) throw new Error('OPENROUTER_API_KEY is not set');
+    const use = model || stageSetting(stage, profile).model;
+    const out = [];
+    for (let i = 0; i < texts.length; i += batch) {
+      const t0 = Date.now();
+      const res = await fetchImpl(ENDPOINT.replace('/chat/completions', '/embeddings'), { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: use, input: texts.slice(i, i + batch), provider: { data_collection: CONFIG.provider.data_collection } }) });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.data) throw new Error(`OpenRouter embeddings ${res.status}: ${json?.error?.message || 'request failed'}`);
+      const cost = Number(json.usage?.cost) || 0; spent += cost; calls += 1;
+      for (const d of json.data.sort((a, b) => a.index - b.index)) out.push(d.embedding);
+      if (logPath) appendFileSync(logPath, JSON.stringify({ at: new Date().toISOString(), stage, model: json.model || use, requested_model: use, input_tokens: json.usage?.prompt_tokens ?? null, output_tokens: 0, finish: 'embedding', cost_usd: cost, ms: Date.now() - t0, parsed: true, items: json.data.length }) + '\n');
+    }
+    return out;
+  }
+  return { call, embed, get spent() { return spent; }, get reserved() { return reserved; }, get calls() { return calls; }, capUsd };
 }

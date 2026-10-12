@@ -3,7 +3,7 @@
  "repo": "invi-bhagyesh/myrias-corpus",
  "url": "https://huggingface.co/datasets/invi-bhagyesh/myrias-corpus",
  "private": true,
- "as_of": "2026-10-11",
+ "as_of": "2026-10-12",
  "parts": {
   "intake": "New search across Europe PMC, Crossref, DOAJ, OpenAlex and Semantic Scholar, with the open full text it could fetch",
   "first-run": "The first run on 20 Chinese papers: source PDFs, page text, extraction, verification, mapping, English statements, model calls",
@@ -37,8 +37,8 @@
   "first_run_papers": 20,
   "first_run_claims": 231,
   "links": 2715,
-  "files": 266,
-  "bytes": 265985734
+  "files": 302,
+  "bytes": 310068193
  },
  "charts": {
   "stages": [
@@ -187,10 +187,22 @@
  "folders": [
   {
    "path": "",
-   "files": 1,
-   "bytes": 815092,
+   "files": 3,
+   "bytes": 870704,
    "about": "",
    "items": [
+    {
+     "name": "cluster-2026-10-12.calls.jsonl",
+     "bytes": 1951,
+     "rows": 8,
+     "about": ""
+    },
+    {
+     "name": "findings-2026-10-12.calls.jsonl",
+     "bytes": 53661,
+     "rows": 198,
+     "about": "Every model call that wrote a finding: model, tokens, cost"
+    },
     {
      "name": "links.csv",
      "bytes": 815092,
@@ -638,8 +650,8 @@
   },
   {
    "path": "run-2",
-   "files": 23,
-   "bytes": 5640128,
+   "files": 30,
+   "bytes": 6085694,
    "about": "One line per step of the run, in order: times, calls, cost, outputs",
    "items": []
   },
@@ -982,6 +994,172 @@
    ]
   },
   {
+   "path": "run-2/B/09-findings",
+   "files": 3,
+   "bytes": 817,
+   "about": "",
+   "items": [
+    {
+     "name": "stderr.log",
+     "bytes": 0,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "stdout.log",
+     "bytes": 221,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "step.json",
+     "bytes": 596,
+     "rows": null,
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+    }
+   ]
+  },
+  {
+   "path": "run-2/B/10-cluster",
+   "files": 4,
+   "bytes": 24735,
+   "about": "",
+   "items": [
+    {
+     "name": "cluster.calls.jsonl",
+     "bytes": 23521,
+     "rows": 87,
+     "about": "Every model call of that step: model, tokens, cost, finish reason"
+    },
+    {
+     "name": "stderr.log",
+     "bytes": 0,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "stdout.log",
+     "bytes": 194,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "step.json",
+     "bytes": 1020,
+     "rows": null,
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+    }
+   ]
+  },
+  {
+   "path": "run-2/B/11-findings",
+   "files": 4,
+   "bytes": 27003,
+   "about": "",
+   "items": [
+    {
+     "name": "findings.calls.jsonl",
+     "bytes": 25499,
+     "rows": 94,
+     "about": "Every model call of that step: model, tokens, cost, finish reason"
+    },
+    {
+     "name": "stderr.log",
+     "bytes": 0,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "stdout.log",
+     "bytes": 232,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "step.json",
+     "bytes": 1272,
+     "rows": null,
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+    }
+   ]
+  },
+  {
+   "path": "run-2/B/12-reconstruct",
+   "files": 6,
+   "bytes": 681007,
+   "about": "",
+   "items": [
+    {
+     "name": "findings-cache.json",
+     "bytes": 73268,
+     "rows": null,
+     "about": "Findings built for the reconstruction test only"
+    },
+    {
+     "name": "reconstruct.calls.jsonl",
+     "bytes": 252730,
+     "rows": 1011,
+     "about": "Every model call of that step: model, tokens, cost, finish reason"
+    },
+    {
+     "name": "reconstruct.json",
+     "bytes": 352845,
+     "rows": null,
+     "about": "Reconstruction test: held-out claims, the answer for each grouping, and the scores"
+    },
+    {
+     "name": "stderr.log",
+     "bytes": 0,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "stdout.log",
+     "bytes": 615,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "step.json",
+     "bytes": 1549,
+     "rows": null,
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+    }
+   ]
+  },
+  {
+   "path": "run-2/B/13-actions",
+   "files": 4,
+   "bytes": 3451,
+   "about": "",
+   "items": [
+    {
+     "name": "actions.calls.jsonl",
+     "bytes": 1360,
+     "rows": 5,
+     "about": "Every model call of that step: model, tokens, cost, finish reason"
+    },
+    {
+     "name": "stderr.log",
+     "bytes": 0,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "stdout.log",
+     "bytes": 1143,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "step.json",
+     "bytes": 948,
+     "rows": null,
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+    }
+   ]
+  },
+  {
    "path": "run-2/B/store-before-merge",
    "files": 3,
    "bytes": 300849,
@@ -1009,29 +1187,10 @@
   },
   {
    "path": "store",
-   "files": 3,
-   "bytes": 10281508,
-   "about": "",
-   "items": [
-    {
-     "name": "claims.jsonl",
-     "bytes": 10179525,
-     "rows": 4460,
-     "about": "Every claim that has passed in any run, with a permanent id (C0001...), the run that added it and every run that found it again"
-    },
-    {
-     "name": "runs.json",
-     "bytes": 491,
-     "rows": null,
-     "about": "One line per merge: claims in, added, already present, papers added"
-    },
-    {
-     "name": "sources.json",
-     "bytes": 101492,
-     "rows": null,
-     "about": "Every paper with claims, with a permanent id (S001...)"
-    }
-   ]
+   "files": 9,
+   "bytes": 53125776,
+   "about": "Every claim that has passed in any run, with a permanent id (C0001...), the run that added it and every run that found it again",
+   "items": []
   }
  ],
  "paper_files": [

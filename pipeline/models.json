@@ -11,9 +11,14 @@
     "map",
     "verify",
     "reconcile",
+    "findings",
     "translate",
     "suggest",
-    "ocr"
+    "ocr",
+    "embed",
+    "cluster",
+    "reconstruct",
+    "actions"
   ],
   "profiles": {
     "demo": {
@@ -82,6 +87,37 @@
       "ocr": {
         "model": "qwen/qwen3-vl-30b-a3b-instruct",
         "temperature": 0
+      },
+      "findings": {
+        "model": "anthropic/claude-sonnet-5.5",
+        "temperature": 0,
+        "provider": {
+          "require_parameters": false
+        }
+      },
+      "embed": {
+        "model": "qwen/qwen3-embedding-8b"
+      },
+      "cluster": {
+        "model": "anthropic/claude-sonnet-5.5",
+        "temperature": 0,
+        "provider": {
+          "require_parameters": false
+        }
+      },
+      "reconstruct": {
+        "model": "z-ai/glm-5.3",
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "actions": {
+        "model": "anthropic/claude-sonnet-5.5",
+        "temperature": 0,
+        "provider": {
+          "require_parameters": false
+        }
       }
     },
     "full": {
@@ -150,6 +186,37 @@
       "ocr": {
         "model": "qwen/qwen3-vl-30b-a3b-instruct",
         "temperature": 0
+      },
+      "findings": {
+        "model": "anthropic/claude-sonnet-5.5",
+        "temperature": 0,
+        "provider": {
+          "require_parameters": false
+        }
+      },
+      "embed": {
+        "model": "qwen/qwen3-embedding-8b"
+      },
+      "cluster": {
+        "model": "anthropic/claude-sonnet-5.5",
+        "temperature": 0,
+        "provider": {
+          "require_parameters": false
+        }
+      },
+      "reconstruct": {
+        "model": "z-ai/glm-5.3",
+        "temperature": 0,
+        "reasoning": {
+          "effort": "low"
+        }
+      },
+      "actions": {
+        "model": "anthropic/claude-sonnet-5.5",
+        "temperature": 0,
+        "provider": {
+          "require_parameters": false
+        }
       }
     }
   },
@@ -205,6 +272,10 @@
     "baidu/ernie-4.5-vl-424b-a47b": [
       0.42,
       1.25
+    ],
+    "qwen/qwen3-embedding-8b": [
+      0.01,
+      0.0
     ]
   }
 }
