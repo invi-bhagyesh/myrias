@@ -7,7 +7,7 @@ import { matrixChart } from './site-chart.js';
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 import { evidenceModel, evidenceMapHtml, mountEvidenceMap } from './site-evmap.js';
 import { speciesModel, speciesPageHtml, speciesCardsHtml } from './site-species.js';
-import { findingsListHtml, findingPageHtml, findingText, findingItemHtml, byWeight } from './site-findings.js';
+import { findingsListHtml, findingPageHtml, findingText, findingItemHtml, byWeight, claimItemsHtml } from './site-findings.js';
 import { actionItemHtml } from './site-actions.js';
 import { browseHtml, mountBrowse } from './site-browse.js';
 import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, LANG_COLOR } from './site-corpusviz.js';
@@ -19,7 +19,7 @@ const $ = selector => document.querySelector(selector);
 const params0 = new URLSearchParams(location.search);
 const useSample = params0.get('data') === 'sample';
 
-const state = { data: null, error: null, lang: 'en', index: null, lastPath: null, graphView: null };
+const state = { data: null, error: null, lang: 'en', index: null, lastPath: null, graphView: null, full: false, listsReady: false, listsWaiters: [], fullPromise: null, fullError: null };
 const tr = (key, vars) => t(state.lang, key, vars);
 
 function store(key, value) {
@@ -28,41 +28,48 @@ function store(key, value) {
 }
 
 // ---------- data ----------
+// The first screen needs only the release shell (taxonomy, sources, practices) and the small summaries, so
+// that is all load() waits for. Claims, findings and actions (about 6 MB, 1.2 MB compressed) download in the
+// background; pages that list them wait for loadFull(). Files carry the release version in the address, so
+// the browser keeps them between visits.
+const json = (url, opt) => fetch(url, opt).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${url}`); return r.json(); });
+const optional = url => json(url, { cache: 'no-cache' }).catch(() => null);
+const indexOf = list => new Map((list || []).map(x => [x.id, x]));
+
 async function load() {
-  state.error = null;
+  state.error = null; state.full = false; state.listsReady = false; state.fullPromise = null;
+  const [shell, corpus, nextRun, pipeline] = await Promise.all([
+    json(useSample ? 'data/sample.json' : 'data/release.json', { cache: 'no-cache' }).catch(e => ({ __error: e.message })),
+    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json')]);
+  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline;
+  if (shell.__error) { state.data = null; state.error = shell.__error; return; }
+  const data = shell, pending = (data.claim_files || []).length > 0;
+  const v = encodeURIComponent(data.release?.version || '0');
+  data.claims_pending = pending;
+  if (pending) { data.claims = []; data.findings = []; data.actions = []; }
+  const problems = L.validateExport(data);
+  if (problems.length) { state.data = null; state.error = 'Invalid export: ' + problems.slice(0, 3).join('; '); return; }
+  state.data = data;
+  state.index = { species: indexOf(data.species), sources: indexOf(data.sources), claims: indexOf(data.claims), findings: indexOf(data.findings),
+    interventions: indexOf(data.interventions), applications: indexOf(data.applications) };
+  if (!pending) { state.full = true; state.listsReady = true; return; }
+  state.fullPromise = loadFull(data, v);
+}
+
+async function loadFull(data, v) {
+  const part = files => Promise.all((files || []).map(f => json(`data/${f}?v=${v}`))).then(a => a.flat());
   try {
-    const response = await fetch(useSample ? 'data/sample.json' : 'data/release.json', { cache: 'no-cache' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    // Claims live in numbered files beside the release (release-claims-N.json); join them first.
-    if (data.claim_files?.length) {
-      const parts = await Promise.all(data.claim_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
-      data.claims = parts.flat();
-    }
-    if (data.action_files?.length) {
-      const parts = await Promise.all(data.action_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
-      data.actions = parts.flat();
-    }
-    if (data.finding_files?.length) {
-      const parts = await Promise.all(data.finding_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
-      data.findings = parts.flat();
-    }
+    // First the small files the Findings and Actions pages are built from, then the claims behind them.
+    const [findings, actions] = await Promise.all([part(data.finding_files), part(data.action_files)]);
+    data.findings = findings; data.actions = actions; state.index.findings = indexOf(findings); state.listsReady = true;
+    state.listsWaiters.splice(0).forEach(fn => fn());
+    const claims = await part(data.claim_files);
+    data.claims = claims; data.claims_pending = false;
     const problems = L.validateExport(data);
     if (problems.length) throw new Error('Invalid export: ' + problems.slice(0, 3).join('; '));
-    state.data = data;
-    const map = list => new Map(list.map(x => [x.id, x]));
-    state.index = {
-      species: map(data.species), sources: map(data.sources), claims: map(data.claims), findings: map(data.findings || []),
-      interventions: map(data.interventions), applications: map(data.applications)
-    };
-  } catch (error) {
-    state.data = null;
-    state.error = error.message;
-  }
-  // What the private corpus on Hugging Face holds: names, counts and sizes only, never text.
-  try { const r = await fetch('data/corpus.json', { cache: 'no-cache' }); state.corpus = r.ok ? await r.json() : null; } catch { state.corpus = null; }
-  try { const r = await fetch('data/next-run.json', { cache: 'no-cache' }); state.nextRun = r.ok ? await r.json() : null; } catch { state.nextRun = null; }
-  try { const r = await fetch('data/pipeline.json', { cache: 'no-cache' }); state.pipeline = r.ok ? await r.json() : null; } catch { state.pipeline = null; }
+    state.index.claims = indexOf(claims);
+    state.full = true;
+  } catch (error) { state.fullError = error.message; }
 }
 
 const taxonomyLabel = (kind, id) => {
@@ -228,7 +235,7 @@ function viewExplore(params) {
   const speciesId = params.get('species') || 'all';
   const matrix = L.buildMatrix(d, speciesId);
   const selected = params.get('cell') || '';
-  const supported = d.claims.filter(c => c.verification === 'supported').length;
+  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : (d.runs[0]?.counts?.claims_supported ?? 0);
   const zhSources = d.sources.filter(s => s.lang === 'zh').length;
   const aside = `<aside class="lead-aside"><h2>${esc(tr('land.ledger'))}</h2><dl class="ledger">
     <dt>${esc(tr('land.l.species'))}</dt><dd>${d.species.length}</dd>
@@ -282,7 +289,8 @@ function viewExplore(params) {
   };
 }
 
-const isDemo = d => !d.release.sample && d.release.status === 'pre-release' && d.claims.length > 0;
+const claimCount = d => d.claims.length || d.runs?.[0]?.counts?.claims_released || 0;
+const isDemo = d => !d.release.sample && d.release.status === 'pre-release' && claimCount(d) > 0;
 const statusText = d => isDemo(d) ? tr('status.demo') : tr(d.release.sample ? 'status.sample' : d.release.status === 'pre-release' ? 'status.pre-release' : 'status.released');
 
 const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-sand)', 'var(--band-clay)', 'var(--band-mint)', 'var(--bg)'];
@@ -292,7 +300,7 @@ const SECTIONS = [['numbers', 'sec.numbers'], ['how', 'how.title'], ['map', 'fig
 
 function viewOverview() {
   const d = state.data;
-  const supported = d.claims.filter(c => c.verification === 'supported').length;
+  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : (d.runs[0]?.counts?.claims_supported ?? 0);
   const zhSources = d.sources.filter(x => x.lang === 'zh').length;
   const stats = [[supported, isDemo(d) ? 'stats.claims.demo' : 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
   const note = isDemo(d) ? 'stats.note.demo' : d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
@@ -361,6 +369,16 @@ function applicationCard(app) {
 }
 
 const findingCtx = () => ({ tr, link, lang: state.lang, claims: state.index.claims, sources: state.index.sources, taxonomyLabel, claimText: L.claimText });
+
+// A finding's claim list is filled in when it is first opened, so the lists load without the claims.
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (!(d instanceof HTMLDetailsElement) || !d.open) return;
+  const ol = d.querySelector('[data-fd-claims]');
+  if (!ol || ol.dataset.filled) return;
+  const fill = () => { const f = state.index.findings.get(ol.dataset.fdClaims); if (f) { ol.innerHTML = claimItemsHtml(f, findingCtx()); ol.dataset.filled = '1'; } };
+  if (state.full) fill(); else { ol.innerHTML = `<li class="loading">${esc(tr('loading.data'))}</li>`; (state.fullPromise || Promise.resolve()).then(fill); }
+}, true);
 
 function viewFinding(id) {
   const f = state.index.findings.get(id);
@@ -581,8 +599,8 @@ function viewNotFound() {
   return { title: tr('notfound'), html: empty(tr('notfound'), '') + `<p style="text-align:center"><a class="button small" href="${link()}">${esc(tr('nav.explore'))}</a></p>` };
 }
 
-function viewError() {
-  return { title: tr('error.load'), html: `<div class="empty"><h3>${esc(tr('error.load'))}</h3><p>${esc(state.error || '')}</p><button class="button" type="button" data-retry>${esc(tr('error.retry'))}</button></div>` };
+function viewError(message) {
+  return { title: tr('error.load'), html: `<div class="empty"><h3>${esc(tr('error.load'))}</h3><p>${esc(message || state.error || '')}</p><button class="button" type="button" data-retry>${esc(tr('error.retry'))}</button></div>` };
 }
 
 // ---------- chrome and rendering ----------
@@ -621,6 +639,11 @@ function setMenu(open) {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.topbar.is-open')) { setMenu(false); $('#menu-toggle').focus(); } });
 document.addEventListener('click', e => { if (!e.target.closest('.topbar')) setMenu(false); });
 
+// Findings and Actions lists need only the small findings and actions files; a single finding, the species page,
+// sources, claims, Explore and Download need the claims too.
+const needsLists = (head, id) => (head === 'findings' && !id) || head === 'actions' || (head === 'species' && id);
+const needsFull = (head, id) => !needsLists(head, id) && ['explore', 'species', 'sources', 'claims', 'findings', 'download'].includes(head);
+
 function render(navigated = false) {
   setMenu(false);
   observers.forEach(o => o.disconnect()); observers = [];
@@ -628,7 +651,15 @@ function render(navigated = false) {
   const { parts, params } = parseHash();
   let view;
   if (!state.data) view = state.error ? viewError() : { title: tr('loading'), html: `<p class="loading">${esc(tr('loading'))}</p>` };
-  else {
+  else if ((!state.full && needsFull(parts[0], parts[1])) || (!state.listsReady && needsLists(parts[0], parts[1]))) {
+    // These pages list claims, findings or actions: show a placeholder until the background download is done.
+    view = state.fullError ? viewError(state.fullError) : { title: tr('loading'), html: `<div class="load-skel" aria-busy="true"><p class="loading">${esc(tr('loading.data'))}</p><i></i><i></i><i></i></div>` };
+    if (state.fullPromise && !state.fullWaiting) {
+      state.fullWaiting = true;
+      const again = () => { state.fullWaiting = false; render(); };
+      if (needsLists(parts[0], parts[1])) state.listsWaiters.push(again); else state.fullPromise.then(again);
+    }
+  } else {
     const [head, id] = parts;
     if (!head || head === 'content') view = viewOverview();
     else if (head === 'explore') view = viewExplore(params);
@@ -700,7 +731,7 @@ function renderFooter() {
 // hubs only; both are labelled placeholder data until a release holds enough verified claims.
 // "today" is always the real release.
 const GRAPH_VIEWS = ['full', 'simple', 'today'];
-const isPlaceholder = d => d.claims.length < MIN_REAL_CLAIMS;
+const isPlaceholder = d => claimCount(d) < MIN_REAL_CLAIMS;
 const graphView = d => (GRAPH_VIEWS.includes(state.graphView) ? state.graphView : isPlaceholder(d) ? 'full' : 'today');
 function viewGraph(d, lang, view) {
   const g = placeholderGraph(d, lang, link);
@@ -822,7 +853,7 @@ document.addEventListener('click', event => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next; store('myrias-theme', next); applyChrome();
   } else if (target.dataset.download) handleDownload(target.dataset.download);
-  else if (target.hasAttribute('data-retry')) { state.data = null; render(); load().then(render); }
+  else if (target.hasAttribute('data-retry')) { state.data = null; state.fullError = null; render(); load().then(render); }
   else if (target.dataset.jump) { event.preventDefault(); const el = document.getElementById(target.dataset.jump); if (el) el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
   else if (target.classList.contains('skip')) { event.preventDefault(); $('#content').focus(); }
 });

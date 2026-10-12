@@ -26,10 +26,11 @@ export function evidenceModel(data, lang = 'en') {
     a.color = c.color;
   }
   const inApps = new Set(data.applications.flatMap(a => a.claim_ids));
+  const claimTotal = data.claims.length || data.runs?.[0]?.counts?.claims_released || 0;
   return {
     classes, problems, apps,
     totals: {
-      claims: data.claims.length, inApps: data.claims.filter(c => inApps.has(c.id)).length,
+      claims: claimTotal, inApps: data.claims.length ? data.claims.filter(c => inApps.has(c.id)).length : inApps.size,
       sources: data.sources.length, zh: data.sources.filter(s => s.lang === 'zh').length, species: data.species.length,
       classesWith: classes.filter(c => c.apps).length
     }

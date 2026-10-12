@@ -141,7 +141,8 @@ export function validateExport(data) {
   };
   const speciesIds = ids('species', data.species);
   const sourceIds = ids('sources', data.sources);
-  const claimIds = ids('claims', data.claims);
+  // While the claim files are still downloading the shell is checked on its own; references are checked once they arrive.
+  const claimIds = data.claims_pending ? { has: () => true } : ids('claims', data.claims);
   ids('applications', data.applications);
   ids('runs', data.runs);
   const classIds = new Set(tax.technology_classes.map(x => x.id));
