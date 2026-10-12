@@ -3,7 +3,7 @@
  "repo": "invi-bhagyesh/myrias-corpus",
  "url": "https://huggingface.co/datasets/invi-bhagyesh/myrias-corpus",
  "private": true,
- "as_of": "2026-10-11",
+ "as_of": "2026-10-12",
  "parts": {
   "intake": "New search across Europe PMC, Crossref, DOAJ, OpenAlex and Semantic Scholar, with the open full text it could fetch",
   "first-run": "The first run on 20 Chinese papers: source PDFs, page text, extraction, verification, mapping, English statements, model calls",
@@ -37,8 +37,8 @@
   "first_run_papers": 20,
   "first_run_claims": 231,
   "links": 2715,
-  "files": 266,
-  "bytes": 265985734
+  "files": 275,
+  "bytes": 267141020
  },
  "charts": {
   "stages": [
@@ -187,10 +187,16 @@
  "folders": [
   {
    "path": "",
-   "files": 1,
-   "bytes": 815092,
+   "files": 2,
+   "bytes": 868753,
    "about": "",
    "items": [
+    {
+     "name": "findings-2026-10-12.calls.jsonl",
+     "bytes": 53661,
+     "rows": 198,
+     "about": "Every model call that wrote a finding: model, tokens, cost"
+    },
     {
      "name": "links.csv",
      "bytes": 815092,
@@ -638,8 +644,8 @@
   },
   {
    "path": "run-2",
-   "files": 23,
-   "bytes": 5640128,
+   "files": 27,
+   "bytes": 6167018,
    "about": "One line per step of the run, in order: times, calls, cost, outputs",
    "items": []
   },
@@ -982,6 +988,32 @@
    ]
   },
   {
+   "path": "run-2/B/09-findings",
+   "files": 3,
+   "bytes": 817,
+   "about": "",
+   "items": [
+    {
+     "name": "stderr.log",
+     "bytes": 0,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "stdout.log",
+     "bytes": 221,
+     "rows": null,
+     "about": "Console output of each step"
+    },
+    {
+     "name": "step.json",
+     "bytes": 596,
+     "rows": null,
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+    }
+   ]
+  },
+  {
    "path": "run-2/B/store-before-merge",
    "files": 3,
    "bytes": 300849,
@@ -1009,8 +1041,8 @@
   },
   {
    "path": "store",
-   "files": 3,
-   "bytes": 10281508,
+   "files": 4,
+   "bytes": 10855426,
    "about": "",
    "items": [
     {
@@ -1018,6 +1050,12 @@
      "bytes": 10179525,
      "rows": 4460,
      "about": "Every claim that has passed in any run, with a permanent id (C0001...), the run that added it and every run that found it again"
+    },
+    {
+     "name": "findings.jsonl",
+     "bytes": 573918,
+     "rows": 531,
+     "about": "One finding per practice and welfare problem: its sentence in English and Chinese, counts, strength, and the claims it rests on; ids kept across runs"
     },
     {
      "name": "runs.json",
