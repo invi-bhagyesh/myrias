@@ -662,10 +662,20 @@ function render(navigated = false) {
   if (!parts[0] || parts[0] === 'content') setupHomeEffects();
   if (parts[0] === 'species' && parts[1]) setupSpeciesPage(view.model);
   if (view.mount) view.mount($('#content'));
+  setupReveal();
   if (parts[0] === 'corpus' && state.papers && state.corpus) {
     const root = document.querySelector('[data-cl-root]');
     if (root) { const holder = { filter: state.corpusFilter }; mountCorpusList(root, state.papers, state.corpus, tr, holder); state.corpusFilter = holder.filter; }
   }
+}
+
+// Sections, pipeline lanes and list groups fade in as they reach the screen, so each reads as its own block.
+function setupReveal() {
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const els = [...document.querySelectorAll('#content .sp-sec, #content .pl-lane, #content .br-group, #content .corpus-tree, #content .cv-two')];
+  const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }, { rootMargin: '0px 0px -8% 0px' });
+  for (const el of els) { if (el.getBoundingClientRect().top < innerHeight) continue; el.classList.add('reveal'); io.observe(el); }
+  observers.push(io);
 }
 
 // ---------- footer and home-page effects ----------

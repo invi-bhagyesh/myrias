@@ -1307,3 +1307,27 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
   .row > .row-sum .row-n { order: 4; }
   .row > .row-sum .ac-type, .row > .row-sum .fd-strength { flex: none; }
 }
+
+/* ===== Separation between sections as you scroll ===== */
+/* Species page: each section is its own full-width band, tinted every other one, with its number above the heading. */
+.sp-page { counter-reset: spsec; }
+.sp-sec { position: relative; isolation: isolate; counter-increment: spsec; padding: 48px 0 40px; margin: 0; }
+.sp-sec::before { content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: 50%; width: 100vw; transform: translateX(-50%); border-top: 1px solid var(--line); }
+.sp-sec:nth-of-type(even)::before { background: linear-gradient(180deg, transparent, var(--sp-band) 14%, var(--sp-band) 86%, transparent); }
+.sp-sec:nth-of-type(4n+2) { --sp-band: color-mix(in srgb, var(--band-sage) 70%, transparent); }
+.sp-sec:nth-of-type(4n) { --sp-band: color-mix(in srgb, var(--band-sand) 70%, transparent); }
+.sp-sec > h2::before { content: counter(spsec, decimal-leading-zero); display: block; font: 500 11px var(--mono); letter-spacing: .08em; color: var(--accent); margin-bottom: 6px; }
+/* Findings and Actions pages: the group's title stays at the top while you scroll through it. */
+.br-group > h3 { position: sticky; top: 74px; z-index: 3; margin: 0 0 10px; padding: 10px 0 8px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.br-group + .br-group { margin-top: 26px; }
+/* Pipeline: a hairline and more air between lanes. */
+.pl-lane + .pl-lane { border-top: 1px solid var(--line); padding-top: 18px; }
+/* Fade in as each block reaches the screen. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .55s cubic-bezier(.2, .7, .2, 1), transform .55s cubic-bezier(.2, .7, .2, 1); }
+  .reveal.is-in { opacity: 1; transform: none; }
+}
+@media (max-width: 860px) {
+  .sp-sec { padding: 36px 0 30px; }
+  .br-group > h3 { top: 68px; font-size: 15px; }
+}
