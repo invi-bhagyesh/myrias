@@ -143,6 +143,11 @@ def manifest(root):
             files.append({'path': rel, 'bytes': len(data), 'rows': rows, 'sha256': hashlib.sha256(data).hexdigest(), 'about': describe(rel)})
     return sorted(files, key=lambda f: f['path'])
 
+# The public site shows no spending: cost is dropped from the file descriptions it gets.
+def public_about(text):
+    t = re.sub(r'([Cc])ounts and cost\b', r'\1ounts', text or '')
+    return re.sub(r'(,\s*|\s+and\s+)cost\b', '', t)
+
 def site_summary(species, repo, private, files, root):
     # Folder tree with counts; leaf files only where a folder holds a few named files.
     tree = {}
@@ -151,7 +156,7 @@ def site_summary(species, repo, private, files, root):
         d = '/'.join(parts[:-1])
         node = tree.setdefault(d, {'files': 0, 'bytes': 0, 'about': '', 'items': []})
         node['files'] += 1; node['bytes'] += f['bytes']
-        node['items'].append({'name': parts[-1], 'bytes': f['bytes'], 'rows': f['rows'], 'about': f['about']})
+        node['items'].append({'name': parts[-1], 'bytes': f['bytes'], 'rows': f['rows'], 'about': public_about(f['about'])})
     folders = []
     for d, node in sorted(tree.items()):
         many = node['files'] > 8

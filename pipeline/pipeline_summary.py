@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Write the numbers the Pipeline page draws: one entry per step with what went in, what came out, whether a
-model or plain code did it, and what it cost. Everything is read from the run folder, the species store and
+model or plain code did it, and how many model calls it made. Everything is read from the run folder, the species store and
 the release; nothing is typed in by hand.
 
   python3 pipeline/pipeline_summary.py RUN_DIR STORE_DIR public/data
@@ -42,7 +42,7 @@ plan = js(os.path.join(data, 'next-run.json'))
 phase_a = next((p for p in plan['phases'] if p['id'] == 'A'), {}).get('actual') or {}
 
 def step(i, lane, key, model, n_in, n_out, extra=None):
-    return {'id': i, 'lane': lane, 'key': key, 'model': model, 'in': n_in, 'out': n_out, 'cost_usd': round(cost.get(key, 0), 3) if key in cost else 0, 'calls': calls.get(key, 0), **(extra or {})}
+    return {'id': i, 'lane': lane, 'key': key, 'model': model, 'in': n_in, 'out': n_out, 'calls': calls.get(key, 0), **(extra or {})}
 
 models = {k: v.get('model') for k, v in js(os.path.join(os.path.dirname(__file__), 'models.json'))['profiles']['demo'].items() if isinstance(v, dict)}
 steps = [
@@ -65,7 +65,7 @@ steps = [
     step(17, 'check', 'audit', None, None, None, {'status': 'planned'}),
 ]
 total = sum(cost.values()) + (phase_a.get('spent_usd') or 0)
-out = {'run': os.path.basename(run), 'as_of': ledger[-1]['finished'][:10], 'steps': steps,
-       'totals': {'cost_usd': round(total, 2), 'calls': sum(calls.values()), 'phase_a_cost_usd': phase_a.get('spent_usd')}}
+# Costs stay in the run records and the private dataset; the public page shows no spending.
+out = {'run': os.path.basename(run), 'as_of': ledger[-1]['finished'][:10], 'steps': steps, 'totals': {'calls': sum(calls.values())}}
 json.dump(out, open(os.path.join(data, 'pipeline.json'), 'w'), indent=1)
-print(json.dumps(out['totals']), len(steps), 'steps')
+print(json.dumps(out['totals']), len(steps), 'steps', 'model cost (not published):', round(total, 2))

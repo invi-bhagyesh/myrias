@@ -100,12 +100,11 @@ function issueLink(title, body) {
 
 // ---------- views ----------
 // The pipeline as a diagram: four lanes of numbered steps, each with what came out, whether a model or
-// plain code did it, and what it cost. Click a step for what it does and how it is checked. The run settings
+// plain code did it. Click a step for what it does and how it is checked. The run settings
 // and the older per-layer notes are folded below.
 function viewPipeline() {
   const i = state.lang === 'zh' ? 1 : 0, P = state.pipeline;
   const n = x => (x === null || x === undefined ? '—' : Number(x).toLocaleString());
-  const usd = x => (x ? '$' + (x < 0.01 ? x.toFixed(3) : x.toFixed(2)) : '');
   const short = m => (m ? m.split('/').pop() : '');
   let diagram = '';
   if (P) {
@@ -119,12 +118,12 @@ function viewPipeline() {
           <span class="pl-num">${String(st.id).padStart(2, '0')}</span><span class="pl-name">${esc(t.name[i])}</span>
           ${st.status === 'planned' ? `<span class="pl-out pl-planned">${esc(tr('pl.planned'))}</span>` : `<strong class="pl-out">${esc(outNum)}</strong><span class="pl-outl">${esc(outLabel)}</span>`}
           ${st.in !== null && st.in !== undefined && t.in ? `<span class="pl-in">${esc(tr('pl.from', { n: n(st.in), what: t.in[i] }))}</span>` : ''}
-          <span class="pl-tag">${st.model ? `<i class="pl-dot"></i>${esc(short(st.model))}` : esc(tr(st.status === 'planned' ? 'pl.people' : 'pl.code'))}${st.cost_usd ? ' · ' + esc(usd(st.cost_usd)) : ''}</span></button>
+          <span class="pl-tag">${st.model ? `<i class="pl-dot"></i>${esc(short(st.model))}` : esc(tr(st.status === 'planned' ? 'pl.people' : 'pl.code'))}</span></button>
         <div class="pl-detail" hidden><p>${esc(t.what[i])}</p><p class="small-note">${esc(t.how[i])}</p>${st.calls ? `<p class="small-note">${esc(tr('pl.calls', { n: n(st.calls) }))}</p>` : ''}${scores}</div></li>`;
     };
     const lanes = LANES.map(([id, label], k) => `<section class="pl-lane"><h3 class="pl-lane-h"><span>${String(k + 1).padStart(2, '0')}</span>${esc(label[i])}</h3><div><ol class="pl-steps">${P.steps.filter(s => s.lane === id).map(card).join('')}</ol><div class="pl-panel" data-pl-panel hidden></div></div></section>`).join('');
     const sum = id => P.steps.find(s => s.key === id);
-    const tiles = [[n(P.steps.length), tr('pl.t.steps')], ['$' + P.totals.cost_usd.toFixed(2), tr('pl.t.cost')], [n(P.totals.calls), tr('pl.t.calls')],
+    const tiles = [[n(P.steps.length), tr('pl.t.steps')], [n(P.totals.calls), tr('pl.t.calls')],
       [`${n(sum('export')?.out)} → ${n(sum('findings')?.out)} → ${n(sum('actions')?.out)}`, tr('pl.t.chain')]];
     diagram = `<div class="pl-top"><ul class="corpus-tiles pl-tiles">${tiles.map(([v, l]) => `<li><strong>${esc(v)}</strong><span>${esc(l)}</span></li>`).join('')}</ul>
         <img class="pl-art" src="art/pipeline.webp" alt="" width="1014" height="824" decoding="async" onerror="this.remove()"></div>
@@ -152,11 +151,9 @@ function viewPipeline() {
 function nextRunHtml(p) {
   if (!p) return '';
   const zh = state.lang === 'zh', L = (o, k) => (zh ? o[k + '_zh'] || o[k + '_en'] : o[k + '_en']) || '', B = o => (zh ? o.zh || o.en : o.en);
-  const usd = x => '$' + Number(x).toFixed(2);
-  const actual = ph => (ph.actual ? `<p class="nr-actual">${esc(tr('nr.actual', { spent: usd(ph.actual.spent_usd), extracted: ph.actual.claims_extracted, found: ph.actual.claims_quote_found, relevant: ph.actual.claims_relevant, released: ph.actual.claims_released, supported: ph.actual.claims_supported, sources: ph.actual.sources_released, interventions: ph.actual.interventions }))}</p>${ph.notes_en ? `<p class="small-note">${esc(L(ph, 'notes'))}</p>` : ''}` : '');
+  const actual = ph => (ph.actual ? `<p class="nr-actual">${esc(tr('nr.actual', { extracted: ph.actual.claims_extracted, found: ph.actual.claims_quote_found, relevant: ph.actual.claims_relevant, released: ph.actual.claims_released, supported: ph.actual.claims_supported, sources: ph.actual.sources_released, interventions: ph.actual.interventions }))}</p>${ph.notes_en ? `<p class="small-note">${esc(L(ph, 'notes'))}</p>` : ''}` : '');
   const phases = p.phases.map(ph => `<article class="nr-phase st-${esc(ph.status || 'planned')}"><div class="nr-phase-head"><span class="nr-id">${esc(ph.id)}</span><h3>${esc(L(ph, 'name'))}</h3><span class="nr-badge">${esc(tr('nr.status.' + (ph.status || 'planned')))}</span></div>
-    <ul class="nr-nums"><li><b>${ph.papers}</b>${esc(tr('nr.papers'))}</li><li><b>${Number(ph.windows).toLocaleString()}</b>${esc(tr('nr.windows'))}</li>
-      <li><b>${usd(ph.estimate_usd.low)}–${usd(ph.estimate_usd.high)}</b>${esc(tr('nr.estimate'))}</li>${ph.cap_usd ? `<li><b>${usd(ph.cap_usd)}</b>${esc(tr('nr.cap'))}</li>` : ''}<li><b>~${ph.minutes} min</b>${esc(tr('nr.time'))}</li></ul>
+    <ul class="nr-nums"><li><b>${ph.papers}</b>${esc(tr('nr.papers'))}</li><li><b>${Number(ph.windows).toLocaleString()}</b>${esc(tr('nr.windows'))}</li><li><b>~${ph.minutes} min</b>${esc(tr('nr.time'))}</li></ul>
     ${actual(ph)}<p>${esc(L(ph, 'why'))}</p><p class="small-note"><code>${esc(ph.input)}</code></p>
     <details class="nr-cmds"><summary>${esc(tr('nr.commands'))}</summary><pre>${esc(ph.commands.join('\n'))}</pre></details></article>`).join('');
   const rows = p.stages.map(st => `<tr><td>${esc(st.id)}</td><td>${st.model ? `<code>${esc(st.model)}</code>${st.fallback ? `<br><small>${esc(tr('nr.fallback'))}: <code>${esc(st.fallback.join(', '))}</code></small>` : ''}` : esc(tr('pipe.nomodel'))}</td>
@@ -164,15 +161,13 @@ function nextRunHtml(p) {
   const gates = p.gates.map(g => `<li class="nr-gate g-${esc(g.status)}"><span>${esc(tr('nr.gate.' + g.status))}</span>${esc(B(g))}</li>`).join('');
   const build = p.to_build_first.map(x => `<li>${esc(B(x))}</li>`).join('');
   const outs = p.outputs.map(x => `<li>${esc(B(x))}</li>`).join('');
-  const total = p.phases.reduce((a, ph) => [a[0] + ph.estimate_usd.low, a[1] + ph.estimate_usd.high], [0, 0]);
   return `<section class="next-run"><div class="nr-top"><span class="pill">${esc(tr('nr.status.' + p.status))}</span><h2>${esc(tr('nr.title'))}</h2>
-      <p>${esc(L(p, 'goal'))}</p><p class="small-note">${esc(tr('nr.total', { low: usd(total[0]), high: usd(total[1]) }))} ${esc(L(p, 'budget'))}</p></div>
+      <p>${esc(L(p, 'goal'))}</p></div>
     <div class="nr-phases">${phases}</div>
     <h3>${esc(tr('nr.config'))}</h3>
     <dl class="nr-settings"><dt>${esc(tr('nr.profile'))}</dt><dd><code>${esc(p.profile)}</code></dd><dt>${esc(tr('nr.router'))}</dt><dd>${esc(p.provider.router)} · data_collection: <code>${esc(p.provider.data_collection)}</code></dd>
       <dt>${esc(tr('nr.window'))}</dt><dd>${p.window.size_chars.toLocaleString()} / ${p.window.overlap_chars}</dd><dt>${esc(tr('nr.prompts'))}</dt><dd>${Object.entries(p.prompt_versions).map(([k, v]) => `${esc(k)} <code>${esc(v)}</code>`).join(' · ')}</dd></dl>
     <div class="nr-table"><table class="plain"><thead><tr><th>${esc(tr('nr.stage'))}</th><th>${esc(tr('pipe.model'))}</th><th>${esc(tr('nr.reasoning'))}</th><th>${esc(tr('nr.maxout'))}</th><th>${esc(tr('nr.per'))}</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <p class="small-note">${esc(L(p, 'estimate_basis'))}</p>
     <div class="nr-cols"><div><h3>${esc(tr('nr.gates'))}</h3><ul class="nr-gates">${gates}</ul></div>
       <div><h3>${esc(tr('nr.build'))}</h3><ul class="nr-list">${build}</ul><h3>${esc(tr('nr.outputs'))}</h3><ul class="nr-list">${outs}</ul></div></div>
     <p class="small-note"><b>${esc(tr('nr.notin'))}</b> ${esc(L(p, 'not_in_this_run'))} · <a href="data/next-run.json">next-run.json</a></p></section>`;
@@ -657,6 +652,8 @@ function render(navigated = false) {
   moveBlob(true);
   const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus', 'actions'].includes(parts[0]) || (parts[0] === 'species' && parts[1]) || (parts[0] === 'findings' && !parts[1]);
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
+  // A short fade when the page changes (not when a filter redraws part of it).
+  if (navigated) { const c = $('#content'); c.classList.remove('is-enter'); void c.offsetWidth; c.classList.add('is-enter'); }
   document.title = `${view.title} — ${tr('site.title')}`;
   const pathKey = parts.join('/');
   if (navigated && pathKey !== state.lastPath) { window.scrollTo(0, 0); $('#content').focus({ preventScroll: true }); }
@@ -679,8 +676,8 @@ function renderFooter() {
   const list = items => `<ul>${items.map(([label, href, ext]) => `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(label)}${ext ? ' ↗' : ''}</a></li>`).join('')}</ul>`;
   const card = (key, items) => `<nav class="site-footer-card" aria-label="${esc(tr(key))}"><h2>${esc(tr(key))}</h2>${list(items)}</nav>`;
   $('#site-footer').innerHTML = `<div class="site-footer-panel"><div class="site-footer-cards">
-      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.sources'), link('sources')]])}
-      ${card('foot.learn', [[tr('nav.methods'), link('methods')], [tr('nav.download'), link('download')]])}
+      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.findings'), link('findings')], [tr('nav.actions'), link('actions')], [tr('nav.sources'), link('sources')]])}
+      ${card('foot.learn', [[tr('nav.methods'), link('methods')], [tr('nav.download'), link('download')], [tr('nav.pipeline'), link('pipeline')], [tr('nav.corpus'), link('corpus')]])}
       ${card('foot.open', [['myrias.org', 'https://myrias.org/', true], [tr('footer.repo'), 'https://github.com/invi-bhagyesh/myrias', true]])}
       <div class="site-footer-card site-footer-cta"><div><p>${esc(tr('foot.cta'))}</p><a class="site-footer-button" href="${reviewLink}" target="_blank" rel="noopener noreferrer">${esc(tr('foot.cta.btn'))} <span aria-hidden="true">→</span></a></div></div>
     </div>

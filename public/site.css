@@ -1208,7 +1208,7 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 
 /* ===== Pipeline diagram ===== */
 .pl-top { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: center; margin: 8px 0 6px; }
-.pl-tiles { margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pl-tiles { margin: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .pl-art { width: 100%; height: auto; image-rendering: pixelated; filter: drop-shadow(0 14px 22px color-mix(in srgb, var(--ink) 14%, transparent)); }
 .pl-key { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--soft); margin: 14px 0 6px; }
 .pl-key span { display: inline-flex; align-items: center; gap: 6px; }
@@ -1253,3 +1253,23 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .pl-panel { margin-top: 10px; padding: 12px 16px; border-radius: 14px; border: 1px solid var(--accent); background: var(--card-bg); font-size: 14px; line-height: 1.55; max-width: 760px; }
 .pl-panel p { margin: 0 0 6px; }
 .pl-panel-h { font: 11px var(--mono); color: var(--soft); text-transform: uppercase; letter-spacing: .05em; }
+
+/* ===== Transitions ===== */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes my-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes my-fade { from { opacity: 0; } to { opacity: 1; } }
+  /* A new page rises in; its first blocks follow one after another. */
+  #content.is-enter > *, #content.is-enter > .narrow > * { animation: my-rise .38s cubic-bezier(.2, .7, .2, 1) both; }
+  #content.is-enter > :nth-child(2), #content.is-enter > .narrow > :nth-child(2) { animation-delay: .04s; }
+  #content.is-enter > :nth-child(3), #content.is-enter > .narrow > :nth-child(3) { animation-delay: .08s; }
+  #content.is-enter > :nth-child(n+4), #content.is-enter > .narrow > :nth-child(n+4) { animation-delay: .12s; }
+  /* Opening a fold, a step's details or a filtered list fades the new content in. */
+  details[open] > :not(summary) { animation: my-fade .25s ease both; }
+  .pl-panel:not([hidden]), [data-b-list] > *, [data-ac-pane]:not([hidden]) { animation: my-rise .25s ease both; }
+  .br-index li, .fd, .ac, .pl-card, .sp-card { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease, background-color .25s ease; }
+  .fd:hover, .ac:hover { border-color: var(--line-strong); }
+  .graph-tabs button, .br-views button, .ac-tabs button { transition: background-color .25s ease, color .25s ease; }
+  .fd-claims > summary, .sp-more > summary, .pl-fold > summary, .br-fbox > summary { transition: color .2s ease; }
+  .sp-contents a { transition: color .2s ease; }
+}
+@media (max-width: 860px) { .pl-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
