@@ -45,9 +45,10 @@ export function speciesModel(data, id, { corpus = null, nextRun = null } = {}) {
   }).sort((a, b) => b.claims - a.claims);
   const runs = data.runs.filter(r => r.species_id === id);
   const findings = (data.findings || []).filter(f => f.species_id === id);
+  const actions = (data.actions || []).filter(a => a.species_id === id).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
   const ownCorpus = corpus && corpus.species === id ? corpus : null;
   const ownPlan = nextRun && nextRun.species === id ? nextRun : null;
-  return { s, claims, apps, sources, verdicts, top, runs, findings, corpus: ownCorpus, plan: ownPlan,
+  return { s, claims, apps, sources, verdicts, top, runs, findings, actions, corpus: ownCorpus, plan: ownPlan,
     data: { ...data, claims, applications: apps, sources: data.sources.filter(x => bySource.has(x.id)), species: [s] } };
 }
 
@@ -73,7 +74,7 @@ export function speciesSteps(m) {
   return steps;
 }
 
-export const SPECIES_SECTIONS = [['sp-about', 'sp.sec.about'], ['sp-found', 'sp.sec.found'], ['sp-from', 'sp.sec.from'], ['sp-steps', 'sp.sec.steps'], ['sp-limits', 'sp.sec.limits']];
+export const SPECIES_SECTIONS = [['sp-about', 'sp.sec.about'], ['sp-found', 'sp.sec.found'], ['sp-do', 'sp.sec.do'], ['sp-from', 'sp.sec.from'], ['sp-steps', 'sp.sec.steps'], ['sp-limits', 'sp.sec.limits']];
 
 // The page. ctx: { tr, link, lang, flowHtml(corpus), topicsHtml(corpus), taxonomyLabel(kind, id) }
 export function speciesPageHtml(m, ctx) {
@@ -142,7 +143,21 @@ export function speciesPageHtml(m, ctx) {
     tr('sp.lim.species')].filter(Boolean);
   const limitsSec = `<section class="sp-sec" id="sp-limits"><h2>${esc(tr('sp.sec.limits'))}</h2><ul class="arena-rows">${limits.map(x => `<li>${esc(x)}</li>`).join('')}</ul></section>`;
 
-  return `<div class="sp-page">${hero}${contents}${about}${found}${from}${stepsSec}${limitsSec}</div>`;
+  // Draft actions: one list by priority and one by technology; a toggle shows one at a time.
+  const fById = new Map(m.findings.map(f => [f.id, f]));
+  const act = a => `<li class="ac t-${esc(a.type)}"><span class="ac-rank">${a.rank ?? ''}</span><div>
+      <div class="ac-head"><span class="ac-type">${esc(tr('ac.type.' + a.type))}</span><span class="ac-who">${esc(tr('ac.who', { who: tr('ac.who.' + a.who.replace(/ /g, '_')) }))}</span><span class="ac-draft">${esc(tr('ac.draft'))}</span></div>
+      <p class="ac-text">${esc(lang === 'zh' ? a.action_zh || a.action_en : a.action_en || a.action_zh)}</p>
+      <p class="ac-meta"><span class="ac-score" title="${esc(tr('ac.score.tip', { e: a.priority.evidence, d: a.priority.actionability }))}"><i style="width:${Math.round(100 * a.priority.score)}%"></i></span>${esc(tr('ac.score', { s: a.priority.score.toFixed(2) }))} · ${a.welfare_problems.map(p => `<span class="sp-chip">${esc(ctx.taxonomyLabel('welfare_problems', p))}</span>`).join('')}</p>
+      <details class="fd-claims"><summary>${esc(tr(a.finding_ids.length === 1 ? 'ac.why.one' : 'ac.why', { n: a.finding_ids.length }))}</summary>
+        <ul class="ac-findings">${a.finding_ids.map(id => fById.get(id)).filter(Boolean).map(f => `<li><a href="${link('findings/' + encodeURIComponent(f.id))}">${esc(lang === 'zh' ? f.statement_zh || f.statement_en : f.statement_en || f.statement_zh)}</a> <span class="fd-meta">${esc(tr('fd.papers', { n: f.counts.papers }))}</span></li>`).join('')}</ul>
+        <p class="ac-note"><b>${esc(tr('ac.gap'))}</b> ${esc(a.evidence_gap)}</p><p class="ac-note"><b>${esc(tr('ac.risks'))}</b> ${esc(a.risks)}</p></details></div></li>`;
+  const byClass = [...new Set(m.actions.map(a => a.technology_class))].map(c => `<h4 class="fd-h">${esc(ctx.taxonomyLabel('technology_classes', c))}</h4><ol class="ac-list">${m.actions.filter(a => a.technology_class === c).map(act).join('')}</ol>`).join('');
+  const doSec = m.actions.length ? `<section class="sp-sec" id="sp-do"><h2>${esc(tr('sp.sec.do'))}</h2><p class="sp-lead">${esc(tr('ac.lead', { n: m.actions.length, multi: m.findings.filter(f => f.counts.papers > 1).length, f: new Set(m.actions.flatMap(a => a.finding_ids)).size }))}</p>
+    <div class="ac-views" data-ac><div class="graph-tabs ac-tabs" role="group"><button type="button" data-ac-view="rank" aria-pressed="true">${esc(tr('ac.view.rank'))}</button><button type="button" data-ac-view="class" aria-pressed="false">${esc(tr('ac.view.class'))}</button></div>
+      <div data-ac-pane="rank"><ol class="ac-list">${m.actions.map(act).join('')}</ol></div><div data-ac-pane="class" hidden>${byClass}</div></div>
+    <p class="small-note">${esc(tr('ac.formula'))}</p></section>` : '';
+  return `<div class="sp-page">${hero}${contents}${about}${found}${doSec}${from}${stepsSec}${limitsSec}</div>`;
 }
 
 // Cards for the species list.

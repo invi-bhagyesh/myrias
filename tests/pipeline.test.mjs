@@ -510,3 +510,13 @@ test('reconstruction: seeded sample is stable; no finding or cannot-tell counts 
     { label: 'does_not_help', finding: null, answer: null }, { label: 'does_not_help', finding: 'x', answer: 'helps' }]);
   assert.deepEqual(s, { n: 4, coverage: 0.75, accuracy: 0.25, accuracy_answered: 0.5, answered: 2 });
 });
+
+test('actions: priority comes from cited findings and type by a fixed formula', async () => {
+  const { priority } = await import('../pipeline/actions.mjs');
+  const strong = { counts: { papers: 5, claims: 10, measured: 10 }, strength: 'agree' };
+  const thin = { counts: { papers: 2, claims: 4, measured: 0 }, strength: 'described' };
+  assert.deepEqual(priority('adopt', [strong]), { score: 1, evidence: 1, actionability: 1, basis: priority('adopt', [strong]).basis });
+  assert.equal(priority('research', [thin]).evidence, 0.22);
+  assert.ok(priority('adopt', [strong]).score > priority('research', [strong]).score);
+  assert.ok(priority('test_on_farms', [strong]).score > priority('test_on_farms', [thin]).score);
+});

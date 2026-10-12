@@ -215,6 +215,17 @@ export function validateExport(data) {
     for (const cid of f.claim_ids || []) if (!claimIds.has(cid)) fail(`finding ${f.id}: unknown claim ${cid}`);
     if (f.counts?.claims !== f.claim_ids?.length) fail(`finding ${f.id}: claim count does not match its claims`);
   }
+  // Actions are drafts written from findings. They may carry a rank only with the published formula
+  // behind it, and every one must say it is a draft until a person has reviewed it.
+  const findingIds = new Set((data.findings || []).map(f => f.id));
+  for (const x of data.actions || []) {
+    if (!x.id) fail('action without id');
+    if (!x.action_en && !x.action_zh) fail(`action ${x.id}: missing text`);
+    if (!['draft', 'reviewed'].includes(x.status)) fail(`action ${x.id}: status must be draft or reviewed`);
+    if (!Array.isArray(x.finding_ids) || !x.finding_ids.length) fail(`action ${x.id}: needs at least one finding`);
+    for (const fid of x.finding_ids || []) if (!findingIds.has(fid)) fail(`action ${x.id}: unknown finding ${fid}`);
+    if ('rank' in x && !x.priority?.basis) fail(`action ${x.id}: a rank needs its published priority formula`);
+  }
   for (const x of data.cells_status) {
     if (!CELL_STATUS.includes(x.status)) fail(`cells_status: unknown status ${x.status}`);
     if (!speciesIds.has(x.species_id)) fail(`cells_status: unknown species ${x.species_id}`);

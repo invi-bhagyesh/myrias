@@ -37,6 +37,10 @@ async function load() {
       const parts = await Promise.all(data.claim_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
       data.claims = parts.flat();
     }
+    if (data.action_files?.length) {
+      const parts = await Promise.all(data.action_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
+      data.actions = parts.flat();
+    }
     if (data.finding_files?.length) {
       const parts = await Promise.all(data.finding_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
       data.findings = parts.flat();
@@ -354,6 +358,11 @@ function setupSpeciesPage(m) {
   const page = document.querySelector('.sp-page');
   if (!page || !m) return;
   page.querySelectorAll('[data-sp-jump]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const t = document.getElementById(a.dataset.spJump); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  page.querySelectorAll('[data-ac-view]').forEach(b => b.addEventListener('click', () => {
+    const box = b.closest('[data-ac]');
+    box.querySelectorAll('[data-ac-view]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    box.querySelectorAll('[data-ac-pane]').forEach(p => { p.hidden = p.dataset.acPane !== b.dataset.acView; });
+  }));
   const stage = page.querySelector('[data-sp-map]');
   if (stage) {
     const model = evidenceModel(m.data, state.lang);
