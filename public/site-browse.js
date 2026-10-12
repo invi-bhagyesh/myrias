@@ -16,7 +16,7 @@ export function browseHtml({ filters = [], views = [], tr }) {
     <div class="br-main">
       <div class="br-controls">${views.length ? `<div class="graph-tabs br-views" role="group">${views.map(([v, l], i) => `<button type="button" data-bview="${esc(v)}" aria-pressed="${i === 0}">${esc(l)}</button>`).join('')}</div>` : ''}
         <details class="br-fbox" open data-bfbox><summary>${esc(tr('br.filters'))}</summary><div class="br-filters">${filters.map(control).join('')}</div></details></div>
-      <p class="br-count" data-b-count aria-live="polite"></p>
+      <div class="br-bar"><p class="br-count" data-b-count aria-live="polite"></p><button type="button" class="br-expand" data-bexpand aria-pressed="false">${esc(tr('br.expand'))}</button></div>
       <div data-b-list></div>
       <button type="button" class="button small br-more" data-b-more hidden></button>
     </div></div>`;
@@ -32,7 +32,10 @@ export function mountBrowse(root, { items, groups, groupOf, test, render, tr, pa
   if (window.innerWidth < 860) box.querySelector('[data-bfbox]')?.removeAttribute('open');
   const values = {};
   let view = initialView || box.querySelector('[data-bview]')?.dataset.bview || 'group';
-  let shown = pageSize;
+  let shown = pageSize, expanded = false;
+  const applyExpand = () => box.querySelectorAll('[data-b-list] [data-row]').forEach(d => { d.open = expanded; });
+  const ex = box.querySelector('[data-bexpand]');
+  ex.addEventListener('click', () => { expanded = !expanded; ex.setAttribute('aria-pressed', String(expanded)); ex.textContent = tr(expanded ? 'br.collapse' : 'br.expand'); applyExpand(); });
   const open = new Set();
   const idOf = g => 'br-g-' + String(g).replace(/[^a-z0-9_-]/gi, '-');
   const draw = () => {
@@ -57,6 +60,7 @@ export function mountBrowse(root, { items, groups, groupOf, test, render, tr, pa
       more.hidden = true;
       list.querySelectorAll('[data-bgroup]').forEach(b => b.addEventListener('click', () => { const g = b.dataset.bgroup; open.has(g) ? open.delete(g) : open.add(g); draw(); }));
     }
+    if (expanded) applyExpand();
     box.querySelectorAll('[data-bjump]').forEach(a => a.addEventListener('click', e => {
       e.preventDefault();
       if (view === 'rank') { view = 'group'; box.querySelectorAll('[data-bview]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.bview === 'group'))); draw(); }

@@ -24,15 +24,17 @@ function claimItems(f, ctx) {
 const meta = (f, tr) => [tr(f.counts.papers === 1 ? 'fd.papers.one' : 'fd.papers', { n: n(f.counts.papers) }), tr(f.counts.claims === 1 ? 'fd.claims.one' : 'fd.claims', { n: n(f.counts.claims) }),
   ...(f.counts.supportive || f.counts.opposing ? [tr('fd.split', { s: f.counts.supportive, o: f.counts.opposing })] : [])].join(' · ');
 
+// One row per finding: strength, the sentence on one line and its weight. Click to open the full card.
 export function findingItemHtml(f, ctx) {
   const { tr, link, lang, taxonomyLabel } = ctx;
   const practice = (lang === 'zh' ? f.practice_zh || f.practice_en : f.practice_en || f.practice_zh) || '';
-  return `<li class="fd s-${esc(f.strength)}">
-    <div class="fd-head"><span class="fd-strength">${esc(tr('fd.strength.' + f.strength))}</span><span class="sp-chip">${esc(taxonomyLabel('welfare_problems', f.welfare_problem))}</span>
+  return `<li class="fd s-${esc(f.strength)}"><details class="row" data-row><summary class="row-sum">
+      <span class="fd-strength">${esc(tr('fd.strength.' + f.strength))}</span><span class="row-line">${esc(findingText(f, lang))}</span>
+      <span class="row-n">${esc(tr(f.counts.papers === 1 ? 'fd.papers.one' : 'fd.papers', { n: n(f.counts.papers) }))}</span></summary>
+    <div class="row-body"><div class="fd-head"><span class="sp-chip">${esc(taxonomyLabel('welfare_problems', f.welfare_problem))}</span>
       <span class="fd-practice">${esc(practice)} · ${esc(taxonomyLabel('technology_classes', f.technology_class))}</span></div>
-    <p class="fd-text"><a href="${link('findings/' + encodeURIComponent(f.id))}">${esc(findingText(f, lang))}</a></p>
-    <p class="fd-meta">${esc(meta(f, tr))}${f.check && f.check !== 'numbers_ok' ? ` · <span class="fd-warn">${esc(tr('fd.check.' + f.check))}</span>` : ''}</p>
-    <details class="fd-claims"><summary>${esc(tr(f.counts.claims === 1 ? 'fd.show.one' : 'fd.show', { n: n(f.counts.claims) }))}</summary><ol>${claimItems(f, ctx)}</ol></details></li>`;
+    <p class="fd-meta">${esc(meta(f, tr))}${f.check && f.check !== 'numbers_ok' ? ` · <span class="fd-warn">${esc(tr('fd.check.' + f.check))}</span>` : ''} · <a href="${link('findings/' + encodeURIComponent(f.id))}">${esc(tr('fd.open'))} →</a></p>
+    <details class="fd-claims"><summary>${esc(tr(f.counts.claims === 1 ? 'fd.show.one' : 'fd.show', { n: n(f.counts.claims) }))}</summary><ol>${claimItems(f, ctx)}</ol></details></div></details></li>`;
 }
 
 // A list: the first `first` findings shown, the rest folded, each folded group labelled with its count.

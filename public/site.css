@@ -1273,3 +1273,37 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
   .sp-contents a { transition: color .2s ease; }
 }
 @media (max-width: 860px) { .pl-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ===== Compact rows that open to the full card ===== */
+.fd, .ac { padding: 0; display: block; }
+.row > .row-sum { list-style: none; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 14px; }
+.ac .row > .row-sum { grid-template-columns: 22px auto minmax(0, 1fr) auto; }
+.row > .row-sum::-webkit-details-marker { display: none; }
+.row-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14.5px; }
+.row[open] > .row-sum .row-line { white-space: normal; font-size: 15.5px; line-height: 1.5; }
+.row-n { font: 11.5px var(--mono); color: var(--soft); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+.row-sum::after { content: "▸"; color: var(--soft); font-size: 11px; margin-left: 2px; transition: transform .2s ease; grid-column: auto; }
+.row > .row-sum { grid-auto-flow: column; }
+.row[open] > .row-sum::after { transform: rotate(90deg); }
+.row > .row-sum:hover .row-line { color: var(--accent); }
+.row-body { padding: 0 14px 12px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.row-body .fd-head, .row-body .ac-head { margin-bottom: 4px; }
+.ac .ac-rank { font-size: 14px; }
+.fd-list, .ac-list { gap: 6px; }
+.br-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.br-expand { background: none; border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px 12px; font: 12.5px var(--font); color: var(--ink); cursor: pointer; }
+.br-expand[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 760px) {
+  .row > .row-sum, .ac .row > .row-sum { grid-template-columns: auto minmax(0, 1fr); grid-auto-flow: row; }
+  .row-line { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; grid-column: 1 / -1; }
+  .ac .ac-rank { display: inline; }
+  .row-sum::after { display: none; }
+}
+.row[open] > .row-sum { align-items: start; }
+.row[open] > .row-sum .fd-strength, .row[open] > .row-sum .ac-type { margin-top: 2px; }
+@media (max-width: 760px) {
+  .row > .row-sum, .ac .row > .row-sum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+  .row > .row-sum .row-line { flex: 1 1 100%; order: 3; }
+  .row > .row-sum .row-n { order: 4; }
+  .row > .row-sum .ac-type, .row > .row-sum .fd-strength { flex: none; }
+}
