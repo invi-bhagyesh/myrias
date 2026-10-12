@@ -89,11 +89,6 @@
       "input": "first-run/pages/pages-used-in-run.jsonl",
       "papers": 19,
       "windows": 103,
-      "estimate_usd": {
-        "low": 0.15,
-        "high": 0.4
-      },
-      "cap_usd": null,
       "minutes": 10,
       "why_en": "Replaces the current release, which was extracted with an older prompt: Chinese records, Chinese intervention names, English renderings with a number check, and no research methods (such as histopathology) counted as interventions.",
       "why_zh": "替换用旧版提示词提取的当前版本：中文记录、中文干预名称、经数字核对的英文译文，不再把研究方法（如组织病理学）当作干预措施。",
@@ -107,7 +102,6 @@
       ],
       "status": "done",
       "actual": {
-        "spent_usd": 0.356,
         "claims_extracted": 407,
         "claims_quote_found": 310,
         "claims_relevant": 127,
@@ -115,9 +109,7 @@
         "claims_supported": 106,
         "sources_released": 16,
         "interventions": 21
-      },
-      "notes_en": "First attempt read pages where the hand transcriptions had not been swapped in; it was redone. The quote check now accepts \"...\" gaps when every piece is on the page. Four papers with a garbled text layer lose most of their quotes and need OCR. One scanned paper has no text layer at all.",
-      "notes_zh": "第一次尝试读取的页面没有换入人工转写文本，因此重做。引文核对现在接受“……”省略，前提是每一段都在页面上。四篇文本层乱码的论文大部分引文无法核对，需要 OCR；一篇扫描版论文完全没有文本层。"
+      }
     },
     {
       "id": "B",
@@ -126,11 +118,6 @@
       "input": "intake/pages.jsonl (reference lists trimmed)",
       "papers": 176,
       "windows": 4054,
-      "estimate_usd": {
-        "low": 3.5,
-        "high": 7.5
-      },
-      "cap_usd": null,
       "minutes": 120,
       "why_en": "The first run read 19 Chinese papers. This reads the 176 papers with open full text (170 English, 6 Chinese), so the release covers what English research says too.",
       "why_zh": "第一次运行读了 19 篇中文论文。这一阶段读取 176 篇有开放全文的论文（英文 170 篇，中文 6 篇），使版本也涵盖英文研究的内容。",
@@ -145,7 +132,6 @@
       ],
       "status": "done",
       "actual": {
-        "spent_usd": 8.83,
         "claims_extracted": 10695,
         "claims_quote_found": 9849,
         "claims_relevant": 4359,
@@ -153,20 +139,10 @@
         "claims_supported": 4066,
         "sources_released": 160,
         "interventions": 531
-      },
-      "notes_en": "Cost includes $1.02 lost when the map step was stopped before it saved, and $0.96 on reconcile attempts that ran out of output room before switching to batches on Claude Sonnet 5.5. Both are fixed: steps now save as they go, and no step has an output limit.",
-      "notes_zh": "费用包含两部分损失：映射步骤在保存前被中断，损失 1.02 美元；整合步骤在改为分批并换用 Claude Sonnet 5.5 之前因输出空间不足失败，花费 0.96 美元。两处都已修复：各步骤现在边做边保存，且不再设输出上限。"
+      }
     }
   ],
-  "estimate_basis_en": "Per-call costs measured in the first run: extract about $0.0006 per window (raised by half for the longer v0.3 output), map $0.0001 and verify $0.00035 per claim; about 2.2 claims per window, 85% with the quote found, about 60% welfare-relevant.",
-  "estimate_basis_zh": "按第一次运行实测的单次费用估算：提取每个窗口约 0.0006 美元（因 v0.3 输出更长上调一半），归类每条 0.0001 美元，核验每条 0.00035 美元；每个窗口约 2.2 条论断，85% 引文可找到，约 60% 与福利相关。",
   "gates": [
-    {
-      "id": "cost_log",
-      "status": "ready",
-      "en": "Every call logs its model, tokens and cost; totals are reported after each step",
-      "zh": "每次调用记录模型、token 和费用；每一步结束后报告总额"
-    },
     {
       "id": "resume",
       "status": "ready",
@@ -207,7 +183,5 @@
     }
   ],
   "not_in_this_run_en": "Chinese papers behind CNKI and Wanfang (needs a licence decision), papers without open full text (788 of the 964 in focus), and the reconcile and suggest stages.",
-  "not_in_this_run_zh": "知网和万方中的中文论文（需要授权决定）、没有开放全文的论文（重点范围 964 篇中的 788 篇），以及整合和建议阶段。",
-  "budget_en": "No spending cap: every call is logged with its cost and the total is reported after each step.",
-  "budget_zh": "不设费用上限：每次调用都记录费用，每一步结束后报告总额。"
+  "not_in_this_run_zh": "知网和万方中的中文论文（需要授权决定）、没有开放全文的论文（重点范围 964 篇中的 788 篇），以及整合和建议阶段。"
 }

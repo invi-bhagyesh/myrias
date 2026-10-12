@@ -68,7 +68,7 @@ export function speciesSteps(m) {
   for (const ph of phases) {
     const a = ph.actual;
     steps.push({ key: 'phase', status: ph.status || 'planned', n: a ? a.claims_released : null, phase: ph,
-      vars: a ? { id: ph.id, papers: n(ph.papers), extracted: n(a.claims_extracted), found: n(a.claims_quote_found), relevant: n(a.claims_relevant), supported: n(a.claims_supported), spent: '$' + Number(a.spent_usd).toFixed(2) }
+      vars: a ? { id: ph.id, papers: n(ph.papers), extracted: n(a.claims_extracted), found: n(a.claims_quote_found), relevant: n(a.claims_relevant), supported: n(a.claims_supported) }
         : { id: ph.id, papers: n(ph.papers), windows: n(ph.windows) } });
   }
   steps.push({ key: 'audit', status: m.runs.some(r => r.audit) ? 'done' : 'planned', n: null, vars: {} });

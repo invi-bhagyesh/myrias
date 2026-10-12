@@ -201,7 +201,7 @@
      "name": "findings-2026-10-12.calls.jsonl",
      "bytes": 53661,
      "rows": 198,
-     "about": "Every model call that wrote a finding: model, tokens, cost"
+     "about": "Every model call that wrote a finding: model, tokens"
     },
     {
      "name": "links.csv",
@@ -379,25 +379,25 @@
      "name": "final-calls.jsonl",
      "bytes": 52449,
      "rows": 206,
-     "about": "Every model call: model, tokens, cost, finish reason"
+     "about": "Every model call: model, tokens, finish reason"
     },
     {
      "name": "mapped-calls.jsonl",
      "bytes": 52446,
      "rows": 206,
-     "about": "Every model call: model, tokens, cost, finish reason"
+     "about": "Every model call: model, tokens, finish reason"
     },
     {
      "name": "suggest-calls.jsonl",
      "bytes": 4918,
      "rows": 19,
-     "about": "Every model call: model, tokens, cost, finish reason"
+     "about": "Every model call: model, tokens, finish reason"
     },
     {
      "name": "verified-calls.jsonl",
      "bytes": 49288,
      "rows": 206,
-     "about": "Every model call: model, tokens, cost, finish reason"
+     "about": "Every model call: model, tokens, finish reason"
     }
    ]
   },
@@ -652,14 +652,14 @@
    "path": "run-2",
    "files": 30,
    "bytes": 6085694,
-   "about": "One line per step of the run, in order: times, calls, cost, outputs",
+   "about": "One line per step of the run, in order: times, calls, outputs",
    "items": []
   },
   {
    "path": "run-2/A",
    "files": 22,
    "bytes": 3755591,
-   "about": "Every model call of that step: model, tokens, cost, finish reason",
+   "about": "Every model call of that step: model, tokens, finish reason",
    "items": []
   },
   {
@@ -672,7 +672,7 @@
      "name": "calls.jsonl",
      "bytes": 26364,
      "rows": 103,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "claims.jsonl",
@@ -702,7 +702,7 @@
      "name": "summary.json",
      "bytes": 381,
      "rows": null,
-     "about": "Counts and cost of the extraction step"
+     "about": "Counts of the extraction step"
     },
     {
      "name": "tasks.jsonl",
@@ -766,7 +766,7 @@
      "name": "step.json",
      "bytes": 1304,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -774,7 +774,7 @@
    "path": "run-2/B/02-extract",
    "files": 9,
    "bytes": 18856506,
-   "about": "Every model call of that step: model, tokens, cost, finish reason",
+   "about": "Every model call of that step: model, tokens, finish reason",
    "items": []
   },
   {
@@ -793,7 +793,7 @@
      "name": "mapped.jsonl.calls.jsonl",
      "bytes": 4668439,
      "rows": 18642,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "mapped.jsonl.partial.jsonl",
@@ -817,7 +817,7 @@
      "name": "step.json",
      "bytes": 1449,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -843,7 +843,7 @@
      "name": "step.json",
      "bytes": 1469,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     },
     {
      "name": "verified.jsonl",
@@ -855,7 +855,7 @@
      "name": "verified.jsonl.calls.jsonl",
      "bytes": 1044573,
      "rows": 4359,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "verified.jsonl.partial.jsonl",
@@ -881,7 +881,7 @@
      "name": "final.jsonl.calls.jsonl",
      "bytes": 2413253,
      "rows": 9468,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "stderr.log",
@@ -899,7 +899,7 @@
      "name": "step.json",
      "bytes": 1208,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -919,7 +919,7 @@
      "name": "reconciled.jsonl.calls.jsonl",
      "bytes": 3295,
      "rows": 12,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "stderr.log",
@@ -937,7 +937,7 @@
      "name": "step.json",
      "bytes": 1635,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -963,7 +963,7 @@
      "name": "step.json",
      "bytes": 735,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -989,7 +989,7 @@
      "name": "step.json",
      "bytes": 634,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -1015,7 +1015,7 @@
      "name": "step.json",
      "bytes": 596,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -1029,7 +1029,7 @@
      "name": "cluster.calls.jsonl",
      "bytes": 23521,
      "rows": 87,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "stderr.log",
@@ -1047,7 +1047,7 @@
      "name": "step.json",
      "bytes": 1020,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -1061,7 +1061,7 @@
      "name": "findings.calls.jsonl",
      "bytes": 25499,
      "rows": 94,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "stderr.log",
@@ -1079,7 +1079,7 @@
      "name": "step.json",
      "bytes": 1272,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -1099,7 +1099,7 @@
      "name": "reconstruct.calls.jsonl",
      "bytes": 252730,
      "rows": 1011,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "reconstruct.json",
@@ -1123,7 +1123,7 @@
      "name": "step.json",
      "bytes": 1549,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
@@ -1137,7 +1137,7 @@
      "name": "actions.calls.jsonl",
      "bytes": 1360,
      "rows": 5,
-     "about": "Every model call of that step: model, tokens, cost, finish reason"
+     "about": "Every model call of that step: model, tokens, finish reason"
     },
     {
      "name": "stderr.log",
@@ -1155,7 +1155,7 @@
      "name": "step.json",
      "bytes": 948,
      "rows": null,
-     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls, cost"
+     "about": "What this step did: times, command, git commit, every input and output with size, rows and checksum, models, calls"
     }
    ]
   },
