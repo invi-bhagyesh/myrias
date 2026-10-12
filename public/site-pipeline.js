@@ -59,6 +59,65 @@ export const STAGES = [
     model: 'qwen/qwen3.8-max-0902', out: ['Draft suggestions with the claims they rest on.', '附依据论断的草稿建议。'] }
 ];
 
+
+// The pipeline as it runs today, one entry per step, for the diagram on the Pipeline tab. Numbers come
+// from data/pipeline.json, which pipeline/pipeline_summary.py writes from the run's step records.
+// name, out (what the number counts), what (one plain sentence), how (how it is done and checked).
+export const LANES = [['collect', ['Collect', '收集']], ['read', ['Read', '阅读']], ['combine', ['Combine', '汇总']], ['check', ['Check', '检验']]];
+export const STEP_TEXT = {
+  search: { name: ['Search', '检索'], in: ['indexes', '个数据库'], out: ['papers found', '篇论文'],
+    what: ['Search five open indexes for the species and merge the records that are the same paper.', '在五个开放数据库中检索该物种，合并指向同一论文的记录。'],
+    how: ['Europe PMC, Crossref, DOAJ, OpenAlex, Semantic Scholar. Matched by DOI, PubMed ids and title. CNKI, Wanfang and CQVIP are not included yet.', 'Europe PMC、Crossref、DOAJ、OpenAlex、Semantic Scholar。按 DOI、PubMed 编号和标题匹配。知网、万方、维普尚未纳入。'] },
+  screen: { name: ['Screen', '筛选'], in: ['papers', '篇'], out: ['about the fish and welfare', '篇涉及该鱼与福利'],
+    what: ['Keep papers that name the species in the title and touch a welfare topic.', '保留标题中出现该物种且涉及福利主题的论文。'],
+    how: ['Keyword rules in English and Chinese, no model.', '中英文关键词规则，不用模型。'] },
+  fetch: { name: ['Fetch full text', '获取全文'], in: ['papers', '篇'], out: ['with open full text', '篇有开放全文'],
+    what: ['Download the open full text where it exists.', '在有开放全文时下载。'],
+    how: ['Europe PMC XML, publisher pages and open PDFs. Paywalled papers are recorded, not fetched.', 'Europe PMC XML、出版商页面和开放 PDF。付费论文只做记录，不下载。'] },
+  prepare: { name: ['Prepare', '整理'], in: ['papers', '篇'], out: ['pages to read', '页待读'],
+    what: ['Turn each paper into numbered pages and cut the reference list.', '把每篇论文整理成带页码的文本，并去掉参考文献。'],
+    how: ['Plain code. Scanned pages are transcribed from images first.', '普通代码。扫描页先从图像转录。'] },
+  extract: { name: ['Extract claims', '提取论断'], in: ['text windows', '个文本窗口'], out: ['claims', '条论断'],
+    what: ['A model reads each page window and writes every claim with a word-for-word quote.', '模型逐个窗口阅读，写出每条论断并附逐字引文。'],
+    how: ['Overlapping windows so a claim across a page break is seen whole; repeated claims from the overlap are merged.', '窗口相互重叠，跨页论断不会被截断；重叠处的重复论断会合并。'] },
+  quote: { name: ['Check the quote', '核对引文'], in: ['claims', '条'], out: ['quotes found on the page', '条引文在原页找到'],
+    what: ['Code checks that every quote is really on its page. Claims whose quote is not are dropped.', '代码核对每条引文确实在所在页，找不到的论断被剔除。'],
+    how: ['Ignores spacing, punctuation width and known glyph errors. It can only reject, never wrongly accept.', '忽略空格、全半角标点和已知字形错误；只会拒绝，不会错误放行。'] },
+  map: { name: ['Map', '归类'], in: ['claims', '条'], out: ['about welfare', '条涉及福利'],
+    what: ['Label each claim: is it about welfare, which technology, which welfare problem, what kind of evidence.', '为每条论断标注：是否涉及福利、属于哪类技术、哪种福利问题、证据类型。'],
+    how: ['One call per claim, answers limited to the fixed taxonomy.', '每条论断一次调用，答案限定在固定分类内。'] },
+  verify: { name: ['Verify', '核验'], in: ['claims', '条'], out: ['supported or partly', '条支持或部分支持'],
+    what: ['A second model, from a different lab, checks each claim against its quote.', '另一家机构的模型对照引文核验每条论断。'],
+    how: ['Supported, partly supported or not supported. Only the first two are released.', '分为支持、部分支持、不支持；只发布前两类。'] },
+  render: { name: ['English text', '英文呈现'], in: ['claims', '条'], out: ['translated', '条已翻译'],
+    what: ['Write an English version beside each claim kept in its own language.', '在保持原语言的论断旁写出英文版本。'],
+    how: ['Code checks that every number survives the translation. The original stays the record.', '代码核对每个数字在译文中都保留；原文始终是记录。'] },
+  reconcile: { name: ['Name practices', '统一做法名称'], in: ['new names', '个新名称'], out: ['groups', '组'],
+    what: ['Give each practice one name, joining existing groups where it is the same practice.', '为每种做法统一名称；若是同一做法则并入已有组。'],
+    how: ['In batches, each batch sees the groups so far. The original wording is kept.', '分批处理，每批都能看到已有分组；保留原始措辞。'] },
+  merge: { name: ['Merge into the store', '并入数据库'], in: ['claims that passed', '条通过'], out: ['claims in the store', '条在库中'],
+    what: ['Add the run to everything found before. A claim found again is not added twice.', '把本次结果并入已有数据；再次找到的论断不会重复加入。'],
+    how: ['Permanent ids for claims and papers, so links never break.', '论断和论文使用永久编号，链接不会失效。'] },
+  export: { name: ['Release', '发布'], in: ['claims', '条'], out: ['claims released', '条已发布'],
+    what: ['Write the files this site reads.', '写出本站读取的文件。'],
+    how: ['Split into small files. Quotes longer than 600 characters are held back.', '拆分为小文件；超过 600 字符的引文暂不发布。'] },
+  cluster: { name: ['Cluster practices', '做法聚类'], in: ['practice names', '个做法名称'], out: ['practices', '种做法'],
+    what: ['Find the names that mean the same practice, so their claims are read together.', '找出指同一做法的不同名称，使相关论断合在一起看。'],
+    how: ['Embeddings and clustering, then a model tests each cluster and removes what does not belong (after Inverse Constitutional AI).', '先用向量嵌入聚类，再由模型逐组检验并剔除不属于该组的内容（参照 Inverse Constitutional AI）。'] },
+  findings: { name: ['Write findings', '撰写发现'], in: ['claims', '条论断'], out: ['findings', '条发现'],
+    what: ['One finding per practice and welfare problem, summing up its claims.', '每种做法与福利问题一条发现，概括其论断。'],
+    how: ['Counts and strength by code; the sentence by a model from the claims only; numbers checked against them.', '计数和强度由代码给出；句子由模型仅依据论断撰写；数字逐一核对。'] },
+  actions: { name: ['Draft actions', '起草行动'], in: ['multi-paper findings', '条多篇论文发现'], out: ['draft actions', '条行动草案'],
+    what: ['Propose next steps from findings that rest on two or more papers.', '依据来自两篇及以上论文的发现提出下一步。'],
+    how: ['The model never ranks: priority is computed by code from the evidence and the type of action.', '模型不排序：优先级由代码根据证据和行动类型计算。'] },
+  reconstruct: { name: ['Reconstruction test', '重建测试'], in: ['held-out claims', '条留出论断'], out: null,
+    what: ['Hold out claims, build findings without them, and ask another model to predict each from the findings alone.', '留出部分论断，在不含它们的情况下生成发现，再让另一个模型仅凭发现预测这些论断。'],
+    how: ['Measures how much of the evidence the findings keep, for each way of grouping practices.', '衡量不同做法分组方式下，发现保留了多少证据。'] },
+  audit: { name: ['Expert audit', '专家审核'], in: null, out: null,
+    what: ['A fish-welfare expert checks a sample of claims and findings, and the error rates are published.', '由鱼类福利专家抽查论断和发现，并公布错误率。'],
+    how: ['Not started. Until then everything here is a lead to check, not a finding to rely on.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'] }
+};
+
 // The funnel from the run counts in release.json; steps with no number are skipped.
 export function funnel(run) {
   const c = (run && run.counts) || {};

@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
-import { STAGES, funnel } from './site-pipeline.js';
+import { STAGES, LANES, STEP_TEXT } from './site-pipeline.js';
 import { matrixChart } from './site-chart.js';
 
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
@@ -62,6 +62,7 @@ async function load() {
   // What the private corpus on Hugging Face holds: names, counts and sizes only, never text.
   try { const r = await fetch('data/corpus.json', { cache: 'no-cache' }); state.corpus = r.ok ? await r.json() : null; } catch { state.corpus = null; }
   try { const r = await fetch('data/next-run.json', { cache: 'no-cache' }); state.nextRun = r.ok ? await r.json() : null; } catch { state.nextRun = null; }
+  try { const r = await fetch('data/pipeline.json', { cache: 'no-cache' }); state.pipeline = r.ok ? await r.json() : null; } catch { state.pipeline = null; }
 }
 
 const taxonomyLabel = (kind, id) => {
@@ -98,18 +99,53 @@ function issueLink(title, body) {
 }
 
 // ---------- views ----------
+// The pipeline as a diagram: four lanes of numbered steps, each with what came out, whether a model or
+// plain code did it, and what it cost. Click a step for what it does and how it is checked. The run settings
+// and the older per-layer notes are folded below.
 function viewPipeline() {
-  const i = state.lang === 'zh' ? 1 : 0;
-  const run = state.data.runs[0];
+  const i = state.lang === 'zh' ? 1 : 0, P = state.pipeline;
+  const n = x => (x === null || x === undefined ? '—' : Number(x).toLocaleString());
+  const usd = x => (x ? '$' + (x < 0.01 ? x.toFixed(3) : x.toFixed(2)) : '');
+  const short = m => (m ? m.split('/').pop() : '');
+  let diagram = '';
+  if (P) {
+    const card = st => {
+      const t = STEP_TEXT[st.key] || { name: [st.key, st.key], what: ['', ''], how: ['', ''] };
+      const best = st.scores ? Object.entries(st.scores).filter(([k]) => k !== 'none').sort((a, b) => b[1].accuracy - a[1].accuracy)[0] : null;
+      const outNum = st.key === 'reconstruct' && best ? Math.round(100 * best[1].accuracy) + '%' : n(st.out);
+      const outLabel = st.key === 'reconstruct' && best ? tr('pl.recon.best', { m: tr('pl.recon.' + best[0]) }) : (t.out ? t.out[i] : '');
+      const scores = st.scores ? `<table class="plain pl-scores"><thead><tr><th>${esc(tr('pl.recon.method'))}</th><th>${esc(tr('pl.recon.cov'))}</th><th>${esc(tr('pl.recon.acc'))}</th></tr></thead><tbody>${['exact', 'embed', 'tested'].filter(k => st.scores[k]).map(k => `<tr><td>${esc(tr('pl.recon.' + k))}</td><td>${Math.round(100 * st.scores[k].coverage)}%</td><td>${Math.round(100 * st.scores[k].accuracy)}%</td></tr>`).join('')}</tbody></table>` : '';
+      return `<li class="pl-step ${st.model ? 'k-model' : 'k-code'}${st.status === 'planned' ? ' is-planned' : ''}"><button type="button" class="pl-card" aria-expanded="false" data-pl>
+          <span class="pl-num">${String(st.id).padStart(2, '0')}</span><span class="pl-name">${esc(t.name[i])}</span>
+          ${st.status === 'planned' ? `<span class="pl-out pl-planned">${esc(tr('pl.planned'))}</span>` : `<strong class="pl-out">${esc(outNum)}</strong><span class="pl-outl">${esc(outLabel)}</span>`}
+          ${st.in !== null && st.in !== undefined && t.in ? `<span class="pl-in">${esc(tr('pl.from', { n: n(st.in), what: t.in[i] }))}</span>` : ''}
+          <span class="pl-tag">${st.model ? `<i class="pl-dot"></i>${esc(short(st.model))}` : esc(tr(st.status === 'planned' ? 'pl.people' : 'pl.code'))}${st.cost_usd ? ' · ' + esc(usd(st.cost_usd)) : ''}</span></button>
+        <div class="pl-detail" hidden><p>${esc(t.what[i])}</p><p class="small-note">${esc(t.how[i])}</p>${st.calls ? `<p class="small-note">${esc(tr('pl.calls', { n: n(st.calls) }))}</p>` : ''}${scores}</div></li>`;
+    };
+    const lanes = LANES.map(([id, label], k) => `<section class="pl-lane"><h3 class="pl-lane-h"><span>${String(k + 1).padStart(2, '0')}</span>${esc(label[i])}</h3><div><ol class="pl-steps">${P.steps.filter(s => s.lane === id).map(card).join('')}</ol><div class="pl-panel" data-pl-panel hidden></div></div></section>`).join('');
+    const sum = id => P.steps.find(s => s.key === id);
+    const tiles = [[n(P.steps.length), tr('pl.t.steps')], ['$' + P.totals.cost_usd.toFixed(2), tr('pl.t.cost')], [n(P.totals.calls), tr('pl.t.calls')],
+      [`${n(sum('export')?.out)} → ${n(sum('findings')?.out)} → ${n(sum('actions')?.out)}`, tr('pl.t.chain')]];
+    diagram = `<div class="pl-top"><ul class="corpus-tiles pl-tiles">${tiles.map(([v, l]) => `<li><strong>${esc(v)}</strong><span>${esc(l)}</span></li>`).join('')}</ul>
+        <img class="pl-art" src="art/pipeline.webp" alt="" width="1014" height="824" decoding="async" onerror="this.remove()"></div>
+      <p class="pl-key"><span><i class="pl-dot"></i>${esc(tr('pl.key.model'))}</span><span><i class="pl-sq"></i>${esc(tr('pl.key.code'))}</span><span>${esc(tr('pl.key.click'))}</span><span class="pl-asof">${esc(tr('pl.asof', { run: P.run, d: P.as_of }))}</span></p>
+      <div class="pl-lanes">${lanes}</div>`;
+  }
   const stages = STAGES.map(st => `<article class="pipe-stage st-${st.status}"><div class="pipe-id"><span>${esc(st.id)}</span></div>
     <div class="pipe-body"><div class="pipe-head"><h3>${esc(st.name[i])}</h3><span class="pipe-badge">${esc(tr('pipe.status.' + st.status))}</span></div>
-      <p class="pipe-what">${esc(st.what[i])}</p>
-      <dl class="pipe-facts"><dt>${esc(tr('pipe.how'))}</dt><dd>${esc(st.how[i])}</dd>
-        <dt>${esc(tr('pipe.model'))}</dt><dd>${st.model ? `<code>${esc(st.model)}</code>` : esc(tr('pipe.nomodel'))}</dd>
-        <dt>${esc(tr('pipe.out'))}</dt><dd>${esc(st.out[i])}</dd>${st.check ? `<dt>${esc(tr('pipe.check'))}</dt><dd>${esc(st.check[i])}</dd>` : ''}</dl></div></article>`).join('');
-  const steps = funnel(run), top = steps.length ? Math.max(...steps.map(x => x.value)) : 1;
-  const bars = steps.length ? `<h2>${esc(tr('pipe.funnel'))}</h2><p class="small-note">${esc(tr('pipe.funnel.note'))}</p><ol class="funnel">${steps.map(x => `<li><span class="funnel-label">${esc(x.label[i])}</span><span class="funnel-bar"><i style="width:${Math.max(3, Math.round(100 * x.value / top))}%"></i></span><b>${x.value}</b></li>`).join('')}</ol>` : '';
-  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pipe.lead')) + nextRunHtml(state.nextRun) + bars + `<h2>${esc(tr('pipe.stages'))}</h2><div class="pipe-flow">${stages}</div>` };
+      <p class="pipe-what">${esc(st.what[i])}</p></div></article>`).join('');
+  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pl.lead')) + diagram +
+      `<details class="pl-fold"><summary>${esc(tr('pl.fold.runs'))}</summary>${nextRunHtml(state.nextRun)}</details>` +
+      `<details class="pl-fold"><summary>${esc(tr('pl.fold.layers'))}</summary><div class="pipe-flow">${stages}</div></details>`,
+    // A step's details open in one panel under its lane, so the row of cards keeps its height.
+    mount: root => root.querySelectorAll('[data-pl]').forEach(b => b.addEventListener('click', () => {
+      const lane = b.closest('.pl-lane'), panel = lane.querySelector('[data-pl-panel]'), open = b.getAttribute('aria-expanded') === 'true';
+      lane.querySelectorAll('[data-pl]').forEach(x => x.setAttribute('aria-expanded', 'false'));
+      if (open) { panel.hidden = true; return; }
+      b.setAttribute('aria-expanded', 'true');
+      panel.innerHTML = `<p class="pl-panel-h">${b.querySelector('.pl-num').textContent} · ${b.querySelector('.pl-name').textContent}</p>` + b.nextElementSibling.innerHTML;
+      panel.hidden = false;
+    })) };
 }
 
 // The planned run and its settings, from data/next-run.json. Nothing here has been run.
@@ -564,7 +600,11 @@ function applyChrome() {
   $('#lang-toggle').textContent = tr('lang.switch');
   $('#lang-toggle').setAttribute('lang', state.lang === 'zh' ? 'en' : 'zh-Hans');
   const dark = document.documentElement.dataset.theme === 'dark';
-  $('#theme-toggle').textContent = tr(dark ? 'theme.light' : 'theme.dark');
+  // Compact: an icon, with the full words for screen readers and on hover.
+  $('#theme-toggle').innerHTML = dark ? '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+    : '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+  $('#theme-toggle').setAttribute('aria-label', tr(dark ? 'theme.light' : 'theme.dark'));
+  $('#theme-toggle').title = tr(dark ? 'theme.light' : 'theme.dark');
   $('#theme-toggle').setAttribute('aria-pressed', String(dark));
   $('.sections').setAttribute('aria-label', tr('nav.label'));
   const banner = $('#banner');

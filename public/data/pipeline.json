@@ -1,0 +1,222 @@
+{
+ "run": "run-2",
+ "as_of": "2026-10-12",
+ "steps": [
+  {
+   "id": 1,
+   "lane": "collect",
+   "key": "search",
+   "model": null,
+   "in": 5,
+   "out": 2005,
+   "cost_usd": 0,
+   "calls": 0
+  },
+  {
+   "id": 2,
+   "lane": "collect",
+   "key": "screen",
+   "model": null,
+   "in": 2005,
+   "out": 964,
+   "cost_usd": 0,
+   "calls": 0
+  },
+  {
+   "id": 3,
+   "lane": "collect",
+   "key": "fetch",
+   "model": null,
+   "in": 964,
+   "out": 176,
+   "cost_usd": 0,
+   "calls": 0
+  },
+  {
+   "id": 4,
+   "lane": "collect",
+   "key": "prepare",
+   "model": null,
+   "in": 176,
+   "out": 1620,
+   "cost_usd": 0.0,
+   "calls": 0
+  },
+  {
+   "id": 5,
+   "lane": "read",
+   "key": "extract",
+   "model": "qwen/qwen3.8-flash",
+   "in": 3979,
+   "out": 10695,
+   "cost_usd": 1.56,
+   "calls": 3979
+  },
+  {
+   "id": 6,
+   "lane": "read",
+   "key": "quote",
+   "model": null,
+   "in": 10695,
+   "out": 9849,
+   "cost_usd": 0,
+   "calls": 0
+  },
+  {
+   "id": 7,
+   "lane": "read",
+   "key": "map",
+   "model": "qwen/qwen3.8-flash",
+   "in": 9849,
+   "out": 4359,
+   "cost_usd": 1.846,
+   "calls": 18642
+  },
+  {
+   "id": 8,
+   "lane": "read",
+   "key": "verify",
+   "model": "z-ai/glm-5.3",
+   "in": 4359,
+   "out": 4333,
+   "cost_usd": 1.504,
+   "calls": 4359,
+   "split": {
+    "supported": 4066,
+    "partial": 267,
+    "unsupported": 24,
+    "null": 2
+   }
+  },
+  {
+   "id": 9,
+   "lane": "read",
+   "key": "render",
+   "model": "qwen/qwen3.8-flash",
+   "in": 9468,
+   "out": 9468,
+   "cost_usd": 0.426,
+   "calls": 9468
+  },
+  {
+   "id": 10,
+   "lane": "combine",
+   "key": "reconcile",
+   "model": "anthropic/claude-sonnet-5.5",
+   "in": 2409,
+   "out": 1063,
+   "cost_usd": 3.496,
+   "calls": 18,
+   "joined_existing": 31
+  },
+  {
+   "id": 11,
+   "lane": "combine",
+   "key": "merge",
+   "model": null,
+   "in": 4333,
+   "out": 4460,
+   "cost_usd": 0.0,
+   "calls": 0
+  },
+  {
+   "id": 12,
+   "lane": "combine",
+   "key": "export",
+   "model": null,
+   "in": 4460,
+   "out": 4458,
+   "cost_usd": 0.0,
+   "calls": 0
+  },
+  {
+   "id": 13,
+   "lane": "combine",
+   "key": "cluster",
+   "model": "anthropic/claude-sonnet-5.5",
+   "in": 475,
+   "out": 352,
+   "cost_usd": 0.326,
+   "calls": 87,
+   "embed_model": "qwen/qwen3-embedding-8b",
+   "embed_only": 298
+  },
+  {
+   "id": 14,
+   "lane": "combine",
+   "key": "findings",
+   "model": "anthropic/claude-sonnet-5.5",
+   "in": 4458,
+   "out": 405,
+   "cost_usd": 1.657,
+   "calls": 292,
+   "multi_paper": 79
+  },
+  {
+   "id": 15,
+   "lane": "combine",
+   "key": "actions",
+   "model": "anthropic/claude-sonnet-5.5",
+   "in": 79,
+   "out": 21,
+   "cost_usd": 0.116,
+   "calls": 5
+  },
+  {
+   "id": 16,
+   "lane": "check",
+   "key": "reconstruct",
+   "model": "z-ai/glm-5.3",
+   "in": 240,
+   "out": null,
+   "cost_usd": 1.477,
+   "calls": 1011,
+   "scores": {
+    "none": {
+     "n": 240,
+     "coverage": 0,
+     "accuracy": 0,
+     "accuracy_answered": null,
+     "answered": 0
+    },
+    "exact": {
+     "n": 240,
+     "coverage": 0.758,
+     "accuracy": 0.333,
+     "accuracy_answered": 0.92,
+     "answered": 87
+    },
+    "embed": {
+     "n": 240,
+     "coverage": 0.817,
+     "accuracy": 0.4,
+     "accuracy_answered": 0.828,
+     "answered": 116
+    },
+    "tested": {
+     "n": 240,
+     "coverage": 0.787,
+     "accuracy": 0.35,
+     "accuracy_answered": 0.857,
+     "answered": 98
+    }
+   }
+  },
+  {
+   "id": 17,
+   "lane": "check",
+   "key": "audit",
+   "model": null,
+   "in": null,
+   "out": null,
+   "cost_usd": 0,
+   "calls": 0,
+   "status": "planned"
+  }
+ ],
+ "totals": {
+  "cost_usd": 12.76,
+  "calls": 37861,
+  "phase_a_cost_usd": 0.356
+ }
+}
