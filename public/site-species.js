@@ -2,6 +2,7 @@
 // steps that produced it. Everything is computed from the release, the corpus summary and the run plan;
 // only the short profile below is written by hand.
 import { pick, escapeHtml as esc } from './site-lib.js';
+import { actionItemHtml } from './site-actions.js';
 
 // Hand-kept profile per species. Short, general facts a reader needs to follow the evidence.
 export const PROFILES = {
@@ -117,7 +118,7 @@ export function speciesPageHtml(m, ctx) {
   const FIRST = 8, rest = m.top.slice(FIRST);
   const found = `<section class="sp-sec" id="sp-found"><h2>${esc(tr('sp.sec.found'))}</h2><p class="sp-lead">${esc(tr('sp.found.lead', { claims: n(m.claims.length), papers: n(m.sources.length), zh: n(zhPapers) }))}</p>
     ${verdictBar}
-    ${m.findings.length && ctx.findingsHtml ? `<h3>${esc(tr('fd.title'))}</h3><p class="sp-lead">${esc(tr('fd.lead', { n: n(m.findings.length), multi: n(m.findings.filter(f => f.counts.papers > 1).length) }))}</p>${ctx.findingsHtml(m.findings, { first: 8 })}`
+    ${m.findings.length && ctx.findingsHtml ? `<h3>${esc(tr('fd.title'))}</h3><p class="sp-lead">${esc(tr('fd.lead', { n: n(m.findings.length), multi: n(m.findings.filter(f => f.counts.papers > 1).length) }))}</p>${ctx.findingsHtml(m.findings, { first: 6, rest: false })}<p><a class="button small" href="${link('findings', { species: s.id })}">${esc(tr('fd.all', { n: n(m.findings.length) }))} →</a></p>`
     : m.top.length ? `<h3>${esc(tr('sp.top'))}</h3><div class="sp-table"><table class="plain">${head}<tbody>${m.top.slice(0, FIRST).map(row).join('')}</tbody></table>${rest.length ? `<details class="sp-more"><summary>${esc(tr('sp.more', { n: rest.length }))}</summary><table class="plain"><tbody>${rest.map(row).join('')}</tbody></table></details>` : ''}</div>` : `<p>${esc(tr('sp.noapps'))}</p>`}
     <h3>${esc(tr('sp.map'))}</h3><div class="cv-card sp-map"><div class="graph-stage" data-sp-map></div><p class="graph-note">${esc(tr('evmap.hint'))}</p></div>
     <p><a class="button small" href="${link('explore', { species: s.id })}">${esc(tr('sp.explore'))} →</a></p></section>`;
@@ -143,19 +144,11 @@ export function speciesPageHtml(m, ctx) {
     tr('sp.lim.species')].filter(Boolean);
   const limitsSec = `<section class="sp-sec" id="sp-limits"><h2>${esc(tr('sp.sec.limits'))}</h2><ul class="arena-rows">${limits.map(x => `<li>${esc(x)}</li>`).join('')}</ul></section>`;
 
-  // Draft actions: one list by priority and one by technology; a toggle shows one at a time.
+  // Draft actions: the top five here; the Actions page has all of them, by priority or by technology.
   const fById = new Map(m.findings.map(f => [f.id, f]));
-  const act = a => `<li class="ac t-${esc(a.type)}"><span class="ac-rank">${a.rank ?? ''}</span><div>
-      <div class="ac-head"><span class="ac-type">${esc(tr('ac.type.' + a.type))}</span><span class="ac-who">${esc(tr('ac.who', { who: tr('ac.who.' + a.who.replace(/ /g, '_')) }))}</span><span class="ac-draft">${esc(tr('ac.draft'))}</span></div>
-      <p class="ac-text">${esc(lang === 'zh' ? a.action_zh || a.action_en : a.action_en || a.action_zh)}</p>
-      <p class="ac-meta"><span class="ac-score" title="${esc(tr('ac.score.tip', { e: a.priority.evidence, d: a.priority.actionability }))}"><i style="width:${Math.round(100 * a.priority.score)}%"></i></span>${esc(tr('ac.score', { s: a.priority.score.toFixed(2) }))} · ${a.welfare_problems.map(p => `<span class="sp-chip">${esc(ctx.taxonomyLabel('welfare_problems', p))}</span>`).join('')}</p>
-      <details class="fd-claims"><summary>${esc(tr(a.finding_ids.length === 1 ? 'ac.why.one' : 'ac.why', { n: a.finding_ids.length }))}</summary>
-        <ul class="ac-findings">${a.finding_ids.map(id => fById.get(id)).filter(Boolean).map(f => `<li><a href="${link('findings/' + encodeURIComponent(f.id))}">${esc(lang === 'zh' ? f.statement_zh || f.statement_en : f.statement_en || f.statement_zh)}</a> <span class="fd-meta">${esc(tr('fd.papers', { n: f.counts.papers }))}</span></li>`).join('')}</ul>
-        <p class="ac-note"><b>${esc(tr('ac.gap'))}</b> ${esc(a.evidence_gap)}</p><p class="ac-note"><b>${esc(tr('ac.risks'))}</b> ${esc(a.risks)}</p></details></div></li>`;
-  const byClass = [...new Set(m.actions.map(a => a.technology_class))].map(c => `<h4 class="fd-h">${esc(ctx.taxonomyLabel('technology_classes', c))}</h4><ol class="ac-list">${m.actions.filter(a => a.technology_class === c).map(act).join('')}</ol>`).join('');
   const doSec = m.actions.length ? `<section class="sp-sec" id="sp-do"><h2>${esc(tr('sp.sec.do'))}</h2><p class="sp-lead">${esc(tr('ac.lead', { n: m.actions.length, multi: m.findings.filter(f => f.counts.papers > 1).length, f: new Set(m.actions.flatMap(a => a.finding_ids)).size }))}</p>
-    <div class="ac-views" data-ac><div class="graph-tabs ac-tabs" role="group"><button type="button" data-ac-view="rank" aria-pressed="true">${esc(tr('ac.view.rank'))}</button><button type="button" data-ac-view="class" aria-pressed="false">${esc(tr('ac.view.class'))}</button></div>
-      <div data-ac-pane="rank"><ol class="ac-list">${m.actions.map(act).join('')}</ol></div><div data-ac-pane="class" hidden>${byClass}</div></div>
+    <ol class="ac-list">${m.actions.slice(0, 5).map(a => actionItemHtml(a, ctx, fById)).join('')}</ol>
+    <p><a class="button small" href="${link('actions', { species: s.id })}">${esc(tr('ac.all', { n: m.actions.length }))} →</a></p>
     <p class="small-note">${esc(tr('ac.formula'))}</p></section>` : '';
   return `<div class="sp-page">${hero}${contents}${about}${found}${doSec}${from}${stepsSec}${limitsSec}</div>`;
 }

@@ -7,7 +7,9 @@ import { matrixChart } from './site-chart.js';
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 import { evidenceModel, evidenceMapHtml, mountEvidenceMap } from './site-evmap.js';
 import { speciesModel, speciesPageHtml, speciesCardsHtml } from './site-species.js';
-import { findingsListHtml, findingPageHtml, findingText } from './site-findings.js';
+import { findingsListHtml, findingPageHtml, findingText, findingItemHtml, byWeight } from './site-findings.js';
+import { actionItemHtml } from './site-actions.js';
+import { browseHtml, mountBrowse } from './site-browse.js';
 import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, LANG_COLOR } from './site-corpusviz.js';
 import { controlsHtml, mountCorpusList, FILTER_DEFAULTS, unpackPapers } from './site-corpuslist.js';
 
@@ -335,6 +337,42 @@ function viewFinding(id) {
   return { title: `${tr('fd.kicker')} ${f.id}`, html: findingPageHtml(f, findingCtx()) };
 }
 
+// All findings: an index by technology, filters, and grouped or ranked views.
+function viewFindings(params) {
+  const d = state.data, sp = params.get('species') || '';
+  const items = (d.findings || []).filter(f => !sp || f.species_id === sp).sort(byWeight);
+  const tax = d.taxonomy;
+  const filters = [
+    { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('fd.search.ph') },
+    { key: 'strength', type: 'select', label: tr('fd.f.strength'), options: ['agree', 'mixed', 'against', 'described', 'one_paper'].map(k => [k, tr('fd.strength.' + k)]) },
+    { key: 'problem', type: 'select', label: tr('fd.problem'), options: tax.welfare_problems.map(p => [p.id, pick(p, '', state.lang)]) },
+    { key: 'multi', type: 'check', label: tr('fd.f.multi') }];
+  return { title: tr('nav.findings'), html: lead(tr('fd.kicker'), tr('fd.page.title'), tr('fd.page.lead', { n: items.length.toLocaleString(), multi: items.filter(f => f.counts.papers > 1).length })) +
+      browseHtml({ filters, views: [['group', tr('br.view.group')], ['rank', tr('br.view.rank')]], tr }),
+    mount: root => mountBrowse(root, { items, tr, listClass: 'fd-list', groups: tax.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: f => f.technology_class,
+      render: f => findingItemHtml(f, findingCtx()),
+      test: (f, v) => (!v.strength || f.strength === v.strength) && (!v.problem || f.welfare_problem === v.problem) && (!v.multi || f.counts.papers > 1) &&
+        (!v.q || [f.statement_en, f.statement_zh, f.practice_en, f.practice_zh].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
+}
+
+// All draft actions: ranked by priority or grouped by technology, with filters.
+function viewActions(params) {
+  const d = state.data, sp = params.get('species') || '';
+  const items = (d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
+  const fById = new Map((d.findings || []).map(f => [f.id, f]));
+  const filters = [
+    { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('ac.search.ph') },
+    { key: 'type', type: 'select', label: tr('ac.f.type'), options: ['adopt', 'avoid', 'test_on_farms', 'monitor', 'research'].filter(t => items.some(a => a.type === t)).map(t => [t, tr('ac.type.' + t)]) },
+    { key: 'who', type: 'select', label: tr('ac.f.who'), options: [...new Set(items.map(a => a.who))].map(w => [w, tr('ac.who.' + w.replace(/ /g, '_'))]) },
+    { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) }];
+  return { title: tr('nav.actions'), html: lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size })) +
+      browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + `<p class="small-note">${esc(tr('ac.formula'))}</p>`,
+    mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
+      render: a => actionItemHtml(a, findingCtx(), fById),
+      test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) &&
+        (!v.q || [a.action_en, a.action_zh, a.evidence_gap, a.risks].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
+}
+
 function viewSpeciesList() {
   const d = state.data;
   return { title: tr('nav.species'), html: lead(tr('sp.kicker'), tr('sp.title'), tr('sp.desc')) + speciesCardsHtml(d, { tr, link, lang: state.lang }) };
@@ -358,6 +396,13 @@ function setupSpeciesPage(m) {
   const page = document.querySelector('.sp-page');
   if (!page || !m) return;
   page.querySelectorAll('[data-sp-jump]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const t = document.getElementById(a.dataset.spJump); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  // The contents bar stays at the top and marks the section in view.
+  if ('IntersectionObserver' in window) {
+    const links = new Map([...page.querySelectorAll('[data-sp-jump]')].map(a => [a.dataset.spJump, a]));
+    const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) links.forEach((a, id) => a.toggleAttribute('aria-current', id === e.target.id)); }, { rootMargin: '-30% 0px -60% 0px' });
+    links.forEach((_, id) => { const t = document.getElementById(id); if (t) io.observe(t); });
+    observers.push(io);
+  }
   page.querySelectorAll('[data-ac-view]').forEach(b => b.addEventListener('click', () => {
     const box = b.closest('[data-ac]');
     box.querySelectorAll('[data-ac-view]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
@@ -555,7 +600,8 @@ function render(navigated = false) {
     else if (head === 'species') view = id ? viewSpecies(id) : viewSpeciesList();
     else if (head === 'sources') view = id ? viewSource(id) : viewSources(params);
     else if (head === 'claims' && id) view = viewClaim(id);
-    else if (head === 'findings' && id) view = viewFinding(id);
+    else if (head === 'findings') view = id ? viewFinding(id) : viewFindings(params);
+    else if (head === 'actions') view = viewActions(params);
     else if (head === 'pipeline') view = viewPipeline();
     else if (head === 'corpus') view = viewCorpus();
     else if (head === 'methods') view = viewMethods();
@@ -563,13 +609,13 @@ function render(navigated = false) {
     else view = viewNotFound();
   }
   const section = parts[0] || '';
-  const active = ['explore', 'sources', 'claims'].includes(section) ? 'explore' : section === 'findings' ? 'species' : section;
+  const active = ['explore', 'sources', 'claims'].includes(section) ? 'explore' : section;
   document.querySelectorAll('.sections a').forEach(a => {
     const on = a.dataset.route === active;
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   moveBlob(true);
-  const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus'].includes(parts[0]) || (parts[0] === 'species' && parts[1]);
+  const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus', 'actions'].includes(parts[0]) || (parts[0] === 'species' && parts[1]) || (parts[0] === 'findings' && !parts[1]);
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   document.title = `${view.title} — ${tr('site.title')}`;
   const pathKey = parts.join('/');
@@ -578,6 +624,7 @@ function render(navigated = false) {
   state.lastPath = pathKey;
   if (!parts[0] || parts[0] === 'content') setupHomeEffects();
   if (parts[0] === 'species' && parts[1]) setupSpeciesPage(view.model);
+  if (view.mount) view.mount($('#content'));
   if (parts[0] === 'corpus' && state.papers && state.corpus) {
     const root = document.querySelector('[data-cl-root]');
     if (root) { const holder = { filter: state.corpusFilter }; mountCorpusList(root, state.papers, state.corpus, tr, holder); state.corpusFilter = holder.filter; }

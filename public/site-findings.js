@@ -36,10 +36,10 @@ export function findingItemHtml(f, ctx) {
 }
 
 // A list: the first `first` findings shown, the rest folded, each folded group labelled with its count.
-export function findingsListHtml(findings, ctx, { first = 8 } = {}) {
+export function findingsListHtml(findings, ctx, { first = 8, rest: showRest = true } = {}) {
   const list = [...findings].sort(byWeight);
   if (!list.length) return `<p class="small-note">${esc(ctx.tr('fd.none'))}</p>`;
-  const rest = list.slice(first);
+  const rest = showRest ? list.slice(first) : [];
   return `<ol class="fd-list">${list.slice(0, first).map(f => findingItemHtml(f, ctx)).join('')}</ol>` +
     (rest.length ? `<details class="sp-more"><summary>${esc(ctx.tr('fd.more', { n: n(rest.length) }))}</summary><ol class="fd-list">${rest.map(f => findingItemHtml(f, ctx)).join('')}</ol></details>` : '');
 }
