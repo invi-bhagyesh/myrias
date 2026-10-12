@@ -1,5 +1,5 @@
 // Findings: what the claims about one practice and one welfare problem say together.
-//   node pipeline/findings.mjs --release public/data/release.json --store STORE_DIR [--log DIR/findings.calls.jsonl] [--concurrency 8]
+//   node pipeline/findings.mjs --release public/data/release.json --store STORE_DIR [--practices STORE/practices.json] [--log FILE] [--concurrency 8]
 // Run after export. Groups the released claims by technology class, welfare problem and practice name
 // (two records with the same name are one practice), and writes one finding per group:
 //   - code counts claims, papers, measured claims, and how many support, contradict or show no effect,
@@ -29,22 +29,28 @@ export const FINDINGS_SCHEMA = { type: 'object', additionalProperties: false, re
 const OPPOSE = new Set(['counterevidence', 'null', 'mixed']);
 const pad = (n, w) => String(n).padStart(w, '0');
 
-// Pure: groups of released claims, one per technology class x welfare problem x practice name.
-export function findingGroups(release) {
+// Pure: groups of released claims, one per technology class x welfare problem x practice. The practice is
+// the claim's own practice name, or, given a practice map (claim id -> { key, name_en, name_zh } from
+// cluster.mjs), the clustered practice the claim was tested into.
+export function findingGroups(release, practices = null) {
   const iv = new Map(release.interventions.map(i => [i.id, i]));
   const claims = new Map(release.claims.map(c => [c.id, c]));
   const groups = new Map();
   for (const a of release.applications) {
     const i = iv.get(a.intervention_id);
-    const name = (i?.name_en || i?.name_zh || a.intervention_id).toLowerCase();
-    const key = `${a.technology_class}|${a.welfare_problem}|${name}`;
-    const g = groups.get(key) || { key, technology_class: a.technology_class, welfare_problem: a.welfare_problem, species_id: a.species_id,
-      practice_en: i?.name_en || null, practice_zh: i?.name_zh || null, application_ids: [], intervention_ids: [], claim_ids: [] };
-    g.application_ids.push(a.id); if (!g.intervention_ids.includes(a.intervention_id)) g.intervention_ids.push(a.intervention_id);
-    for (const id of a.claim_ids) if (claims.has(id) && !g.claim_ids.includes(id)) g.claim_ids.push(id);
-    groups.set(key, g);
+    for (const id of a.claim_ids) {
+      if (!claims.has(id)) continue;
+      const p = practices?.[id] || { key: `${a.technology_class}|${(i?.name_en || i?.name_zh || a.intervention_id).toLowerCase()}`, name_en: i?.name_en || null, name_zh: i?.name_zh || null };
+      const key = `${a.technology_class}|${a.welfare_problem}|${p.key.split('|').slice(1).join('|')}`;
+      const g = groups.get(key) || { key, technology_class: a.technology_class, welfare_problem: a.welfare_problem, species_id: a.species_id,
+        practice_en: p.name_en, practice_zh: p.name_zh, application_ids: [], intervention_ids: [], claim_ids: [] };
+      if (!g.application_ids.includes(a.id)) g.application_ids.push(a.id);
+      if (!g.intervention_ids.includes(a.intervention_id)) g.intervention_ids.push(a.intervention_id);
+      if (!g.claim_ids.includes(id)) g.claim_ids.push(id);
+      groups.set(key, g);
+    }
   }
-  return [...groups.values()].filter(g => g.claim_ids.length).map(g => ({ ...g, claim_ids: g.claim_ids.sort() }));
+  return [...groups.values()].map(g => ({ ...g, claim_ids: g.claim_ids.sort() }));
 }
 
 // Pure: counts and the strength label, from the claims alone.
@@ -92,7 +98,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const cache = new Map(existsSync(cachePath) ? readFileSync(cachePath, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)).map(f => [f.key, f]) : []);
   let next = [...cache.values()].reduce((m, f) => Math.max(m, Number(f.id.slice(1)) || 0), 0);
   const client = createClient({ logPath: arg('log', join(arg('store'), '..', `findings-${new Date().toISOString().slice(0, 10)}.calls.jsonl`)) });
-  const groups = findingGroups(rel);
+  const groups = findingGroups(rel, arg('practices') ? JSON.parse(readFileSync(arg('practices'), 'utf8')) : null);
   const out = [];
   let reused = 0, single = 0, written = 0;
   const todo = [];

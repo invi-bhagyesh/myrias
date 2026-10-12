@@ -479,3 +479,34 @@ test('findings: one group per class, problem and practice name; counts and stren
   assert.ok(numbersOk('Survival rose to 85% in 2 papers.', [claims.get('C1')], counts));
   assert.ok(!numbersOk('Survival rose to 90%.', [claims.get('C1')], counts));
 });
+
+test('clustering: average linkage merges near items only; findings follow the practice map', async () => {
+  const { agglomerate, practiceItems } = await import('../pipeline/cluster.mjs');
+  const { findingGroups } = await import('../pipeline/findings.mjs');
+  const v = [[1, 0, 0], [0.99, 0.05, 0], [0, 1, 0], [0, 0.98, 0.1], [0, 0, 1]];
+  const cs = agglomerate(v, 0.1).map(c => c.sort()).sort((a, b) => a[0] - b[0]);
+  assert.deepEqual(cs, [[0, 1], [2, 3], [4]]);
+  assert.equal(agglomerate(v, 0.0001).length, 5);
+  const rel = {
+    interventions: [{ id: 'I1', name_en: '13% carbohydrate diet' }, { id: 'I2', name_en: '30% carbohydrate diet' }],
+    applications: [{ id: 'A1', intervention_id: 'I1', species_id: 's', technology_class: 'feeds', welfare_problem: 'feeding', claim_ids: ['C1'] },
+      { id: 'A2', intervention_id: 'I2', species_id: 's', technology_class: 'feeds', welfare_problem: 'feeding', claim_ids: ['C2'] }],
+    claims: [{ id: 'C1', source_id: 'S1' }, { id: 'C2', source_id: 'S2' }]
+  };
+  assert.equal(practiceItems(rel).length, 2);
+  assert.equal(findingGroups(rel).length, 2);
+  const p = { key: 'feeds|dietary carbohydrate level', name_en: 'dietary carbohydrate level', name_zh: '饲料碳水化合物水平' };
+  const merged = findingGroups(rel, { C1: p, C2: p });
+  assert.equal(merged.length, 1);
+  assert.deepEqual(merged[0].claim_ids, ['C1', 'C2']);
+  assert.equal(merged[0].practice_en, 'dietary carbohydrate level');
+});
+
+test('reconstruction: seeded sample is stable; no finding or cannot-tell counts as wrong', async () => {
+  const { seeded, score } = await import('../pipeline/reconstruct.mjs');
+  assert.deepEqual(seeded([1, 2, 3, 4, 5], 7), seeded([1, 2, 3, 4, 5], 7));
+  assert.deepEqual([...seeded([1, 2, 3, 4, 5], 7)].sort(), [1, 2, 3, 4, 5]);
+  const s = score([{ label: 'helps', finding: 'x', answer: 'helps' }, { label: 'helps', finding: 'x', answer: 'cannot_tell' },
+    { label: 'does_not_help', finding: null, answer: null }, { label: 'does_not_help', finding: 'x', answer: 'helps' }]);
+  assert.deepEqual(s, { n: 4, coverage: 0.75, accuracy: 0.25, accuracy_answered: 0.5, answered: 2 });
+});
