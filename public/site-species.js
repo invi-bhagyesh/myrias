@@ -24,10 +24,13 @@ export function speciesModel(data, id, { corpus = null, nextRun = null } = {}) {
   if (!s) return null;
   const claims = data.claims.filter(c => c.species_id === id);
   const apps = data.applications.filter(a => a.species_id === id);
-  const bySource = new Map();
+  // Until the claim files arrive the release's own summary stands in for them.
+  const stats = !claims.length ? data.species_stats?.[id] : null;
+  const bySource = new Map(stats ? Object.entries(stats.by_source) : []);
+  const claimCount = stats ? stats.claims : claims.length;
   for (const c of claims) bySource.set(c.source_id, (bySource.get(c.source_id) || 0) + 1);
   const sources = data.sources.filter(x => bySource.has(x.id)).map(x => ({ ...x, claims: bySource.get(x.id) })).sort((a, b) => b.claims - a.claims || (a.year || 0) - (b.year || 0));
-  const verdicts = {};
+  const verdicts = stats ? { ...stats.verdicts } : {};
   for (const c of claims) verdicts[c.verification] = (verdicts[c.verification] || 0) + 1;
   const interventions = new Map((data.interventions || []).map(i => [i.id, i]));
   const byIntervention = new Map();
@@ -49,7 +52,7 @@ export function speciesModel(data, id, { corpus = null, nextRun = null } = {}) {
   const actions = (data.actions || []).filter(a => a.species_id === id).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
   const ownCorpus = corpus && corpus.species === id ? corpus : null;
   const ownPlan = nextRun && nextRun.species === id ? nextRun : null;
-  return { s, claims, apps, sources, verdicts, top, runs, findings, actions, corpus: ownCorpus, plan: ownPlan,
+  return { s, claims, claimCount, apps, sources, verdicts, top, runs, findings, actions, corpus: ownCorpus, plan: ownPlan,
     data: { ...data, claims, applications: apps, sources: data.sources.filter(x => bySource.has(x.id)), species: [s] } };
 }
 
@@ -116,7 +119,7 @@ export function speciesPageHtml(m, ctx) {
       <td class="sp-num"><span class="sp-meter"><i style="width:${(100 * r.claims / maxC).toFixed(1)}%"></i></span>${r.claims}<small>${esc(tr('sp.of.supported', { n: r.supported }))}</small></td></tr>`;
   const head = `<thead><tr><th>${esc(tr('sp.col.intervention'))}</th><th>${esc(tr('sp.col.problem'))}</th><th>${esc(tr('sp.col.claims'))}</th></tr></thead>`;
   const FIRST = 8, rest = m.top.slice(FIRST);
-  const found = `<section class="sp-sec" id="sp-found"><h2>${esc(tr('sp.sec.found'))}</h2><p class="sp-lead">${esc(tr('sp.found.lead', { claims: n(m.claims.length), papers: n(m.sources.length), zh: n(zhPapers) }))}</p>
+  const found = `<section class="sp-sec" id="sp-found"><h2>${esc(tr('sp.sec.found'))}</h2><p class="sp-lead">${esc(tr('sp.found.lead', { claims: n(m.claimCount), papers: n(m.sources.length), zh: n(zhPapers) }))}</p>
     ${verdictBar}
     ${m.findings.length && ctx.findingsHtml ? `<h3>${esc(tr('fd.title'))}</h3><p class="sp-lead">${esc(tr('fd.lead', { n: n(m.findings.length), multi: n(m.findings.filter(f => f.counts.papers > 1).length) }))}</p>${ctx.findingsHtml(m.findings, { first: 6, rest: false })}<p><a class="button small" href="${link('findings', { species: s.id })}">${esc(tr('fd.all', { n: n(m.findings.length) }))} →</a></p>`
     : m.top.length ? `<h3>${esc(tr('sp.top'))}</h3><div class="sp-table"><table class="plain">${head}<tbody>${m.top.slice(0, FIRST).map(row).join('')}</tbody></table>${rest.length ? `<details class="sp-more"><summary>${esc(tr('sp.more', { n: rest.length }))}</summary><table class="plain"><tbody>${rest.map(row).join('')}</tbody></table></details>` : ''}</div>` : `<p>${esc(tr('sp.noapps'))}</p>`}

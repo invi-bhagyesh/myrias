@@ -1331,3 +1331,6 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
   .sp-sec { padding: 36px 0 30px; }
   .br-group > h3 { top: 68px; font-size: 15px; }
 }
+.load-skel { display: grid; gap: 12px; padding: 24px 0; max-width: 760px; }
+.load-skel i { display: block; height: 56px; border-radius: 16px; background: linear-gradient(90deg, var(--line) 0%, color-mix(in srgb, var(--line) 40%, transparent) 50%, var(--line) 100%); background-size: 200% 100%; opacity: .6; }
+@media (prefers-reduced-motion: no-preference) { .load-skel i { animation: my-shimmer 1.4s ease-in-out infinite; } @keyframes my-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } } }

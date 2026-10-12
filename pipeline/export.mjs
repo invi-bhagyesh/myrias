@@ -106,6 +106,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const flush = () => { if (!part.length) return; const f = `${stem}-claims-${files.length}.json`; writeFileSync(join(dir, f), JSON.stringify(part) + '\n'); files.push(f); part = []; size = 0; };
   for (const c of rel.claims) { const n = Buffer.byteLength(JSON.stringify(c)); if (size + n > 350_000) flush(); part.push(c); size += n + 1; }
   flush();
-  writeFileSync(arg('out'), JSON.stringify({ ...rel, claims: [], claim_files: files }, null, 1) + '\n');
+  // A small summary per species, so the species page can show its numbers before the claim files have downloaded.
+  const species_stats = {};
+  for (const c of rel.claims) {
+    const st = species_stats[c.species_id] ||= { claims: 0, verdicts: {}, by_source: {} };
+    st.claims++; st.verdicts[c.verification] = (st.verdicts[c.verification] || 0) + 1; st.by_source[c.source_id] = (st.by_source[c.source_id] || 0) + 1;
+  }
+  writeFileSync(arg('out'), JSON.stringify({ ...rel, claims: [], claim_files: files, species_stats }, null, 1) + '\n');
   console.log({ sources: rel.sources.length, claims: rel.claims.length, applications: rel.applications.length, models });
 }
