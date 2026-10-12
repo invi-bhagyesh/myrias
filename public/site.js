@@ -7,6 +7,7 @@ import { matrixChart } from './site-chart.js';
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 import { evidenceModel, evidenceMapHtml, mountEvidenceMap } from './site-evmap.js';
 import { speciesModel, speciesPageHtml, speciesCardsHtml } from './site-species.js';
+import { findingsListHtml, findingPageHtml, findingText } from './site-findings.js';
 import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, LANG_COLOR } from './site-corpusviz.js';
 import { controlsHtml, mountCorpusList, FILTER_DEFAULTS, unpackPapers } from './site-corpuslist.js';
 
@@ -36,12 +37,16 @@ async function load() {
       const parts = await Promise.all(data.claim_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
       data.claims = parts.flat();
     }
+    if (data.finding_files?.length) {
+      const parts = await Promise.all(data.finding_files.map(f => fetch('data/' + f, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${f}`); return r.json(); })));
+      data.findings = parts.flat();
+    }
     const problems = L.validateExport(data);
     if (problems.length) throw new Error('Invalid export: ' + problems.slice(0, 3).join('; '));
     state.data = data;
     const map = list => new Map(list.map(x => [x.id, x]));
     state.index = {
-      species: map(data.species), sources: map(data.sources), claims: map(data.claims),
+      species: map(data.species), sources: map(data.sources), claims: map(data.claims), findings: map(data.findings || []),
       interventions: map(data.interventions), applications: map(data.applications)
     };
   } catch (error) {
@@ -219,7 +224,8 @@ function viewExplore(params) {
     const cell = matrix.rows.find(r => r.problem.id === pid)?.cells.find(c => c.class_id === cid);
     if (cell) {
       const title = tr('cell.title', { problem: taxonomyLabel('welfare_problems', pid), cls: taxonomyLabel('technology_classes', cid) });
-      panel = `<h3>${esc(title)}</h3>` + (cell.applications.length
+      const cellFindings = (state.data.findings || []).filter(f => f.welfare_problem === pid && f.technology_class === cid && (speciesId === 'all' || f.species_id === speciesId));
+      panel = `<h3>${esc(title)}</h3>` + (cellFindings.length ? `<h4 class="fd-h">${esc(tr('fd.title'))}</h4>${findingsListHtml(cellFindings, findingCtx(), { first: 5 })}<h4 class="fd-h">${esc(tr('sp.apps'))}</h4>` : '') + (cell.applications.length
         ? cell.applications.map(a => applicationCard(a)).join('')
         : `<p>${esc(tr('cell.empty.' + cell.status))}</p>`);
     }
@@ -317,6 +323,14 @@ function applicationCard(app) {
     <ul class="claim-list">${claims.map(c => `<li><a href="${link('claims/' + encodeURIComponent(c.id))}">${esc(L.claimText(c, state.lang).text)}</a> ${verBadge(c.verification)}</li>`).join('')}</ul></article>`;
 }
 
+const findingCtx = () => ({ tr, link, lang: state.lang, claims: state.index.claims, sources: state.index.sources, taxonomyLabel, claimText: L.claimText });
+
+function viewFinding(id) {
+  const f = state.index.findings.get(id);
+  if (!f) return viewNotFound();
+  return { title: `${tr('fd.kicker')} ${f.id}`, html: findingPageHtml(f, findingCtx()) };
+}
+
 function viewSpeciesList() {
   const d = state.data;
   return { title: tr('nav.species'), html: lead(tr('sp.kicker'), tr('sp.title'), tr('sp.desc')) + speciesCardsHtml(d, { tr, link, lang: state.lang }) };
@@ -332,7 +346,7 @@ function viewSpecies(id) {
     return `<div class="cv-two"><section><h3>${esc(tr('cv.topics'))}</h3>${topicBarsHtml(c.charts.topics, k => tr('cv.topic.' + k))}<p class="cv-note">${esc(tr('cv.topics.note', { n: Number(st.about.n).toLocaleString() }))}</p></section>
       <section><h3>${esc(tr('cv.decades'))}</h3>${decadeColumnsHtml(c.charts.decades)}<p class="cv-note">${esc(tr('cv.decades.note', { n: total.toLocaleString() }))}</p></section></div>`;
   };
-  return { title: pick(m.s, 'common', state.lang), html: speciesPageHtml(m, { tr, link, lang: state.lang, flowHtml, topicsHtml, taxonomyLabel }) + suggestionBlock(id), model: m };
+  return { title: pick(m.s, 'common', state.lang), html: speciesPageHtml(m, { tr, link, lang: state.lang, flowHtml, topicsHtml, taxonomyLabel, findingsHtml: (list, o) => findingsListHtml(list, findingCtx(), o) }) + suggestionBlock(id), model: m };
 }
 
 // Species page: the evidence map for this species, and the contents links.
@@ -415,6 +429,7 @@ function viewClaim(id) {
       <header class="species-title"><div class="record-type">${esc(tr('claim.kicker'))} ${esc(c.id)}</div><h1>${esc(L.claimText(c, state.lang).text)}</h1>
         <p class="badges">${verBadge(c.verification)} ${kindBadge(c.kind)} ${auditBadge(c.audit)}</p></header>
       ${recordBlock(c)}
+      ${(state.data.findings || []).filter(f => f.claim_ids.includes(c.id)).map(f => `<p class="fd-of">${esc(tr('fd.partof'))} <a href="${link('findings/' + encodeURIComponent(f.id))}">${esc(findingText(f, state.lang))}</a></p>`).join('')}
       <h2>${esc(tr('claim.quote'))}</h2>
       <blockquote class="quote" lang="${esc(c.quote_lang || 'und')}">${esc(c.quote)}</blockquote>
       <p class="meta">${esc(tr('claim.locator'))}: ${esc(L.formatLocator(c.locator))} · ${esc(tr('claim.source'))}: ${s ? `<a href="${link('sources/' + encodeURIComponent(s.id))}" lang="${esc(s.lang)}">${esc(s.title)}</a>` : esc(c.source_id)}</p>
@@ -531,6 +546,7 @@ function render(navigated = false) {
     else if (head === 'species') view = id ? viewSpecies(id) : viewSpeciesList();
     else if (head === 'sources') view = id ? viewSource(id) : viewSources(params);
     else if (head === 'claims' && id) view = viewClaim(id);
+    else if (head === 'findings' && id) view = viewFinding(id);
     else if (head === 'pipeline') view = viewPipeline();
     else if (head === 'corpus') view = viewCorpus();
     else if (head === 'methods') view = viewMethods();
@@ -538,7 +554,7 @@ function render(navigated = false) {
     else view = viewNotFound();
   }
   const section = parts[0] || '';
-  const active = ['explore', 'sources', 'claims'].includes(section) ? 'explore' : section;
+  const active = ['explore', 'sources', 'claims'].includes(section) ? 'explore' : section === 'findings' ? 'species' : section;
   document.querySelectorAll('.sections a').forEach(a => {
     const on = a.dataset.route === active;
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');

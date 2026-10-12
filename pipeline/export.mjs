@@ -81,7 +81,8 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
       : { documents_collected: base.runs[0].counts.documents_collected, documents_processed: new Set(claims.map(c => c.source)).size, sources_released: sources.length, claims_extracted: extracted, claims_quote_found: claims.filter(c => c.quote_check === 'found').length, claims_relevant: claims.filter(c => c.quote_check === 'found' && c.map?.welfare_relevant === true).length, claims_released: out.length, claims_supported: out.filter(c => c.verification === 'supported').length }, models, audit: null,
     changelog: store ? store.runs.map(r => ({ date: r.date, text_en: `${r.run} phase ${r.phase}: ${r.claims_added} claims added, ${r.claims_already_present} already present, ${r.sources_added} papers added.`, text_zh: `${r.run} 阶段 ${r.phase}：新增 ${r.claims_added} 条论断，${r.claims_already_present} 条已存在，新增 ${r.sources_added} 篇论文。` }))
       : [{ date: '2026-10', text_en: 'First machine-verified demo release. Quotes are checked against the page text; support is judged by a second model. No expert has audited these claims.', text_zh: null }] };
-  const species = base.species.map(s => ({ ...s, run_status: 'in_progress', summary_en: 'First species run: Chinese-language papers only. Machine-verified, not yet audited by an expert.', summary_zh: null }));
+  // The species summary is hand-kept in the base release; only the run status is set here.
+  const species = base.species.map(s => ({ ...s, run_status: 'in_progress' }));
   const lastDate = store && store.runs.length ? store.runs[store.runs.length - 1].date : null;
   return { ...base, release: { ...base.release, version: store ? `0.${1 + store.runs.length}.0` : '0.1.0', as_of: lastDate || '2026-10', status: 'pre-release', sample: false,
       note_en: 'Demo release: claims are extracted and checked by models and have not been audited by an expert. Treat them as leads to check, not findings.', note_zh: null },

@@ -205,6 +205,16 @@ export function validateExport(data) {
     for (const cid of x.claim_ids || []) if (!claimIds.has(cid)) fail(`suggestion ${x.id}: unknown claim ${cid}`);
     if ('rank' in x || 'score' in x) fail(`suggestion ${x.id}: suggestions are not ranked`);
   }
+  // Findings summarise the released claims about one practice and one welfare problem. Each must rest
+  // on claims in this release, and its counts must match those claims.
+  for (const f of data.findings || []) {
+    if (!f.id) fail('finding without id');
+    if (!speciesIds.has(f.species_id)) fail(`finding ${f.id}: unknown species ${f.species_id}`);
+    if (!f.statement_en && !f.statement_zh) fail(`finding ${f.id}: no statement`);
+    if (!Array.isArray(f.claim_ids) || !f.claim_ids.length) fail(`finding ${f.id}: needs at least one claim`);
+    for (const cid of f.claim_ids || []) if (!claimIds.has(cid)) fail(`finding ${f.id}: unknown claim ${cid}`);
+    if (f.counts?.claims !== f.claim_ids?.length) fail(`finding ${f.id}: claim count does not match its claims`);
+  }
   for (const x of data.cells_status) {
     if (!CELL_STATUS.includes(x.status)) fail(`cells_status: unknown status ${x.status}`);
     if (!speciesIds.has(x.species_id)) fail(`cells_status: unknown species ${x.species_id}`);

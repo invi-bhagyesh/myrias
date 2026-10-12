@@ -11,7 +11,7 @@ import { speciesModel, speciesSteps, speciesPageHtml, PROFILES } from '../public
 const read = name => JSON.parse(readFileSync(new URL(`../public/data/${name}`, import.meta.url), 'utf8'));
 // The pre-release export with no records, kept as a fixture; the live release.json now holds real claims.
 const release = JSON.parse(readFileSync(new URL('./empty-release.json', import.meta.url), 'utf8'));
-const live = (r => (r.claim_files ? { ...r, claims: r.claim_files.flatMap(f => read(f)) } : r))(read('release.json'));
+const live = (r => ({ ...r, ...(r.claim_files ? { claims: r.claim_files.flatMap(f => read(f)) } : {}), ...(r.finding_files ? { findings: r.finding_files.flatMap(f => read(f)) } : {}) }))(read('release.json'));
 const sample = read('sample.json');
 const clone = x => structuredClone(x);
 
@@ -260,7 +260,7 @@ test('pipeline tab: stages are bilingual, models match the demo profile, funnel 
 test('evidence map: every intervention is placed, empty classes and problems stay on the map', async () => {
   const esc = L.escapeHtml;
   const { evidenceModel, evidenceMapHtml } = await import('../public/site-evmap.js');
-  const live = (r => (r.claim_files ? { ...r, claims: r.claim_files.flatMap(f => read(f)) } : r))(read('release.json'));
+  const live = (r => ({ ...r, ...(r.claim_files ? { claims: r.claim_files.flatMap(f => read(f)) } : {}), ...(r.finding_files ? { findings: r.finding_files.flatMap(f => read(f)) } : {}) }))(read('release.json'));
   const m = evidenceModel(live, 'en');
   assert.equal(m.apps.length, live.applications.length);
   assert.equal(m.classes.length, live.taxonomy.technology_classes.length);

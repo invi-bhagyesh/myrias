@@ -44,9 +44,10 @@ export function speciesModel(data, id, { corpus = null, nextRun = null } = {}) {
     return { ...r, problems: [...r.problems], claims: cs.length, supported: cs.filter(c => c.verification === 'supported').length };
   }).sort((a, b) => b.claims - a.claims);
   const runs = data.runs.filter(r => r.species_id === id);
+  const findings = (data.findings || []).filter(f => f.species_id === id);
   const ownCorpus = corpus && corpus.species === id ? corpus : null;
   const ownPlan = nextRun && nextRun.species === id ? nextRun : null;
-  return { s, claims, apps, sources, verdicts, top, runs, corpus: ownCorpus, plan: ownPlan,
+  return { s, claims, apps, sources, verdicts, top, runs, findings, corpus: ownCorpus, plan: ownPlan,
     data: { ...data, claims, applications: apps, sources: data.sources.filter(x => bySource.has(x.id)), species: [s] } };
 }
 
@@ -115,8 +116,9 @@ export function speciesPageHtml(m, ctx) {
   const FIRST = 8, rest = m.top.slice(FIRST);
   const found = `<section class="sp-sec" id="sp-found"><h2>${esc(tr('sp.sec.found'))}</h2><p class="sp-lead">${esc(tr('sp.found.lead', { claims: n(m.claims.length), papers: n(m.sources.length), zh: n(zhPapers) }))}</p>
     ${verdictBar}
-    <div class="cv-card sp-map"><div class="graph-stage" data-sp-map></div><p class="graph-note">${esc(tr('evmap.hint'))}</p></div>
-    ${m.top.length ? `<h3>${esc(tr('sp.top'))}</h3><div class="sp-table"><table class="plain">${head}<tbody>${m.top.slice(0, FIRST).map(row).join('')}</tbody></table>${rest.length ? `<details class="sp-more"><summary>${esc(tr('sp.more', { n: rest.length }))}</summary><table class="plain"><tbody>${rest.map(row).join('')}</tbody></table></details>` : ''}</div>` : `<p>${esc(tr('sp.noapps'))}</p>`}
+    ${m.findings.length && ctx.findingsHtml ? `<h3>${esc(tr('fd.title'))}</h3><p class="sp-lead">${esc(tr('fd.lead', { n: n(m.findings.length), multi: n(m.findings.filter(f => f.counts.papers > 1).length) }))}</p>${ctx.findingsHtml(m.findings, { first: 8 })}`
+    : m.top.length ? `<h3>${esc(tr('sp.top'))}</h3><div class="sp-table"><table class="plain">${head}<tbody>${m.top.slice(0, FIRST).map(row).join('')}</tbody></table>${rest.length ? `<details class="sp-more"><summary>${esc(tr('sp.more', { n: rest.length }))}</summary><table class="plain"><tbody>${rest.map(row).join('')}</tbody></table></details>` : ''}</div>` : `<p>${esc(tr('sp.noapps'))}</p>`}
+    <h3>${esc(tr('sp.map'))}</h3><div class="cv-card sp-map"><div class="graph-stage" data-sp-map></div><p class="graph-note">${esc(tr('evmap.hint'))}</p></div>
     <p><a class="button small" href="${link('explore', { species: s.id })}">${esc(tr('sp.explore'))} →</a></p></section>`;
 
   const paper = x => `<li><a href="${link('sources/' + encodeURIComponent(x.id))}" lang="${esc(x.lang)}">${esc(x.title)}</a>
