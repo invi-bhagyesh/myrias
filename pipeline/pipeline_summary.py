@@ -34,7 +34,6 @@ rel = js(os.path.join(data, 'release.json'))
 findings = [f for x in rel.get('finding_files', []) for f in js(os.path.join(data, x))]
 actions = [a for x in rel.get('action_files', []) for a in js(os.path.join(data, x))]
 prac = lambda f: len({p['key'] for p in js(os.path.join(store, f)).values()})
-recon = js(os.path.join(B, '12-reconstruct', 'reconstruct.json'))
 import re
 rc = open(os.path.join(B, '06-reconcile', 'stdout.log')).read()
 rc_num = lambda k: int(m.group(1)) if (m := re.search(r'(?<![_a-z])' + k + r':\s*(\d+)', rc)) else None
@@ -61,8 +60,7 @@ steps = [
     step(13, 'combine', 'cluster', models.get('cluster'), prac('practices-exact.json'), prac('practices.json'), {'embed_model': models.get('embed'), 'embed_only': prac('practices-embed.json')}),
     step(14, 'combine', 'findings', models.get('findings'), sum(len(json.load(open(os.path.join(data, f)))) for f in rel['claim_files']), len(findings), {'multi_paper': sum(1 for f in findings if f['counts']['papers'] > 1)}),
     step(15, 'combine', 'actions', models.get('actions'), sum(1 for f in findings if f['counts']['papers'] > 1), len(actions)),
-    step(16, 'check', 'reconstruct', models.get('reconstruct'), recon['n'], None, {'scores': recon['scores']}),
-    step(17, 'check', 'audit', None, None, None, {'status': 'planned'}),
+    step(16, 'check', 'audit', None, None, None, {'status': 'planned'}),
 ]
 total = sum(cost.values()) + (phase_a.get('spent_usd') or 0)
 # Costs stay in the run records and the private dataset; the public page shows no spending.

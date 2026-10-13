@@ -110,9 +110,6 @@ export const STEP_TEXT = {
   actions: { name: ['Draft actions', '起草行动'], in: ['multi-paper findings', '条多篇论文发现'], out: ['draft actions', '条行动草案'],
     what: ['Propose next steps from findings that rest on two or more papers.', '依据来自两篇及以上论文的发现提出下一步。'],
     how: ['The model never ranks: priority is computed by code from the evidence and the type of action.', '模型不排序：优先级由代码根据证据和行动类型计算。'] },
-  reconstruct: { name: ['Reconstruction test', '重建测试'], in: ['held-out claims', '条留出论断'], out: null,
-    what: ['Hold out claims, build findings without them, and ask another model to predict each from the findings alone.', '留出部分论断，在不含它们的情况下生成发现，再让另一个模型仅凭发现预测这些论断。'],
-    how: ['Measures how much of the evidence the findings keep, for each way of grouping practices.', '衡量不同做法分组方式下，发现保留了多少证据。'] },
   audit: { name: ['Expert audit', '专家审核'], in: null, out: null,
     what: ['A fish-welfare expert checks a sample of claims and findings, and the error rates are published.', '由鱼类福利专家抽查论断和发现，并公布错误率。'],
     how: ['Not started. Until then everything here is a lead to check, not a finding to rely on.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'] }

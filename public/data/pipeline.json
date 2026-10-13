@@ -150,45 +150,6 @@
   {
    "id": 16,
    "lane": "check",
-   "key": "reconstruct",
-   "model": "z-ai/glm-5.3",
-   "in": 240,
-   "out": null,
-   "calls": 1011,
-   "scores": {
-    "none": {
-     "n": 240,
-     "coverage": 0,
-     "accuracy": 0,
-     "accuracy_answered": null,
-     "answered": 0
-    },
-    "exact": {
-     "n": 240,
-     "coverage": 0.758,
-     "accuracy": 0.333,
-     "accuracy_answered": 0.92,
-     "answered": 87
-    },
-    "embed": {
-     "n": 240,
-     "coverage": 0.817,
-     "accuracy": 0.4,
-     "accuracy_answered": 0.828,
-     "answered": 116
-    },
-    "tested": {
-     "n": 240,
-     "coverage": 0.787,
-     "accuracy": 0.35,
-     "accuracy_answered": 0.857,
-     "answered": 98
-    }
-   }
-  },
-  {
-   "id": 17,
-   "lane": "check",
    "key": "audit",
    "model": null,
    "in": null,

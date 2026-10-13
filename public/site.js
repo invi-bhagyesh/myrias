@@ -117,16 +117,13 @@ function viewPipeline() {
   if (P) {
     const card = st => {
       const t = STEP_TEXT[st.key] || { name: [st.key, st.key], what: ['', ''], how: ['', ''] };
-      const best = st.scores ? Object.entries(st.scores).filter(([k]) => k !== 'none').sort((a, b) => b[1].accuracy - a[1].accuracy)[0] : null;
-      const outNum = st.key === 'reconstruct' && best ? Math.round(100 * best[1].accuracy) + '%' : n(st.out);
-      const outLabel = st.key === 'reconstruct' && best ? tr('pl.recon.best', { m: tr('pl.recon.' + best[0]) }) : (t.out ? t.out[i] : '');
-      const scores = st.scores ? `<table class="plain pl-scores"><thead><tr><th>${esc(tr('pl.recon.method'))}</th><th>${esc(tr('pl.recon.cov'))}</th><th>${esc(tr('pl.recon.acc'))}</th></tr></thead><tbody>${['exact', 'embed', 'tested'].filter(k => st.scores[k]).map(k => `<tr><td>${esc(tr('pl.recon.' + k))}</td><td>${Math.round(100 * st.scores[k].coverage)}%</td><td>${Math.round(100 * st.scores[k].accuracy)}%</td></tr>`).join('')}</tbody></table>` : '';
+      const outNum = n(st.out), outLabel = t.out ? t.out[i] : '';
       return `<li class="pl-step ${st.model ? 'k-model' : 'k-code'}${st.status === 'planned' ? ' is-planned' : ''}"><button type="button" class="pl-card" aria-expanded="false" data-pl>
           <span class="pl-num">${String(st.id).padStart(2, '0')}</span><span class="pl-name">${esc(t.name[i])}</span>
           ${st.status === 'planned' ? `<span class="pl-out pl-planned">${esc(tr('pl.planned'))}</span>` : `<strong class="pl-out">${esc(outNum)}</strong><span class="pl-outl">${esc(outLabel)}</span>`}
           ${st.in !== null && st.in !== undefined && t.in ? `<span class="pl-in">${esc(tr('pl.from', { n: n(st.in), what: t.in[i] }))}</span>` : ''}
           <span class="pl-tag">${st.model ? `<i class="pl-dot"></i>${esc(short(st.model))}` : esc(tr(st.status === 'planned' ? 'pl.people' : 'pl.code'))}</span></button>
-        <div class="pl-detail" hidden><p>${esc(t.what[i])}</p><p class="small-note">${esc(t.how[i])}</p>${st.calls ? `<p class="small-note">${esc(tr('pl.calls', { n: n(st.calls) }))}</p>` : ''}${scores}</div></li>`;
+        <div class="pl-detail" hidden><p>${esc(t.what[i])}</p><p class="small-note">${esc(t.how[i])}</p>${st.calls ? `<p class="small-note">${esc(tr('pl.calls', { n: n(st.calls) }))}</p>` : ''}</div></li>`;
     };
     const lanes = LANES.map(([id, label], k) => `<section class="pl-lane"><h3 class="pl-lane-h"><span>${String(k + 1).padStart(2, '0')}</span>${esc(label[i])}</h3><div><ol class="pl-steps">${P.steps.filter(s => s.lane === id).map(card).join('')}</ol><div class="pl-panel" data-pl-panel hidden></div></div></section>`).join('');
     const sum = id => P.steps.find(s => s.key === id);
