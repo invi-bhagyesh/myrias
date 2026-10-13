@@ -624,8 +624,6 @@ function applyChrome() {
   const d = state.data;
   if (d && d.release.sample) { banner.hidden = false; banner.className = 'notice sample'; banner.textContent = tr('banner.sample'); }
   else banner.hidden = true;
-  $('#release-line').textContent = d && !d.release.sample ? tr('subhead.version', { version: d.release.version, asof: d.release.as_of }) : '';
-  $('#release-status').textContent = d && d.release.sample ? statusText(d) : '';
 }
 
 // Phone header: one row (brand + menu button); the sections and tools fold out beneath it.
@@ -712,7 +710,6 @@ function setupReveal() {
 // ---------- footer and home-page effects ----------
 function renderFooter() {
   const d = state.data;
-  const year = new Date().getFullYear();
   const reviewLink = esc(issueLink('Offer to review', 'Languages, fish-welfare background, hours available:\n\n'));
   const list = items => `<ul>${items.map(([label, href, ext]) => `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(label)}${ext ? ' ↗' : ''}</a></li>`).join('')}</ul>`;
   const card = (key, items) => `<nav class="site-footer-card" aria-label="${esc(tr(key))}"><h2>${esc(tr(key))}</h2>${list(items)}</nav>`;
@@ -722,8 +719,6 @@ function renderFooter() {
       ${card('foot.open', [['myrias.org', 'https://myrias.org/', true], [tr('footer.repo'), 'https://github.com/invi-bhagyesh/myrias', true]])}
       <div class="site-footer-card site-footer-cta"><div><p>${esc(tr('foot.cta'))}</p><a class="site-footer-button" href="${reviewLink}" target="_blank" rel="noopener noreferrer">${esc(tr('foot.cta.btn'))} <span aria-hidden="true">→</span></a></div></div>
     </div>
-    <div class="site-footer-meta"><span>${esc(tr('foot.copy', { year }))} · <span id="release-line"></span> <span id="release-status" role="status"></span></span>
-      <a href="https://valuearena.github.io/" target="_blank" rel="noopener noreferrer">${esc(tr('foot.credit'))} ↗</a></div>
     <div class="site-footer-scene" aria-hidden="true">${pixelHills('footer')}<span class="site-footer-wordmark">Myrias</span></div></div>`;
 }
 
