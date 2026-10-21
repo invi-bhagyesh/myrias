@@ -210,6 +210,18 @@ node pipeline/step.mjs --root $RUN --phase A --step 02-extract --in $RUN/prepare
 
 `pipeline_summary.py` reads those records to build the Pipeline page's numbers.
 
+## Organising the source PDFs
+
+```sh
+python3 pipeline/organize_raw.py $CORPUS /tmp/out [--batch DIR --batch-index INDEX.xlsx --batch-name NAME]
+```
+
+Gathers every PDF for the species (the intake's open-access downloads, the first run's supplied papers, and
+any supplied batch with its spreadsheet index) into `raw/<species>/zh|en/`, named `year_author_title.pdf`,
+keeps each paper once, and writes `raw/index.csv` with one row per PDF (bibliographic details, topic and
+relevance from a batch index, origin, whether the pipeline has read it, page count, whether it needs OCR,
+checksum, old location). Upload `raw/` to the dataset's top level.
+
 ## Publishing your corpus (optional)
 
 ```sh
