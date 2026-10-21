@@ -137,7 +137,7 @@ def manifest(root):
     for dirpath, _, names in os.walk(root):
         for n in sorted(names):
             p = os.path.join(dirpath, n); rel = os.path.relpath(p, root)
-            if rel == 'MANIFEST.json': continue
+            if rel == 'MANIFEST.json' or n.lower().endswith('.pdf'): continue
             data = open(p, 'rb').read()
             rows = data.count(b'\n') if n.endswith('.jsonl') or n.endswith('.csv') else None
             files.append({'path': rel, 'bytes': len(data), 'rows': rows, 'sha256': hashlib.sha256(data).hexdigest(), 'about': describe(rel)})
@@ -298,7 +298,8 @@ def main():
     api = HfApi(token=os.environ['HF_TOKEN'])
     api.create_repo(repo, repo_type='dataset', private=private, exist_ok=True)
     api.upload_file(path_or_fileobj=CARD.encode(), path_in_repo='README.md', repo_id=repo, repo_type='dataset', commit_message='Dataset card')
-    info = api.upload_folder(folder_path=root, path_in_repo=species, repo_id=repo, repo_type='dataset', commit_message=f'Upload {species} corpus')
+    # PDFs live once, in the dataset's top-level raw/ folder (pipeline/organize_raw.py), not in the species folder.
+    info = api.upload_folder(folder_path=root, path_in_repo=species, repo_id=repo, repo_type='dataset', commit_message=f'Upload {species} corpus', ignore_patterns=['*.pdf'])
     print(json.dumps({'repo': repo, 'private': private, 'folder': species, 'commit': str(info)}, indent=1))
 
 if __name__ == '__main__':
