@@ -27,7 +27,7 @@ export const AFFIL_SCHEMA = { type: 'object', additionalProperties: false, requi
     properties: { name: { type: 'string' }, country: { type: 'string' }, sector: { type: 'string', enum: SECTORS } } } },
   first_author: { type: 'integer' }, kind: { type: 'string', enum: KINDS } } };
 
-const EUROPE = new Set('AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GR HU IS IE IT LV LI LT LU MT MD MC ME NL MK NO PL PT RO RU SM RS SK SI ES SE CH UA GB VA'.split(' '));
+const EUROPE = new Set('AL AD AT BY BE BA BG HR CY CZ DK EE FI FR DE GR HU IS IE IT LV LI LT LU MT MD MC ME NL MK NO PL PT RO SM RS SK SI ES SE CH UA GB VA'.split(' '));
 const AMERICAS = new Set('US CA MX BR AR CL CO PE VE EC BO PY UY CR PA CU DO GT HN NI SV JM TT'.split(' '));
 const ASIA = new Set('JP KR KP TW HK MO MN VN TH MY SG ID PH KH LA MM BD IN PK LK NP IR IQ IL SA AE TR KZ UZ'.split(' '));
 

@@ -544,6 +544,7 @@ test('affiliations: a paper is placed by its first author\'s institution; China 
   assert.equal(affiliationGroup(m('KR', 'university')), 'asia');
   assert.equal(affiliationGroup(m('US', 'university')), 'americas');
   assert.equal(affiliationGroup(m('AU', 'university')), 'other');
+  assert.equal(affiliationGroup(m('RU', 'research_institute')), 'other');
   assert.equal(affiliationGroup(m('CN', 'university', -1)), 'unknown');
   assert.equal(affiliationGroup(null), 'unknown');
   assert.ok(AFFIL_SCHEMA.required.includes('kind'));
