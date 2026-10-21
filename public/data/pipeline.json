@@ -144,11 +144,20 @@
    "key": "actions",
    "model": "anthropic/claude-sonnet-5.5",
    "in": 79,
-   "out": 21,
+   "out": 18,
    "calls": 5
   },
   {
    "id": 16,
+   "lane": "combine",
+   "key": "rank",
+   "model": "anthropic/claude-sonnet-5.5",
+   "in": 18,
+   "out": 18,
+   "calls": 2
+  },
+  {
+   "id": 17,
    "lane": "check",
    "key": "audit",
    "model": null,
@@ -159,7 +168,7 @@
   }
  ],
  "totals": {
-  "calls": 37861
+  "calls": 37863
  },
  "example": {
   "claim_id": "C0269",
@@ -294,23 +303,99 @@
    "strength": "against",
    "welfare_problem": "water_quality",
    "practice_en": "water temperature regulation",
-   "practice_zh": "水温调控"
+   "practice_zh": "水温调控",
+   "basis": {
+    "grouping": {
+     "names": [
+      "high-temperature farming",
+      "low-temperature farming",
+      "temperature stress",
+      "water temperature control",
+      "water temperature monitoring"
+     ],
+     "dropped": [],
+     "reason": "All members concern managing or setting rearing water temperature (high, low, controlled, monitored) for mandarin fish, so they are one practice; only the liver pathology claim C0276 and viral load claim C0422 are not about temperature management itself.",
+     "model": "anthropic/claude-sonnet-5.5"
+    },
+    "strength": {
+     "en": "Of 12 claims that take a side: 1 in favour, 11 against or no effect. At least 80% point one way.",
+     "zh": "12 条有明确倾向的论断中，1 条支持，11 条反对或无效果，至少 80% 指向同一方向。",
+     "rule": "one paper; described if more claims describe than take a side; agree or against at 80% or more one way; otherwise mixed"
+    },
+    "summary": null
+   }
   },
   "actions": {
-   "id": "X001",
-   "rank": 1,
-   "action_en": "Farmers should avoid letting mandarin fish water temperature rise to around 36°C.",
-   "action_zh": "养殖户应避免让鳜鱼养殖水温升至36°C左右。",
+   "id": "X014",
+   "rank": 3,
+   "action_en": "Avoid holding mandarin fish at water temperatures up to 36°C, and treat temperatures at that level as a welfare risk to be corrected.",
+   "action_zh": "养殖者应避免将鳜养殖水温长期保持在高达36°C的水平,并将此类温度视为需要纠正的福利风险。",
    "type": "avoid",
    "who": "farmers",
    "priority": {
-    "score": 0.9,
-    "evidence": 0.83,
-    "actionability": 1,
-    "basis": "priority = 0.6 x evidence + 0.4 x actionability (see pipeline/actions.mjs)"
+    "score": 0.8,
+    "reason": "Seven papers with 18 measured claims show 36°C inhibits growth and weakens antioxidant defences. Avoiding it is a clear step, but the harm threshold between 30°C and 36°C is undefined and cooling costs money.",
+    "criteria": [
+     {
+      "criterion": "Welfare gain",
+      "level": "medium",
+      "note": "Heat stress where summer peaks occur"
+     },
+     {
+      "criterion": "Strength of evidence",
+      "level": "medium",
+      "note": "Measured at 36°C, safe limit unknown"
+     },
+     {
+      "criterion": "Can it be done now",
+      "level": "medium",
+      "note": "Shading or water exchange, some cost"
+     },
+     {
+      "criterion": "Risk if wrong",
+      "level": "low",
+      "note": "Extra energy cost only"
+     }
+    ],
+    "method": "model",
+    "by": {
+     "model": "anthropic/claude-sonnet-5.5",
+     "version": "rank-0.1",
+     "spec": "pipeline/priority-spec.md",
+     "spec_sha": "c0809ced3ebc",
+     "as_of": "2026-10-21"
+    }
    },
-   "evidence_gap": "The studies tested 36°C against other temperatures, so the exact upper safe limit and the effect of short heat spikes are not defined.",
-   "risks": "Cooling or temperature control costs money, and keeping temperatures too low reduces feeding and growth."
-  }
+   "evidence_gap": "The studies tested 36°C in controlled trials, so the temperature at which harm begins between about 30°C and 36°C on commercial farms is not defined.",
+   "risks": "Cooling or shading to prevent such temperatures adds energy and equipment costs, and the findings do not say what level is a safe upper limit.",
+   "basis": {
+    "reason": "Both findings report harm at 36°C: strongly inhibited growth, lower liver antioxidant enzymes, higher liver oxidative damage, and signs of immune fatigue in females. I chose these over the feeding findings because they show a direct harm at high temperature. The harm comes from trials at one extreme temperature, so I limited the action to avoiding that range and did not set a recommended temperature.",
+    "findings": [
+     {
+      "id": "F0616",
+      "why": "Growth inhibition and antioxidant and heat-shock changes at 36°C, read as exceeding the fish's self-protection range.",
+      "practice_en": "water temperature regulation",
+      "practice_zh": "水温调控",
+      "welfare_problem": "water_quality",
+      "strength": "against",
+      "papers": 7,
+      "claims": 22,
+      "measured": 18
+     },
+     {
+      "id": "F0602",
+      "why": "Higher liver oxidative damage and immune fatigue in females at up to 36°C.",
+      "practice_en": "water temperature regulation",
+      "practice_zh": "水温调控",
+      "welfare_problem": "disease_parasites",
+      "strength": "mixed",
+      "papers": 5,
+      "claims": 14,
+      "measured": 9
+     }
+    ]
+   }
+  },
+  "rank_of": 18
  }
 }

@@ -511,12 +511,69 @@ test('reconstruction: seeded sample is stable; no finding or cannot-tell counts 
   assert.deepEqual(s, { n: 4, coverage: 0.75, accuracy: 0.25, accuracy_answered: 0.5, answered: 2 });
 });
 
-test('actions: priority comes from cited findings and type by a fixed formula', async () => {
-  const { priority } = await import('../pipeline/actions.mjs');
-  const strong = { counts: { papers: 5, claims: 10, measured: 10 }, strength: 'agree' };
-  const thin = { counts: { papers: 2, claims: 4, measured: 0 }, strength: 'described' };
-  assert.deepEqual(priority('adopt', [strong]), { score: 1, evidence: 1, actionability: 1, basis: priority('adopt', [strong]).basis });
-  assert.equal(priority('research', [thin]).evidence, 0.22);
-  assert.ok(priority('adopt', [strong]).score > priority('research', [strong]).score);
-  assert.ok(priority('test_on_farms', [strong]).score > priority('test_on_farms', [thin]).score);
+test('rank: a model ranks every action once against the written spec; code orders and records it', async () => {
+  const { applyRanking, rankUser, RANK_SCHEMA } = await import('../pipeline/rank.mjs');
+  const { readFileSync } = await import('node:fs');
+  const spec = readFileSync(new URL('../pipeline/priority-spec.md', import.meta.url), 'utf8');
+  assert.match(spec, /## What to weigh/);
+  assert.deepEqual(RANK_SCHEMA.properties.ranking.items.required, ['id', 'score', 'reason', 'criteria']);
+  const f = { id: 'F1', practice_en: 'heat', welfare_problem: 'water_quality', strength: 'against', counts: { papers: 7, claims: 22, measured: 18, supportive: 1, opposing: 11 }, statement_en: 'Heat harms growth.' };
+  const acts = [{ id: 'X1', type: 'avoid', who: 'farmers', technology_class: 'water_systems', action_en: 'Avoid 36C.', evidence_gap: 'g', risks: 'r', finding_ids: ['F1'] },
+    { id: 'X2', type: 'research', who: 'researchers', technology_class: 'feeds', action_en: 'Study diets.', evidence_gap: 'g', risks: 'r', finding_ids: ['F1'] },
+    { id: 'X3', type: 'monitor', who: 'farmers', technology_class: 'feeds', action_en: 'Watch ammonia.', evidence_gap: 'g', risks: 'r', finding_ids: [] }];
+  const user = rankUser(spec, acts, new Map([['F1', f]]));
+  assert.ok(user.startsWith('SPEC') && user.includes('X1 [avoid; for farmers') && user.includes('7 papers, 22 claims, 18 measured'));
+  const crit = [{ criterion: 'Welfare gain', level: 'high', note: 'n' }];
+  const { actions, missing } = applyRanking(acts, [{ id: 'X2', score: 40, reason: 'thin', criteria: crit }, { id: 'X1', score: 90, reason: 'strong', criteria: crit },
+    { id: 'X1', score: 10, reason: 'dup', criteria: [] }, { id: 'X9', score: 99, reason: 'unknown id', criteria: [] }]);
+  assert.deepEqual(actions.map(a => [a.id, a.rank, a.priority.score]), [['X1', 1, 0.9], ['X2', 2, 0.4], ['X3', 3, null]]);
+  assert.equal(actions[0].priority.reason, 'strong');
+  assert.equal(actions[0].priority.method, 'model');
+  assert.equal(actions[2].priority.method, 'not_ranked');
+  assert.deepEqual(missing, ['X3']);
+});
+
+test('affiliations: a paper is placed by its first author\'s institution; China by sector', async () => {
+  const { affiliationGroup, AFFIL_SCHEMA } = await import('../pipeline/affiliations.mjs');
+  const m = (country, sector, first = 0) => ({ institutions: [{ name: 'x', country, sector }], first_author: first });
+  assert.equal(affiliationGroup(m('CN', 'university')), 'cn_university');
+  assert.equal(affiliationGroup(m('cn', 'research_institute')), 'cn_institute');
+  assert.equal(affiliationGroup(m('CN', 'government')), 'cn_institute');
+  assert.equal(affiliationGroup(m('CN', 'company')), 'cn_company');
+  assert.equal(affiliationGroup(m('DE', 'university')), 'europe');
+  assert.equal(affiliationGroup(m('KR', 'university')), 'asia');
+  assert.equal(affiliationGroup(m('US', 'university')), 'americas');
+  assert.equal(affiliationGroup(m('AU', 'university')), 'other');
+  assert.equal(affiliationGroup(m('RU', 'research_institute')), 'other');
+  assert.equal(affiliationGroup(m('CN', 'university', -1)), 'unknown');
+  assert.equal(affiliationGroup(null), 'unknown');
+  assert.ok(AFFIL_SCHEMA.required.includes('kind'));
+});
+
+test('basis: every combine step keeps why it grouped or concluded what it did', async () => {
+  const R = await import('../pipeline/reconcile.mjs');
+  const F = await import('../pipeline/findings.mjs');
+  const A = await import('../pipeline/actions.mjs');
+  // Schemas ask the model for a reason at naming, findings and actions; clustering already did.
+  for (const s of [R.RECONCILE_SCHEMA.properties.groups.items, F.FINDINGS_SCHEMA, A.ACTIONS_SCHEMA.properties.actions.items]) assert.ok(s.required.includes('reason'));
+  // Naming: each claim carries its group's reason, and a known group passes its reason on.
+  const c = iv => ({ quote_check: 'found', map: { welfare_relevant: true }, intervention: iv, intervention_en: iv });
+  const names = R.distinctNames([c('a'), c('b')]);
+  const out = R.applyGroups([c('a'), c('b')], names, [{ key: 'ab', name_en: 'ab', name_zh: 'ab', members: [0, 1], reason: 'same feed training' }]);
+  assert.ok(out.every(x => x.reconcile_reason === 'same feed training'));
+  const known = R.knownGroups(out.map(x => ({ ...x, reconcile: x.reconcile })));
+  assert.equal(R.applyGroups([c('a')], [], [], known)[0].reconcile_reason, 'same feed training');
+  // Strength: explained from the counts, in both languages, for every label.
+  const counts = { claims: 12, papers: 7, measured: 9, supportive: 1, opposing: 11, descriptive: 0 };
+  const sb = F.strengthBasis({ counts, strength: 'against' });
+  assert.match(sb.en, /12 claims that take a side: 1 in favour, 11 against/);
+  assert.ok(sb.zh.includes('12') && sb.rule);
+  for (const s of ['one_paper', 'described', 'agree', 'mixed']) assert.ok(F.strengthBasis({ counts, strength: s }).en);
+  // Grouping: the cluster behind a practice, with the names kept and left out, found by the practice key.
+  const practices = { C1: { key: 'water_systems|water temperature regulation' } };
+  const clusters = [{ name_en: 'water temperature regulation', members: ['water_systems|high-temperature farming', 'water_systems|water temperature control', 'water_systems|ammonia'],
+    dropped_members: ['water_systems|ammonia'], reason: 'all set the temperature', model: 'm' }];
+  assert.deepEqual(F.groupingBasis(['C1'], practices, clusters), { names: ['high-temperature farming', 'water temperature control'], dropped: ['ammonia'], reason: 'all set the temperature', model: 'm' });
+  assert.deepEqual(F.groupingBasis(['C1'], { C1: { key: 'feeds|live prey' } }, clusters), { names: [], reason: null, model: null });
+  assert.equal(F.groupingBasis(['C1'], null, clusters), null);
 });

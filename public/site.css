@@ -1429,3 +1429,33 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .load-skel { display: grid; gap: 12px; padding: 24px 0; max-width: 760px; }
 .load-skel i { display: block; height: 56px; border-radius: 16px; background: linear-gradient(90deg, var(--line) 0%, color-mix(in srgb, var(--line) 40%, transparent) 50%, var(--line) 100%); background-size: 200% 100%; opacity: .6; }
 @media (prefers-reduced-motion: no-preference) { .load-skel i { animation: my-shimmer 1.4s ease-in-out infinite; } @keyframes my-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } } }
+
+/* A finding's basis: how it was put together, as numbered steps. */
+.fd-basis { margin: 26px 0 8px; }
+.fd-basis h2 { margin: 0 0 12px; }
+.fd-basis ol { list-style: none; counter-reset: fdb; margin: 0; padding: 0; display: grid; gap: 10px; }
+.fd-basis li { counter-increment: fdb; position: relative; padding: 14px 18px 12px 52px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-line, var(--line)); }
+.fd-basis li::before { content: counter(fdb, decimal-leading-zero); position: absolute; left: 18px; top: 15px; font: 600 12px var(--mono); color: var(--accent); }
+.fd-basis h3 { margin: 0 0 4px; font-size: 15px; }
+.fd-basis p { margin: 0 0 4px; font-size: 14.5px; line-height: 1.55; }
+.fd-basis-why { color: var(--soft); border-left: 2px solid var(--line-strong); padding-left: 10px; }
+.fd-basis-by { font: 11px var(--mono); color: var(--soft); margin-top: 6px !important; }
+.ac-reason { border-left: 2px solid var(--accent); padding-left: 10px; }
+/* Why an action ranks where it does: the ranking model's reason and one chip per criterion in the spec. */
+.ac-rankwhy { margin: 8px 0 10px; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, var(--accent) 6%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); }
+.ac-rankwhy .ac-note { margin: 8px 0; }
+.ac-rankwhy > summary { cursor: pointer; font-weight: 600; font-size: 13.5px; }
+.ac-fwhy { display: block; font-size: 12.5px; color: var(--soft); margin-top: 2px; }
+.ac-crit { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.ac-crit li { display: grid; grid-template-columns: 1fr auto; gap: 1px 8px; padding: 7px 10px; border-radius: 10px; background: var(--card-bg); border: 1px solid var(--line); font-size: 12.5px; }
+.ac-crit li span { font-weight: 600; } .ac-crit li small { grid-column: 1 / -1; color: var(--soft); line-height: 1.35; }
+.ac-crit li b { font: 600 10.5px var(--mono); text-transform: uppercase; letter-spacing: .04em; padding: 1px 7px; border-radius: 999px; align-self: start; }
+/* Levels stay neutral: "high" is good for welfare gain but bad for risk, so colour would mislead. */
+.ac-crit li b { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+
+/* Home: who wrote the papers we read. Labels sit beside each bar; hovering a group fades the other strands. */
+.af-svg .af-t { font: 500 13px var(--font); fill: var(--ink); }
+.af-svg .af-v { font: 600 12px var(--mono); fill: var(--soft); }
+.af-svg .af-l { opacity: .9; transition: opacity .2s ease; }
+.af-svg:has(.af-l:hover) .af-l:not(:hover) { opacity: .15; }
+.af-sum { max-width: 78ch; }

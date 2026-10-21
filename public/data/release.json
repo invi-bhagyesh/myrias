@@ -15102,5 +15102,12 @@
     "S176": 1
    }
   }
+ },
+ "action_ranking": {
+  "model": "anthropic/claude-sonnet-5.5",
+  "version": "rank-0.1",
+  "spec": "pipeline/priority-spec.md",
+  "spec_sha": "c0809ced3ebc",
+  "as_of": "2026-10-21"
  }
 }

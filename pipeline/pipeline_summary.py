@@ -17,8 +17,9 @@ for r in ledger:
         k = r['step'].split('-', 1)[1]; cost[k] += r.get('cost_usd') or 0; calls[k] += r.get('calls') or 0
 # The first findings pass logged its calls beside the store.
 for f in os.listdir(os.path.dirname(store)):
-    if f.startswith('findings-') and f.endswith('.calls.jsonl'):
-        for c in jl(os.path.join(os.path.dirname(store), f)): cost['findings'] += c.get('cost_usd') or 0; calls['findings'] += 1
+    k = f.split('-', 1)[0]
+    if k in ('findings', 'rank') and f.endswith('.calls.jsonl'):
+        for c in jl(os.path.join(os.path.dirname(store), f)): cost[k] += c.get('cost_usd') or 0; calls[k] += 1
 
 corpus = js(os.path.join(data, 'corpus.json')); h = corpus['headline']
 stages = {s['id']: s for s in corpus['charts']['stages']}
@@ -60,7 +61,8 @@ steps = [
     step(13, 'combine', 'cluster', models.get('cluster'), prac('practices-exact.json'), prac('practices.json'), {'embed_model': models.get('embed'), 'embed_only': prac('practices-embed.json')}),
     step(14, 'combine', 'findings', models.get('findings'), sum(len(json.load(open(os.path.join(data, f)))) for f in rel['claim_files']), len(findings), {'multi_paper': sum(1 for f in findings if f['counts']['papers'] > 1)}),
     step(15, 'combine', 'actions', models.get('actions'), sum(1 for f in findings if f['counts']['papers'] > 1), len(actions)),
-    step(16, 'check', 'audit', None, None, None, {'status': 'planned'}),
+    step(16, 'combine', 'rank', models.get('rank'), len(actions), sum(1 for a in actions if a.get('rank'))),
+    step(17, 'check', 'audit', None, None, None, {'status': 'planned'}),
 ]
 total = sum(cost.values()) + (phase_a.get('spent_usd') or 0)
 # Costs stay in the run records and the private dataset; the public page shows no spending.
@@ -105,8 +107,9 @@ def example(cid):
         'merge': {'uid': claim['uid'], 'id': cid, 'source_id': src['id'], 'run': claim['added_in']['run']},
         'export': {'released': True},
         'cluster': {'names': names.most_common(), 'name': [clustered[cid]['name_en'], clustered[cid]['name_zh']], 'reason': cl.get('reason'), 'model': cl.get('model')},
-        'findings': finding and {k: finding[k] for k in ('id', 'statement_en', 'statement_zh', 'counts', 'strength', 'welfare_problem', 'practice_en', 'practice_zh')},
-        'actions': action and {k: action[k] for k in ('id', 'rank', 'action_en', 'action_zh', 'type', 'who', 'priority', 'evidence_gap', 'risks')},
+        'findings': finding and {k: finding[k] for k in ('id', 'statement_en', 'statement_zh', 'counts', 'strength', 'welfare_problem', 'practice_en', 'practice_zh', 'basis') if k in finding},
+        'actions': action and {k: action[k] for k in ('id', 'rank', 'action_en', 'action_zh', 'type', 'who', 'priority', 'evidence_gap', 'risks', 'basis') if k in action},
+        'rank_of': len(actions),
     }
 
 out['example'] = example(sys.argv[4] if len(sys.argv) > 4 else 'C0269')

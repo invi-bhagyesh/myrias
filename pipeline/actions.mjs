@@ -3,20 +3,18 @@
 // Only findings that rest on at least --min-papers papers are used. For each technology class (the same
 // categories as the map), the actions model reads those findings and proposes a few actions, each citing
 // the findings it rests on and saying what type of action it is, who would do it, what evidence is missing
-// and what could go wrong. The model never ranks. Code then scores each action, from the findings it cites
-// and its type, with a fixed and published formula:
-//   evidence      = average over cited findings of 0.4 x papers (capped at 5, scaled 0-1)
-//                   + 0.3 x agreement (agree or mostly against 1.0, mixed 0.4, described 0.2)
-//                   + 0.3 x share of claims that were measured
-//   actionability = by type: adopt 1.0, avoid 1.0, test on farms 0.8, monitor 0.6, research 0.4
-//   priority      = 0.6 x evidence + 0.4 x actionability
+// and what could go wrong. Ranking is a separate step: pipeline/rank.mjs places every action against the
+// written spec in pipeline/priority-spec.md. Run it after this one; until then actions carry no priority.
 // Every action is a draft until an expert reviews it, and the site says so on each one.
+// Each action keeps its basis, so the site can show how it was put together: why the model combined these
+// findings into one action and chose them over the other findings for this technology (basis.reason), what
+// each cited finding contributes (basis.findings[].why), and each finding's strength and counts.
 // Output: release-actions.json beside the release, listed in action_files.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, basename, join } from 'node:path';
 import { createClient } from './llm.mjs';
 
-export const ACTIONS_VERSION = 'actions-0.1';
+export const ACTIONS_VERSION = 'actions-0.3';
 export const ACTION_TYPES = ['adopt', 'avoid', 'test_on_farms', 'monitor', 'research'];
 export const ACTIONS_SYSTEM = `You propose practical next steps for the welfare of one farmed fish species, from a set of research findings about one kind of technology.
 Each finding says what several papers found about one practice and one welfare problem, and how strongly they agree.
@@ -29,22 +27,14 @@ For each action give:
 - evidence_gap: what is not yet known, in one sentence.
 - risks: what could go wrong or what it costs the fish or the farm, in one sentence.
 - finding_ids: the findings it rests on.
+- reason: two or three plain sentences on how you built this action: why these findings belong together in one action, why you chose them over the other findings listed, and why they lead to this type (what held you back from a stronger one).
+- finding_notes: for each cited finding, its id and a few words on what it contributes to the action.
 No hype, no recommendations the findings do not support.`;
 export const ACTIONS_SCHEMA = { type: 'object', additionalProperties: false, required: ['actions'], properties: { actions: { type: 'array', items: {
-  type: 'object', additionalProperties: false, required: ['action_en', 'action_zh', 'type', 'who', 'evidence_gap', 'risks', 'finding_ids'],
+  type: 'object', additionalProperties: false, required: ['action_en', 'action_zh', 'type', 'who', 'evidence_gap', 'risks', 'finding_ids', 'reason', 'finding_notes'],
   properties: { action_en: { type: 'string' }, action_zh: { type: 'string' }, type: { type: 'string', enum: ACTION_TYPES }, who: { type: 'string', enum: ['farmers', 'feed makers', 'vets', 'researchers', 'policy'] },
-    evidence_gap: { type: 'string' }, risks: { type: 'string' }, finding_ids: { type: 'array', items: { type: 'string' } } } } } } };
-
-const AGREE = { agree: 1, against: 1, mixed: 0.4, described: 0.2, one_paper: 0.1 };
-const DOABLE = { adopt: 1, avoid: 1, test_on_farms: 0.8, monitor: 0.6, research: 0.4 };
-const r2 = x => Math.round(x * 100) / 100;
-
-// Pure: the priority of one action from the findings it cites and its type. Returns the parts too.
-export function priority(type, findings) {
-  const ev = findings.length ? findings.reduce((s, f) => s + 0.4 * Math.min(f.counts.papers, 5) / 5 + 0.3 * (AGREE[f.strength] ?? 0) + 0.3 * (f.counts.claims ? f.counts.measured / f.counts.claims : 0), 0) / findings.length : 0;
-  const doable = DOABLE[type] ?? 0;
-  return { score: r2(0.6 * ev + 0.4 * doable), evidence: r2(ev), actionability: doable, basis: 'priority = 0.6 x evidence + 0.4 x actionability (see pipeline/actions.mjs)' };
-}
+    evidence_gap: { type: 'string' }, risks: { type: 'string' }, finding_ids: { type: 'array', items: { type: 'string' } }, reason: { type: 'string' },
+    finding_notes: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'why'], properties: { id: { type: 'string' }, why: { type: 'string' } } } } } } } } };
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i < 0 ? d : process.argv[i + 1]; };
@@ -68,16 +58,20 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const cited = a.finding_ids.filter(id => fs.some(f => f.id === id));
       if (!cited.length) continue;
       const fsCited = cited.map(id => byId.get(id));
-      out.push({ technology_class: cls, species_id: fsCited[0].species_id, ...a, finding_ids: cited,
+      const { reason, finding_notes, ...act } = a;
+      const why = new Map((finding_notes || []).map(x => [x.id, x.why]));
+      out.push({ technology_class: cls, species_id: fsCited[0].species_id, ...act, finding_ids: cited,
+        basis: { reason: reason || null, findings: fsCited.map(f => ({ id: f.id, why: why.get(f.id) || null, practice_en: f.practice_en, practice_zh: f.practice_zh, welfare_problem: f.welfare_problem, strength: f.strength, papers: f.counts.papers, claims: f.counts.claims, measured: f.counts.measured })) },
         claim_ids: [...new Set(fsCited.flatMap(f => f.claim_ids))], welfare_problems: [...new Set(fsCited.map(f => f.welfare_problem))],
-        priority: priority(a.type, fsCited), status: 'draft', written_by: { model: r.entry.model, version: ACTIONS_VERSION } });
+        status: 'draft', written_by: { model: r.entry.model, version: ACTIONS_VERSION } });
     }
   }
-  out.sort((a, b) => b.priority.score - a.priority.score || a.technology_class.localeCompare(b.technology_class));
-  out.forEach((a, i) => { a.id = 'X' + String(i + 1).padStart(3, '0'); a.rank = i + 1; });
+  // Ids by technology class; rank.mjs sets rank and priority.
+  out.sort((a, b) => a.technology_class.localeCompare(b.technology_class));
+  out.forEach((a, i) => { a.id = 'X' + String(i + 1).padStart(3, '0'); a.rank = null; a.priority = null; });
   writeFileSync(join(dir, `${stem}-actions.json`), JSON.stringify(out) + '\n');
   const shell = JSON.parse(readFileSync(relPath, 'utf8'));
   writeFileSync(relPath, JSON.stringify({ ...shell, action_files: [`${stem}-actions.json`] }, null, 1) + '\n');
   console.log({ findings_used: used.length, classes: new Set(used.map(f => f.technology_class)).size, actions: out.length,
-    by_type: out.reduce((m, a) => ({ ...m, [a.type]: (m[a.type] || 0) + 1 }), {}), top: out.slice(0, 5).map(a => [a.priority.score, a.type, a.action_en]), spent_usd: client.spent });
+    by_type: out.reduce((m, a) => ({ ...m, [a.type]: (m[a.type] || 0) + 1 }), {}), next: 'node pipeline/rank.mjs --release ' + relPath, spent_usd: client.spent });
 }
