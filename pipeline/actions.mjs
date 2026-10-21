@@ -1,5 +1,5 @@
 // Draft actions: what farms, feed makers, vets or researchers could do next, from the findings.
-//   node pipeline/actions.mjs --release public/data/release.json [--min-papers 2] [--log FILE]
+//   node pipeline/actions.mjs --release public/data/release.json [--min-papers 2] [--species-name "mandarin fish (Siniperca chuatsi)"] [--log FILE]
 // Only findings that rest on at least --min-papers papers are used. For each technology class (the same
 // categories as the map), the actions model reads those findings and proposes a few actions, each citing
 // the findings it rests on and saying what type of action it is, who would do it, what evidence is missing
@@ -60,7 +60,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const out = [];
   for (const cls of [...new Set(used.map(f => f.technology_class))].sort()) {
     const fs = used.filter(f => f.technology_class === cls);
-    const user = `Species: mandarin fish (Siniperca chuatsi)\nTechnology: ${classLabel.get(cls)}\nFindings:\n` + fs.map(f =>
+    const user = `Species: ${arg('species-name') || 'mandarin fish (Siniperca chuatsi)'}\nTechnology: ${classLabel.get(cls)}\nFindings:\n` + fs.map(f =>
       `${f.id} [${f.practice_en}; welfare problem: ${problemLabel.get(f.welfare_problem)}; ${f.counts.papers} papers, ${f.counts.claims} claims, ${f.counts.measured} measured; strength: ${f.strength}]: ${f.statement_en}`).join('\n') + '\nReturn JSON.';
     const r = await client.call('actions', { system: ACTIONS_SYSTEM, user, schema: ACTIONS_SCHEMA });
     if (!r.data) { console.error(`actions: unparsed output for ${cls}`); continue; }

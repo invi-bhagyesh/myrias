@@ -1,5 +1,5 @@
 // Findings: what the claims about one practice and one welfare problem say together.
-//   node pipeline/findings.mjs --release public/data/release.json --store STORE_DIR [--practices STORE/practices.json] [--log FILE] [--concurrency 8]
+//   node pipeline/findings.mjs --release public/data/release.json --store STORE_DIR [--practices STORE/practices.json] [--species-name "mandarin fish (Siniperca chuatsi)"] [--log FILE] [--concurrency 8]
 // Run after export. Groups the released claims by technology class, welfare problem and practice name
 // (two records with the same name are one practice), and writes one finding per group:
 //   - code counts claims, papers, measured claims, and how many support, contradict or show no effect,
@@ -79,7 +79,7 @@ export function numbersOk(statement, claims, counts, extra = []) {
 }
 
 const hashOf = ids => createHash('sha1').update(ids.join(',')).digest('hex').slice(0, 12);
-const findingUser = (g, cs, sourceYear, label) => `Species: mandarin fish (Siniperca chuatsi)
+const findingUser = (g, cs, sourceYear, label, species = 'mandarin fish (Siniperca chuatsi)') => `Species: ${species}
 Practice: ${g.practice_en || g.practice_zh}${g.practice_zh && g.practice_en ? ` (${g.practice_zh})` : ''}
 Welfare problem: ${label}
 Claims (${cs.length}, from ${new Set(cs.map(c => c.source_id)).size} papers):
@@ -125,7 +125,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     while (queue.length) {
       const base = queue.shift();
       const cs = base.claim_ids.map(id => claims.get(id));
-      const r = await client.call('findings', { system: FINDINGS_SYSTEM, user: findingUser(base, cs, sourceYear, problemLabel.get(base.welfare_problem)), schema: FINDINGS_SCHEMA });
+      const r = await client.call('findings', { system: FINDINGS_SYSTEM, user: findingUser(base, cs, sourceYear, problemLabel.get(base.welfare_problem), arg('species-name') || undefined), schema: FINDINGS_SCHEMA });
       if (!r.data) { console.error(`findings: unparsed output for ${base.key}`); out.push({ ...base, statement_en: null, statement_zh: null, written_by: null, check: 'unparsed' }); continue; }
       const used = r.data.claim_ids.filter(id => base.claim_ids.includes(id));
       const usedClaims = used.length ? used.map(id => claims.get(id)) : cs;
