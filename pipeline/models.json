@@ -18,7 +18,9 @@
     "embed",
     "cluster",
     "reconstruct",
-    "actions"
+    "actions",
+    "affiliations",
+    "rank"
   ],
   "profiles": {
     "demo": {
@@ -118,6 +120,23 @@
         "provider": {
           "require_parameters": false
         }
+      },
+      "affiliations": {
+        "model": "qwen/qwen3.8-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
+      },
+      "rank": {
+        "model": "anthropic/claude-sonnet-5.5",
+        "temperature": 0,
+        "provider": {
+          "require_parameters": false
+        }
       }
     },
     "full": {
@@ -212,6 +231,23 @@
         }
       },
       "actions": {
+        "model": "anthropic/claude-sonnet-5.5",
+        "temperature": 0,
+        "provider": {
+          "require_parameters": false
+        }
+      },
+      "affiliations": {
+        "model": "qwen/qwen3.8-flash",
+        "temperature": 0,
+        "reasoning": {
+          "enabled": false
+        },
+        "fallback": [
+          "deepseek/deepseek-v4.1-flash"
+        ]
+      },
+      "rank": {
         "model": "anthropic/claude-sonnet-5.5",
         "temperature": 0,
         "provider": {

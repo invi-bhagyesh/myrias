@@ -133,3 +133,53 @@ export function decadeColumnsHtml(decades) {
     <span class="cv-col-bar"><i style="height:${(100 * v.zh / max).toFixed(1)}%;background:${LANG_COLOR.zh}"></i><i style="height:${(100 * v.en / max).toFixed(1)}%;background:${LANG_COLOR.en}"></i></span>
     <span class="cv-col-label">${esc(k)}</span></div>`).join('')}</div>`;
 }
+
+// Who wrote the papers we read, and what kind of papers they are: a flow from where each paper's first
+// author works (China by sector, then other regions) to the kind of paper. Reads data/papers.json, which
+// pipeline/affiliations.mjs writes from the papers' title pages. Groups are coloured in a fixed order
+// checked with the dataviz validator (light #ECEADF and dark #20241C: CVD and normal-vision separation pass).
+export const AF_GROUPS = [['cn_university', '#b5562a'], ['cn_institute', '#008c80'], ['cn_other', '#97761f'], ['asia', '#b04a6e'], ['europe', '#2a67a4'], ['americas', '#4e8a3a'], ['other', '#8457a8'], ['unknown', 'var(--line-strong)']];
+export const AF_KINDS = ['experiment', 'field_study', 'methods', 'review', 'thesis', 'other', 'unknown'];
+
+// Pure: counts per group, per kind and per pair. A Chinese company or other sector folds into cn_other.
+export function authorModel(meta) {
+  const papers = (meta?.papers || []).map(p => ({ ...p, group: p.group === 'cn_company' ? 'cn_other' : p.group, kind: AF_KINDS.includes(p.kind) ? p.kind : 'other' }));
+  const count = (f, keys) => keys.map(k => [k, papers.filter(p => f(p) === k).length]).filter(([, v]) => v);
+  const groups = count(p => p.group, AF_GROUPS.map(([k]) => k)), kinds = count(p => p.kind, AF_KINDS);
+  const links = [];
+  for (const [g] of groups) for (const [k] of kinds) { const v = papers.filter(p => p.group === g && p.kind === k).length; if (v) links.push({ g, k, v }); }
+  const china = papers.filter(p => p.group.startsWith('cn_')).length;
+  return { n: papers.length, groups, kinds, links, china, intl: papers.filter(p => (p.countries || []).length > 1).length,
+    countries: [...new Set(papers.filter(p => !p.group.startsWith('cn_') && p.country).map(p => p.country))].sort() };
+}
+
+export function authorFlowHtml(meta, tr) {
+  const m = authorModel(meta);
+  if (!m.n) return '';
+  const color = Object.fromEntries(AF_GROUPS);
+  const W = 1000, TOP = 40, H0 = 330, GAP = 8, BW = 16, XL = 330, XR = 652;
+  const lay = (rows) => { const sc = (H0 - GAP * (rows.length - 1)) / m.n; let y = TOP; return Object.fromEntries(rows.map(([k, v]) => { const h = Math.max(3, v * sc); const r = [k, { y, h, v, used: 0 }]; y += h + GAP; return r; })); };
+  const L = lay(m.groups), R = lay(m.kinds);
+  const edge = (y0, y1, x0, x1) => { const c = (x0 + x1) / 2; return `M${x0},${y0} C${c},${y0} ${c},${y1} ${x1},${y1}`; };
+  let links = '';
+  for (const l of m.links) {
+    const a = L[l.g], b = R[l.k], ha = a.h * l.v / a.v, hb = b.h * l.v / b.v;
+    const ya = a.y + a.used, yb = b.y + b.used; a.used += ha; b.used += hb;
+    const k = Math.max(1, Math.round(Math.max(ha, hb) / 3.5)); let d = '';
+    for (let j = 0; j <= k; j++) { const t = k ? j / k : 0.5; d += edge(ya + t * ha, yb + t * hb, XL + BW + 2, XR - 2) + ' '; }
+    links += `<g class="af-l" data-g="${l.g}" style="stroke:${color[l.g]}"><title>${esc(tr('af.g.' + l.g))} → ${esc(tr('af.k.' + l.k))}: ${n(l.v)}</title><path class="sk-strand" d="${d.trim()}"/></g>`;
+  }
+  const bar = (x, r, fill, cls, g) => `<rect class="${cls}" ${g ? `data-g="${g}"` : ''} x="${x}" y="${r.y.toFixed(1)}" width="${BW}" height="${r.h.toFixed(1)}" rx="${Math.min(4, r.h / 2).toFixed(1)}" style="fill:${fill}"/>`;
+  let nodes = `<text class="sk-stage" x="${XL + BW}" y="${TOP - 18}" text-anchor="end">${esc(tr('af.left'))}</text><text class="sk-stage" x="${XR}" y="${TOP - 18}">${esc(tr('af.right'))}</text>`;
+  for (const [g, r] of Object.entries(L)) nodes += bar(XL, r, color[g], 'af-n', g) +
+    `<text class="af-t" x="${XL - 12}" y="${(r.y + r.h / 2 + 4).toFixed(1)}" text-anchor="end">${esc(tr('af.g.' + g))} <tspan class="af-v">${n(r.v)}</tspan></text>`;
+  for (const [k, r] of Object.entries(R)) nodes += bar(XR, r, 'var(--soft)', 'af-k', '') +
+    `<text class="af-t" x="${XR + BW + 12}" y="${(r.y + r.h / 2 + 4).toFixed(1)}"><tspan class="af-v">${n(r.v)}</tspan> ${esc(tr('af.k.' + k))}</text>`;
+  const svg = `<svg class="cv-svg af-svg" viewBox="0 0 ${W} ${TOP + H0 + 16}" role="img" aria-label="${esc(tr('af.aria', { n: m.n }))}">${links}${nodes}</svg>`;
+  // Phones: the same counts as two lists of bars.
+  const list = (rows, col, key) => `<ul class="cv-bars">${rows.map(([k, v]) => `<li><span class="cv-bar-label">${esc(tr(key + k))}</span><span class="cv-bar"><i style="width:${(100 * v / m.n).toFixed(1)}%;background:${col(k)}"></i></span><span class="cv-bar-n">${n(v)}</span></li>`).join('')}</ul>`;
+  const phone = `<h3>${esc(tr('af.left'))}</h3>${list(m.groups, g => color[g], 'af.g.')}<h3>${esc(tr('af.right'))}</h3>${list(m.kinds, () => 'var(--soft)', 'af.k.')}`;
+  const pct = x => Math.round(100 * x / m.n) + '%';
+  const sum = tr('af.sum', { n: n(m.n), china: n(m.china), pc: pct(m.china), intl: n(m.intl), countries: m.countries.join(', ') || '—' });
+  return `<div class="fx-sankey">${svg}</div><div class="fx-phone">${phone}</div><p class="fx-keep fx-keep-row af-sum">${esc(sum)}</p>`;
+}

@@ -259,7 +259,8 @@ test('pipeline page: every step is bilingual, models match the demo profile, the
   for (const lang of ['en', 'zh']) {
     const html = pipelineHtml(P, { lang, tr: (k, v) => t(lang, k, v), link: p => '#/' + p, taxonomyLabel: tx });
     assert.equal((html.match(/data-step="/g) || []).length, P.steps.length);
-    assert.ok(!/undefined|NaN|\[object/.test(html), lang);
+    // A value that failed to render, not the English word inside a model's sentence.
+    assert.ok(!/[>"(]undefined|undefined[<")]|\bNaN\b|\[object/.test(html), lang);
     assert.ok(html.includes(P.example.claim_id) && html.includes(P.example.findings.id) && html.includes(P.example.actions.id));
   }
   // The example is a released claim, and the finding and action it shows really contain it.
@@ -335,4 +336,22 @@ test('species page: counts come from the release, steps from corpus and plan, ev
     assert.ok(!/\{\w+\}/.test(html), 'unfilled placeholder');
   }
   for (const p of Object.values(PROFILES)) statSync(new URL('../public/' + p.image, import.meta.url));
+});
+
+test('home author flow: counts per group, kind and pair add up; companies fold into China other', async () => {
+  const { authorModel, authorFlowHtml, AF_GROUPS, AF_KINDS } = await import('../public/site-corpusviz.js');
+  const meta = { papers: [{ group: 'cn_university', kind: 'experiment', countries: ['CN'] }, { group: 'cn_company', kind: 'review', countries: ['CN'] },
+    { group: 'europe', kind: 'experiment', country: 'DE', countries: ['DE', 'CN'] }, { group: 'unknown', kind: 'odd', countries: [] }] };
+  const m = authorModel(meta);
+  assert.equal(m.n, 4);
+  assert.deepEqual(m.groups, [['cn_university', 1], ['cn_other', 1], ['europe', 1], ['unknown', 1]]);
+  assert.equal(m.links.reduce((s, l) => s + l.v, 0), 4);
+  assert.equal(m.china, 2); assert.equal(m.intl, 1); assert.deepEqual(m.countries, ['DE']);
+  for (const lang of ['en', 'zh']) {
+    const html = authorFlowHtml(meta, (k, v) => t(lang, k, v));
+    for (const [g] of AF_GROUPS) assert.ok(t(lang, 'af.g.' + g) !== 'af.g.' + g, g);
+    for (const k of AF_KINDS) assert.ok(t(lang, 'af.k.' + k) !== 'af.k.' + k, k);
+    assert.ok(!/undefined|NaN/.test(html));
+  }
+  assert.equal(authorFlowHtml({ papers: [] }, k => k), '');
 });

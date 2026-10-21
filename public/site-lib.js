@@ -225,7 +225,7 @@ export function validateExport(data) {
     if (!['draft', 'reviewed'].includes(x.status)) fail(`action ${x.id}: status must be draft or reviewed`);
     if (!Array.isArray(x.finding_ids) || !x.finding_ids.length) fail(`action ${x.id}: needs at least one finding`);
     for (const fid of x.finding_ids || []) if (!findingIds.has(fid)) fail(`action ${x.id}: unknown finding ${fid}`);
-    if ('rank' in x && !x.priority?.basis) fail(`action ${x.id}: a rank needs its published priority formula`);
+    if (x.rank != null && !(x.priority?.method === 'model' ? x.priority.reason && x.priority.by?.spec : x.priority?.basis)) fail(`action ${x.id}: a rank needs its reason and the spec it was ranked against`);
   }
   for (const x of data.cells_status) {
     if (!CELL_STATUS.includes(x.status)) fail(`cells_status: unknown status ${x.status}`);

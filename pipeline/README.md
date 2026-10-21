@@ -136,14 +136,20 @@ node pipeline/export.mjs --store $STORE --base public/data/release.json --out pu
 node pipeline/cluster.mjs  --release public/data/release.json --store $STORE
 node pipeline/findings.mjs --release public/data/release.json --store $STORE --practices $STORE/practices.json
 node pipeline/actions.mjs  --release public/data/release.json
+node pipeline/rank.mjs     --release public/data/release.json      # ranks against pipeline/priority-spec.md
 ```
 
 - **cluster** finds the practice names that mean the same practice (embeddings, average-linkage clustering,
   then a model tests each cluster).
 - **findings** writes one finding per practice and welfare problem. Counts and strength come from code; the
   sentence comes from a model that sees only the claims; code checks every number against them.
-- **actions** drafts next steps from findings backed by two or more papers. Priority is computed by a fixed
-  formula in code, never by the model, and every action stays a draft until someone reviews it.
+- **actions** drafts next steps from findings backed by two or more papers. Every action stays a draft until
+  someone reviews it.
+- **rank** has a model rank all actions against each other, following the written spec in
+  `pipeline/priority-spec.md` (welfare gain, strength of evidence, whether it can be done now, risk if wrong).
+  Each action gets a score, a reason and a note per criterion. To change what priority means, edit the spec and
+  run `rank.mjs` again; `--spec FILE` uses another spec. The spec's file name and checksum are stored with the
+  ranking.
 
 Every combine step keeps its reason, so the site can show why things were grouped and concluded:
 `reconcile` stores each group's reason on its claims (`reconcile_reason`) and in `reconciled.jsonl.groups.json`;
@@ -154,7 +160,18 @@ and action pages show them.
 
 For another species, add `--species-name "<common name> (<scientific name>)"` to `findings` and `actions`.
 
-### 8. Look at it
+### 8. Who wrote the papers (optional)
+
+```sh
+node pipeline/affiliations.mjs --store $STORE --pages $RUN/prepare/pages.jsonl --out public/data/papers.json
+```
+
+A cheap model reads the first two pages of each paper and lists the authors' institutions (country and
+sector) and the kind of paper (experiment, field study, methods, review, thesis). Code places each paper by
+its first author's institution. Results are cached in `$STORE/paper-meta.json`, so later runs only read new
+papers. The home page chart reads `papers.json`.
+
+### 9. Look at it
 
 ```sh
 npm run dev        # serves public/ at http://localhost:5173
@@ -165,8 +182,8 @@ Open the Species, Findings, Actions and Pipeline pages. Pages that list claims l
 ## Running a second time
 
 Run 2 builds on run 1; it does not start over. Use a new `RUN` folder, give `merge.mjs` a new `--run run-2
---phase A`, pass `--known $STORE/claims.jsonl` to `reconcile.mjs`, and run `cluster`, `findings` and
-`actions` again. Findings are only rewritten when their set of claims changes, and existing ids never change,
+--phase A`, pass `--known $STORE/claims.jsonl` to `reconcile.mjs`, and run `cluster`, `findings`,
+`actions` and `rank` again. Findings are only rewritten when their set of claims changes, and existing ids never change,
 so links to claims and findings stay valid.
 
 ## Choosing models and limits

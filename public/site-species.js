@@ -152,7 +152,7 @@ export function speciesPageHtml(m, ctx) {
   const doSec = m.actions.length ? `<section class="sp-sec" id="sp-do"><h2>${esc(tr('sp.sec.do'))}</h2><p class="sp-lead">${esc(tr('ac.lead', { n: m.actions.length, multi: m.findings.filter(f => f.counts.papers > 1).length, f: new Set(m.actions.flatMap(a => a.finding_ids)).size }))}</p>
     <ol class="ac-list">${m.actions.slice(0, 5).map(a => actionItemHtml(a, ctx, fById)).join('')}</ol>
     <p><a class="button small" href="${link('actions', { species: s.id })}">${esc(tr('ac.all', { n: m.actions.length }))} →</a></p>
-    <p class="small-note">${esc(tr('ac.formula'))}</p></section>` : '';
+    ${ctx.rankNote || ''}</section>` : '';
   return `<div class="sp-page">${hero}${contents}${about}${found}${doSec}${from}${stepsSec}${limitsSec}</div>`;
 }
 

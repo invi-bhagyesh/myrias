@@ -52,7 +52,10 @@ export const STEP_TEXT = {
     how: ['Counts and strength by code; the sentence by a model from the claims only; numbers checked against them.', '计数和强度由代码给出；句子由模型仅依据论断撰写；数字逐一核对。'] },
   actions: { name: ['Draft actions', '起草行动'], in: ['multi-paper findings', '条多篇论文发现'], out: ['draft actions', '条行动草案'],
     what: ['Propose next steps from findings that rest on two or more papers.', '依据来自两篇及以上论文的发现提出下一步。'],
-    how: ['The model never ranks: priority is computed by code from the evidence and the type of action.', '模型不排序：优先级由代码根据证据和行动类型计算。'] },
+    how: ['Each action cites its findings and says who would do it, what is not yet known, the risks, and why. Ranking is the next step.', '每项行动都引用其依据的发现，并写明由谁执行、尚不清楚之处、风险和理由。排序在下一步进行。'] },
+  rank: { name: ['Rank actions', '行动排序'], in: ['draft actions', '条行动草案'], out: ['ranked', '条已排序'],
+    what: ['A model ranks all actions against each other, following a written spec of what priority means.', '模型按一份写明“优先级”含义的规范，把所有行动放在一起排序。'],
+    how: ['The spec (pipeline/priority-spec.md) weighs welfare gain, strength of evidence, whether it can be done now and the risk if wrong. Each action gets a score, a reason and a note per criterion; change the spec to change the ranking.', '规范（pipeline/priority-spec.md）权衡福利收益、证据强度、能否立即实施以及出错时的风险。每项行动都有分数、理由和逐项评估；修改规范即可改变排序。'] },
   audit: { name: ['Expert audit', '专家审核'], in: null, out: null,
     what: ['A fish-welfare expert checks a sample of claims and findings, and the error rates are published.', '由鱼类福利专家抽查论断和发现，并公布错误率。'],
     how: ['Not started. Until then everything here is a lead to check, not a finding to rely on.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'] }
@@ -132,10 +135,15 @@ function exampleHtml(key, e, c) {
         (f.basis?.summary ? `<details class="ex-why"><summary>${esc(L('Why the model summarised it this way', '模型为何这样概括'))}</summary><p>${esc(f.basis.summary)}</p></details>` : ''); }
     case 'actions': { const a = e.actions; if (!a) return '';
       const p = a.priority;
-      return `<a class="ex-claim ex-action" href="${c.link('actions')}"><span class="ex-k">${esc(a.id)} · ${esc(L('rank', '排名'))} ${a.rank} · ${esc(L(a.who, a.who))}</span><b>${esc(L(a.action_en, a.action_zh))}</b></a>` +
-        `<div class="ex-formula"><span>${esc(L('priority', '优先级'))}</span><b>${p.score.toFixed(2)}</b><span>=</span><span>0.6 × <b>${p.evidence.toFixed(2)}</b><i>${esc(L('evidence', '证据'))}</i></span><span>+</span><span>0.4 × <b>${p.actionability.toFixed(1)}</b><i>${esc(L(a.type, a.type))}</i></span></div>` +
-        `<p class="ex-k">${esc(L('Computed by code, not by the model. Still a draft until reviewed.', '由代码计算，而非模型给出；审核前仍为草案。'))}</p>` +
-        (a.basis?.reason ? `<details class="ex-why"><summary>${esc(L('Why the model proposed it', '模型为何提出'))}</summary><p>${esc(a.basis.reason)}</p></details>` : ''); }
+      return `<a class="ex-claim ex-action" href="${c.link('actions')}"><span class="ex-k">${esc(a.id)} · ${esc(L(a.type, a.type))} · ${esc(L(a.who, a.who))}</span><b>${esc(L(a.action_en, a.action_zh))}</b></a>` +
+        `<p class="ex-k">${esc(L('Cites', '依据'))} ${esc(e.findings?.id || '')} · ${esc(L('still a draft until reviewed', '审核前仍为草案'))}</p>` +
+        (a.basis?.reason ? `<details class="ex-why"><summary>${esc(L('How the model built it from the findings', '模型如何由发现得出它'))}</summary><p>${esc(a.basis.reason)}</p></details>` : ''); }
+    case 'rank': { const a = e.actions; if (!a?.priority) return '';
+      const p = a.priority;
+      return `<div class="ex-formula"><span>${esc(L('rank', '排名'))}</span><b>${a.rank}</b><span>${esc(L(`of ${e.rank_of}`, `/ ${e.rank_of}`))}</span><span>·</span><span>${esc(L('score', '分数'))} <b>${Math.round(100 * p.score)}</b><i>/100</i></span></div>` +
+        (p.reason ? `<p class="ex-p">${esc(p.reason)}</p>` : '') +
+        ((p.criteria || []).length ? `<ul class="ac-crit">${p.criteria.map(k => `<li><span>${esc(k.criterion)}</span><b>${esc(c.tr('ac.level.' + k.level))}</b><small>${esc(k.note)}</small></li>`).join('')}</ul>` : '') +
+        `<p class="ex-k">${esc(L(`${short(p.by?.model)} against ${p.by?.spec || 'the spec'}`, `${short(p.by?.model)} 按 ${p.by?.spec || '规范'} 排序`))}</p>`; }
     case 'audit': return `<div class="ex-todo"><p>${esc(L(`An expert opens page ${e.prepare.page} of ${e.source_id}, reads the quote, and marks ${e.claim_id}, ${e.findings?.id || ''} and ${e.actions?.id || ''} right or wrong.`, `专家打开 ${e.source_id} 第 ${e.prepare.page} 页，阅读引文，判断 ${e.claim_id}、${e.findings?.id || ''} 和 ${e.actions?.id || ''} 是否正确。`))}</p>
         <p class="ex-k">${esc(L('Not started. Until then, everything here is a lead to check.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'))}</p></div>`;
     default: return '';

@@ -511,14 +511,42 @@ test('reconstruction: seeded sample is stable; no finding or cannot-tell counts 
   assert.deepEqual(s, { n: 4, coverage: 0.75, accuracy: 0.25, accuracy_answered: 0.5, answered: 2 });
 });
 
-test('actions: priority comes from cited findings and type by a fixed formula', async () => {
-  const { priority } = await import('../pipeline/actions.mjs');
-  const strong = { counts: { papers: 5, claims: 10, measured: 10 }, strength: 'agree' };
-  const thin = { counts: { papers: 2, claims: 4, measured: 0 }, strength: 'described' };
-  assert.deepEqual(priority('adopt', [strong]), { score: 1, evidence: 1, actionability: 1, basis: priority('adopt', [strong]).basis });
-  assert.equal(priority('research', [thin]).evidence, 0.22);
-  assert.ok(priority('adopt', [strong]).score > priority('research', [strong]).score);
-  assert.ok(priority('test_on_farms', [strong]).score > priority('test_on_farms', [thin]).score);
+test('rank: a model ranks every action once against the written spec; code orders and records it', async () => {
+  const { applyRanking, rankUser, RANK_SCHEMA } = await import('../pipeline/rank.mjs');
+  const { readFileSync } = await import('node:fs');
+  const spec = readFileSync(new URL('../pipeline/priority-spec.md', import.meta.url), 'utf8');
+  assert.match(spec, /## What to weigh/);
+  assert.deepEqual(RANK_SCHEMA.properties.ranking.items.required, ['id', 'score', 'reason', 'criteria']);
+  const f = { id: 'F1', practice_en: 'heat', welfare_problem: 'water_quality', strength: 'against', counts: { papers: 7, claims: 22, measured: 18, supportive: 1, opposing: 11 }, statement_en: 'Heat harms growth.' };
+  const acts = [{ id: 'X1', type: 'avoid', who: 'farmers', technology_class: 'water_systems', action_en: 'Avoid 36C.', evidence_gap: 'g', risks: 'r', finding_ids: ['F1'] },
+    { id: 'X2', type: 'research', who: 'researchers', technology_class: 'feeds', action_en: 'Study diets.', evidence_gap: 'g', risks: 'r', finding_ids: ['F1'] },
+    { id: 'X3', type: 'monitor', who: 'farmers', technology_class: 'feeds', action_en: 'Watch ammonia.', evidence_gap: 'g', risks: 'r', finding_ids: [] }];
+  const user = rankUser(spec, acts, new Map([['F1', f]]));
+  assert.ok(user.startsWith('SPEC') && user.includes('X1 [avoid; for farmers') && user.includes('7 papers, 22 claims, 18 measured'));
+  const crit = [{ criterion: 'Welfare gain', level: 'high', note: 'n' }];
+  const { actions, missing } = applyRanking(acts, [{ id: 'X2', score: 40, reason: 'thin', criteria: crit }, { id: 'X1', score: 90, reason: 'strong', criteria: crit },
+    { id: 'X1', score: 10, reason: 'dup', criteria: [] }, { id: 'X9', score: 99, reason: 'unknown id', criteria: [] }]);
+  assert.deepEqual(actions.map(a => [a.id, a.rank, a.priority.score]), [['X1', 1, 0.9], ['X2', 2, 0.4], ['X3', 3, null]]);
+  assert.equal(actions[0].priority.reason, 'strong');
+  assert.equal(actions[0].priority.method, 'model');
+  assert.equal(actions[2].priority.method, 'not_ranked');
+  assert.deepEqual(missing, ['X3']);
+});
+
+test('affiliations: a paper is placed by its first author\'s institution; China by sector', async () => {
+  const { affiliationGroup, AFFIL_SCHEMA } = await import('../pipeline/affiliations.mjs');
+  const m = (country, sector, first = 0) => ({ institutions: [{ name: 'x', country, sector }], first_author: first });
+  assert.equal(affiliationGroup(m('CN', 'university')), 'cn_university');
+  assert.equal(affiliationGroup(m('cn', 'research_institute')), 'cn_institute');
+  assert.equal(affiliationGroup(m('CN', 'government')), 'cn_institute');
+  assert.equal(affiliationGroup(m('CN', 'company')), 'cn_company');
+  assert.equal(affiliationGroup(m('DE', 'university')), 'europe');
+  assert.equal(affiliationGroup(m('KR', 'university')), 'asia');
+  assert.equal(affiliationGroup(m('US', 'university')), 'americas');
+  assert.equal(affiliationGroup(m('AU', 'university')), 'other');
+  assert.equal(affiliationGroup(m('CN', 'university', -1)), 'unknown');
+  assert.equal(affiliationGroup(null), 'unknown');
+  assert.ok(AFFIL_SCHEMA.required.includes('kind'));
 });
 
 test('basis: every combine step keeps why it grouped or concluded what it did', async () => {

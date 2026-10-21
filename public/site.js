@@ -8,9 +8,9 @@ import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIM
 import { evidenceModel, evidenceMapHtml, mountEvidenceMap } from './site-evmap.js';
 import { speciesModel, speciesPageHtml, speciesCardsHtml } from './site-species.js';
 import { findingsListHtml, findingPageHtml, findingText, findingItemHtml, byWeight, claimItemsHtml } from './site-findings.js';
-import { actionItemHtml } from './site-actions.js';
+import { actionItemHtml, rankNoteHtml } from './site-actions.js';
 import { browseHtml, mountBrowse } from './site-browse.js';
-import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, LANG_COLOR } from './site-corpusviz.js';
+import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, authorFlowHtml, LANG_COLOR } from './site-corpusviz.js';
 import { controlsHtml, mountCorpusList, FILTER_DEFAULTS, unpackPapers } from './site-corpuslist.js';
 
 const { escapeHtml: esc, safeUrl, pick } = L;
@@ -38,10 +38,10 @@ const indexOf = list => new Map((list || []).map(x => [x.id, x]));
 
 async function load() {
   state.error = null; state.full = false; state.listsReady = false; state.fullPromise = null;
-  const [shell, corpus, nextRun, pipeline] = await Promise.all([
+  const [shell, corpus, nextRun, pipeline, papersMeta] = await Promise.all([
     json(useSample ? 'data/sample.json' : 'data/release.json', { cache: 'no-cache' }).catch(e => ({ __error: e.message })),
-    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json')]);
-  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline;
+    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json'), optional('data/papers.json')]);
+  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline; state.authors = papersMeta;
   if (shell.__error) { state.data = null; state.error = shell.__error; return; }
   const data = shell, pending = (data.claim_files || []).length > 0;
   const v = encodeURIComponent(data.release?.version || '0');
@@ -111,7 +111,7 @@ function issueLink(title, body) {
 function viewPipeline() {
   const P = state.pipeline, start = Number(parseHash().params.get('step')) || 1;
   const body = P ? pipelineHtml(P, { lang: state.lang, tr, link, taxonomyLabel }) : '';
-  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pl.lead')) + body +
+  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pl.lead', { n: P ? P.steps.length : '' })) + body +
       `<details class="pl-fold"><summary>${esc(tr('pl.fold.runs'))}</summary>${nextRunHtml(state.nextRun)}</details>`,
     mount: root => mountPipeline(root, { start, onStep: k => history.replaceState(null, '', link('pipeline', k > 1 ? { step: k } : {})) }) };
 }
@@ -290,9 +290,9 @@ function viewOverview() {
         <button type="button" class="scroll-cue" data-scroll="graph-title"><span>${esc(tr('hero.scroll'))}</span><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 7l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <aside class="hero-side" aria-hidden="true"><img class="hero-art" src="art/research-desk.webp" width="1004" height="849" alt="" decoding="async"><div class="hero-tiles">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</div></aside>
       </section>
-      ${state.corpus && state.corpus.charts ? `<section class="home-flow" aria-labelledby="home-flow-title"><div class="home-flow-head"><h2 id="home-flow-title">${esc(tr('cv.title'))}</h2>
-        <p class="cv-legend">${['en', 'zh'].map(l => `<span><i style="background:${LANG_COLOR[l]}"></i>${esc(tr('cv.lang.' + l))}</span>`).join('')}<a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
-        <div class="cv-card">${corpusFlowHtml(state.corpus, tr)}</div></section>` : ''}
+      ${state.authors?.papers?.length ? `<section class="home-flow" aria-labelledby="home-flow-title"><div class="home-flow-head"><h2 id="home-flow-title">${esc(tr('af.title'))}</h2>
+        <p class="cv-legend"><span>${esc(tr('af.note'))}</span><a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
+        <div class="cv-card">${authorFlowHtml(state.authors, tr)}</div></section>` : ''}
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
       <section class="graph-feature" aria-labelledby="graph-title">
         <figure class="band-card graph-card"><div class="graph-head"><h2 class="graph-name" id="graph-title">${esc(tr('graph.title'))}</h2><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
@@ -377,7 +377,7 @@ function viewActions(params) {
     { key: 'who', type: 'select', label: tr('ac.f.who'), options: [...new Set(items.map(a => a.who))].map(w => [w, tr('ac.who.' + w.replace(/ /g, '_'))]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) }];
   return { title: tr('nav.actions'), html: lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size })) +
-      browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + `<p class="small-note">${esc(tr('ac.formula'))}</p>`,
+      browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + rankNoteHtml(d, tr),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
       render: a => actionItemHtml(a, findingCtx(), fById),
       test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) &&
@@ -399,7 +399,7 @@ function viewSpecies(id) {
     return `<div class="cv-two"><section><h3>${esc(tr('cv.topics'))}</h3>${topicBarsHtml(c.charts.topics, k => tr('cv.topic.' + k))}<p class="cv-note">${esc(tr('cv.topics.note', { n: Number(st.about.n).toLocaleString() }))}</p></section>
       <section><h3>${esc(tr('cv.decades'))}</h3>${decadeColumnsHtml(c.charts.decades)}<p class="cv-note">${esc(tr('cv.decades.note', { n: total.toLocaleString() }))}</p></section></div>`;
   };
-  return { title: pick(m.s, 'common', state.lang), html: speciesPageHtml(m, { tr, link, lang: state.lang, flowHtml, topicsHtml, taxonomyLabel, findingsHtml: (list, o) => findingsListHtml(list, findingCtx(), o) }) + suggestionBlock(id), model: m };
+  return { title: pick(m.s, 'common', state.lang), html: speciesPageHtml(m, { tr, link, lang: state.lang, flowHtml, topicsHtml, taxonomyLabel, rankNote: rankNoteHtml(state.data, tr), findingsHtml: (list, o) => findingsListHtml(list, findingCtx(), o) }) + suggestionBlock(id), model: m };
 }
 
 // Species page: the evidence map for this species, and the contents links.
