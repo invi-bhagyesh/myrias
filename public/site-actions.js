@@ -10,7 +10,8 @@ export function actionItemHtml(a, ctx, fById) {
       <span class="row-n"><span class="ac-score" title="${esc(tr('ac.score.tip', { e: a.priority.evidence, d: a.priority.actionability }))}"><i style="width:${Math.round(100 * a.priority.score)}%"></i></span>${esc(a.priority.score.toFixed(2))}</span></summary>
     <div class="row-body"><div class="ac-head"><span class="ac-who">${esc(tr('ac.who', { who: tr('ac.who.' + a.who.replace(/ /g, '_')) }))}</span><span class="ac-draft">${esc(tr('ac.draft'))}</span>
       ${a.welfare_problems.map(p => `<span class="sp-chip">${esc(ctx.taxonomyLabel('welfare_problems', p))}</span>`).join('')}</div>
+      ${a.basis?.reason ? `<p class="ac-note ac-reason"><b>${esc(tr('ac.reason'))}</b> ${esc(a.basis.reason)}</p>` : ''}
       <p class="ac-note"><b>${esc(tr('ac.gap'))}</b> ${esc(a.evidence_gap)}</p><p class="ac-note"><b>${esc(tr('ac.risks'))}</b> ${esc(a.risks)}</p>
       <p class="ac-note"><b>${esc(tr(a.finding_ids.length === 1 ? 'ac.why.one' : 'ac.why', { n: a.finding_ids.length }))}</b></p>
-      <ul class="ac-findings">${a.finding_ids.map(id => fById.get(id)).filter(Boolean).map(f => `<li><a href="${link('findings/' + encodeURIComponent(f.id))}">${esc(lang === 'zh' ? f.statement_zh || f.statement_en : f.statement_en || f.statement_zh)}</a> <span class="fd-meta">${esc(tr('fd.papers', { n: f.counts.papers }))}</span></li>`).join('')}</ul></div></details></li>`;
+      <ul class="ac-findings">${a.finding_ids.map(id => fById.get(id)).filter(Boolean).map(f => `<li><a href="${link('findings/' + encodeURIComponent(f.id))}">${esc(lang === 'zh' ? f.statement_zh || f.statement_en : f.statement_en || f.statement_zh)}</a> <span class="fd-meta">${esc(tr('fd.strength.' + f.strength))} · ${esc(tr('fd.papers', { n: f.counts.papers }))}</span></li>`).join('')}</ul></div></details></li>`;
 }

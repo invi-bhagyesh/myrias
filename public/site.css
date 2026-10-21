@@ -1429,3 +1429,15 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .load-skel { display: grid; gap: 12px; padding: 24px 0; max-width: 760px; }
 .load-skel i { display: block; height: 56px; border-radius: 16px; background: linear-gradient(90deg, var(--line) 0%, color-mix(in srgb, var(--line) 40%, transparent) 50%, var(--line) 100%); background-size: 200% 100%; opacity: .6; }
 @media (prefers-reduced-motion: no-preference) { .load-skel i { animation: my-shimmer 1.4s ease-in-out infinite; } @keyframes my-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } } }
+
+/* A finding's basis: how it was put together, as numbered steps. */
+.fd-basis { margin: 26px 0 8px; }
+.fd-basis h2 { margin: 0 0 12px; }
+.fd-basis ol { list-style: none; counter-reset: fdb; margin: 0; padding: 0; display: grid; gap: 10px; }
+.fd-basis li { counter-increment: fdb; position: relative; padding: 14px 18px 12px 52px; border-radius: 16px; background: var(--card-bg); border: 1px solid var(--card-line, var(--line)); }
+.fd-basis li::before { content: counter(fdb, decimal-leading-zero); position: absolute; left: 18px; top: 15px; font: 600 12px var(--mono); color: var(--accent); }
+.fd-basis h3 { margin: 0 0 4px; font-size: 15px; }
+.fd-basis p { margin: 0 0 4px; font-size: 14.5px; line-height: 1.55; }
+.fd-basis-why { color: var(--soft); border-left: 2px solid var(--line-strong); padding-left: 10px; }
+.fd-basis-by { font: 11px var(--mono); color: var(--soft); margin-top: 6px !important; }
+.ac-reason { border-left: 2px solid var(--accent); padding-left: 10px; }

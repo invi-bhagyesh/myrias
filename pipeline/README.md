@@ -145,6 +145,13 @@ node pipeline/actions.mjs  --release public/data/release.json
 - **actions** drafts next steps from findings backed by two or more papers. Priority is computed by a fixed
   formula in code, never by the model, and every action stays a draft until someone reviews it.
 
+Every combine step keeps its reason, so the site can show why things were grouped and concluded:
+`reconcile` stores each group's reason on its claims (`reconcile_reason`) and in `reconciled.jsonl.groups.json`;
+`cluster` stores each cluster's reason in `practice-clusters.json`; each finding carries a `basis` (the names joined
+into its practice and why, the counts behind its strength label, and the model's reason for its sentence); each
+action carries a `basis` (the model's reason for the action and its type, and the findings it cites). The finding
+and action pages show them.
+
 For another species, add `--species-name "<common name> (<scientific name>)"` to `findings` and `actions`.
 
 ### 8. Look at it

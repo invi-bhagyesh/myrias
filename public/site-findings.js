@@ -47,6 +47,22 @@ export function findingsListHtml(findings, ctx, { first = 8, rest: showRest = tr
 }
 
 // The page for one finding: the sentence, how it was written, the counts, and every claim under it.
+// How a finding was put together, from its stored basis: which practice names were joined into it and why,
+// why it has its strength label (from the counts, by code), and the model's reason for its sentence.
+export function findingBasisHtml(f, ctx) {
+  const b = f.basis, { tr, lang } = ctx;
+  if (!b) return '';
+  const L = o => (lang === 'zh' ? o.zh || o.en : o.en);
+  const g = b.grouping, s = b.strength;
+  const step = (h, body, by) => `<li><h3>${esc(h)}</h3>${body}${by ? `<p class="fd-basis-by">${esc(by)}</p>` : ''}</li>`;
+  const rows = [];
+  if (g) rows.push(step(tr('fd.basis.group'), `<p>${esc(g.names.length > 1 ? tr('fd.basis.joined', { n: g.names.length, names: g.names.join(', ') }) : tr('fd.basis.alone'))}</p>` +
+    (g.dropped?.length ? `<p class="small-note">${esc(tr('fd.basis.left', { names: g.dropped.join(', ') }))}</p>` : '') + (g.reason ? `<p class="fd-basis-why">${esc(g.reason)}</p>` : ''), g.reason && g.model ? tr('fd.basis.by', { model: g.model }) : ''));
+  if (s) rows.push(step(tr('fd.basis.strength', { s: tr('fd.strength.' + f.strength) }), `<p>${esc(L(s))}</p>`, tr('fd.basis.rule')));
+  if (b.summary) rows.push(step(tr('fd.basis.summary'), `<p class="fd-basis-why">${esc(b.summary)}</p>`, f.written_by?.model ? tr('fd.basis.by', { model: f.written_by.model }) : ''));
+  return rows.length ? `<section class="fd-basis"><h2>${esc(tr('fd.basis.h'))}</h2><ol>${rows.join('')}</ol></section>` : '';
+}
+
 export function findingPageHtml(f, ctx) {
   const { tr, link, lang, taxonomyLabel } = ctx;
   const practice = (lang === 'zh' ? f.practice_zh || f.practice_en : f.practice_en || f.practice_zh) || '';
@@ -57,5 +73,6 @@ export function findingPageHtml(f, ctx) {
       <dt>${esc(tr('fd.class'))}</dt><dd>${esc(taxonomyLabel('technology_classes', f.technology_class))}</dd><dt>${esc(tr('fd.evidence'))}</dt><dd>${esc(meta(f, tr))}${f.counts.measured ? ' · ' + esc(tr('fd.measured', { n: f.counts.measured })) : ''}</dd>
       <dt>${esc(tr('fd.written'))}</dt><dd>${esc(how)}${f.check && f.check !== 'numbers_ok' ? ` <span class="fd-warn">${esc(tr('fd.check.' + f.check))}</span>` : ''}</dd></dl>
     <p class="small-note">${esc(tr('fd.note'))}</p>
+    ${findingBasisHtml(f, ctx)}
     <h2>${esc(tr(f.counts.claims === 1 ? 'fd.claims.h.one' : 'fd.claims.h', { n: n(f.counts.claims) }))}</h2><ol class="fd-claimlist">${claimItemsHtml(f, ctx)}</ol>`;
 }

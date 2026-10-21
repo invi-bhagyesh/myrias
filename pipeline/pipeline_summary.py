@@ -105,8 +105,8 @@ def example(cid):
         'merge': {'uid': claim['uid'], 'id': cid, 'source_id': src['id'], 'run': claim['added_in']['run']},
         'export': {'released': True},
         'cluster': {'names': names.most_common(), 'name': [clustered[cid]['name_en'], clustered[cid]['name_zh']], 'reason': cl.get('reason'), 'model': cl.get('model')},
-        'findings': finding and {k: finding[k] for k in ('id', 'statement_en', 'statement_zh', 'counts', 'strength', 'welfare_problem', 'practice_en', 'practice_zh')},
-        'actions': action and {k: action[k] for k in ('id', 'rank', 'action_en', 'action_zh', 'type', 'who', 'priority', 'evidence_gap', 'risks')},
+        'findings': finding and {k: finding[k] for k in ('id', 'statement_en', 'statement_zh', 'counts', 'strength', 'welfare_problem', 'practice_en', 'practice_zh', 'basis') if k in finding},
+        'actions': action and {k: action[k] for k in ('id', 'rank', 'action_en', 'action_zh', 'type', 'who', 'priority', 'evidence_gap', 'risks', 'basis') if k in action},
     }
 
 out['example'] = example(sys.argv[4] if len(sys.argv) > 4 else 'C0269')

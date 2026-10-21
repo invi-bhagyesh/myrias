@@ -131,7 +131,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const dropM = new Set(r.data.drop_members), dropC = new Set(r.data.drop_claims);
       const kept = members.filter((_, k) => !dropM.has(k));
       for (const m of members) for (const id of m.claim_ids) tested[id] = (kept.includes(m) && !dropC.has(id)) ? pick(m, r.data.name_en, r.data.name_zh) : pick(m);
-      record.push({ name_en: r.data.name_en, name_zh: r.data.name_zh, members: members.map(m => m.key), dropped_members: members.filter((_, k) => dropM.has(k)).map(m => m.key),
+      record.push({ key: pick(members[0], r.data.name_en, r.data.name_zh).key, name_en: r.data.name_en, name_zh: r.data.name_zh, members: members.map(m => m.key), dropped_members: members.filter((_, k) => dropM.has(k)).map(m => m.key),
         dropped_claims: [...dropC].filter(id => members.some(m => m.claim_ids.includes(id))), reason: r.data.reason, model: r.entry.model, version: CLUSTER_VERSION });
     }
   }));

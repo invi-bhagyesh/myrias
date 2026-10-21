@@ -7,17 +7,19 @@
 // passed (quote found, welfare-relevant) and groups only names for the same practice. Each claim keeps
 // its original wording in intervention_original; the group's key and names replace the working ones.
 // Code checks that every name lands in exactly one group; anything the model leaves out stays as it was.
+// Each group carries the model's one-sentence reason for putting the names together; every claim keeps it
+// in reconcile_reason, and the groups are written beside the output (OUT.groups.json).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createClient } from './llm.mjs';
 
-export const RECONCILE_VERSION = 'reconcile-0.1';
+export const RECONCILE_VERSION = 'reconcile-0.2';
 export const RECONCILE_SYSTEM = `You group names of aquaculture practices that refer to the same practice, for one species.
 You get a numbered list of intervention names (Chinese, with an English rendering). Put every number in exactly one group.
 Merge only names for the same practice done the same way. Keep distinct practices apart even when related: starving fish before feed training is not the same as conditioned-reflex training; a live-prey diet is not a formulated feed; a disease is not a treatment.
-For each group give: key (short lowercase English, words joined by hyphens), name_zh (a short Chinese name a fish farmer would use), name_en (a short plain English name).`;
+For each group give: key (short lowercase English, words joined by hyphens), name_zh (a short Chinese name a fish farmer would use), name_en (a short plain English name), and reason: one sentence on why these names are the same practice (for a group of one name, what the practice is).`;
 export const RECONCILE_SCHEMA = { type: 'object', additionalProperties: false, required: ['groups'], properties: { groups: { type: 'array', items: {
-  type: 'object', additionalProperties: false, required: ['key', 'name_zh', 'name_en', 'members'],
-  properties: { key: { type: 'string' }, name_zh: { type: 'string' }, name_en: { type: 'string' }, members: { type: 'array', items: { type: 'integer' } } } } } } };
+  type: 'object', additionalProperties: false, required: ['key', 'name_zh', 'name_en', 'members', 'reason'],
+  properties: { key: { type: 'string' }, name_zh: { type: 'string' }, name_en: { type: 'string' }, members: { type: 'array', items: { type: 'integer' } }, reason: { type: 'string' } } } } } };
 
 const eligible = c => c.quote_check === 'found' && c.map?.welfare_relevant === true && c.intervention;
 export function distinctNames(claims) {
@@ -30,7 +32,7 @@ export function distinctNames(claims) {
 export function knownGroups(storeClaims) {
   const byKey = new Map(), byName = new Map();
   for (const c of storeClaims.filter(c => c.reconcile && c.intervention_key)) {
-    const g = byKey.get(c.intervention_key) || { key: c.intervention_key, name_zh: c.intervention, name_en: c.intervention_en };
+    const g = byKey.get(c.intervention_key) || { key: c.intervention_key, name_zh: c.intervention, name_en: c.intervention_en, reason: c.reconcile_reason || null };
     byKey.set(c.intervention_key, g);
     for (const n of [c.intervention_original, c.intervention]) if (n && !byName.has(n)) byName.set(n, g);
   }
@@ -51,7 +53,8 @@ export function applyGroups(claims, names, groups, known = { byKey: new Map(), b
     const g = byName.get(c.intervention);
     if (!g) return c;
     return { ...c, intervention_original: c.intervention, intervention_en_original: c.intervention_en, intervention_key_original: c.intervention_key,
-      intervention: g.name_zh, intervention_en: g.name_en, intervention_key: g.key.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, ''), reconcile: RECONCILE_VERSION };
+      intervention: g.name_zh, intervention_en: g.name_en, intervention_key: g.key.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, ''), reconcile: RECONCILE_VERSION,
+      reconcile_reason: g.reason || null };
   });
 }
 
@@ -75,13 +78,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     for (const g of r.data.groups) {
       const members = g.members.filter(m => m >= 0 && m < chunk.length).map(m => m + off);
       const have = byKey.get(g.key);
-      if (have) have.members.push(...members); else byKey.set(g.key, { ...g, members });
+      if (have) { have.members.push(...members); have.reason ||= g.reason; } else byKey.set(g.key, { ...g, members });
     }
     console.error(`reconcile: names ${off + chunk.length} of ${names.length}, groups ${byKey.size}`);
   }
   const groups = [...byKey.values()];
   const out = applyGroups(claims, names, groups, known);
   writeFileSync(arg('out'), out.map(c => JSON.stringify(c)).join('\n') + '\n');
+  writeFileSync(`${arg('out')}.groups.json`, JSON.stringify(groups.map(g => ({ key: g.key, name_en: g.name_en, name_zh: g.name_zh, reason: g.reason,
+    names: g.members.map(m => names[m]).filter(Boolean), version: RECONCILE_VERSION })), null, 1) + '\n');
   const assigned = new Set(groups.flatMap(g => g.members));
   console.log({ known_groups: known.byKey.size, names_known: distinctNames(claims).length - names.length, new_names: names.length, groups: groups.length,
     joined_existing: groups.filter(g => known.byKey.has(g.key)).length, unassigned: names.filter((_, i) => !assigned.has(i)).length, spent_usd: client.spent });

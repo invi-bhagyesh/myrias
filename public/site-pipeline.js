@@ -127,12 +127,15 @@ function exampleHtml(key, e, c) {
       return `<a class="ex-claim ex-finding" href="${c.link('findings/' + encodeURIComponent(f.id))}"><span class="ex-k">${esc(f.id)} · ${esc(L(f.practice_en, f.practice_zh))} × ${esc(c.taxonomyLabel('welfare_problems', f.welfare_problem))}</span>
         <span class="ex-verdict v-${esc(f.strength)}">${esc(c.tr('fd.strength.' + f.strength))}</span><b>${esc(L(f.statement_en, f.statement_zh))}</b>
         <span class="ex-nums"><span><strong>${f.counts.claims}</strong>${esc(L('claims', '条论断'))}</span><span><strong>${f.counts.papers}</strong>${esc(L('papers', '篇论文'))}</span><span><strong>${f.counts.measured}</strong>${esc(L('measured', '条实测'))}</span><span><strong>${f.counts.opposing}</strong>${esc(L('against', '条反对'))}</span></span>
-        <span class="ex-open">${esc(L('Open the finding and all its claims', '打开该发现及其全部论断'))} →</span></a>`; }
+        <span class="ex-open">${esc(L('Open the finding and all its claims', '打开该发现及其全部论断'))} →</span></a>` +
+        (f.basis?.strength ? `<p class="ex-k">${esc(L('Why this label (by code): ', '为何是这个标签（代码判定）：') + L(f.basis.strength.en, f.basis.strength.zh))}</p>` : '') +
+        (f.basis?.summary ? `<details class="ex-why"><summary>${esc(L('Why the model summarised it this way', '模型为何这样概括'))}</summary><p>${esc(f.basis.summary)}</p></details>` : ''); }
     case 'actions': { const a = e.actions; if (!a) return '';
       const p = a.priority;
       return `<a class="ex-claim ex-action" href="${c.link('actions')}"><span class="ex-k">${esc(a.id)} · ${esc(L('rank', '排名'))} ${a.rank} · ${esc(L(a.who, a.who))}</span><b>${esc(L(a.action_en, a.action_zh))}</b></a>` +
         `<div class="ex-formula"><span>${esc(L('priority', '优先级'))}</span><b>${p.score.toFixed(2)}</b><span>=</span><span>0.6 × <b>${p.evidence.toFixed(2)}</b><i>${esc(L('evidence', '证据'))}</i></span><span>+</span><span>0.4 × <b>${p.actionability.toFixed(1)}</b><i>${esc(L(a.type, a.type))}</i></span></div>` +
-        `<p class="ex-k">${esc(L('Computed by code, not by the model. Still a draft until reviewed.', '由代码计算，而非模型给出；审核前仍为草案。'))}</p>`; }
+        `<p class="ex-k">${esc(L('Computed by code, not by the model. Still a draft until reviewed.', '由代码计算，而非模型给出；审核前仍为草案。'))}</p>` +
+        (a.basis?.reason ? `<details class="ex-why"><summary>${esc(L('Why the model proposed it', '模型为何提出'))}</summary><p>${esc(a.basis.reason)}</p></details>` : ''); }
     case 'audit': return `<div class="ex-todo"><p>${esc(L(`An expert opens page ${e.prepare.page} of ${e.source_id}, reads the quote, and marks ${e.claim_id}, ${e.findings?.id || ''} and ${e.actions?.id || ''} right or wrong.`, `专家打开 ${e.source_id} 第 ${e.prepare.page} 页，阅读引文，判断 ${e.claim_id}、${e.findings?.id || ''} 和 ${e.actions?.id || ''} 是否正确。`))}</p>
         <p class="ex-k">${esc(L('Not started. Until then, everything here is a lead to check.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'))}</p></div>`;
     default: return '';

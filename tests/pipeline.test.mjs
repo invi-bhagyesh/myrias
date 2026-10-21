@@ -520,3 +520,31 @@ test('actions: priority comes from cited findings and type by a fixed formula', 
   assert.ok(priority('adopt', [strong]).score > priority('research', [strong]).score);
   assert.ok(priority('test_on_farms', [strong]).score > priority('test_on_farms', [thin]).score);
 });
+
+test('basis: every combine step keeps why it grouped or concluded what it did', async () => {
+  const R = await import('../pipeline/reconcile.mjs');
+  const F = await import('../pipeline/findings.mjs');
+  const A = await import('../pipeline/actions.mjs');
+  // Schemas ask the model for a reason at naming, findings and actions; clustering already did.
+  for (const s of [R.RECONCILE_SCHEMA.properties.groups.items, F.FINDINGS_SCHEMA, A.ACTIONS_SCHEMA.properties.actions.items]) assert.ok(s.required.includes('reason'));
+  // Naming: each claim carries its group's reason, and a known group passes its reason on.
+  const c = iv => ({ quote_check: 'found', map: { welfare_relevant: true }, intervention: iv, intervention_en: iv });
+  const names = R.distinctNames([c('a'), c('b')]);
+  const out = R.applyGroups([c('a'), c('b')], names, [{ key: 'ab', name_en: 'ab', name_zh: 'ab', members: [0, 1], reason: 'same feed training' }]);
+  assert.ok(out.every(x => x.reconcile_reason === 'same feed training'));
+  const known = R.knownGroups(out.map(x => ({ ...x, reconcile: x.reconcile })));
+  assert.equal(R.applyGroups([c('a')], [], [], known)[0].reconcile_reason, 'same feed training');
+  // Strength: explained from the counts, in both languages, for every label.
+  const counts = { claims: 12, papers: 7, measured: 9, supportive: 1, opposing: 11, descriptive: 0 };
+  const sb = F.strengthBasis({ counts, strength: 'against' });
+  assert.match(sb.en, /12 claims that take a side: 1 in favour, 11 against/);
+  assert.ok(sb.zh.includes('12') && sb.rule);
+  for (const s of ['one_paper', 'described', 'agree', 'mixed']) assert.ok(F.strengthBasis({ counts, strength: s }).en);
+  // Grouping: the cluster behind a practice, with the names kept and left out, found by the practice key.
+  const practices = { C1: { key: 'water_systems|water temperature regulation' } };
+  const clusters = [{ name_en: 'water temperature regulation', members: ['water_systems|high-temperature farming', 'water_systems|water temperature control', 'water_systems|ammonia'],
+    dropped_members: ['water_systems|ammonia'], reason: 'all set the temperature', model: 'm' }];
+  assert.deepEqual(F.groupingBasis(['C1'], practices, clusters), { names: ['high-temperature farming', 'water temperature control'], dropped: ['ammonia'], reason: 'all set the temperature', model: 'm' });
+  assert.deepEqual(F.groupingBasis(['C1'], { C1: { key: 'feeds|live prey' } }, clusters), { names: [], reason: null, model: null });
+  assert.equal(F.groupingBasis(['C1'], null, clusters), null);
+});

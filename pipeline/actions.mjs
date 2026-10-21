@@ -11,12 +11,14 @@
 //   actionability = by type: adopt 1.0, avoid 1.0, test on farms 0.8, monitor 0.6, research 0.4
 //   priority      = 0.6 x evidence + 0.4 x actionability
 // Every action is a draft until an expert reviews it, and the site says so on each one.
+// Each action keeps its basis: the model's reason for the action and its type (basis.reason), and the
+// findings it cites with their strength and counts (basis.findings), so the site can show why it exists.
 // Output: release-actions.json beside the release, listed in action_files.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, basename, join } from 'node:path';
 import { createClient } from './llm.mjs';
 
-export const ACTIONS_VERSION = 'actions-0.1';
+export const ACTIONS_VERSION = 'actions-0.2';
 export const ACTION_TYPES = ['adopt', 'avoid', 'test_on_farms', 'monitor', 'research'];
 export const ACTIONS_SYSTEM = `You propose practical next steps for the welfare of one farmed fish species, from a set of research findings about one kind of technology.
 Each finding says what several papers found about one practice and one welfare problem, and how strongly they agree.
@@ -29,11 +31,12 @@ For each action give:
 - evidence_gap: what is not yet known, in one sentence.
 - risks: what could go wrong or what it costs the fish or the farm, in one sentence.
 - finding_ids: the findings it rests on.
+- reason: one or two sentences on why these findings lead to this action and this type: what in them points this way, and what held you back from a stronger type.
 No hype, no recommendations the findings do not support.`;
 export const ACTIONS_SCHEMA = { type: 'object', additionalProperties: false, required: ['actions'], properties: { actions: { type: 'array', items: {
-  type: 'object', additionalProperties: false, required: ['action_en', 'action_zh', 'type', 'who', 'evidence_gap', 'risks', 'finding_ids'],
+  type: 'object', additionalProperties: false, required: ['action_en', 'action_zh', 'type', 'who', 'evidence_gap', 'risks', 'finding_ids', 'reason'],
   properties: { action_en: { type: 'string' }, action_zh: { type: 'string' }, type: { type: 'string', enum: ACTION_TYPES }, who: { type: 'string', enum: ['farmers', 'feed makers', 'vets', 'researchers', 'policy'] },
-    evidence_gap: { type: 'string' }, risks: { type: 'string' }, finding_ids: { type: 'array', items: { type: 'string' } } } } } } };
+    evidence_gap: { type: 'string' }, risks: { type: 'string' }, finding_ids: { type: 'array', items: { type: 'string' } }, reason: { type: 'string' } } } } } };
 
 const AGREE = { agree: 1, against: 1, mixed: 0.4, described: 0.2, one_paper: 0.1 };
 const DOABLE = { adopt: 1, avoid: 1, test_on_farms: 0.8, monitor: 0.6, research: 0.4 };
@@ -68,7 +71,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const cited = a.finding_ids.filter(id => fs.some(f => f.id === id));
       if (!cited.length) continue;
       const fsCited = cited.map(id => byId.get(id));
-      out.push({ technology_class: cls, species_id: fsCited[0].species_id, ...a, finding_ids: cited,
+      const { reason, ...act } = a;
+      out.push({ technology_class: cls, species_id: fsCited[0].species_id, ...act, finding_ids: cited,
+        basis: { reason: reason || null, findings: fsCited.map(f => ({ id: f.id, practice_en: f.practice_en, practice_zh: f.practice_zh, welfare_problem: f.welfare_problem, strength: f.strength, papers: f.counts.papers, claims: f.counts.claims, measured: f.counts.measured })) },
         claim_ids: [...new Set(fsCited.flatMap(f => f.claim_ids))], welfare_problems: [...new Set(fsCited.map(f => f.welfare_problem))],
         priority: priority(a.type, fsCited), status: 'draft', written_by: { model: r.entry.model, version: ACTIONS_VERSION } });
     }

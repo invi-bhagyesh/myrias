@@ -294,7 +294,27 @@
    "strength": "against",
    "welfare_problem": "water_quality",
    "practice_en": "water temperature regulation",
-   "practice_zh": "水温调控"
+   "practice_zh": "水温调控",
+   "basis": {
+    "grouping": {
+     "names": [
+      "high-temperature farming",
+      "low-temperature farming",
+      "temperature stress",
+      "water temperature control",
+      "water temperature monitoring"
+     ],
+     "dropped": [],
+     "reason": "All members concern managing or setting rearing water temperature (high, low, controlled, monitored) for mandarin fish, so they are one practice; only the liver pathology claim C0276 and viral load claim C0422 are not about temperature management itself.",
+     "model": "anthropic/claude-sonnet-5.5"
+    },
+    "strength": {
+     "en": "Of 12 claims that take a side: 1 in favour, 11 against or no effect. At least 80% point one way.",
+     "zh": "12 条有明确倾向的论断中，1 条支持，11 条反对或无效果，至少 80% 指向同一方向。",
+     "rule": "one paper; described if more claims describe than take a side; agree or against at 80% or more one way; otherwise mixed"
+    },
+    "summary": null
+   }
   },
   "actions": {
    "id": "X001",
