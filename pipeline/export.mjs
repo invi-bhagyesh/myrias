@@ -2,7 +2,7 @@
 // quote-checked and judged supported or partial by the verifier are released. Suggested actions are
 // not exported here: they stay drafts until a person has reviewed them.
 //   node pipeline/export.mjs --claims claims-final.jsonl --base public/data/release.json --meta pipeline/sources-meta.json --out public/data/release.json
-//   node pipeline/export.mjs --store STORE_DIR --base public/data/release.json --out public/data/release.json
+//   node pipeline/export.mjs --store STORE_DIR --base public/data/release.json --out public/data/release.json [--species-id mandarin-fish]
 // With --store the release is built from the species store (pipeline/merge.mjs): every claim that has
 // passed in any run, with public ids that never change, paper details from the intake records, and one
 // changelog line per merge.
@@ -94,7 +94,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const store = arg('store') ? readStore(arg('store')) : null;
   const claims = store ? store.claims : readFileSync(arg('claims'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
   const models = [...new Set(claims.flatMap(c => [c.model && `${c.model} (extract)`, c.map?.model && `${c.map.model} (map)`, c.verify?.model && `${c.verify.model} (verify)`, c.rendering?.model && `${c.rendering.model} (render)`]).filter(Boolean))];
-  const rel = buildRelease({ claims, store, base: JSON.parse(readFileSync(arg('base'), 'utf8')), meta: arg('meta') ? JSON.parse(readFileSync(arg('meta'), 'utf8')) : {}, models });
+  const rel = buildRelease({ speciesId: arg('species-id') || undefined, claims, store, base: JSON.parse(readFileSync(arg('base'), 'utf8')), meta: arg('meta') ? JSON.parse(readFileSync(arg('meta'), 'utf8')) : {}, models });
   const errors = validateExport(rel);
   if (errors.length) { console.error(errors.slice(0, 20).join('\n')); process.exit(1); }
   // Claims go in numbered files beside the release, each under 350 KB, so no single file is large;
