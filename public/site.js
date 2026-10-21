@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
-import { STAGES, LANES, STEP_TEXT } from './site-pipeline.js';
+import { pipelineHtml, mountPipeline } from './site-pipeline.js';
 import { matrixChart } from './site-chart.js';
 
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
@@ -106,49 +106,14 @@ function issueLink(title, body) {
 }
 
 // ---------- views ----------
-// The pipeline as a diagram: four lanes of numbered steps, each with what came out, whether a model or
-// plain code did it. Click a step for what it does and how it is checked. The run settings
-// and the older per-layer notes are folded below.
+// The pipeline: the framework in four phases, then a walkthrough of one real claim, step by step (see
+// site-pipeline.js). The run settings are folded below.
 function viewPipeline() {
-  const i = state.lang === 'zh' ? 1 : 0, P = state.pipeline;
-  const n = x => (x === null || x === undefined ? '—' : Number(x).toLocaleString());
-  const short = m => (m ? m.split('/').pop() : '');
-  let diagram = '';
-  if (P) {
-    const card = st => {
-      const t = STEP_TEXT[st.key] || { name: [st.key, st.key], what: ['', ''], how: ['', ''] };
-      const outNum = n(st.out), outLabel = t.out ? t.out[i] : '';
-      return `<li class="pl-step ${st.model ? 'k-model' : 'k-code'}${st.status === 'planned' ? ' is-planned' : ''}"><button type="button" class="pl-card" aria-expanded="false" data-pl>
-          <span class="pl-num">${String(st.id).padStart(2, '0')}</span><span class="pl-name">${esc(t.name[i])}</span>
-          ${st.status === 'planned' ? `<span class="pl-out pl-planned">${esc(tr('pl.planned'))}</span>` : `<strong class="pl-out">${esc(outNum)}</strong><span class="pl-outl">${esc(outLabel)}</span>`}
-          ${st.in !== null && st.in !== undefined && t.in ? `<span class="pl-in">${esc(tr('pl.from', { n: n(st.in), what: t.in[i] }))}</span>` : ''}
-          <span class="pl-tag">${st.model ? `<i class="pl-dot"></i>${esc(short(st.model))}` : esc(tr(st.status === 'planned' ? 'pl.people' : 'pl.code'))}</span></button>
-        <div class="pl-detail" hidden><p>${esc(t.what[i])}</p><p class="small-note">${esc(t.how[i])}</p>${st.calls ? `<p class="small-note">${esc(tr('pl.calls', { n: n(st.calls) }))}</p>` : ''}</div></li>`;
-    };
-    const lanes = LANES.map(([id, label], k) => `<section class="pl-lane"><h3 class="pl-lane-h"><span>${String(k + 1).padStart(2, '0')}</span>${esc(label[i])}</h3><div><ol class="pl-steps">${P.steps.filter(s => s.lane === id).map(card).join('')}</ol><div class="pl-panel" data-pl-panel hidden></div></div></section>`).join('');
-    const sum = id => P.steps.find(s => s.key === id);
-    const tiles = [[n(P.steps.length), tr('pl.t.steps')], [n(P.totals.calls), tr('pl.t.calls')],
-      [`${n(sum('export')?.out)} → ${n(sum('findings')?.out)} → ${n(sum('actions')?.out)}`, tr('pl.t.chain')]];
-    diagram = `<div class="pl-top"><ul class="corpus-tiles pl-tiles">${tiles.map(([v, l]) => `<li><strong>${esc(v)}</strong><span>${esc(l)}</span></li>`).join('')}</ul>
-        <img class="pl-art" src="art/pipeline.webp" alt="" width="1014" height="824" decoding="async" onerror="this.remove()"></div>
-      <p class="pl-key"><span><i class="pl-dot"></i>${esc(tr('pl.key.model'))}</span><span><i class="pl-sq"></i>${esc(tr('pl.key.code'))}</span><span>${esc(tr('pl.key.click'))}</span><span class="pl-asof">${esc(tr('pl.asof', { run: P.run, d: P.as_of }))}</span></p>
-      <div class="pl-lanes">${lanes}</div>`;
-  }
-  const stages = STAGES.map(st => `<article class="pipe-stage st-${st.status}"><div class="pipe-id"><span>${esc(st.id)}</span></div>
-    <div class="pipe-body"><div class="pipe-head"><h3>${esc(st.name[i])}</h3><span class="pipe-badge">${esc(tr('pipe.status.' + st.status))}</span></div>
-      <p class="pipe-what">${esc(st.what[i])}</p></div></article>`).join('');
-  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pl.lead')) + diagram +
-      `<details class="pl-fold"><summary>${esc(tr('pl.fold.runs'))}</summary>${nextRunHtml(state.nextRun)}</details>` +
-      `<details class="pl-fold"><summary>${esc(tr('pl.fold.layers'))}</summary><div class="pipe-flow">${stages}</div></details>`,
-    // A step's details open in one panel under its lane, so the row of cards keeps its height.
-    mount: root => root.querySelectorAll('[data-pl]').forEach(b => b.addEventListener('click', () => {
-      const lane = b.closest('.pl-lane'), panel = lane.querySelector('[data-pl-panel]'), open = b.getAttribute('aria-expanded') === 'true';
-      lane.querySelectorAll('[data-pl]').forEach(x => x.setAttribute('aria-expanded', 'false'));
-      if (open) { panel.hidden = true; return; }
-      b.setAttribute('aria-expanded', 'true');
-      panel.innerHTML = `<p class="pl-panel-h">${b.querySelector('.pl-num').textContent} · ${b.querySelector('.pl-name').textContent}</p>` + b.nextElementSibling.innerHTML;
-      panel.hidden = false;
-    })) };
+  const P = state.pipeline, start = Number(parseHash().params.get('step')) || 1;
+  const body = P ? pipelineHtml(P, { lang: state.lang, tr, link, taxonomyLabel }) : '';
+  return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pl.lead')) + body +
+      `<details class="pl-fold"><summary>${esc(tr('pl.fold.runs'))}</summary>${nextRunHtml(state.nextRun)}</details>`,
+    mount: root => mountPipeline(root, { start, onStep: k => history.replaceState(null, '', link('pipeline', k > 1 ? { step: k } : {})) }) };
 }
 
 // The planned run and its settings, from data/next-run.json. Nothing here has been run.
@@ -698,7 +663,7 @@ function render(navigated = false) {
 // Sections, pipeline lanes and list groups fade in as they reach the screen, so each reads as its own block.
 function setupReveal() {
   if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const els = [...document.querySelectorAll('#content .sp-sec, #content .pl-lane, #content .br-group, #content .corpus-tree, #content .cv-two')];
+  const els = [...document.querySelectorAll('#content .sp-sec, #content .fw-over, #content .fw-walk, #content .br-group, #content .corpus-tree, #content .cv-two')];
   const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }, { rootMargin: '0px 0px -8% 0px' });
   for (const el of els) { if (el.getBoundingClientRect().top < innerHeight) continue; el.classList.add('reveal'); io.observe(el); }
   observers.push(io);

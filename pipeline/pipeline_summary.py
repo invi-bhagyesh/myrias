@@ -3,7 +3,7 @@
 model or plain code did it, and how many model calls it made. Everything is read from the run folder, the species store and
 the release; nothing is typed in by hand.
 
-  python3 pipeline/pipeline_summary.py RUN_DIR STORE_DIR public/data
+  python3 pipeline/pipeline_summary.py RUN_DIR STORE_DIR public/data [EXAMPLE_CLAIM_ID]
 """
 import json, os, sys, collections
 
@@ -67,3 +67,47 @@ total = sum(cost.values()) + (phase_a.get('spent_usd') or 0)
 out = {'run': os.path.basename(run), 'as_of': ledger[-1]['finished'][:10], 'steps': steps, 'totals': {'calls': sum(calls.values())}}
 json.dump(out, open(os.path.join(data, 'pipeline.json'), 'w'), indent=1)
 print(json.dumps(out['totals']), len(steps), 'steps', 'model cost (not published):', round(total, 2))
+
+# One claim followed through every step, for the walkthrough on the Pipeline page. Everything is read from
+# the run, the store and the release: the paper's record, its pages, the model's own labels and verdict,
+# the practice names before and after clustering, and the finding and action it ends up in. Only the short
+# quote the site already shows is copied; no other paper text.
+def example(cid):
+    base = os.path.dirname(store)
+    claim = next((c for c in jl(os.path.join(store, 'claims.jsonl')) if c.get('release_id') == cid), None)
+    if not claim: return None
+    rec = next((r for r in jl(os.path.join(base, 'intake', 'records.jsonl')) if r['id'] == claim['source']), {})
+    pages = sum(1 for p in jl(os.path.join(B, '01-prepare', 'pages.jsonl')) if p['source'] == claim['source'])
+    ext_all = [c for c in jl(os.path.join(B, '02-extract', 'claims.jsonl')) if c['source'] == claim['source']]
+    windows = sum(1 for t in jl(os.path.join(B, '02-extract', 'tasks.jsonl')) if t.get('source') == claim['source'])
+    pub = next(c for f in rel['claim_files'] for c in js(os.path.join(data, f)) if c['id'] == cid)
+    src = next(s for s in rel['sources'] if s['id'] == pub['source_id'])
+    exact, clustered = js(os.path.join(store, 'practices-exact.json')), js(os.path.join(store, 'practices.json'))
+    key = clustered[claim['release_id']]['key']
+    names = collections.Counter(exact[c]['name_en'] for c in clustered if clustered[c]['key'] == key and c in exact)
+    cl = next((c for c in js(os.path.join(store, 'practice-clusters.json'))['clusters'] if key.split('|', 1)[1] == c['name_en'].lower() and key.split('|')[0] == c['members'][0].split('|')[0]), {})
+    finding = next((f for f in findings if cid in f['claim_ids'] and f['welfare_problem'] == claim['map']['welfare_problem']), None) or next((f for f in findings if cid in f['claim_ids']), None)
+    action = next((a for a in sorted(actions, key=lambda a: a['rank']) if finding and finding['id'] in a['finding_ids']), None)
+    nums = sorted(set(re.findall(r'\d+(?:\.\d+)?', claim['statement'])), key=lambda x: claim['statement'].index(x))
+    return {
+        'claim_id': cid, 'source_id': src['id'], 'title': src['title'], 'year': src['year'], 'venue': src.get('venue'), 'doi': src.get('doi'),
+        'search': {'indexes': rec.get('sources', []), 'found_of': h['papers_found']},
+        'screen': {'species_in_title': rec.get('species_in_title'), 'topics': rec.get('topics', [])},
+        'fetch': {'format': rec.get('fetched')},
+        'prepare': {'pages': pages, 'page': claim['page']},
+        'extract': {'windows': windows, 'claims_from_paper': len(ext_all), 'window': claim['window'], 'quote': claim['quote'], 'statement': claim['statement'],
+                    'lang': pub['quote_lang'], 'intervention': claim['intervention_original'], 'basis': claim['basis'], 'polarity': claim['polarity'], 'model': claim['model']},
+        'quote': {'check': claim['quote_check'], 'page': claim['page'], 'found_in_paper': sum(1 for c in ext_all if c.get('quote_check') == 'found')},
+        'map': {k: claim['map'][k] for k in ('welfare_relevant', 'technology_class', 'welfare_problem', 'kind', 'welfare_link', 'reason', 'model')},
+        'verify': {'verdict': claim['verify']['verdict'], 'note': claim['verify'].get('note'), 'model': claim['verify']['model']},
+        'render': {'text_en': claim['statement_en'], 'numbers': nums, 'check': claim['rendering']['check'], 'model': claim['rendering']['model']},
+        'reconcile': {'before': [claim['intervention_original'], claim.get('intervention_en_original')], 'after': [exact[cid]['name_en'], exact[cid]['name_zh']]},
+        'merge': {'uid': claim['uid'], 'id': cid, 'source_id': src['id'], 'run': claim['added_in']['run']},
+        'export': {'released': True},
+        'cluster': {'names': names.most_common(), 'name': [clustered[cid]['name_en'], clustered[cid]['name_zh']], 'reason': cl.get('reason'), 'model': cl.get('model')},
+        'findings': finding and {k: finding[k] for k in ('id', 'statement_en', 'statement_zh', 'counts', 'strength', 'welfare_problem', 'practice_en', 'practice_zh')},
+        'actions': action and {k: action[k] for k in ('id', 'rank', 'action_en', 'action_zh', 'type', 'who', 'priority', 'evidence_gap', 'risks')},
+    }
+
+out['example'] = example(sys.argv[4] if len(sys.argv) > 4 else 'C0269')
+json.dump(out, open(os.path.join(data, 'pipeline.json'), 'w'), indent=1, ensure_ascii=False)

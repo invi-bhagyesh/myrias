@@ -242,19 +242,32 @@ test('the live release validates, is not a sample, and has enough claims for the
   assert.ok(g.nodes.some(n => n.type === 'claim'));
 });
 
-import { STAGES, funnel } from '../public/site-pipeline.js';
-test('pipeline tab: stages are bilingual, models match the demo profile, funnel comes from the release counts', () => {
+import { STEP_TEXT, LANES, PHASE_TEXT, pipelineHtml } from '../public/site-pipeline.js';
+test('pipeline page: every step is bilingual, models match the demo profile, the example is followed through every step', () => {
+  const P = read('pipeline.json');
   const cfg = JSON.parse(readFileSync(new URL('../pipeline/models.json', import.meta.url), 'utf8')).profiles.demo;
-  const byStage = { L2: 'profile', L3: 'map', L4: 'extract', L5: 'verify', L6: 'map', L7: 'reconcile', S: 'suggest' };
-  for (const st of STAGES) {
-    for (const f of ['name', 'what', 'how', 'out']) assert.ok(st[f][0] && st[f][1], `${st.id}.${f}`);
-    assert.ok(['built', 'partial', 'planned'].includes(st.status));
-    if (byStage[st.id]) assert.equal(st.model, cfg[byStage[st.id]].model, st.id);
+  for (const st of P.steps) {
+    const t = STEP_TEXT[st.key];
+    assert.ok(t, st.key);
+    for (const f of ['name', 'what', 'how']) assert.ok(t[f][0] && t[f][1], `${st.key}.${f}`);
+    assert.ok(LANES.some(([id]) => id === st.lane), st.lane);
+    if (st.model) assert.equal(st.model, cfg[{ render: 'translate' }[st.key] || st.key].model, st.key);
   }
-  const f = funnel(live.runs[0]);
-  assert.deepEqual(f.map(x => x.key), ['documents_collected', 'documents_processed', 'claims_extracted', 'claims_quote_found', 'claims_relevant', 'claims_released']);
-  assert.ok(f.every((x, i) => i === 0 || x.value <= f[i - 1].value || x.key === 'claims_extracted'));
-  assert.equal(funnel(null).length, 0);
+  for (const [id] of LANES) assert.ok(PHASE_TEXT[id][0] && PHASE_TEXT[id][1]);
+  const live = read('release.json');
+  const tx = (kind, id) => (live.taxonomy[kind].find(x => x.id === id) || {}).en || id;
+  for (const lang of ['en', 'zh']) {
+    const html = pipelineHtml(P, { lang, tr: (k, v) => t(lang, k, v), link: p => '#/' + p, taxonomyLabel: tx });
+    assert.equal((html.match(/data-step="/g) || []).length, P.steps.length);
+    assert.ok(!/undefined|NaN|\[object/.test(html), lang);
+    assert.ok(html.includes(P.example.claim_id) && html.includes(P.example.findings.id) && html.includes(P.example.actions.id));
+  }
+  // The example is a released claim, and the finding and action it shows really contain it.
+  const claims = live.claim_files.flatMap(f => read(f)), findings = live.finding_files.flatMap(f => read(f)), actions = live.action_files.flatMap(f => read(f));
+  const c = claims.find(x => x.id === P.example.claim_id);
+  assert.ok(c && c.quote === P.example.extract.quote && c.locator.page === P.example.prepare.page);
+  assert.ok(findings.find(f => f.id === P.example.findings.id).claim_ids.includes(c.id));
+  assert.ok(actions.find(a => a.id === P.example.actions.id).finding_ids.includes(P.example.findings.id));
 });
 
 test('evidence map: every intervention is placed, empty classes and problems stay on the map', async () => {

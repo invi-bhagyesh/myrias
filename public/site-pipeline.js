@@ -1,64 +1,7 @@
-// The pipeline, stage by stage, for the Pipeline tab. Models are the demo profile in pipeline/models.json
-// (a test checks they stay in step). status: built, partial, planned.
-export const STAGES = [
-  { id: 'L1', status: 'partial', name: ['Intake', '收集'],
-    what: ['Collect the papers for one species and keep a record of every file.', '收集某一物种的论文，并记录每个文件。'],
-    how: ['Files are supplied by hand today. Automatic discovery of new papers is not built.', '目前由人工提供文件，尚未实现自动发现新论文。'],
-    model: null, out: ['A list of source files with page counts.', '带页数的来源文件清单。'] },
-  { id: 'L1b', status: 'built', name: ['Normalize', '规范化'],
-    what: ['Turn each PDF into text with a page marker before every page, and report what could not be read.', '把每个 PDF 转成带页码标记的文本，并报告无法读取之处。'],
-    how: ['PyMuPDF reads the text layer. Where the layer is missing digits or garbled, pages are transcribed from images by hand. OCR with a vision model is prepared but not used.', 'PyMuPDF 读取文本层；文本层缺数字或乱码的页面，由人工看图转写。已备好视觉模型 OCR，但尚未使用。'],
-    model: null, out: ['Markdown per paper and a conversion report.', '每篇论文一份 Markdown，以及转换报告。'],
-    check: ['The report counts empty pages, missing digits and known glyph glitches.', '报告统计空白页、缺失数字和已知字形问题。'] },
-  { id: 'L1c', status: 'built', name: ['Deduplicate', '去重'],
-    what: ['Drop duplicate papers before any model call: the same text, or the same title under another file name.', '在调用任何模型之前剔除重复论文：正文相同，或同一标题换了文件名。'],
-    how: ['Plain code. The first copy is kept and every drop is reported with its reason.', '普通代码。保留第一份，并说明每一份被剔除的原因。'],
-    model: null, out: ['The list of papers kept and dropped.', '保留与剔除的论文清单。'] },
-  { id: 'L2', status: 'partial', name: ['Profile', '画像'],
-    what: ['Describe each paper: species, language, study design.', '描述每篇论文：物种、语言、研究设计。'],
-    how: ['A model stage is configured but was not run for the demo.', '已配置模型阶段，演示中未运行。'],
-    model: 'deepseek/deepseek-v4.1-flash', out: ['A profile per paper.', '每篇论文的画像。'] },
-  { id: 'L3', status: 'partial', name: ['Screen', '筛选'],
-    what: ['Decide whether a passage or claim concerns welfare technology at all.', '判断某段文字或论断是否涉及福利技术。'],
-    how: ['In the demo this is folded into the Map step: breeding doses and basic biology are marked not relevant.', '演示中并入“归类”步骤：与福利无关的繁殖剂量和基础生物学被标为不相关。'],
-    model: 'qwen/qwen3.8-flash', out: ['A relevance flag.', '相关性标记。'] },
-  { id: 'L4', status: 'built', name: ['Extract', '提取'],
-    what: ['Pull out each claim with a verbatim quote and a one-sentence English statement.', '提取每条论断，附原文引文和一句英文陈述。'],
-    how: ['Each paper is read in overlapping windows (1,800 characters, 300 overlapping) that remember their pages, so a claim that crosses a page break is seen whole; duplicates from the overlaps are merged. Each claim separates what the study measured from what it claims, attributes to others, infers or proposes, and records whether the evidence points for, against, or finds no effect, plus stated limitations and counterevidence. Every window is a checkpointed task: a stopped run resumes where it left off, and a run with changed settings cannot mix into an old one. Model reasoning is off here, because it used up the output budget. The current release was extracted with the earlier version, one page per call.', '每篇论文按带页码的重叠窗口读取（1800 字，重叠 300 字），跨页的论断也能完整读到；重叠产生的重复会被合并。每条论断区分研究实测、仅有陈述、引自他人、作者推断和设想，并记录证据是支持、反对还是未发现效果，以及文中所述的局限和反证。每个窗口都是有检查点的任务：中断后可接着运行，设置改变后不会与旧结果混在一起。此处关闭模型推理，因为推理会耗尽输出额度。当前发布使用的是旧版（每页一次调用）。'],
-    model: 'qwen/qwen3.8-flash', out: ['Claims written in the source language, which is the record: quote, statement, intervention and its key, basis, polarity, limitations, counterevidence, page. Nothing is translated here.', '以来源语言写成的论断（即原始记录）：引文、陈述、干预措施及其标签、依据类型、证据倾向、局限、反证、页码。此阶段不做任何翻译。'],
-    check: ['The quote must appear in its window (next stage).', '引文必须出现在其窗口中（见下一阶段）。'] },
-  { id: 'L5', status: 'built', name: ['Verify', '核验'],
-    what: ['Check that the quote is really on the page, then that it supports the record statement, in the same language.', '先核对引文确在该页，再用同一种语言核对它是否支持记录中的陈述。'],
-    how: ['First a deterministic text match that ignores spacing, punctuation width and known glyph errors. Then a second model, from a different lab than the extractor, judges supported, partial or unsupported from the quote alone.', '先做确定性的文本比对（忽略空格、标点宽度和已知字形错误）；再由与提取模型不同厂商的第二个模型，仅根据引文判断“支持、部分支持、不支持”。'],
-    model: 'z-ai/glm-5.3', out: ['A verdict per claim; claims whose quote is not on the page are dropped.', '每条论断一个结论；引文不在该页的论断被剔除。'],
-    check: ['The match can only reject, never wrongly accept a quote.', '文本比对只会拒绝，不会错误放行引文。'] },
-  { id: 'L5b', status: 'built', name: ['Render in English', '英文呈现'],
-    what: ['Give each claim an English view beside its record. The Chinese original stays the record; English never replaces it.', '为每条论断在原始记录旁提供英文视图。中文原文始终是记录，英文不会取代它。'],
-    how: ['A model translates the record statement and intervention name. Code then checks that every number in the record (including 万 and ranges) appears in the English. A rendering that fails is not shown; the site shows the record instead. Each rendering keeps its model and version.', '由模型翻译记录中的陈述和干预名称，再由代码核对记录中的每个数字（包括“万”和区间）都出现在英文中。未通过核对的译文不展示，网站改为显示原始记录。每条译文都保留所用模型和版本。'],
-    model: 'qwen/qwen3.8-flash', out: ['An English rendering with provenance and a number check, stored beside the record.', '附来源信息和数字核对结果的英文译文，与原始记录并存。'],
-    check: ['Verification and mapping read the record, not the rendering, so a verdict never depends on a translation.', '核验与归类读取的是原始记录而非译文，因此结论不受翻译影响。'] },
-  { id: 'L6', status: 'built', name: ['Map', '归类'],
-    what: ['Place each claim on the map: technology class, welfare problem, kind of claim, link to welfare, strength of evidence.', '把每条论断放到地图上：技术类别、福利问题、论断类型、与福利的关联、证据强度。'],
-    how: ['One call per claim, answers limited to the fixed taxonomy.', '每条论断一次调用，答案限定在固定分类之内。'],
-    model: 'qwen/qwen3.8-flash', out: ['Labels used for the matrix and the network.', '用于矩阵和网络图的标签。'] },
-  { id: 'L7', status: 'planned', name: ['Reconcile', '整合'],
-    what: ['Merge duplicates, flag claims that disagree, carry nothing across species.', '合并重复内容，标出相互矛盾的论断，不跨物种外推。'],
-    how: ['Planned, with the strongest model in the profile.', '计划中，使用配置中最强的模型。'],
-    model: 'anthropic/claude-sonnet-5.5', out: ['A reconciled set per species.', '每个物种一组整合后的论断。'] },
-  { id: 'L8', status: 'partial', name: ['Gates', '关卡'],
-    what: ['Expert audit of a sample, recall check, saturation and gap probes before anything is released.', '发布前：专家抽样审核、召回检查、饱和度与缺口探测。'],
-    how: ['The recall gate is built: a run can be scored against a hand-checked gold set and fail below a threshold. The gold set itself does not exist yet, and nobody has audited the current claims.', '召回关卡已实现：运行结果可与人工核对的标准集比较，低于阈值即不通过。但标准集尚未建立，目前的论断也尚无人审核。'],
-    model: null, out: ['Measured error rates for the Methods page.', '用于“方法与局限”页的实测错误率。'] },
-  { id: 'L9', status: 'built', name: ['Commit and export', '提交与导出'],
-    what: ['Write the release file the site reads.', '写出本站读取的发布文件。'],
-    how: ['Only claims that are relevant, quote-checked and supported or partial are exported. Within each technology and problem, claims are grouped by intervention key; claims that are evidence but not an intervention support the cell without forming one. The site validator rejects anything else, including full text.', '只导出相关、引文核对通过、且被判为“支持”或“部分支持”的论断。在每个技术与问题组合内，按干预标签分组；只是证据而非干预措施的论断支持该格，但不单独成为一项应用。站点校验器会拒绝其他内容，包括全文。'],
-    model: null, out: ['release.json (schema myrias-landscape/1).', 'release.json（模式 myrias-landscape/1）。'] },
-  { id: 'S', status: 'partial', name: ['Suggest', '建议行动'],
-    what: ['Draft possible actions from claims that passed, naming who could act, what evidence is missing and the risks.', '根据通过核验的论断起草可能的行动，注明可由谁行动、缺少哪些证据及风险。'],
-    how: ['Drafts only. They stay out of the public release until a person has reviewed them.', '仅为草稿。经人工审核前不会进入公开发布。'],
-    model: 'qwen/qwen3.8-max-0902', out: ['Draft suggestions with the claims they rest on.', '附依据论断的草稿建议。'] }
-];
-
+// The Pipeline page: the framework in four phases, then a walkthrough that follows one real claim through
+// every step. Numbers and the example come from data/pipeline.json, which pipeline/pipeline_summary.py
+// writes from the run's step records, the store and the release; nothing on this page is typed in by hand.
+import { escapeHtml as esc } from './site-lib.js';
 
 // The pipeline as it runs today, one entry per step, for the diagram on the Pipeline tab. Numbers come
 // from data/pipeline.json, which pipeline/pipeline_summary.py writes from the run's step records.
@@ -115,10 +58,166 @@ export const STEP_TEXT = {
     how: ['Not started. Until then everything here is a lead to check, not a finding to rely on.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'] }
 };
 
-// The funnel from the run counts in release.json; steps with no number are skipped.
-export function funnel(run) {
-  const c = (run && run.counts) || {};
-  const steps = [['documents_collected', 'Papers collected', '收集的论文'], ['documents_processed', 'Papers processed', '已处理的论文'], ['claims_extracted', 'Claims extracted', '提取的论断'],
-    ['claims_quote_found', 'Quote found on the page', '引文在该页找到'], ['claims_relevant', 'About welfare technology', '涉及福利技术'], ['claims_released', 'Released (supported or partial)', '已发布（支持或部分支持）']];
-  return steps.filter(([k]) => Number.isFinite(c[k])).map(([k, en, zh]) => ({ key: k, value: c[k], label: [en, zh] }));
+// What each phase is for, in one line each, for the overview.
+export const PHASE_TEXT = {
+  collect: ['Find the papers and get their text.', '找到论文并取得全文。'],
+  read: ['Pull out every claim, then check it twice.', '提取每条论断，并做两道核对。'],
+  combine: ['Join claims into practices, findings and actions.', '把论断汇总为做法、发现和行动。'],
+  check: ['A person checks a sample before anyone relies on it.', '在使用前由专家抽查。']
+};
+// Steps whose input and output count the same thing, so a "kept" share means something.
+const SAME_UNIT = new Set(['screen', 'fetch', 'quote', 'map', 'verify', 'export']);
+const LAB = { qwen: 'Alibaba', 'z-ai': 'Zhipu', anthropic: 'Anthropic', deepseek: 'DeepSeek', openai: 'OpenAI', google: 'Google' };
+const INDEX = { openalex: 'OpenAlex', semanticscholar: 'Semantic Scholar', europepmc: 'Europe PMC', crossref: 'Crossref', doaj: 'DOAJ' };
+const n = x => (x === null || x === undefined ? '—' : Number(x).toLocaleString());
+const short = m => (m ? m.split('/').pop() : '');
+const pad = x => String(x).padStart(2, '0');
+
+// The example at one step: the real record as it looked after that step ran.
+function exampleHtml(key, e, c) {
+  const L = (en, zh) => (c.lang === 'zh' ? zh : en);
+  const lab = m => LAB[(m || '').split('/')[0]] || '';
+  const hi = (text, nums) => nums.reduce((s, x) => s.split(x).join(`\u0000${x}\u0001`), esc(text)).replace(/\u0000/g, '<mark>').replace(/\u0001/g, '</mark>');
+  const quote = `<blockquote class="ex-quote" lang="${esc(e.extract.lang)}">${esc(e.extract.quote)}</blockquote>`;
+  const paper = `<div class="ex-paper"><span class="ex-k">${esc(e.source_id)} · ${esc(e.year)}${e.venue ? ' · ' + esc(e.venue) : ''}</span><b>${esc(e.title)}</b>${e.doi ? `<span class="ex-k">doi ${esc(e.doi)}</span>` : ''}</div>`;
+  const chip = (label, value, cls = '') => `<span class="ex-chip ${cls}"><i>${esc(label)}</i>${esc(value)}</span>`;
+  const ok = text => `<p class="ex-ok"><span aria-hidden="true">✓</span>${esc(text)}</p>`;
+  switch (key) {
+    case 'search': return paper + `<p class="ex-p">${esc(L(`Found in ${e.search.indexes.map(x => INDEX[x] || x).join(' and ')}, and merged into one record. One of ${n(e.search.found_of)} papers found.`,
+      `在 ${e.search.indexes.map(x => INDEX[x] || x).join('、')} 中找到，合并为一条记录；共找到 ${n(e.search.found_of)} 篇论文。`))}</p>`;
+    case 'screen': return paper + ok(L('Names the species in the title', '标题中出现该物种')) +
+      ok(L('Touches welfare topics: ', '涉及福利主题：') + e.screen.topics.map(t => c.taxonomyLabel('welfare_problems', t).replace(/_/g, ' ')).join(', ')) +
+      `<p class="ex-verdict v-pass">${esc(L('Kept', '保留'))}</p>`;
+    case 'fetch': return paper + `<p class="ex-file"><span>${esc((e.fetch.format || 'pdf').toUpperCase())}</span>${esc(L('Open-access full text downloaded. Stays private, never published.', '已下载开放获取全文；仅内部使用，不公开。'))}</p>`;
+    case 'prepare': return `<div class="ex-pages">${Array.from({ length: e.prepare.pages }, (_, k) => `<span class="${k + 1 === e.prepare.page ? 'on' : ''}">${k + 1}</span>`).join('')}</div>` +
+      `<p class="ex-p">${esc(L(`${e.prepare.pages} pages of text, each with its page number. Our claim will come from page ${e.prepare.page}.`, `共 ${e.prepare.pages} 页文本，每页保留页码；我们的论断来自第 ${e.prepare.page} 页。`))}</p>`;
+    case 'extract': return `<div class="ex-windows" aria-hidden="true">${Array.from({ length: e.extract.windows }, (_, k) => `<span class="${k === e.extract.window ? 'on' : ''}"></span>`).join('')}</div>` +
+      `<p class="ex-k">${esc(L(`window ${e.extract.window + 1} of ${e.extract.windows} · one of ${e.extract.claims_from_paper} claims from this paper`, `第 ${e.extract.window + 1}/${e.extract.windows} 个窗口 · 本文 ${e.extract.claims_from_paper} 条论断之一`))}</p>` +
+      quote + `<p class="ex-p" lang="${esc(e.extract.lang)}">${esc(e.extract.statement)}</p>` +
+      `<div class="ex-chips">${chip(L('practice', '做法'), e.extract.intervention)}${chip(L('basis', '依据'), c.tr('kind.' + e.extract.basis))}${chip(L('direction', '倾向'), c.tr('pol.' + e.extract.polarity))}</div>` +
+      `<p class="ex-k">${esc(L('Written in the paper’s own language. Nothing is translated yet.', '用论文原语言写成，此时尚未翻译。'))}</p>`;
+    case 'quote': return `<div class="ex-page"><span class="ex-k">${esc(L('page', '第'))} ${e.quote.page}</span><i></i><i></i><mark lang="${esc(e.extract.lang)}">${esc(e.extract.quote)}</mark><i></i><i class="s"></i></div>` +
+      ok(L(`Found word for word on page ${e.quote.page}`, `在第 ${e.quote.page} 页逐字找到`)) +
+      `<p class="ex-k">${esc(L(`${e.quote.found_in_paper} of ${e.extract.claims_from_paper} claims from this paper passed.`, `本文 ${e.extract.claims_from_paper} 条论断中 ${e.quote.found_in_paper} 条通过。`))}</p>`;
+    case 'map': return `<div class="ex-chips">${chip(L('about welfare', '涉及福利'), e.map.welfare_relevant ? L('yes', '是') : L('no', '否'), 'c-yes')}
+        ${chip(L('technology', '技术'), c.taxonomyLabel('technology_classes', e.map.technology_class))}${chip(L('welfare problem', '福利问题'), c.taxonomyLabel('welfare_problems', e.map.welfare_problem))}
+        ${chip(L('evidence', '证据'), c.tr('kind.' + e.map.kind))}${chip(L('link to welfare', '与福利的关系'), e.map.welfare_link === 'proxy' ? L('indirect (growth)', '间接（生长）') : e.map.welfare_link)}</div>` +
+      `<details class="ex-why"><summary>${esc(L('The model’s reason', '模型给出的理由'))} · ${esc(short(e.map.model))}</summary><p>${esc(e.map.reason)}</p></details>`;
+    case 'verify': return quote + `<p class="ex-verdict v-pass">${esc(c.tr('ver.' + e.verify.verdict))}</p>` +
+      (e.verify.note ? `<p class="ex-note" lang="zh"><span class="ex-k">${esc(short(e.verify.model))}:</span> ${esc(e.verify.note)}</p>` : '') +
+      `<p class="ex-k">${esc(L(`Checked by ${short(e.verify.model)} (${lab(e.verify.model)}); the claim was written by ${short(e.extract.model)} (${lab(e.extract.model)}).`, `由 ${short(e.verify.model)}（${lab(e.verify.model)}）核验；论断由 ${short(e.extract.model)}（${lab(e.extract.model)}）写出。`))}</p>`;
+    case 'render': return `<div class="ex-two"><div><span class="ex-k">${esc(L('record', '原始记录'))}</span><p lang="${esc(e.extract.lang)}">${hi(e.extract.statement, e.render.numbers)}</p></div>
+        <div><span class="ex-k">English</span><p lang="en">${hi(e.render.text_en, e.render.numbers)}</p></div></div>` +
+      ok(L(`Every number survives: ${e.render.numbers.join(', ')}`, `所有数字都保留：${e.render.numbers.join('、')}`));
+    case 'reconcile': return `<div class="ex-flow"><div><span class="ex-k">${esc(L('as written', '原写法'))}</span><b lang="zh">${esc(e.reconcile.before[0])}</b>${e.reconcile.before[1] ? `<span>${esc(e.reconcile.before[1])}</span>` : ''}</div>
+        <span class="ex-arrow" aria-hidden="true">→</span><div class="on"><span class="ex-k">${esc(L('practice name', '做法名称'))}</span><b>${esc(L(e.reconcile.after[0], e.reconcile.after[1]))}</b><span>${esc(L(e.reconcile.after[1], e.reconcile.after[0]))}</span></div></div>` +
+      `<p class="ex-k">${esc(L('The wording in the paper is kept beside the name.', '论文原有措辞与名称一同保留。'))}</p>`;
+    case 'merge': return `<div class="ex-flow"><div><span class="ex-k">${esc(L('fingerprint of paper + page + quote', '论文+页码+引文的指纹'))}</span><code>${esc(e.merge.uid)}</code></div>
+        <span class="ex-arrow" aria-hidden="true">→</span><div class="on"><span class="ex-k">${esc(L('permanent id', '永久编号'))}</span><b>${esc(e.merge.id)}</b><span>${esc(L('paper', '论文'))} ${esc(e.merge.source_id)}</span></div></div>` +
+      `<p class="ex-p">${esc(L('If a later run finds the same quote on the same page, it gets the same fingerprint and is not added again.', '以后的运行若在同一页找到同一引文，指纹相同，不会重复加入。'))}</p>`;
+    case 'export': return `<a class="ex-claim" href="${c.link('claims/' + encodeURIComponent(e.claim_id))}"><span class="ex-k">${esc(e.claim_id)} · ${esc(e.source_id)}, ${esc(L('page', '第'))} ${e.prepare.page}${c.lang === 'zh' ? ' 页' : ''}</span>
+        <b>${esc(L(e.render.text_en, e.extract.statement))}</b><span class="ex-open">${esc(L('Open it on the site', '在本站打开'))} →</span></a>`;
+    case 'cluster': {
+      const max = Math.max(...e.cluster.names.map(x => x[1]));
+      return `<ul class="ex-bars">${e.cluster.names.map(([name, k]) => `<li class="${name === e.reconcile.after[0] ? 'on' : ''}"><span>${esc(name)}</span><i style="--w:${Math.round(100 * k / max)}%"></i><b>${k}</b></li>`).join('')}</ul>` +
+        `<p class="ex-merged"><span aria-hidden="true">↳</span> ${esc(L(`${e.cluster.names.length} names, one practice:`, `${e.cluster.names.length} 个名称，同一做法：`))} <b>${esc(L(e.cluster.name[0], e.cluster.name[1]))}</b></p>` +
+        (e.cluster.reason ? `<details class="ex-why"><summary>${esc(L('Why the model kept them together', '模型认为它们属于同一做法的理由'))} · ${esc(short(e.cluster.model))}</summary><p>${esc(e.cluster.reason)}</p></details>` : '');
+    }
+    case 'findings': { const f = e.findings; if (!f) return '';
+      return `<a class="ex-claim ex-finding" href="${c.link('findings/' + encodeURIComponent(f.id))}"><span class="ex-k">${esc(f.id)} · ${esc(L(f.practice_en, f.practice_zh))} × ${esc(c.taxonomyLabel('welfare_problems', f.welfare_problem))}</span>
+        <span class="ex-verdict v-${esc(f.strength)}">${esc(c.tr('fd.strength.' + f.strength))}</span><b>${esc(L(f.statement_en, f.statement_zh))}</b>
+        <span class="ex-nums"><span><strong>${f.counts.claims}</strong>${esc(L('claims', '条论断'))}</span><span><strong>${f.counts.papers}</strong>${esc(L('papers', '篇论文'))}</span><span><strong>${f.counts.measured}</strong>${esc(L('measured', '条实测'))}</span><span><strong>${f.counts.opposing}</strong>${esc(L('against', '条反对'))}</span></span>
+        <span class="ex-open">${esc(L('Open the finding and all its claims', '打开该发现及其全部论断'))} →</span></a>`; }
+    case 'actions': { const a = e.actions; if (!a) return '';
+      const p = a.priority;
+      return `<a class="ex-claim ex-action" href="${c.link('actions')}"><span class="ex-k">${esc(a.id)} · ${esc(L('rank', '排名'))} ${a.rank} · ${esc(L(a.who, a.who))}</span><b>${esc(L(a.action_en, a.action_zh))}</b></a>` +
+        `<div class="ex-formula"><span>${esc(L('priority', '优先级'))}</span><b>${p.score.toFixed(2)}</b><span>=</span><span>0.6 × <b>${p.evidence.toFixed(2)}</b><i>${esc(L('evidence', '证据'))}</i></span><span>+</span><span>0.4 × <b>${p.actionability.toFixed(1)}</b><i>${esc(L(a.type, a.type))}</i></span></div>` +
+        `<p class="ex-k">${esc(L('Computed by code, not by the model. Still a draft until reviewed.', '由代码计算，而非模型给出；审核前仍为草案。'))}</p>`; }
+    case 'audit': return `<div class="ex-todo"><p>${esc(L(`An expert opens page ${e.prepare.page} of ${e.source_id}, reads the quote, and marks ${e.claim_id}, ${e.findings?.id || ''} and ${e.actions?.id || ''} right or wrong.`, `专家打开 ${e.source_id} 第 ${e.prepare.page} 页，阅读引文，判断 ${e.claim_id}、${e.findings?.id || ''} 和 ${e.actions?.id || ''} 是否正确。`))}</p>
+        <p class="ex-k">${esc(L('Not started. Until then, everything here is a lead to check.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'))}</p></div>`;
+    default: return '';
+  }
+}
+
+// The whole page body. ctx: { lang, tr, link, taxonomyLabel, step }.
+export function pipelineHtml(P, c) {
+  const i = c.lang === 'zh' ? 1 : 0, L = (en, zh) => (c.lang === 'zh' ? zh : en);
+  const by = k => P.steps.find(s => s.key === k) || {};
+  const kind = st => (st.status === 'planned' ? 'k-people' : st.model ? 'k-model' : 'k-code');
+  const who = st => (st.status === 'planned' ? L('people', '人工') : st.model ? short(st.model) : L('plain code', '普通代码'));
+  const io = {
+    collect: [[by('search').out, L('papers found', '篇论文')], [by('fetch').out, L('with full text', '篇有全文')]],
+    read: [[by('extract').out, L('claims written', '条论断')], [by('verify').out, L('checked claims', '条通过核对')]],
+    combine: [[by('findings').out, L('findings', '条发现')], [by('actions').out, L('draft actions', '条行动草案')]],
+    check: null
+  };
+  const phases = LANES.map(([id, label], k) => `<article class="fw-ph ph-${id}"><header><span class="fw-ph-n">${pad(k + 1)}</span><h3>${esc(label[i])}</h3></header>
+      <p>${esc(PHASE_TEXT[id][i])}</p>
+      <div class="fw-ph-io">${io[id] ? io[id].map(([v, l]) => `<span><strong>${n(v)}</strong>${esc(l)}</span>`).join('<span class="fw-to" aria-hidden="true">→</span>') : `<span class="fw-ph-todo">${esc(L('Not started', '尚未开始'))}</span>`}</div>
+      <ol class="fw-chips">${P.steps.filter(s => s.lane === id).map(st => `<li><button type="button" class="${kind(st)}" data-go="${st.id}"><span>${pad(st.id)}</span>${esc((STEP_TEXT[st.key] || { name: [st.key, st.key] }).name[i])}</button></li>`).join('')}</ol></article>`).join('');
+  const models = P.steps.filter(s => s.model).length, code = P.steps.filter(s => !s.model && s.status !== 'planned').length;
+  const overview = `<section class="fw-over" aria-label="${esc(L('The framework', '框架'))}"><div class="fw-phases">${phases}</div>
+    <p class="fw-key"><span><i class="k-model"></i>${esc(L(`a model does it (${models} steps)`, `由模型完成（${models} 步）`))}</span><span><i class="k-code"></i>${esc(L(`plain code, no model (${code} steps)`, `普通代码，不用模型（${code} 步）`))}</span><span><i class="k-people"></i>${esc(L('people', '人工'))}</span>
+      <span class="fw-asof">${esc(L(`${n(P.totals.calls)} model calls · ${P.run}, ${P.as_of}`, `${n(P.totals.calls)} 次模型调用 · ${P.run}，${P.as_of}`))}</span></p></section>`;
+
+  const e = P.example;
+  const lane = id => LANES.find(l => l[0] === id)[1][i];
+  const rail = LANES.map(([id, label]) => `<li class="fw-rail-g"><span class="fw-rail-l">${esc(label[i])}</span><ol>${P.steps.filter(s => s.lane === id).map(st =>
+    `<li><button type="button" class="${kind(st)}" data-go="${st.id}" aria-label="${esc(pad(st.id) + ' ' + (STEP_TEXT[st.key]?.name[i] || st.key))}" title="${esc(pad(st.id) + ' · ' + (STEP_TEXT[st.key]?.name[i] || st.key))}">${pad(st.id)}</button></li>`).join('')}</ol></li>`).join('');
+  const panel = st => {
+    const t = STEP_TEXT[st.key] || { name: [st.key, st.key], what: ['', ''], how: ['', ''] };
+    const planned = st.status === 'planned';
+    const kept = SAME_UNIT.has(st.key) && st.in ? Math.min(100, Math.round(100 * st.out / st.in)) : null;
+    const ioHtml = planned ? '' : `<div class="fw-io"><div><strong>${n(st.in)}</strong><span>${esc(t.in ? t.in[i] : '')}</span></div>
+        <div class="fw-io-mid"><span class="fw-io-who ${kind(st)}">${esc(who(st))}</span><svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path d="M0 5H96"/><path d="M90 1L97 5L90 9"/></svg>${st.calls ? `<span class="fw-io-calls">${esc(L(`${n(st.calls)} calls`, `${n(st.calls)} 次调用`))}</span>` : ''}</div>
+        <div class="fw-io-out"><strong>${n(st.out)}</strong><span>${esc(t.out ? t.out[i] : '')}</span></div></div>` +
+      (kept !== null ? `<div class="fw-kept"><span style="--w:${kept}%"></span><em>${esc(L(`${kept}% kept`, `保留 ${kept}%`))}</em></div>` : '');
+    return `<article class="fw-step ${kind(st)}" data-step="${st.id}" hidden>
+      <div class="fw-explain"><div class="fw-step-h"><span class="fw-num">${pad(st.id)}</span><div><span class="fw-lane">${esc(lane(st.lane))}</span><h3>${esc(t.name[i])}</h3></div></div>
+        <p class="fw-what">${esc(t.what[i])}</p>${ioHtml}
+        <p class="fw-how"><b>${esc(L('How it is done and checked', '做法与核对'))}</b>${esc(t.how[i])}</p></div>
+      ${e ? `<div class="fw-ex"><p class="fw-ex-h">${esc(L('Our example after this step', '本步之后的示例'))}</p>${exampleHtml(st.key, e, c)}</div>` : ''}</article>`;
+  };
+  const walk = `<section class="fw-walk" data-walk data-n="${P.steps.length}">
+    <header class="fw-walk-h"><div><div class="record-type">${esc(L('Walkthrough', '逐步演示'))}</div><h2>${esc(L('Follow one claim through every step', '跟随一条论断走完每一步'))}</h2>
+      ${e ? `<p>${esc(L(`A real claim from page ${e.prepare.page} of a ${e.year} paper on water temperature, and where it ends up.`, `一条真实论断：来自 ${e.year} 年一篇水温论文的第 ${e.prepare.page} 页，看它最终走到哪里。`))}</p>` : ''}</div>
+      <div class="fw-ctrl"><button type="button" data-prev aria-label="${esc(L('Previous step', '上一步'))}">←</button><span data-pos></span><button type="button" data-next aria-label="${esc(L('Next step', '下一步'))}">→</button></div></header>
+    <ol class="fw-rail">${rail}</ol>
+    <div class="fw-stage">${P.steps.map(panel).join('')}</div>
+    <p class="fw-tip">${esc(L('Use ← and → to move between steps.', '用 ← 和 → 键切换步骤。'))}</p></section>`;
+  return overview + walk;
+}
+
+// Wires the walkthrough: one step shown at a time, the rail and the overview chips jump to a step, arrows and
+// the keyboard move through them, and the step is kept in the address so a link opens on it.
+export function mountPipeline(root, { start = 1, onStep } = {}) {
+  const walk = root.querySelector('[data-walk]');
+  if (!walk) return;
+  const total = Number(walk.dataset.n);
+  let cur = 0;
+  const show = (k, scroll) => {
+    k = Math.max(1, Math.min(total, k));
+    if (k === cur) { if (scroll) walk.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    cur = k;
+    walk.querySelectorAll('[data-step]').forEach(a => { a.hidden = Number(a.dataset.step) !== k; });
+    root.querySelectorAll('[data-go]').forEach(b => { if (Number(b.dataset.go) === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    walk.querySelector('[data-pos]').textContent = `${pad(k)} / ${pad(total)}`;
+    walk.querySelector('[data-prev]').disabled = k === 1;
+    walk.querySelector('[data-next]').disabled = k === total;
+    const on = walk.querySelector('.fw-rail [aria-current]');
+    if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (scroll) walk.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (onStep) onStep(k);
+  };
+  root.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(Number(b.dataset.go), !walk.contains(b))));
+  walk.querySelector('[data-prev]').addEventListener('click', () => show(cur - 1));
+  walk.querySelector('[data-next]').addEventListener('click', () => show(cur + 1));
+  const key = ev => {
+    if (!walk.isConnected) { document.removeEventListener('keydown', key); return; }
+    if (ev.altKey || ev.ctrlKey || ev.metaKey || /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return;
+    if (ev.key === 'ArrowRight') { show(cur + 1); ev.preventDefault(); }
+    else if (ev.key === 'ArrowLeft') { show(cur - 1); ev.preventDefault(); }
+  };
+  document.addEventListener('keydown', key);
+  show(start);
 }

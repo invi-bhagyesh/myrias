@@ -160,5 +160,157 @@
  ],
  "totals": {
   "calls": 37861
+ },
+ "example": {
+  "claim_id": "C0269",
+  "source_id": "S023",
+  "title": "WATER TEMPERATURE ON GROWTH AND LIPID METABOLISM IN CHINESE MANDARIN FISH",
+  "year": 2025,
+  "venue": "Acta Hydrobiologica Sinica",
+  "doi": "10.3724/1000-3207.2025.2025.0090",
+  "search": {
+   "indexes": [
+    "openalex",
+    "semanticscholar"
+   ],
+   "found_of": 2005
+  },
+  "screen": {
+   "species_in_title": true,
+   "topics": [
+    "water_quality",
+    "stress_behaviour"
+   ]
+  },
+  "fetch": {
+   "format": "pdf"
+  },
+  "prepare": {
+   "pages": 7,
+   "page": 3
+  },
+  "extract": {
+   "windows": 11,
+   "claims_from_paper": 68,
+   "window": 4,
+   "quote": "在36℃养殖条件下, 雌雄鳜的WGR较28℃和35℃显著降低(P<0.05)。",
+   "statement": "在36℃养殖条件下，雌雄鳜的增重率较28℃和35℃显著降低。",
+   "lang": "zh",
+   "intervention": "高温养殖",
+   "basis": "measured",
+   "polarity": "counterevidence",
+   "model": "qwen/qwen3.8-flash"
+  },
+  "quote": {
+   "check": "found",
+   "page": 3,
+   "found_in_paper": 67
+  },
+  "map": {
+   "welfare_relevant": true,
+   "technology_class": "water_systems",
+   "welfare_problem": "water_quality",
+   "kind": "measured",
+   "welfare_link": "proxy",
+   "reason": "The claim reports that high temperature (36°C) significantly reduces weight gain rate in mandarin fish compared to lower temperatures. This is a measured result from the study. While it addresses an environmental condition (temperature/water quality) relevant to welfare, the outcome reported is growth (a proxy for welfare/health), not a direct welfare metric like stress hormones or mortality. The reduction in growth indicates a negative impact on the animal's physiological state under that specific condition.",
+   "model": "qwen/qwen3.8-flash"
+  },
+  "verify": {
+   "verdict": "supported",
+   "note": "WGR即增重率(Weight Gain Rate)，引文与陈述内容一致。",
+   "model": "z-ai/glm-5.3"
+  },
+  "render": {
+   "text_en": "Under rearing conditions at 36°C, the weight gain rate of female and male mandarin fish was significantly lower than at 28°C and 35°C.",
+   "numbers": [
+    "36",
+    "28",
+    "35"
+   ],
+   "check": "numbers_ok",
+   "model": "qwen/qwen3.8-flash"
+  },
+  "reconcile": {
+   "before": [
+    "高温养殖",
+    "High-temperature rearing"
+   ],
+   "after": [
+    "high-temperature farming",
+    "高温养殖"
+   ]
+  },
+  "merge": {
+   "uid": "q9940b1ddcd83",
+   "id": "C0269",
+   "source_id": "S023",
+   "run": "run-2"
+  },
+  "export": {
+   "released": true
+  },
+  "cluster": {
+   "names": [
+    [
+     "high-temperature farming",
+     20
+    ],
+    [
+     "water temperature control",
+     16
+    ],
+    [
+     "water temperature monitoring",
+     11
+    ],
+    [
+     "low-temperature farming",
+     1
+    ],
+    [
+     "temperature stress",
+     1
+    ]
+   ],
+   "name": [
+    "water temperature regulation",
+    "水温调控"
+   ],
+   "reason": "All members concern managing or setting rearing water temperature (high, low, controlled, monitored) for mandarin fish, so they are one practice; only the liver pathology claim C0276 and viral load claim C0422 are not about temperature management itself.",
+   "model": "anthropic/claude-sonnet-5.5"
+  },
+  "findings": {
+   "id": "F0616",
+   "statement_en": "In mandarin fish, raising water temperature to 36°C was linked to poorer welfare: growth was strongly inhibited, liver antioxidant enzymes (SOD, CAT) and related gene expression fell, MDA rose in females, and hsp70/hsp90 expression trended down, which the authors read as exceeding the fish's self-protection range. Other claims mostly describe how temperature was set or the ranges used, and one earlier study found higher blood total protein and GOT at 20°C than at other temperatures; background says 25-35°C is the optimal range.",
+   "statement_zh": "对鳜来说，把水温升到36°C与福利变差有关：生长受到明显抑制，肝脏抗氧化酶（SOD、CAT）及相关基因表达下降，雌鱼MDA升高，hsp70/hsp90表达总体下降，作者认为这已超出鱼体自身保护范围。其他结论多只是描述控温方式或试验温度范围；另有一项早期研究发现20°C时血清总蛋白和GOT高于其他水温；背景资料称25-35°C为适宜温度范围。",
+   "counts": {
+    "claims": 22,
+    "papers": 7,
+    "measured": 18,
+    "supportive": 1,
+    "opposing": 11,
+    "descriptive": 10
+   },
+   "strength": "against",
+   "welfare_problem": "water_quality",
+   "practice_en": "water temperature regulation",
+   "practice_zh": "水温调控"
+  },
+  "actions": {
+   "id": "X001",
+   "rank": 1,
+   "action_en": "Farmers should avoid letting mandarin fish water temperature rise to around 36°C.",
+   "action_zh": "养殖户应避免让鳜鱼养殖水温升至36°C左右。",
+   "type": "avoid",
+   "who": "farmers",
+   "priority": {
+    "score": 0.9,
+    "evidence": 0.83,
+    "actionability": 1,
+    "basis": "priority = 0.6 x evidence + 0.4 x actionability (see pipeline/actions.mjs)"
+   },
+   "evidence_gap": "The studies tested 36°C against other temperatures, so the exact upper safe limit and the effect of short heat spikes are not defined.",
+   "risks": "Cooling or temperature control costs money, and keeping temperatures too low reduces feeding and growth."
+  }
  }
 }
