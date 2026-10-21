@@ -1,7 +1,7 @@
 // The Pipeline page: the framework in four phases, then a walkthrough that follows one real claim through
 // every step. Numbers and the example come from data/pipeline.json, which pipeline/pipeline_summary.py
 // writes from the run's step records, the store and the release; nothing on this page is typed in by hand.
-import { escapeHtml as esc } from './site-lib.js';
+import { escapeHtml as esc, linkIds } from './site-lib.js';
 
 // The pipeline as it runs today, one entry per step, for the diagram on the Pipeline tab. Numbers come
 // from data/pipeline.json, which pipeline/pipeline_summary.py writes from the run's step records.
@@ -105,7 +105,7 @@ function exampleHtml(key, e, c) {
     case 'map': return `<div class="ex-chips">${chip(L('about welfare', '涉及福利'), e.map.welfare_relevant ? L('yes', '是') : L('no', '否'), 'c-yes')}
         ${chip(L('technology', '技术'), c.taxonomyLabel('technology_classes', e.map.technology_class))}${chip(L('welfare problem', '福利问题'), c.taxonomyLabel('welfare_problems', e.map.welfare_problem))}
         ${chip(L('evidence', '证据'), c.tr('kind.' + e.map.kind))}${chip(L('link to welfare', '与福利的关系'), e.map.welfare_link === 'proxy' ? L('indirect (growth)', '间接（生长）') : e.map.welfare_link)}</div>` +
-      `<details class="ex-why"><summary>${esc(L('The model’s reason', '模型给出的理由'))} · ${esc(short(e.map.model))}</summary><p>${esc(e.map.reason)}</p></details>`;
+      `<details class="ex-why"><summary>${esc(L('The model’s reason', '模型给出的理由'))} · ${esc(short(e.map.model))}</summary><p>${linkIds(e.map.reason, c.link)}</p></details>`;
     case 'verify': return quote + `<p class="ex-verdict v-pass">${esc(c.tr('ver.' + e.verify.verdict))}</p>` +
       (e.verify.note ? `<p class="ex-note" lang="zh"><span class="ex-k">${esc(short(e.verify.model))}:</span> ${esc(e.verify.note)}</p>` : '') +
       `<p class="ex-k">${esc(L(`Checked by ${short(e.verify.model)} (${lab(e.verify.model)}); the claim was written by ${short(e.extract.model)} (${lab(e.extract.model)}).`, `由 ${short(e.verify.model)}（${lab(e.verify.model)}）核验；论断由 ${short(e.extract.model)}（${lab(e.extract.model)}）写出。`))}</p>`;
@@ -124,7 +124,7 @@ function exampleHtml(key, e, c) {
       const max = Math.max(...e.cluster.names.map(x => x[1]));
       return `<ul class="ex-bars">${e.cluster.names.map(([name, k]) => `<li class="${name === e.reconcile.after[0] ? 'on' : ''}"><span>${esc(name)}</span><i style="--w:${Math.round(100 * k / max)}%"></i><b>${k}</b></li>`).join('')}</ul>` +
         `<p class="ex-merged"><span aria-hidden="true">↳</span> ${esc(L(`${e.cluster.names.length} names, one practice:`, `${e.cluster.names.length} 个名称，同一做法：`))} <b>${esc(L(e.cluster.name[0], e.cluster.name[1]))}</b></p>` +
-        (e.cluster.reason ? `<details class="ex-why"><summary>${esc(L('Why the model kept them together', '模型认为它们属于同一做法的理由'))} · ${esc(short(e.cluster.model))}</summary><p>${esc(e.cluster.reason)}</p></details>` : '');
+        (e.cluster.reason ? `<details class="ex-why"><summary>${esc(L('Why the model kept them together', '模型认为它们属于同一做法的理由'))} · ${esc(short(e.cluster.model))}</summary><p>${linkIds(e.cluster.reason, c.link)}</p></details>` : '');
     }
     case 'findings': { const f = e.findings; if (!f) return '';
       return `<a class="ex-claim ex-finding" href="${c.link('findings/' + encodeURIComponent(f.id))}"><span class="ex-k">${esc(f.id)} · ${esc(L(f.practice_en, f.practice_zh))} × ${esc(c.taxonomyLabel('welfare_problems', f.welfare_problem))}</span>
@@ -132,17 +132,17 @@ function exampleHtml(key, e, c) {
         <span class="ex-nums"><span><strong>${f.counts.claims}</strong>${esc(L('claims', '条论断'))}</span><span><strong>${f.counts.papers}</strong>${esc(L('papers', '篇论文'))}</span><span><strong>${f.counts.measured}</strong>${esc(L('measured', '条实测'))}</span><span><strong>${f.counts.opposing}</strong>${esc(L('against', '条反对'))}</span></span>
         <span class="ex-open">${esc(L('Open the finding and all its claims', '打开该发现及其全部论断'))} →</span></a>` +
         (f.basis?.strength ? `<p class="ex-k">${esc(L('Why this label (by code): ', '为何是这个标签（代码判定）：') + L(f.basis.strength.en, f.basis.strength.zh))}</p>` : '') +
-        (f.basis?.summary ? `<details class="ex-why"><summary>${esc(L('Why the model summarised it this way', '模型为何这样概括'))}</summary><p>${esc(f.basis.summary)}</p></details>` : ''); }
+        (f.basis?.summary ? `<details class="ex-why"><summary>${esc(L('Why the model summarised it this way', '模型为何这样概括'))}</summary><p>${linkIds(f.basis.summary, c.link)}</p></details>` : ''); }
     case 'actions': { const a = e.actions; if (!a) return '';
       const p = a.priority;
       return `<a class="ex-claim ex-action" href="${c.link('actions')}"><span class="ex-k">${esc(a.id)} · ${esc(L(a.type, a.type))} · ${esc(L(a.who, a.who))}</span><b>${esc(L(a.action_en, a.action_zh))}</b></a>` +
         `<p class="ex-k">${esc(L('Cites', '依据'))} ${esc(e.findings?.id || '')} · ${esc(L('still a draft until reviewed', '审核前仍为草案'))}</p>` +
-        (a.basis?.reason ? `<details class="ex-why"><summary>${esc(L('How the model built it from the findings', '模型如何由发现得出它'))}</summary><p>${esc(a.basis.reason)}</p></details>` : ''); }
+        (a.basis?.reason ? `<details class="ex-why"><summary>${esc(L('How the model built it from the findings', '模型如何由发现得出它'))}</summary><p>${linkIds(a.basis.reason, c.link)}</p></details>` : ''); }
     case 'rank': { const a = e.actions; if (!a?.priority) return '';
       const p = a.priority;
       return `<div class="ex-formula"><span>${esc(L('rank', '排名'))}</span><b>${a.rank}</b><span>${esc(L(`of ${e.rank_of}`, `/ ${e.rank_of}`))}</span><span>·</span><span>${esc(L('score', '分数'))} <b>${Math.round(100 * p.score)}</b><i>/100</i></span></div>` +
-        (p.reason ? `<p class="ex-p">${esc(p.reason)}</p>` : '') +
-        ((p.criteria || []).length ? `<ul class="ac-crit">${p.criteria.map(k => `<li><span>${esc(k.criterion)}</span><b>${esc(c.tr('ac.level.' + k.level))}</b><small>${esc(k.note)}</small></li>`).join('')}</ul>` : '') +
+        (p.reason ? `<p class="ex-p">${linkIds(p.reason, c.link)}</p>` : '') +
+        ((p.criteria || []).length ? `<ul class="ac-crit">${p.criteria.map(k => `<li><span>${esc(k.criterion)}</span><b>${esc(c.tr('ac.level.' + k.level))}</b><small>${linkIds(k.note, c.link)}</small></li>`).join('')}</ul>` : '') +
         `<p class="ex-k">${esc(L(`${short(p.by?.model)} against ${p.by?.spec || 'the spec'}`, `${short(p.by?.model)} 按 ${p.by?.spec || '规范'} 排序`))}</p>`; }
     case 'audit': return `<div class="ex-todo"><p>${esc(L(`An expert opens page ${e.prepare.page} of ${e.source_id}, reads the quote, and marks ${e.claim_id}, ${e.findings?.id || ''} and ${e.actions?.id || ''} right or wrong.`, `专家打开 ${e.source_id} 第 ${e.prepare.page} 页，阅读引文，判断 ${e.claim_id}、${e.findings?.id || ''} 和 ${e.actions?.id || ''} 是否正确。`))}</p>
         <p class="ex-k">${esc(L('Not started. Until then, everything here is a lead to check.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'))}</p></div>`;

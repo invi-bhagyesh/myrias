@@ -1456,6 +1456,13 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 /* Home: who wrote the papers we read. Labels sit beside each bar; hovering a group fades the other strands. */
 .af-svg .af-t { font: 500 13px var(--font); fill: var(--ink); }
 .af-svg .af-v { font: 600 12px var(--mono); fill: var(--soft); }
-.af-svg .af-l { opacity: .9; transition: opacity .2s ease; }
+.af-svg .af-l { transition: opacity .2s ease; }
 .af-svg:has(.af-l:hover) .af-l:not(:hover) { opacity: .15; }
 .af-sum { max-width: 78ch; }
+
+.af-head { margin-top: 34px; }
+
+/* Record ids inside sentences (C0001, F0001, S001, X001) link to their pages. */
+.id-link { font: 600 .92em var(--mono); color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; white-space: nowrap; }
+.id-link:hover { text-decoration-thickness: 2px; }
+.fx-phone h3 { margin: 14px 0 6px; }

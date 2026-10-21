@@ -355,3 +355,11 @@ test('home author flow: counts per group, kind and pair add up; companies fold i
   }
   assert.equal(authorFlowHtml({ papers: [] }, k => k), '');
 });
+
+test('record ids inside sentences become links; partial-width ids stay text', () => {
+  const link = (p, q) => '#/' + p + (q ? '?' + new URLSearchParams(q) : '');
+  const html = L.linkIds('F0563 and C0276 from S023 support X014; F1 hybrids and C18 do not. <b>', link);
+  assert.ok(html.includes('<a class="id-link" href="#/findings/F0563">F0563</a>'));
+  assert.ok(html.includes('href="#/claims/C0276"') && html.includes('href="#/sources/S023"') && html.includes('href="#/actions?q=X014"'));
+  assert.ok(html.includes('F1 hybrids and C18 do not') && html.includes('&lt;b&gt;'));
+});

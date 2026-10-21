@@ -1,7 +1,7 @@
 // Findings on the site: what the claims about one practice and one welfare problem say together.
 // A finding is a summary, never evidence on its own: each one shows its counts and the claims under it,
 // each with its quote and paper, so a reader can check it against the source.
-import { escapeHtml as esc } from './site-lib.js';
+import { escapeHtml as esc, linkIds } from './site-lib.js';
 
 export const findingText = (f, lang) => (lang === 'zh' ? f.statement_zh || f.statement_en : f.statement_en || f.statement_zh) || '';
 const n = x => Number(x).toLocaleString();
@@ -57,9 +57,9 @@ export function findingBasisHtml(f, ctx) {
   const step = (h, body, by) => `<li><h3>${esc(h)}</h3>${body}${by ? `<p class="fd-basis-by">${esc(by)}</p>` : ''}</li>`;
   const rows = [];
   if (g) rows.push(step(tr('fd.basis.group'), `<p>${esc(g.names.length > 1 ? tr('fd.basis.joined', { n: g.names.length, names: g.names.join(', ') }) : tr('fd.basis.alone'))}</p>` +
-    (g.dropped?.length ? `<p class="small-note">${esc(tr('fd.basis.left', { names: g.dropped.join(', ') }))}</p>` : '') + (g.reason ? `<p class="fd-basis-why">${esc(g.reason)}</p>` : ''), g.reason && g.model ? tr('fd.basis.by', { model: g.model }) : ''));
+    (g.dropped?.length ? `<p class="small-note">${esc(tr('fd.basis.left', { names: g.dropped.join(', ') }))}</p>` : '') + (g.reason ? `<p class="fd-basis-why">${linkIds(g.reason, ctx.link)}</p>` : ''), g.reason && g.model ? tr('fd.basis.by', { model: g.model }) : ''));
   if (s) rows.push(step(tr('fd.basis.strength', { s: tr('fd.strength.' + f.strength) }), `<p>${esc(L(s))}</p>`, tr('fd.basis.rule')));
-  if (b.summary) rows.push(step(tr('fd.basis.summary'), `<p class="fd-basis-why">${esc(b.summary)}</p>`, f.written_by?.model ? tr('fd.basis.by', { model: f.written_by.model }) : ''));
+  if (b.summary) rows.push(step(tr('fd.basis.summary'), `<p class="fd-basis-why">${linkIds(b.summary, ctx.link)}</p>`, f.written_by?.model ? tr('fd.basis.by', { model: f.written_by.model }) : ''));
   return rows.length ? `<section class="fd-basis"><h2>${esc(tr('fd.basis.h'))}</h2><ol>${rows.join('')}</ol></section>` : '';
 }
 

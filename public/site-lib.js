@@ -19,6 +19,14 @@ export function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// Text with record ids made into links: claims C0001, findings F0001, papers S001 and actions X001, as the
+// pipeline writes them. Only ids at their full width are linked, so "F1 hybrids" or "C18" stay plain text.
+// Returns escaped HTML. link(path, query) builds an address the way the site does.
+const ID_ROUTE = { C: id => ['claims/' + id], F: id => ['findings/' + id], S: id => ['sources/' + id], X: id => ['actions', { q: id }] };
+export function linkIds(text, link) {
+  return escapeHtml(text).replace(/\b(?:C\d{4}|F\d{4}|S\d{3}|X\d{3})\b/g, id => `<a class="id-link" href="${escapeHtml(link(...ID_ROUTE[id[0]](id)))}">${id}</a>`);
+}
+
 export function safeUrl(value) {
   if (!value) return '';
   try {

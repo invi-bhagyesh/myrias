@@ -153,21 +153,28 @@ export function authorModel(meta) {
     countries: [...new Set(papers.filter(p => !p.group.startsWith('cn_') && p.country).map(p => p.country))].sort() };
 }
 
+// Country codes as names in the page's language, where the browser knows them.
+const countryNames = (codes, lang) => { let dn = null; try { dn = new Intl.DisplayNames([lang], { type: 'region' }); } catch { /* codes as they are */ } return codes.map(c => (dn && dn.of(c)) || c); };
+
 export function authorFlowHtml(meta, tr) {
   const m = authorModel(meta);
   if (!m.n) return '';
   const color = Object.fromEntries(AF_GROUPS);
   const W = 1000, TOP = 40, H0 = 330, GAP = 8, BW = 16, XL = 330, XR = 652;
-  const lay = (rows) => { const sc = (H0 - GAP * (rows.length - 1)) / m.n; let y = TOP; return Object.fromEntries(rows.map(([k, v]) => { const h = Math.max(3, v * sc); const r = [k, { y, h, v, used: 0 }]; y += h + GAP; return r; })); };
+  // Small groups keep at least MIN px of room so their labels never collide; the rest share what is left.
+  const MIN = 18, lay = rows => { const small = rows.filter(([, v]) => v * (H0 / m.n) < MIN), big = m.n - small.reduce((s, [, v]) => s + v, 0);
+    const sc = (H0 - GAP * (rows.length - 1) - small.length * MIN) / Math.max(big, 1); let y = TOP;
+    return Object.fromEntries(rows.map(([k, v]) => { const room = small.some(([s]) => s === k) ? MIN : v * sc, h = Math.max(3, Math.min(room, v * sc)); const r = [k, { y: y + (room - h) / 2, h, v, used: 0 }]; y += room + GAP; return r; })); };
   const L = lay(m.groups), R = lay(m.kinds);
   const edge = (y0, y1, x0, x1) => { const c = (x0 + x1) / 2; return `M${x0},${y0} C${c},${y0} ${c},${y1} ${x1},${y1}`; };
   let links = '';
   for (const l of m.links) {
     const a = L[l.g], b = R[l.k], ha = a.h * l.v / a.v, hb = b.h * l.v / b.v;
     const ya = a.y + a.used, yb = b.y + b.used; a.used += ha; b.used += hb;
-    const k = Math.max(1, Math.round(Math.max(ha, hb) / 3.5)); let d = '';
+    const k = Math.max(1, Math.round(Math.max(ha, hb) / 4)); let d = '';
     for (let j = 0; j <= k; j++) { const t = k ? j / k : 0.5; d += edge(ya + t * ha, yb + t * hb, XL + BW + 2, XR - 2) + ' '; }
-    links += `<g class="af-l" data-g="${l.g}" style="stroke:${color[l.g]}"><title>${esc(tr('af.g.' + l.g))} → ${esc(tr('af.k.' + l.k))}: ${n(l.v)}</title><path class="sk-strand" d="${d.trim()}"/></g>`;
+    links += `<g class="sk-flow af-l" data-g="${l.g}" style="stroke:${color[l.g]}"><title>${esc(tr('af.g.' + l.g))} → ${esc(tr('af.k.' + l.k))}: ${n(l.v)}</title><path class="sk-strand" d="${d.trim()}"/>`
+      + `<path class="sk-edge" d="${edge(ya, yb, XL + BW + 2, XR - 2)} ${edge(ya + ha, yb + hb, XL + BW + 2, XR - 2)}"/></g>`;
   }
   const bar = (x, r, fill, cls, g) => `<rect class="${cls}" ${g ? `data-g="${g}"` : ''} x="${x}" y="${r.y.toFixed(1)}" width="${BW}" height="${r.h.toFixed(1)}" rx="${Math.min(4, r.h / 2).toFixed(1)}" style="fill:${fill}"/>`;
   let nodes = `<text class="sk-stage" x="${XL + BW}" y="${TOP - 18}" text-anchor="end">${esc(tr('af.left'))}</text><text class="sk-stage" x="${XR}" y="${TOP - 18}">${esc(tr('af.right'))}</text>`;
@@ -180,6 +187,6 @@ export function authorFlowHtml(meta, tr) {
   const list = (rows, col, key) => `<ul class="cv-bars">${rows.map(([k, v]) => `<li><span class="cv-bar-label">${esc(tr(key + k))}</span><span class="cv-bar"><i style="width:${(100 * v / m.n).toFixed(1)}%;background:${col(k)}"></i></span><span class="cv-bar-n">${n(v)}</span></li>`).join('')}</ul>`;
   const phone = `<h3>${esc(tr('af.left'))}</h3>${list(m.groups, g => color[g], 'af.g.')}<h3>${esc(tr('af.right'))}</h3>${list(m.kinds, () => 'var(--soft)', 'af.k.')}`;
   const pct = x => Math.round(100 * x / m.n) + '%';
-  const sum = tr('af.sum', { n: n(m.n), china: n(m.china), pc: pct(m.china), intl: n(m.intl), countries: m.countries.join(', ') || '—' });
+  const sum = tr('af.sum', { n: n(m.n), china: n(m.china), pc: pct(m.china), intl: n(m.intl), countries: countryNames(m.countries, tr('af.lang')).join(', ') || '—' });
   return `<div class="fx-sankey">${svg}</div><div class="fx-phone">${phone}</div><p class="fx-keep fx-keep-row af-sum">${esc(sum)}</p>`;
 }
