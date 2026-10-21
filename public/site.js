@@ -290,9 +290,11 @@ function viewOverview() {
         <button type="button" class="scroll-cue" data-scroll="graph-title"><span>${esc(tr('hero.scroll'))}</span><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 7l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <aside class="hero-side" aria-hidden="true"><img class="hero-art" src="art/research-desk.webp" width="1004" height="849" alt="" decoding="async"><div class="hero-tiles">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</div></aside>
       </section>
-      ${state.authors?.papers?.length ? `<section class="home-flow" aria-labelledby="home-flow-title"><div class="home-flow-head"><h2 id="home-flow-title">${esc(tr('af.title'))}</h2>
-        <p class="cv-legend"><span>${esc(tr('af.note'))}</span><a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
-        <div class="cv-card">${authorFlowHtml(state.authors, tr)}</div></section>` : ''}
+      ${state.corpus && state.corpus.charts ? `<section class="home-flow" aria-labelledby="home-flow-title"><div class="home-flow-head"><h2 id="home-flow-title">${esc(tr('cv.title'))}</h2>
+        <p class="cv-legend">${['en', 'zh'].map(l => `<span><i style="background:${LANG_COLOR[l]}"></i>${esc(tr('cv.lang.' + l))}</span>`).join('')}<a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
+        <div class="cv-card">${corpusFlowHtml(state.corpus, tr)}</div>
+        ${state.authors?.papers?.length ? `<div class="home-flow-head af-head"><h2>${esc(tr('af.title'))}</h2><p class="cv-legend"><span>${esc(tr('af.note'))}</span></p></div>
+        <div class="cv-card">${authorFlowHtml(state.authors, tr)}</div>` : ''}</section>` : ''}
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
       <section class="graph-feature" aria-labelledby="graph-title">
         <figure class="band-card graph-card"><div class="graph-head"><h2 class="graph-name" id="graph-title">${esc(tr('graph.title'))}</h2><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
@@ -378,10 +380,10 @@ function viewActions(params) {
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) }];
   return { title: tr('nav.actions'), html: lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size })) +
       browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + rankNoteHtml(d, tr),
-    mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
+    mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
       render: a => actionItemHtml(a, findingCtx(), fById),
       test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) &&
-        (!v.q || [a.action_en, a.action_zh, a.evidence_gap, a.risks].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
+        (!v.q || [a.id, a.action_en, a.action_zh, a.evidence_gap, a.risks].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
 }
 
 function viewSpeciesList() {

@@ -26,11 +26,13 @@ export function browseHtml({ filters = [], views = [], tr }) {
 // display order. test(item, values) -> keep or not. render(item) -> <li>. In the grouped view every group
 // shows its first `perGroup` items with its own "show more"; in the ranked view the list shows `pageSize`
 // at a time. The index always lists the groups with their counts under the current filters.
-export function mountBrowse(root, { items, groups, groupOf, test, render, tr, pageSize = 20, perGroup = 6, initialView = null, listClass = '' }) {
+export function mountBrowse(root, { items, groups, groupOf, test, render, tr, pageSize = 20, perGroup = 6, initialView = null, listClass = '', initial = {} }) {
   const box = root.querySelector('[data-br]');
   // On phones the filters start folded so the list is on the first screen.
   if (window.innerWidth < 860) box.querySelector('[data-bfbox]')?.removeAttribute('open');
+  // Filters can start set from the address (a link to one action opens the list filtered to it).
   const values = {};
+  box.querySelectorAll('[data-bf]').forEach(el => { const v = initial[el.dataset.bf]; if (v) { if (el.type === 'checkbox') el.checked = true; else el.value = v; values[el.dataset.bf] = el.type === 'checkbox' ? true : v; } });
   let view = initialView || box.querySelector('[data-bview]')?.dataset.bview || 'group';
   let shown = pageSize, expanded = false;
   const applyExpand = () => box.querySelectorAll('[data-b-list] [data-row]').forEach(d => { d.open = expanded; });
@@ -61,6 +63,8 @@ export function mountBrowse(root, { items, groups, groupOf, test, render, tr, pa
       list.querySelectorAll('[data-bgroup]').forEach(b => b.addEventListener('click', () => { const g = b.dataset.bgroup; open.has(g) ? open.delete(g) : open.add(g); draw(); }));
     }
     if (expanded) applyExpand();
+    // Filtered down to one item from the address: open it.
+    else if (rows.length === 1 && Object.values(initial).some(Boolean)) list.querySelector('[data-row]')?.setAttribute('open', '');
     box.querySelectorAll('[data-bjump]').forEach(a => a.addEventListener('click', e => {
       e.preventDefault();
       if (view === 'rank') { view = 'group'; box.querySelectorAll('[data-bview]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.bview === 'group'))); draw(); }
