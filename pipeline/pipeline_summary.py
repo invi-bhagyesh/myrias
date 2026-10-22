@@ -64,7 +64,9 @@ rc_num = lambda k: int(m.group(1)) if (m := re.search(r'(?<![_a-z])' + k + r':\s
 corpus = js(os.path.join(data, 'corpus.json')); h = corpus['headline']
 stages = {s['id']: s for s in corpus['charts']['stages']}
 sources = js(os.path.join(store, 'sources.json'))
-supplied = sum(1 for s in sources.values() if not s.get('record_id'))
+# Supplied papers: any the open search did not find (not in the intake's records).
+intake_ids = {r['id'] for r in jl(os.path.join(os.path.dirname(store), 'intake', 'records.jsonl'))}
+supplied = sum(1 for s in sources.values() if s.get('record_id') not in intake_ids)
 claims_store = len(jl(os.path.join(store, 'claims.jsonl')))
 rel = js(os.path.join(data, 'release.json'))
 released = sum(len(json.load(open(os.path.join(data, f)))) for f in rel['claim_files'])

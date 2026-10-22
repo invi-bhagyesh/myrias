@@ -627,3 +627,13 @@ test('render: only claims that can reach the release are rendered by default', a
   assert.ok(releasable(c()) && releasable(c({ verify: { verdict: 'partial' } })) && releasable(c({ verify: undefined })));
   assert.ok(!releasable(c({ map: { welfare_relevant: false } })) && !releasable(c({ verify: { verdict: 'unsupported' } })) && !releasable(c({ quote_check: 'not_found' })));
 });
+
+test('merge: English rendered after the merge is copied onto the stored claims by uid, nothing else changes', async () => {
+  const { refreshEnglish, claimUid } = await import('../pipeline/merge.mjs');
+  const a = { source: 's.pdf', page: 2, quote: '驯化率70%' }, b = { source: 's.pdf', page: 3, quote: '成活率90%' };
+  const store = { claims: [{ ...a, uid: claimUid(a), release_id: 'C0001', intervention_en: 'feed training' }, { ...b, uid: claimUid(b), release_id: 'C0002', statement_en: 'kept', rendering: { check: 'numbers_ok' } }] };
+  const r = refreshEnglish(store, [{ ...a, statement_en: 'Rate 70%.', intervention_en: 'other name', rendering: { check: 'numbers_ok' } }, { ...b, statement_en: 'kept', rendering: { check: 'numbers_ok' } }]);
+  assert.equal(r.updated, 1);
+  assert.equal(r.claims[0].statement_en, 'Rate 70%.'); assert.equal(r.claims[0].intervention_en, 'feed training'); assert.equal(r.claims[0].release_id, 'C0001');
+  assert.equal(r.claims[1], store.claims[1]);
+});

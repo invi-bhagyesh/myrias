@@ -1,5 +1,6 @@
 // Merge a run's claims into the species store, so each run adds to what exists instead of starting over.
 //   node pipeline/merge.mjs --store DIR --claims final.jsonl --run run-2 --phase B [--records records.jsonl] [--meta sources-meta.json] [--date 2026-10-11]
+//   node pipeline/merge.mjs --store DIR --refresh-english rendered.jsonl   (copy English onto claims already merged)
 // The store holds every claim that has passed (quote on the page, about welfare, supported or partly
 // supported), in the order it was added:
 //   DIR/claims.jsonl  one claim per line; uid (source + page + quote), release_id (C0001…, never reused),
@@ -52,6 +53,21 @@ export function mergeIntoStore(store, incoming, { run, phase, date, records = ne
   return { claims, sources, runs: [...store.runs, entry], entry };
 }
 
+// Pure: copy English renderings onto claims already in the store, matched by uid. Only the rendering and the
+// English statement change; the record, ids and the reconciled practice names stay as they are. Used when the
+// English step finishes after its claims were merged.
+export function refreshEnglish(store, rendered) {
+  const byUid = new Map(rendered.filter(c => c.rendering && c.statement_en).map(c => [claimUid(c), c]));
+  let updated = 0;
+  const claims = store.claims.map(c => {
+    const r = byUid.get(c.uid);
+    if (!r || (c.rendering && c.statement_en === r.statement_en)) return c;
+    updated++;
+    return { ...c, statement_en: r.statement_en, rendering: r.rendering };
+  });
+  return { claims, updated };
+}
+
 export function readStore(dir) {
   const read = (f, d) => (existsSync(`${dir}/${f}`) ? JSON.parse(readFileSync(`${dir}/${f}`, 'utf8')) : d);
   const claims = existsSync(`${dir}/claims.jsonl`) ? readFileSync(`${dir}/claims.jsonl`, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)) : [];
@@ -70,6 +86,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const dir = arg('store');
   const records = arg('records') ? new Map(jl(arg('records')).map(r => [r.id, r])) : new Map();
   const meta = arg('meta') ? JSON.parse(readFileSync(arg('meta'), 'utf8')) : {};
+  if (arg('refresh-english')) {
+    // node pipeline/merge.mjs --store DIR --refresh-english rendered.jsonl
+    const store = readStore(dir), r = refreshEnglish(store, jl(arg('refresh-english')));
+    writeStore(dir, { ...store, claims: r.claims });
+    console.log(JSON.stringify({ english_updated: r.updated, store_claims: r.claims.length, with_english: r.claims.filter(c => c.statement_en).length }));
+    process.exit(0);
+  }
   const merged = mergeIntoStore(readStore(dir), jl(arg('claims')), { run: arg('run'), phase: arg('phase'), date: arg('date', new Date().toISOString().slice(0, 10)), records, meta });
   writeStore(dir, merged);
   console.log(JSON.stringify({ ...merged.entry, store_claims: merged.claims.length, store_sources: Object.keys(merged.sources).length }));
