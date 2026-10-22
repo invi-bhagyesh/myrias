@@ -3,6 +3,7 @@ import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { pipelineHtml, mountPipeline } from './site-pipeline.js';
 import { runsHtml } from './site-runs.js';
+import { historyHtml, mountHistory, versionHead, versionsOf, loadVersionFile } from './site-history.js';
 import { matrixChart } from './site-chart.js';
 
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
@@ -39,10 +40,10 @@ const indexOf = list => new Map((list || []).map(x => [x.id, x]));
 
 async function load() {
   state.error = null; state.full = false; state.listsReady = false; state.fullPromise = null;
-  const [shell, corpus, nextRun, pipeline, papersMeta, runs] = await Promise.all([
+  const [shell, corpus, nextRun, pipeline, papersMeta, runs, versions] = await Promise.all([
     json(useSample ? 'data/sample.json' : 'data/release.json', { cache: 'no-cache' }).catch(e => ({ __error: e.message })),
-    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json'), optional('data/papers.json'), optional('data/runs.json')]);
-  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline; state.authors = papersMeta; state.runs = runs;
+    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json'), optional('data/papers.json'), optional('data/runs.json'), optional('data/versions.json')]);
+  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline; state.authors = papersMeta; state.runs = runs; state.versions = versions;
   if (shell.__error) { state.data = null; state.error = shell.__error; return; }
   const data = shell, pending = (data.claim_files || []).length > 0;
   const v = encodeURIComponent(data.release?.version || '0');
@@ -320,8 +321,26 @@ document.addEventListener('toggle', e => {
 
 function viewFinding(id) {
   const f = state.index.findings.get(id);
-  if (!f) return viewNotFound();
-  return { title: `${tr('fd.kicker')} ${f.id}`, html: findingPageHtml(f, findingCtx()) };
+  if (!f) return goneView('findings', id, 'fd.kicker');
+  return { title: `${tr('fd.kicker')} ${f.id}`, html: findingPageHtml(f, findingCtx()) + historyHtml(state.versions, 'findings', id, tr), mount: mountVersions };
+}
+
+// Earlier versions. A finding or claim that changed shows what earlier releases said under it; one that is no
+// longer in the release shows its last archived version instead of "not found".
+function historyRecordHtml(kind, x, v) {
+  const lang = state.lang;
+  if (kind === 'findings') return `<article class="hist-v">${versionHead(v, x, tr)}<p class="hist-text">${esc(findingText(x, lang))}</p>
+    <p class="fd-meta">${esc(tr('fd.strength.' + x.strength))} · ${esc(tr(x.counts.papers === 1 ? 'fd.papers.one' : 'fd.papers', { n: x.counts.papers }))} · ${esc(tr(x.counts.claims === 1 ? 'fd.claims.one' : 'fd.claims', { n: x.counts.claims }))}</p>
+    ${x.practice_en ? `<p class="small-note">${esc(tr('fd.practice'))}: ${esc(lang === 'zh' ? x.practice_zh || x.practice_en : x.practice_en)}</p>` : ''}</article>`;
+  return `<article class="hist-v">${versionHead(v, x, tr)}<p class="hist-text">${esc(L.claimText(x, lang).text)}</p>
+    <blockquote class="quote" lang="${esc(x.quote_lang || 'und')}">${esc(x.quote)}</blockquote>
+    <p class="small-note">${esc(tr('claim.intervention'))}: ${esc(x.intervention || '—')} · ${esc(tr('ver.' + x.verification))}</p></article>`;
+}
+const mountVersions = root => mountHistory(root, state.versions, historyRecordHtml);
+function goneView(kind, id, kicker) {
+  if (!versionsOf(state.versions, kind, id).length) return viewNotFound();
+  return { title: `${tr(kicker)} ${id}`, html: `<header class="species-title"><div class="record-type">${esc(tr(kicker))} ${esc(id)}</div><h1>${esc(tr('hist.gone.title'))}</h1></header>
+      <p>${esc(tr('hist.gone.note'))}</p>${historyHtml(state.versions, kind, id, tr, { open: true })}`, mount: mountVersions };
 }
 
 // All findings: an index by technology, filters, and grouped or ranked views.
@@ -343,9 +362,24 @@ function viewFindings(params) {
 }
 
 // All draft actions: ranked by priority or grouped by technology, with filters.
+// The version switch above the actions: the current set, or a set an earlier run drafted (archived).
+function actionVersionsHtml(params) {
+  const vs = (state.versions?.versions || []).filter(v => v.files?.actions);
+  if (!vs.length) return '';
+  const cur = params.get('v') || '', q = Object.fromEntries([...params].filter(([k]) => k !== 'v'));
+  return `<nav class="ac-versions" aria-label="${esc(tr('ac.version'))}"><span>${esc(tr('ac.version'))}</span><a href="${link('actions', q)}"${cur ? '' : ' aria-current="page"'}>${esc(tr('ac.version.current', { v: state.data.release.version }))}</a>${vs.map(v =>
+    `<a href="${link('actions', { ...q, v: v.run })}"${cur === v.run ? ' aria-current="page"' : ''}>${esc(tr('ac.version.run', { run: v.run, v: v.version || '' }))}</a>`).join('')}</nav>`;
+}
+
 function viewActions(params) {
-  const d = state.data, sp = params.get('species') || '';
-  const items = (d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
+  const d = state.data, sp = params.get('species') || '', vr = params.get('v');
+  const ver = vr && (state.versions?.versions || []).find(v => v.run === vr);
+  state.archivedActions ||= {};
+  if (ver && !state.archivedActions[vr]) {
+    loadVersionFile(ver.files.actions).then(a => { state.archivedActions[vr] = a; render(); });
+    return { title: tr('nav.actions'), html: `<p class="loading">${esc(tr('loading'))}</p>` };
+  }
+  const items = (ver ? state.archivedActions[vr] : d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
   const fById = new Map((d.findings || []).map(f => [f.id, f]));
   const filters = [
     { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('ac.search.ph') },
@@ -353,7 +387,8 @@ function viewActions(params) {
     { key: 'who', type: 'select', label: tr('ac.f.who'), options: [...new Set(items.map(a => a.who))].map(w => [w, tr('ac.who.' + w.replace(/ /g, '_'))]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) }];
   return { title: tr('nav.actions'), html: lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size })) +
-      browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + rankNoteHtml(d, tr),
+      actionVersionsHtml(params) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
+      browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
       render: a => actionItemHtml(a, findingCtx(), fById),
       test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) &&
@@ -459,7 +494,7 @@ function viewSource(id) {
 
 function viewClaim(id) {
   const c = state.index.claims.get(id);
-  if (!c) return viewNotFound();
+  if (!c) return goneView('claims', id, 'claim.kicker');
   const s = state.index.sources.get(c.source_id);
   const pop = c.population || {};
   const popText = [pop.species, pop.life_stage, pop.system].filter(Boolean).join(' · ');
@@ -482,7 +517,8 @@ function viewClaim(id) {
           ...(c.limitations ? [[tr('claim.limits'), esc(c.limitations)]] : []), ...(c.counterevidence ? [[tr('claim.counter'), esc(c.counterevidence)]] : []),
           [tr('claim.welfare'), `${esc(tr('welfare.' + c.welfare_link))}${c.welfare_link_note ? `<br><span class="meta">${esc(c.welfare_link_note)}</span>` : ''}`]]) +
       `<p><a class="button small" href="${esc(issueLink(`Correction: claim ${c.id}`, reportBody))}" target="_blank" rel="noopener noreferrer">${esc(tr('claim.report'))} ↗</a></p>
-       <p class="small-note">${esc(tr('claim.report.note'))}</p>`
+       <p class="small-note">${esc(tr('claim.report.note'))}</p>` + historyHtml(state.versions, 'claims', id, tr),
+    mount: mountVersions
   };
 }
 

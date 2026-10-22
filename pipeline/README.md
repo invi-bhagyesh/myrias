@@ -213,6 +213,19 @@ the spec, and every commit to `pipeline/` since that run ended. Add `--note` for
 `finish` reads the step records and writes what the run added: claims, papers, findings new, rewritten,
 unchanged or gone, and actions. `publish` writes the site's Run history without costs.
 
+## Keeping earlier versions
+
+Before a run, copy the release files (`public/data/release*.json`) aside. After it, run
+
+```sh
+node pipeline/versions.mjs --old OLD_COPY --new public/data --run run-2
+```
+
+with `--run` naming the run that made the old release. It archives the previous record of every claim and
+finding that changed or went, and the whole previous set of actions, under `public/data/versions/run-2/`, and
+lists them in `versions.json`. Finding and claim pages then offer "Earlier versions", a page for something that
+went shows its last version, and the Actions page can switch to an earlier run's set.
+
 ## Keeping a record of each step
 
 Wrap any command in `step.mjs` and it writes a numbered folder with a `step.json` (times, exact command,

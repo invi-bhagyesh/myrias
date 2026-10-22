@@ -597,3 +597,16 @@ test('run log: settings changes, results against the snapshot, no costs in the s
   const ps = await promptSettings();
   for (const k of ['extract', 'map', 'verify', 'translate', 'reconcile', 'cluster', 'findings', 'actions', 'rank']) assert.ok(ps[k].sha, k);
 });
+
+test('versions: what changed or went between two releases is archived with its previous record', async () => {
+  const { diffReleases } = await import('../pipeline/versions.mjs');
+  const oldR = { claims: [{ id: 'C1', text_en: 'a' }, { id: 'C2', text_en: 'b' }, { id: 'C3', text_en: 'c' }],
+    findings: [{ id: 'F1', statement_en: 'x', claim_ids: ['C1'], strength: 'one_paper' }, { id: 'F2', statement_en: 'y', claim_ids: ['C2'], strength: 'agree' }, { id: 'F3', statement_en: 'z', claim_ids: ['C3'], strength: 'agree' }],
+    actions: [{ id: 'X1' }] };
+  const newR = { claims: [{ id: 'C1', text_en: 'a' }, { id: 'C2', text_en: 'b2' }],
+    findings: [{ id: 'F1', statement_en: 'x', claim_ids: ['C1'], strength: 'one_paper' }, { id: 'F2', statement_en: 'y', claim_ids: ['C2', 'C9'], strength: 'agree' }], actions: [{ id: 'X1' }, { id: 'X2' }] };
+  const d = diffReleases(oldR, newR);
+  assert.deepEqual(d.claims.map(c => [c.id, c._change, c.text_en]), [['C2', 'changed', 'b'], ['C3', 'gone', 'c']]);
+  assert.deepEqual(d.findings.map(f => [f.id, f._change]), [['F2', 'changed'], ['F3', 'gone']]);
+  assert.deepEqual(d.actions, oldR.actions);
+});

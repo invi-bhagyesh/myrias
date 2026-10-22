@@ -374,3 +374,13 @@ test('run history: every run renders in both languages, with no cost', async () 
     assert.ok(!/[>"(]undefined|undefined[<")]|\bNaN\b|rn\.[a-z]/.test(html), lang);
   }
 });
+
+test('earlier versions: offered only for items an archived version lists', async () => {
+  const { historyHtml, versionsOf } = await import('../public/site-history.js');
+  const V = { versions: [{ run: 'run-2', version: '0.3.0', changed: { findings: ['F2'], claims: ['C3'] }, files: { findings: 'versions/run-2/findings.json' } }] };
+  assert.equal(versionsOf(V, 'findings', 'F2').length, 1);
+  assert.equal(historyHtml(V, 'findings', 'F1', k => k), '');
+  assert.ok(historyHtml(V, 'findings', 'F2', (k, v) => t('en', k, v)).includes('Earlier versions (1)'));
+  assert.ok(historyHtml(V, 'claims', 'C3', k => k, { open: true }).includes(' open'));
+  assert.equal(historyHtml(null, 'claims', 'C3', k => k), '');
+});
