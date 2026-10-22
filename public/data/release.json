@@ -62341,7 +62341,15 @@
   "release-claims-47.json",
   "release-claims-48.json",
   "release-claims-49.json",
-  "release-claims-50.json"
+  "release-claims-50.json",
+  "release-claims-51.json",
+  "release-claims-52.json",
+  "release-claims-53.json",
+  "release-claims-54.json",
+  "release-claims-55.json",
+  "release-claims-56.json",
+  "release-claims-57.json",
+  "release-claims-58.json"
  ],
  "finding_files": [
   "release-findings-0.json",
@@ -62351,7 +62359,8 @@
   "release-findings-4.json",
   "release-findings-5.json",
   "release-findings-6.json",
-  "release-findings-7.json"
+  "release-findings-7.json",
+  "release-findings-8.json"
  ],
  "action_files": [
   "release-actions.json"

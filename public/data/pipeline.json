@@ -35,7 +35,7 @@
    "key": "supplied",
    "model": null,
    "in": null,
-   "out": 16,
+   "out": 422,
    "calls": 0
   },
   {
@@ -94,9 +94,9 @@
    "lane": "read",
    "key": "render",
    "model": "qwen/qwen3.8-flash",
-   "in": 10777,
-   "out": 10777,
-   "calls": 10777
+   "in": 22709,
+   "out": 22709,
+   "calls": 22709
   },
   {
    "id": 11,
@@ -177,92 +177,84 @@
   }
  ],
  "totals": {
-  "calls": 81588
+  "calls": 93520
  },
  "example": {
-  "claim_id": "C0269",
-  "source_id": "S023",
-  "title": "WATER TEMPERATURE ON GROWTH AND LIPID METABOLISM IN CHINESE MANDARIN FISH",
+  "claim_id": "C14416",
+  "source_id": "S503",
+  "title": "鳜幼鱼饲料中最适淀粉添加量研究",
   "year": 2025,
-  "venue": "Acta Hydrobiologica Sinica",
-  "doi": "10.3724/1000-3207.2025.2025.0090",
+  "venue": "水产学报",
+  "doi": null,
   "search": {
-   "indexes": [
-    "openalex",
-    "semanticscholar"
-   ],
+   "indexes": [],
    "found_of": 2005
   },
   "screen": {
-   "species_in_title": true,
-   "topics": [
-    "water_quality",
-    "stress_behaviour"
-   ]
+   "species_in_title": null,
+   "topics": []
   },
   "fetch": {
-   "format": "pdf"
+   "format": null
   },
   "prepare": {
-   "pages": 7,
-   "page": 3
+   "pages": 11,
+   "page": 1
   },
   "extract": {
-   "windows": 11,
-   "claims_from_paper": 68,
-   "window": 4,
-   "quote": "在36℃养殖条件下, 雌雄鳜的WGR较28℃和35℃显著降低(P<0.05)。",
-   "statement": "在36℃养殖条件下，雌雄鳜的增重率较28℃和35℃显著降低。",
+   "windows": 22,
+   "claims_from_paper": 87,
+   "window": 0,
+   "quote": "当饲料淀粉含量超过13% 时，鳜血糖水平显著升高，血清中谷草转氨酶和谷丙转氨酶活性显著上升，肝组织空泡化程度加重，出现核聚集甚至核溶解现象。",
+   "statement": "当饲料淀粉含量超过13%时，鳜的血糖水平升高，血清转氨酶活性上升，且肝组织出现空泡化、核聚集及核溶解等病理变化。",
    "lang": "zh",
-   "intervention": "高温养殖",
+   "intervention": "饲料淀粉添加量",
    "basis": "measured",
    "polarity": "counterevidence",
    "model": "qwen/qwen3.8-flash"
   },
   "quote": {
    "check": "found",
-   "page": 3,
-   "found_in_paper": 67
+   "page": 1,
+   "found_in_paper": 78
   },
   "map": {
    "welfare_relevant": true,
-   "technology_class": "water_systems",
-   "welfare_problem": "water_quality",
+   "technology_class": "feeds",
+   "welfare_problem": "disease_parasites",
    "kind": "measured",
-   "welfare_link": "proxy",
-   "reason": "The claim reports that high temperature (36°C) significantly reduces weight gain rate in mandarin fish compared to lower temperatures. This is a measured result from the study. While it addresses an environmental condition (temperature/water quality) relevant to welfare, the outcome reported is growth (a proxy for welfare/health), not a direct welfare metric like stress hormones or mortality. The reduction in growth indicates a negative impact on the animal's physiological state under that specific condition.",
+   "welfare_link": "direct",
+   "reason": "The statement reports physiological and pathological changes (elevated blood glucose, liver enzyme activity, and histological damage like vacuolization and nuclear dissolution) resulting from high dietary starch. These are direct indicators of metabolic stress and liver pathology, which are welfare-relevant health issues. The study measures these negative outcomes directly.",
    "model": "qwen/qwen3.8-flash"
   },
   "verify": {
    "verdict": "supported",
-   "note": "WGR即增重率(Weight Gain Rate)，引文与陈述内容一致。",
+   "note": "该陈述与引文内容一致：饲料淀粉含量超过13%时血糖升高、血清转氨酶活性上升、肝组织空泡化及核聚集、核溶解等变化均在引文中明确出现。",
    "model": "z-ai/glm-5.3"
   },
   "render": {
-   "text_en": "Under rearing conditions at 36°C, the weight gain rate of female and male mandarin fish was significantly lower than at 28°C and 35°C.",
+   "text_en": "When the dietary starch content exceeds 13%, blood glucose levels in mandarin fish increase, serum transaminase activity rises, and pathological changes such as vacuolization, nuclear aggregation, and karyolysis appear in liver tissue.",
    "numbers": [
-    "36",
-    "28",
-    "35"
+    "13"
    ],
    "check": "numbers_ok",
    "model": "qwen/qwen3.8-flash"
   },
   "reconcile": {
    "before": [
-    "高温养殖",
-    "High-temperature rearing"
+    "饲料淀粉添加量",
+    null
    ],
    "after": [
-    "high-temperature farming",
-    "高温养殖"
+    "different dietary carbohydrate levels",
+    "不同碳水化合物水平饲料"
    ]
   },
   "merge": {
-   "uid": "q9940b1ddcd83",
-   "id": "C0269",
-   "source_id": "S023",
-   "run": "run-2"
+   "uid": "q338e52908a3d",
+   "id": "C14416",
+   "source_id": "S503",
+   "run": "run-3"
   },
   "export": {
    "released": true
@@ -270,77 +262,273 @@
   "cluster": {
    "names": [
     [
-     "water temperature control",
-     40
+     "high-carbohydrate diet",
+     64
     ],
     [
-     "high-temperature farming",
-     22
+     "different dietary carbohydrate levels",
+     31
     ],
     [
-     "extreme water temperature (27 or 33°c)",
+     "high-lipid high-carbohydrate diet",
+     10
+    ],
+    [
+     "carbohydrate supplementation",
+     7
+    ],
+    [
+     "excessive carbohydrate supplementation",
+     6
+    ],
+    [
+     "early-stage high-carbohydrate feeding",
+     6
+    ],
+    [
+     "increasing carbohydrate levels",
+     5
+    ],
+    [
+     "carbohydrate-rich diets",
+     5
+    ],
+    [
+     "diet with appropriate cho:l ratio",
      3
     ],
     [
-     "artificial temperature control with feeding management",
+     "diets with different cho:l ratios",
+     3
+    ],
+    [
+     "appropriate carbohydrate supplementation",
+     3
+    ],
+    [
+     "whole-period high-carbohydrate feeding",
+     3
+    ],
+    [
+     "10% carbohydrate diet",
+     2
+    ],
+    [
+     "carbohydrate and lipid levels",
+     2
+    ],
+    [
+     "adjusting cho:l ratio",
+     2
+    ],
+    [
+     "diets with different lipid and carbohydrate levels",
+     2
+    ],
+    [
+     "long-term high carbohydrate intake",
+     2
+    ],
+    [
+     "13% carbohydrate diet",
      1
     ],
     [
-     "water temperature 23-27°c",
+     "16.5% carbohydrate diet",
      1
     ],
     [
-     "low-temperature farming",
+     "9.7% carbohydrate diet",
      1
     ],
     [
-     "temperature stress",
+     "23.9–30.1% high-carbohydrate diets",
+     1
+    ],
+    [
+     "30.1% carbohydrate diet",
+     1
+    ],
+    [
+     "20% high-carbohydrate diet",
+     1
+    ],
+    [
+     "optimizing dietary carbohydrate level",
+     1
+    ],
+    [
+     "moderate to high carbohydrate diet",
+     1
+    ],
+    [
+     "12% carbohydrate diet",
+     1
+    ],
+    [
+     "16% carbohydrate diet",
+     1
+    ],
+    [
+     "increasing cho:l ratio",
+     1
+    ],
+    [
+     "moderate carbohydrate diet",
+     1
+    ],
+    [
+     "high-carbohydrate/low-fat diet",
+     1
+    ],
+    [
+     "high-fat/low-carbohydrate diet",
+     1
+    ],
+    [
+     "high-carbohydrate feeding after yolk exhaustion",
      1
     ]
    ],
    "name": [
-    "water temperature control",
-    "水温控制"
+    "dietary carbohydrate level",
+    "饲料碳水化合物水平"
    ],
-   "reason": "All members concern managing or setting rearing water temperature (optimal range or extremes) for the fish, but claim C9269 is about small yellow croaker, not the target species, so it is dropped.",
+   "reason": "All members are different carbohydrate inclusion levels (13%, 16.5%, 9.7%, 20-30%, optimum) of the same practice, dietary carbohydrate level, so none need dropping.",
    "model": "anthropic/claude-sonnet-5.5"
   },
   "findings": {
-   "id": "F1972",
-   "statement_en": "In mandarin fish, water temperature outside the suitable range harmed welfare: at 36°C growth was severely inhibited, liver antioxidant enzymes (SOD, CAT) and heat shock genes (hsp70, hsp90) fell while MDA rose, and early development was suppressed at temperatures too high or too low. Temperatures of about 23-27°C (best 25°C) gave good feeding, vigour and growth, though the claims cite different optimal ranges (25-35°C in one paper), and several claims only describe how temperature was controlled.",
-   "statement_zh": "对鳜鱼来说，水温偏离适宜范围会损害其福利：36℃时生长受到严重抑制，肝脏抗氧化酶（SOD、CAT）和热休克基因（hsp70、hsp90）下降，MDA升高；水温过高或过低还会抑制早期发育。23-27℃（最适25℃）时摄食旺盛、活力好、生长快，不过各研究给出的适宜范围不完全一致（有研究称25-35℃），另有几条只是描述了控温方法。",
+   "id": "F0535",
+   "statement_en": "In mandarin fish, higher dietary carbohydrate mostly harmed health: several papers measured liver damage (vacuolization, lipid build-up, raised MDA and liver enzymes, apoptosis and ER stress) once levels passed about 7-13%, with the interaction with high fat making it worse. One paper found that carbohydrate improved growth and, in saline-alkaline water, a 13% diet eased the oxidative and tissue damage, and a medium level raised plasma immune-related proteins.",
+   "statement_zh": "在鳜上，饲料碳水化合物偏高多数情况下对健康不利：多篇研究测到，碳水超过约7%～13%后肝细胞肿胀空泡化、脂质蓄积、MDA和转氨酶升高、细胞凋亡和内质网应激，与高脂叠加时更严重。也有研究发现碳水能促生长，在盐碱水中13%碳水饲料可减轻氧化和组织损伤，中等水平还提高了血浆免疫相关蛋白。",
    "counts": {
-    "claims": 28,
-    "papers": 10,
-    "measured": 20,
-    "supportive": 4,
-    "opposing": 14,
-    "descriptive": 10
+    "claims": 87,
+    "papers": 20,
+    "measured": 51,
+    "supportive": 7,
+    "opposing": 80,
+    "descriptive": 0
    },
-   "strength": "mixed",
-   "welfare_problem": "water_quality",
-   "practice_en": "water temperature control",
-   "practice_zh": "水温控制",
+   "strength": "against",
+   "welfare_problem": "disease_parasites",
+   "practice_en": "dietary carbohydrate level",
+   "practice_zh": "饲料碳水化合物水平",
    "basis": {
     "grouping": {
      "names": [
-      "artificial temperature control with feeding management",
-      "extreme water temperature (27 or 33°c)",
-      "water temperature 23-27°c"
+      "13% carbohydrate diet",
+      "16.5% carbohydrate diet",
+      "9.7% carbohydrate diet",
+      "23.9–30.1% high-carbohydrate diets",
+      "30.1% carbohydrate diet",
+      "20% high-carbohydrate diet",
+      "optimizing dietary carbohydrate level"
      ],
      "dropped": [],
-     "reason": "All members concern managing or setting rearing water temperature (optimal range or extremes) for the fish, but claim C9269 is about small yellow croaker, not the target species, so it is dropped.",
+     "reason": "All members are different carbohydrate inclusion levels (13%, 16.5%, 9.7%, 20-30%, optimum) of the same practice, dietary carbohydrate level, so none need dropping.",
      "model": "anthropic/claude-sonnet-5.5"
     },
     "strength": {
-     "en": "Of 18 claims that take a side: 4 in favour, 14 against or no effect. Neither side reaches 80%.",
-     "zh": "18 条有明确倾向的论断中，4 条支持，14 条反对或无效果，任何一方都未达到 80%。",
+     "en": "Of 87 claims that take a side: 7 in favour, 80 against or no effect. At least 80% point one way.",
+     "zh": "87 条有明确倾向的论断中，7 条支持，80 条反对或无效果，至少 80% 指向同一方向。",
      "rule": "one paper; described if more claims describe than take a side; agree or against at 80% or more one way; otherwise mixed"
     },
-    "summary": "Most weight rests on the measured high-temperature results from paper S023 (growth, antioxidant and heat shock markers) plus measured early-development results from paper S370; the optimal range differs between papers (25-35°C vs 23-27°C), so I noted that, and left out claims that only describe heating/cooling methods or other species."
+    "summary": "Most weight goes to measured claims on liver histology, MDA, enzymes and apoptosis from several mandarin fish papers (S454, S461, S055, S503, S018), which agree on harm at high carbohydrate; I noted the supportive claims from S053, S090 and S114 as exceptions under specific conditions and left out background and other-species claims."
    }
   },
-  "actions": null,
+  "actions": {
+   "id": "X007",
+   "rank": 2,
+   "action_en": "Keep dietary carbohydrate and starch in mandarin fish feeds at about 10-13% and avoid formulating above roughly 13-16%.",
+   "action_zh": "饲料厂应将鳜鱼饲料中的碳水化合物和淀粉控制在约10-13%,避免配方超过约13-16%。",
+   "type": "avoid",
+   "who": "feed makers",
+   "priority": {
+    "score": 0.9,
+    "reason": "Many measured papers (51 measured claims in F0535 alone) show liver damage and reduced feed intake from high carbohydrate, so capping it is a clear feed-formulation step. Thresholds vary between 7 and 16%, which keeps it just below the top.",
+    "criteria": [
+     {
+      "criterion": "Welfare gain",
+      "level": "high",
+      "note": "liver damage and anorexia, all fed fish"
+     },
+     {
+      "criterion": "Strength of evidence",
+      "level": "high",
+      "note": "four findings, many measured, agree"
+     },
+     {
+      "criterion": "Can it be done now",
+      "level": "high",
+      "note": "formulation change by feed makers"
+     },
+     {
+      "criterion": "Risk if it is wrong",
+      "level": "low",
+      "note": "slightly lower growth if too low"
+     }
+    ],
+    "method": "model",
+    "by": {
+     "model": "anthropic/claude-sonnet-5.5",
+     "version": "rank-0.1",
+     "spec": "pipeline/priority-spec.md",
+     "spec_sha": "c0809ced3ebc",
+     "as_of": "2026-10-22"
+    }
+   },
+   "evidence_gap": "Reported thresholds differ between studies (about 7-16%), and effects with different fish sizes, fat levels and water types are not settled.",
+   "risks": "Going too low may cut protein sparing and growth, and one study found carbohydrate improved growth and, in saline-alkaline water, a 13% diet eased tissue damage.",
+   "basis": {
+    "reason": "These four findings all measured harm from high carbohydrate or starch in mandarin fish, covering liver damage, lower feed intake and anorexia, and they give similar cut-off levels. I chose them over the sugar and gelatinized starch findings because they rest on more papers and more measured results. The type is avoid for high levels only, because the safe level is not fixed and low-to-moderate levels sometimes showed no effect.",
+    "findings": [
+     {
+      "id": "F0535",
+      "why": "Measured liver damage once carbohydrate passed about 7-13%",
+      "practice_en": "dietary carbohydrate level",
+      "practice_zh": "饲料碳水化合物水平",
+      "welfare_problem": "disease_parasites",
+      "strength": "against",
+      "papers": 20,
+      "claims": 87,
+      "measured": 51
+     },
+     {
+      "id": "F0563",
+      "why": "Lower intake and anorexia at high levels; best around 10-13%",
+      "practice_en": "dietary carbohydrate level",
+      "practice_zh": "饲料碳水化合物水平",
+      "welfare_problem": "feeding",
+      "strength": "against",
+      "papers": 16,
+      "claims": 79,
+      "measured": 48
+     },
+     {
+      "id": "F0722",
+      "why": "Liver damage and higher AST/ALT above about 13-16% starch",
+      "practice_en": "dietary starch level",
+      "practice_zh": "饲料淀粉水平",
+      "welfare_problem": "disease_parasites",
+      "strength": "against",
+      "papers": 10,
+      "claims": 30,
+      "measured": 7
+     },
+     {
+      "id": "F1201",
+      "why": "High-sugar diets lowered intake and growth; only some fish became anorexic",
+      "practice_en": "high-sugar diet",
+      "practice_zh": "高糖饲料",
+      "welfare_problem": "feeding",
+      "strength": "against",
+      "papers": 8,
+      "claims": 31,
+      "measured": 14
+     }
+    ]
+   }
+  },
   "rank_of": 29
  }
 }

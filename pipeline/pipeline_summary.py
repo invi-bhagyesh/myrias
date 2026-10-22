@@ -54,6 +54,16 @@ for run, ph in phases():
     mg = step_dir(ph, 'merge')
     if mg: R['passing'] += json.loads(open(os.path.join(mg, 'stdout.log')).read())['claims_passing']
     else: R['passing'] += sum(1 for c in ver if (c.get('verify') or {}).get('verdict') in ('supported', 'partial'))
+# English text: count the calls from the step's own call logs, since a step that was resumed later (run 3's
+# render-finish) logged its calls into the first step's folder.
+render_calls = 0
+for run, ph in phases():
+    d = step_dir(ph, 'render')
+    if d: render_calls += sum(len(jl(f)) for f in glob.glob(os.path.join(d, '*calls.jsonl')))
+if render_calls:
+    flat = sum(len(jl(os.path.join(ph, 'final.jsonl.calls.jsonl'))) for run, ph in phases() if not step_dir(ph, 'render'))
+    calls['render'] = render_calls + flat
+    calls.pop('render-finish', None)
 # The latest naming step: how many new names it grouped and how many joined groups already in the store.
 rc_txt = ''
 for run, ph in phases():

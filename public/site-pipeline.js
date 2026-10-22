@@ -195,7 +195,7 @@ export function pipelineHtml(P, c) {
   };
   const walk = `<section class="fw-walk" data-walk data-n="${P.steps.length}">
     <header class="fw-walk-h"><div><div class="record-type">${esc(L('Walkthrough', '逐步演示'))}</div><h2>${esc(L('Follow one claim through every step', '跟随一条论断走完每一步'))}</h2>
-      ${e ? `<p>${esc(L(`A real claim from page ${e.prepare.page} of a ${e.year} paper on water temperature, and where it ends up.`, `一条真实论断：来自 ${e.year} 年一篇水温论文的第 ${e.prepare.page} 页，看它最终走到哪里。`))}</p>` : ''}</div>
+      ${e ? `<p>${esc(L(`A real claim from page ${e.prepare.page} of a ${e.year} paper${e.findings?.practice_en ? ` on ${e.findings.practice_en}` : ''}, and where it ends up.`, `一条真实论断：来自 ${e.year} 年一篇${e.findings?.practice_zh ? `关于${e.findings.practice_zh}的` : ''}论文第 ${e.prepare.page} 页，看它最终走到哪里。`))}</p>` : ''}</div>
       <div class="fw-ctrl"><button type="button" data-prev aria-label="${esc(L('Previous step', '上一步'))}">←</button><span data-pos></span><button type="button" data-next aria-label="${esc(L('Next step', '下一步'))}">→</button></div></header>
     <ol class="fw-rail">${rail}</ol>
     <div class="fw-stage">${P.steps.map(panel).join('')}</div>

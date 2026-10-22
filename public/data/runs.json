@@ -6,7 +6,7 @@
    "title_en": "Run 3: the 2026-10-20 batch of Chinese papers",
    "status": "done",
    "started": "2026-10-22T06:40:48.221Z",
-   "finished": "2026-10-22T11:09:16.639Z",
+   "finished": "2026-10-22T11:41:24.924Z",
    "git": {
     "commit": "84306b6",
     "branch": "claude/site-suggestions-t8i6vo"
@@ -212,6 +212,10 @@
      {
       "en": "English text now covers only claims that can be released (quote found, about welfare, supported or partly supported), 16 calls at a time, and resumes if stopped; run 2 translated every claim with a found quote.",
       "at": "2026-10-22T08:26:52.944Z"
+     },
+     {
+      "en": "The first English step stopped after 999 claims on a gateway timeout but reported success; the step was fixed to skip a failed call and report it, finished the remaining claims (12,931 rendered, 12,807 with every number carried over), and the English was copied onto the stored claims before a fresh export and findings refresh.",
+      "at": "2026-10-22T11:41:24.370Z"
      }
     ]
    },
@@ -335,6 +339,38 @@
      "calls": 406,
      "exit_code": 0,
      "rows_out": 406
+    },
+    {
+     "phase": "A",
+     "step": "16-render-finish",
+     "started": "2026-10-22T11:10:59.766Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "17-english-to-store",
+     "started": "2026-10-22T11:40:56.326Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "18-export",
+     "started": "2026-10-22T11:40:58.403Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "19-findings",
+     "started": "2026-10-22T11:41:00.024Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
     }
    ],
    "results": {
