@@ -66,9 +66,9 @@ def main():
             if s not in want: continue
             n_ocr += 1
             for p in sorted(ps, key=lambda p: p['page']):
-                text, dropped = collapse_repeats(p['text'])
+                clean, dropped = collapse_repeats(p['text'])
                 n_dropped += dropped
-                f.write(json.dumps({'source': s, 'page': p['page'], 'text': text, 'ocr': {**(p.get('ocr') or {}), **({'repeated_lines_dropped': dropped} if dropped else {})}}, ensure_ascii=False) + '\n')
+                f.write(json.dumps({'source': s, 'page': p['page'], 'text': clean, 'ocr': {**(p.get('ocr') or {}), **({'repeated_lines_dropped': dropped} if dropped else {})}}, ensure_ascii=False) + '\n')
     with open(f'{out}/records.jsonl', 'w', encoding='utf-8') as f:
         for s, r in sorted(want.items()):
             f.write(json.dumps({'id': s, 'title': r['title'], 'title_en': r.get('title_en'), 'authors': [r['first_author']] if r.get('first_author') else [],
