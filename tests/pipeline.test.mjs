@@ -197,6 +197,16 @@ test('stage 0 drops the same text or the same title and says why', () => {
   assert.deepEqual(r.dropped.map(d => d.reason).sort(), ['same_text', 'same_title']);
 });
 
+test('stage 0 with paper records: same title and same first author is a duplicate; same author alone or same title alone is not', () => {
+  const pages = ['2002_Spotted_Xu_Culture techniques.pdf', '2002_Spotted_Xu_Preliminary study.pdf', '2003_Spotted_Xu_Culture techniques again.pdf', '2003_Spotted_Li_Same title other author.pdf']
+    .map((source, i) => ({ source, page: 1, text: 'text ' + i }));
+  const info = new Map([['2002_Spotted_Xu_Culture techniques.pdf', { title: '斑鳜养殖技术', authors: ['徐'] }], ['2002_Spotted_Xu_Preliminary study.pdf', { title: '斑鳜人工养殖初步研究', authors: ['徐'] }],
+    ['2003_Spotted_Xu_Culture techniques again.pdf', { title: '斑鳜养殖技术', authors: ['徐'] }], ['2003_Spotted_Li_Same title other author.pdf', { title: '斑鳜养殖技术', authors: ['李'] }]]);
+  const r = dedupSources(pages, info);
+  assert.deepEqual(r.dropped.map(d => [d.source, d.reason]), [['2003_Spotted_Xu_Culture techniques again.pdf', 'same_title']]);
+  assert.equal(r.kept.length, 3);
+});
+
 test('budget reservation: concurrent calls can never pass the cap', async () => {
   let inFlight = 0, maxInFlight = 0;
   const fetchImpl = async () => { inFlight++; maxInFlight = Math.max(maxInFlight, inFlight); await new Promise(r => setTimeout(r, 5)); inFlight--; return okFetch('{"claims":[]}', 0.0001)(); };
