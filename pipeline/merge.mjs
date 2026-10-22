@@ -21,7 +21,7 @@ const langOf = s => ((String(s).match(/[一-鿿]/g) || []).length > String(s).le
 // the hand-kept first-run metadata (title prefix → year, venue).
 export function sourceInfo(source, records, meta, sampleQuote = '') {
   const r = records.get(source);
-  if (r) return { title: r.title, authors: r.authors || [], year: r.year ?? null, lang: r.lang || langOf(r.title), venue: r.venue ?? null,
+  if (r) return { title: r.title, ...(r.title_en ? { title_en: r.title_en } : {}), authors: r.authors || [], year: r.year ?? null, lang: r.lang || langOf(r.title), venue: r.venue ?? null,
     doi: r.doi ?? null, url: r.doi ? `https://doi.org/${r.doi}` : (r.oa?.landing || null), access: 'full_text', record_id: source };
   const stem = String(source).replace(/\.pdf$/i, ''), [title, author] = stem.split(/_(?=[^_]*$)/);
   const m = Object.entries(meta).find(([k]) => !k.startsWith('_') && title.startsWith(k))?.[1] || {};
