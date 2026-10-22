@@ -1,6 +1,6 @@
 {
- "run": "run-2",
- "as_of": "2026-10-12",
+ "run": "run-2, run-3",
+ "as_of": "2026-10-22",
  "steps": [
   {
    "id": 1,
@@ -43,8 +43,8 @@
    "lane": "collect",
    "key": "prepare",
    "model": null,
-   "in": 176,
-   "out": 1710,
+   "in": 582,
+   "out": 6678,
    "calls": 0
   },
   {
@@ -52,17 +52,17 @@
    "lane": "read",
    "key": "extract",
    "model": "qwen/qwen3.8-flash",
-   "in": 4077,
-   "out": 11102,
-   "calls": 4077
+   "in": 8420,
+   "out": 34942,
+   "calls": 8420
   },
   {
    "id": 7,
    "lane": "read",
    "key": "quote",
    "model": null,
-   "in": 11102,
-   "out": 10159,
+   "in": 34942,
+   "out": 32306,
    "calls": 0
   },
   {
@@ -70,23 +70,23 @@
    "lane": "read",
    "key": "map",
    "model": "qwen/qwen3.8-flash",
-   "in": 10159,
-   "out": 4486,
-   "calls": 18952
+   "in": 32306,
+   "out": 17482,
+   "calls": 41099
   },
   {
    "id": 9,
    "lane": "read",
    "key": "verify",
    "model": "z-ai/glm-5.3",
-   "in": 4486,
-   "out": 4460,
-   "calls": 4486,
+   "in": 17482,
+   "out": 17406,
+   "calls": 17482,
    "split": {
-    "supported": 4172,
-    "partial": 288,
-    "unsupported": 24,
-    "null": 2
+    "supported": 15315,
+    "partial": 2091,
+    "unsupported": 69,
+    "null": 7
    }
   },
   {
@@ -94,27 +94,27 @@
    "lane": "read",
    "key": "render",
    "model": "qwen/qwen3.8-flash",
-   "in": 9778,
-   "out": 9778,
-   "calls": 9778
+   "in": 10777,
+   "out": 10777,
+   "calls": 10777
   },
   {
    "id": 11,
    "lane": "combine",
    "key": "reconcile",
    "model": "anthropic/claude-sonnet-5.5",
-   "in": 2409,
-   "out": 1063,
-   "calls": 20,
-   "joined_existing": 31
+   "in": 7031,
+   "out": 3275,
+   "calls": 44,
+   "joined_existing": 404
   },
   {
    "id": 12,
    "lane": "combine",
    "key": "merge",
    "model": null,
-   "in": 4460,
-   "out": 4460,
+   "in": 17406,
+   "out": 17406,
    "calls": 0
   },
   {
@@ -122,8 +122,8 @@
    "lane": "combine",
    "key": "export",
    "model": null,
-   "in": 4460,
-   "out": 4458,
+   "in": 17406,
+   "out": 17403,
    "calls": 0
   },
   {
@@ -131,39 +131,39 @@
    "lane": "combine",
    "key": "cluster",
    "model": "anthropic/claude-sonnet-5.5",
-   "in": 475,
-   "out": 352,
-   "calls": 87,
+   "in": 2215,
+   "out": 1522,
+   "calls": 533,
    "embed_model": "qwen/qwen3-embedding-8b",
-   "embed_only": 298
+   "embed_only": 1220
   },
   {
    "id": 15,
    "lane": "combine",
    "key": "findings",
    "model": "anthropic/claude-sonnet-5.5",
-   "in": 4458,
-   "out": 405,
-   "calls": 292,
-   "multi_paper": 79
+   "in": 17403,
+   "out": 1784,
+   "calls": 1016,
+   "multi_paper": 577
   },
   {
    "id": 16,
    "lane": "combine",
    "key": "actions",
    "model": "anthropic/claude-sonnet-5.5",
-   "in": 79,
-   "out": 18,
-   "calls": 10
+   "in": 577,
+   "out": 29,
+   "calls": 17
   },
   {
    "id": 17,
    "lane": "combine",
    "key": "rank",
    "model": "anthropic/claude-sonnet-5.5",
-   "in": 18,
-   "out": 18,
-   "calls": 2
+   "in": 29,
+   "out": 29,
+   "calls": 3
   },
   {
    "id": 18,
@@ -177,7 +177,7 @@
   }
  ],
  "totals": {
-  "calls": 38715
+  "calls": 81588
  },
  "example": {
   "claim_id": "C0269",
@@ -270,16 +270,24 @@
   "cluster": {
    "names": [
     [
-     "high-temperature farming",
-     20
-    ],
-    [
      "water temperature control",
-     16
+     40
     ],
     [
-     "water temperature monitoring",
-     11
+     "high-temperature farming",
+     22
+    ],
+    [
+     "extreme water temperature (27 or 33°c)",
+     3
+    ],
+    [
+     "artificial temperature control with feeding management",
+     1
+    ],
+    [
+     "water temperature 23-27°c",
+     1
     ],
     [
      "low-temperature farming",
@@ -291,120 +299,48 @@
     ]
    ],
    "name": [
-    "water temperature regulation",
-    "水温调控"
+    "water temperature control",
+    "水温控制"
    ],
-   "reason": "All members concern managing or setting rearing water temperature (high, low, controlled, monitored) for mandarin fish, so they are one practice; only the liver pathology claim C0276 and viral load claim C0422 are not about temperature management itself.",
+   "reason": "All members concern managing or setting rearing water temperature (optimal range or extremes) for the fish, but claim C9269 is about small yellow croaker, not the target species, so it is dropped.",
    "model": "anthropic/claude-sonnet-5.5"
   },
   "findings": {
-   "id": "F0616",
-   "statement_en": "In mandarin fish, raising water temperature to 36°C was linked to poorer welfare: growth was strongly inhibited, liver antioxidant enzymes (SOD, CAT) and related gene expression fell, MDA rose in females, and hsp70/hsp90 expression trended down, which the authors read as exceeding the fish's self-protection range. Other claims mostly describe how temperature was set or the ranges used, and one earlier study found higher blood total protein and GOT at 20°C than at other temperatures; background says 25-35°C is the optimal range.",
-   "statement_zh": "对鳜来说，把水温升到36°C与福利变差有关：生长受到明显抑制，肝脏抗氧化酶（SOD、CAT）及相关基因表达下降，雌鱼MDA升高，hsp70/hsp90表达总体下降，作者认为这已超出鱼体自身保护范围。其他结论多只是描述控温方式或试验温度范围；另有一项早期研究发现20°C时血清总蛋白和GOT高于其他水温；背景资料称25-35°C为适宜温度范围。",
+   "id": "F1972",
+   "statement_en": "In mandarin fish, water temperature outside the suitable range harmed welfare: at 36°C growth was severely inhibited, liver antioxidant enzymes (SOD, CAT) and heat shock genes (hsp70, hsp90) fell while MDA rose, and early development was suppressed at temperatures too high or too low. Temperatures of about 23-27°C (best 25°C) gave good feeding, vigour and growth, though the claims cite different optimal ranges (25-35°C in one paper), and several claims only describe how temperature was controlled.",
+   "statement_zh": "对鳜鱼来说，水温偏离适宜范围会损害其福利：36℃时生长受到严重抑制，肝脏抗氧化酶（SOD、CAT）和热休克基因（hsp70、hsp90）下降，MDA升高；水温过高或过低还会抑制早期发育。23-27℃（最适25℃）时摄食旺盛、活力好、生长快，不过各研究给出的适宜范围不完全一致（有研究称25-35℃），另有几条只是描述了控温方法。",
    "counts": {
-    "claims": 22,
-    "papers": 7,
-    "measured": 18,
-    "supportive": 1,
-    "opposing": 11,
+    "claims": 28,
+    "papers": 10,
+    "measured": 20,
+    "supportive": 4,
+    "opposing": 14,
     "descriptive": 10
    },
-   "strength": "against",
+   "strength": "mixed",
    "welfare_problem": "water_quality",
-   "practice_en": "water temperature regulation",
-   "practice_zh": "水温调控",
+   "practice_en": "water temperature control",
+   "practice_zh": "水温控制",
    "basis": {
     "grouping": {
      "names": [
-      "high-temperature farming",
-      "low-temperature farming",
-      "temperature stress",
-      "water temperature control",
-      "water temperature monitoring"
+      "artificial temperature control with feeding management",
+      "extreme water temperature (27 or 33°c)",
+      "water temperature 23-27°c"
      ],
      "dropped": [],
-     "reason": "All members concern managing or setting rearing water temperature (high, low, controlled, monitored) for mandarin fish, so they are one practice; only the liver pathology claim C0276 and viral load claim C0422 are not about temperature management itself.",
+     "reason": "All members concern managing or setting rearing water temperature (optimal range or extremes) for the fish, but claim C9269 is about small yellow croaker, not the target species, so it is dropped.",
      "model": "anthropic/claude-sonnet-5.5"
     },
     "strength": {
-     "en": "Of 12 claims that take a side: 1 in favour, 11 against or no effect. At least 80% point one way.",
-     "zh": "12 条有明确倾向的论断中，1 条支持，11 条反对或无效果，至少 80% 指向同一方向。",
+     "en": "Of 18 claims that take a side: 4 in favour, 14 against or no effect. Neither side reaches 80%.",
+     "zh": "18 条有明确倾向的论断中，4 条支持，14 条反对或无效果，任何一方都未达到 80%。",
      "rule": "one paper; described if more claims describe than take a side; agree or against at 80% or more one way; otherwise mixed"
     },
-    "summary": null
+    "summary": "Most weight rests on the measured high-temperature results from paper S023 (growth, antioxidant and heat shock markers) plus measured early-development results from paper S370; the optimal range differs between papers (25-35°C vs 23-27°C), so I noted that, and left out claims that only describe heating/cooling methods or other species."
    }
   },
-  "actions": {
-   "id": "X014",
-   "rank": 3,
-   "action_en": "Avoid holding mandarin fish at water temperatures up to 36°C, and treat temperatures at that level as a welfare risk to be corrected.",
-   "action_zh": "养殖者应避免将鳜养殖水温长期保持在高达36°C的水平,并将此类温度视为需要纠正的福利风险。",
-   "type": "avoid",
-   "who": "farmers",
-   "priority": {
-    "score": 0.8,
-    "reason": "Seven papers with 18 measured claims show 36°C inhibits growth and weakens antioxidant defences. Avoiding it is a clear step, but the harm threshold between 30°C and 36°C is undefined and cooling costs money.",
-    "criteria": [
-     {
-      "criterion": "Welfare gain",
-      "level": "medium",
-      "note": "Heat stress where summer peaks occur"
-     },
-     {
-      "criterion": "Strength of evidence",
-      "level": "medium",
-      "note": "Measured at 36°C, safe limit unknown"
-     },
-     {
-      "criterion": "Can it be done now",
-      "level": "medium",
-      "note": "Shading or water exchange, some cost"
-     },
-     {
-      "criterion": "Risk if wrong",
-      "level": "low",
-      "note": "Extra energy cost only"
-     }
-    ],
-    "method": "model",
-    "by": {
-     "model": "anthropic/claude-sonnet-5.5",
-     "version": "rank-0.1",
-     "spec": "pipeline/priority-spec.md",
-     "spec_sha": "c0809ced3ebc",
-     "as_of": "2026-10-21"
-    }
-   },
-   "evidence_gap": "The studies tested 36°C in controlled trials, so the temperature at which harm begins between about 30°C and 36°C on commercial farms is not defined.",
-   "risks": "Cooling or shading to prevent such temperatures adds energy and equipment costs, and the findings do not say what level is a safe upper limit.",
-   "basis": {
-    "reason": "Both findings report harm at 36°C: strongly inhibited growth, lower liver antioxidant enzymes, higher liver oxidative damage, and signs of immune fatigue in females. I chose these over the feeding findings because they show a direct harm at high temperature. The harm comes from trials at one extreme temperature, so I limited the action to avoiding that range and did not set a recommended temperature.",
-    "findings": [
-     {
-      "id": "F0616",
-      "why": "Growth inhibition and antioxidant and heat-shock changes at 36°C, read as exceeding the fish's self-protection range.",
-      "practice_en": "water temperature regulation",
-      "practice_zh": "水温调控",
-      "welfare_problem": "water_quality",
-      "strength": "against",
-      "papers": 7,
-      "claims": 22,
-      "measured": 18
-     },
-     {
-      "id": "F0602",
-      "why": "Higher liver oxidative damage and immune fatigue in females at up to 36°C.",
-      "practice_en": "water temperature regulation",
-      "practice_zh": "水温调控",
-      "welfare_problem": "disease_parasites",
-      "strength": "mixed",
-      "papers": 5,
-      "claims": 14,
-      "measured": 9
-     }
-    ]
-   }
-  },
-  "rank_of": 18
+  "actions": null,
+  "rank_of": 29
  }
 }

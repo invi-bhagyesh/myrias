@@ -4,31 +4,26 @@
   {
    "id": "run-3",
    "title_en": "Run 3: the 2026-10-20 batch of Chinese papers",
-   "status": "planned",
-   "started": null,
-   "finished": null,
+   "status": "done",
+   "started": "2026-10-22T06:40:48.221Z",
+   "finished": "2026-10-22T11:09:16.639Z",
    "git": {
-    "commit": "3013546",
+    "commit": "84306b6",
     "branch": "claude/site-suggestions-t8i6vo"
    },
    "inputs": {
-    "papers": 411,
+    "papers": 413,
     "by_lang": {
-     "zh": 411
+     "zh": 413
     },
     "by_origin": {
-     "cnki-batch-2026-10-20": 411
+     "cnki-batch-2026-10-20": 413
     },
-    "pages": 6053,
-    "by_relevance": {
-     "0": 8,
-     "1": 91,
-     "2": 87,
-     "3": 94,
-     "4": 84,
-     "5": 47
-    },
-    "note_en": "The 2026-10-20 batch of Chinese papers: 417 PDFs, less 4 already read in run 2 and 2 scans that need OCR. Which of them run 3 reads is not decided yet."
+    "note_en": "All 413 papers of the 2026-10-20 batch not read before (417 in the batch, less 4 already read in run 2). 51 papers whose text layer was damaged or missing (774 pages) were read by OCR first.",
+    "ocr": {
+     "papers": 51,
+     "pages": 774
+    }
    },
    "settings": {
     "profile": "demo",
@@ -120,6 +115,16 @@
     ],
     "code": [
      {
+      "commit": "84306b6",
+      "date": "2026-10-22",
+      "en": "Run 3 tooling: OCR command and page renderer, batch inputs builder, merged papers keep their English title; home shows only the papers chart"
+     },
+     {
+      "commit": "cfb0ef1",
+      "date": "2026-10-22",
+      "en": "Run log: each run's inputs, settings, changes since the last run, steps and results; Run history on the Pipeline page"
+     },
+     {
       "commit": "3013546",
       "date": "2026-10-21",
       "en": "hf_upload: leave PDFs to raw/"
@@ -195,11 +200,194 @@
      {
       "en": "Every source PDF now sits in raw/ on Hugging Face, with one index; the 2026-10-20 batch (419 PDFs with its own spreadsheet) was added there.",
       "at": "2026-10-22T06:35:13.149Z"
+     },
+     {
+      "en": "OCR: 51 papers, 780 pages. One page looped on a single line until the model's length limit; 8,160 repeated lines were dropped from it before extraction. The inputs step's printed count of text-layer papers was wrong (a code bug, since fixed); all 413 papers went in.",
+      "at": "2026-10-22T07:08:07.922Z"
+     },
+     {
+      "en": "Extraction was stopped at 2,290 windows: the duplicate check read titles from file names written as title_author, but this batch names files year_topic_author_title, so 23 different papers by the same author were dropped as duplicates. The check now compares record titles and first authors; extraction resumed with all 413 papers and no saved window was redone.",
+      "at": "2026-10-22T07:46:04.697Z"
+     },
+     {
+      "en": "English text now covers only claims that can be released (quote found, about welfare, supported or partly supported), 16 calls at a time, and resumes if stopped; run 2 translated every claim with a found quote.",
+      "at": "2026-10-22T08:26:52.944Z"
      }
     ]
    },
-   "steps": [],
-   "results": null
+   "steps": [
+    {
+     "phase": "A",
+     "step": "01-ocr",
+     "started": "2026-10-22T06:42:29.086Z",
+     "calls": 780,
+     "exit_code": 0,
+     "rows_out": 780
+    },
+    {
+     "phase": "A",
+     "step": "02-inputs",
+     "started": "2026-10-22T07:07:27.480Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": 6036
+    },
+    {
+     "phase": "A",
+     "step": "03-prepare",
+     "started": "2026-10-22T07:07:28.284Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": 4968
+    },
+    {
+     "phase": "A",
+     "step": "04-extract",
+     "started": "2026-10-22T07:46:09.521Z",
+     "calls": 4343,
+     "exit_code": 0,
+     "rows_out": 27046
+    },
+    {
+     "phase": "A",
+     "step": "05-map",
+     "started": "2026-10-22T08:25:42.765Z",
+     "calls": 22147,
+     "exit_code": 0,
+     "rows_out": 23840
+    },
+    {
+     "phase": "A",
+     "step": "06-verify",
+     "started": "2026-10-22T09:25:57.082Z",
+     "calls": 12996,
+     "exit_code": 0,
+     "rows_out": 23840
+    },
+    {
+     "phase": "A",
+     "step": "07-render",
+     "started": "2026-10-22T09:48:01.755Z",
+     "calls": 999,
+     "exit_code": 0,
+     "rows_out": 23840
+    },
+    {
+     "phase": "A",
+     "step": "08-reconcile",
+     "started": "2026-10-22T09:50:49.386Z",
+     "calls": 24,
+     "exit_code": 0,
+     "rows_out": 23840
+    },
+    {
+     "phase": "A",
+     "step": "09-merge",
+     "started": "2026-10-22T10:54:27.717Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "10-export",
+     "started": "2026-10-22T10:54:29.737Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "11-cluster",
+     "started": "2026-10-22T10:54:31.310Z",
+     "calls": 446,
+     "exit_code": 0,
+     "rows_out": 446
+    },
+    {
+     "phase": "A",
+     "step": "12-findings",
+     "started": "2026-10-22T10:58:27.375Z",
+     "calls": 724,
+     "exit_code": 0,
+     "rows_out": 724
+    },
+    {
+     "phase": "A",
+     "step": "13-actions",
+     "started": "2026-10-22T11:04:49.201Z",
+     "calls": 7,
+     "exit_code": 0,
+     "rows_out": 7
+    },
+    {
+     "phase": "A",
+     "step": "14-rank",
+     "started": "2026-10-22T11:07:21.189Z",
+     "calls": 1,
+     "exit_code": 0,
+     "rows_out": 1
+    },
+    {
+     "phase": "A",
+     "step": "15-affiliations",
+     "started": "2026-10-22T11:08:05.482Z",
+     "calls": 406,
+     "exit_code": 0,
+     "rows_out": 406
+    }
+   ],
+   "results": {
+    "claims": {
+     "before": 4460,
+     "after": 17406,
+     "added": 12946
+    },
+    "papers": {
+     "before": 176,
+     "after": 582,
+     "added": 406
+    },
+    "findings": {
+     "new": 1508,
+     "rewritten": 109,
+     "unchanged": 167,
+     "gone": 129,
+     "total": 1784
+    },
+    "actions": {
+     "before": 18,
+     "after": 29,
+     "same_text": 0,
+     "top": [
+      {
+       "id": "X026",
+       "rank": 1,
+       "text": "Avoid letting ammonia nitrogen build up in mandarin fish water by testing it regularly and acting when it rises."
+      },
+      {
+       "id": "X007",
+       "rank": 2,
+       "text": "Keep dietary carbohydrate and starch in mandarin fish feeds at about 10-13% and avoid formulating above roughly 13-16%."
+      },
+      {
+       "id": "X008",
+       "rank": 3,
+       "text": "Keep dietary lipid in mandarin fish feeds near 12% and avoid levels of about 16% or more."
+      },
+      {
+       "id": "X010",
+       "rank": 4,
+       "text": "Monitor survival, liver and gut condition, and non-feeding individuals during staged training of mandarin fish from live bait to formulated feed."
+      },
+      {
+       "id": "X027",
+       "rank": 5,
+       "text": "Monitor water temperature in mandarin fish culture as a disease-risk indicator, watching for viral disease risk above about 20°C and for water mould at low temperatures, without cooling so far that feeding drops."
+      }
+     ]
+    }
+   }
   },
   {
    "id": "run-2",

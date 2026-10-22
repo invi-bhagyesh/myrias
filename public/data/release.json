@@ -62345,7 +62345,13 @@
  ],
  "finding_files": [
   "release-findings-0.json",
-  "release-findings-1.json"
+  "release-findings-1.json",
+  "release-findings-2.json",
+  "release-findings-3.json",
+  "release-findings-4.json",
+  "release-findings-5.json",
+  "release-findings-6.json",
+  "release-findings-7.json"
  ],
  "action_files": [
   "release-actions.json"
@@ -62948,6 +62954,6 @@
   "version": "rank-0.1",
   "spec": "pipeline/priority-spec.md",
   "spec_sha": "c0809ced3ebc",
-  "as_of": "2026-10-21"
+  "as_of": "2026-10-22"
  }
 }

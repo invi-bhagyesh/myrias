@@ -44,7 +44,7 @@ export async function runRender(claims, client, concurrency = 6, { all = true, d
   const out = claims.map(c => ({ ...c }));
   for (const [i, r] of done) Object.assign(out[i], r);
   const queue = out.map((c, i) => [c, i]).filter(([c, i]) => !done.has(i) && (all ? c.quote_check === 'found' && c.statement : releasable(c)));
-  let stopped = null;
+  let stopped = null, failed = 0;
   async function worker() {
     while (queue.length && !stopped) {
       const [c, i] = queue.shift();
@@ -58,11 +58,15 @@ export async function runRender(claims, client, concurrency = 6, { all = true, d
         out[i].intervention_en = r.data.intervention_en;
         out[i].rendering = { from: lang, model: r.entry.model, version: RENDER_VERSION, check: chk.ok ? 'numbers_ok' : 'numbers_mismatch', ...(chk.ok ? {} : { missing: chk.missing }) };
         onResult(i, { statement_en: out[i].statement_en, intervention_en: out[i].intervention_en, rendering: out[i].rendering });
-      } catch (e) { stopped = e instanceof SpendCapError ? 'spend cap' : e.message; }
+      } catch (e) {
+        // A spend cap stops the step; any other error (a timeout, a gateway error) skips this claim, and the
+        // step reports it so a re-run fills the gap from the partial file.
+        if (e instanceof SpendCapError) stopped = 'spend cap'; else { failed++; console.error(`render: claim ${i}: ${e.message}`); }
+      }
     }
   }
   await Promise.all(Array.from({ length: concurrency }, worker));
-  return { out, stopped };
+  return { out, stopped, failed };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -71,9 +75,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const client = createClient({ capUsd: Number(arg('cap', 0)), logPath: `${arg('out')}.calls.jsonl` });
   const partial = `${arg('out')}.partial.jsonl`;
   const done = new Map(existsSync(partial) ? readFileSync(partial, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)).map(r => [r.i, r.fields]) : []);
-  const { out, stopped } = await runRender(claims, client, Number(arg('concurrency', 16)), { all: process.argv.includes('--all'), done,
+  const { out, stopped, failed } = await runRender(claims, client, Number(arg('concurrency', 16)), { all: process.argv.includes('--all'), done,
     onResult: (i, fields) => appendFileSync(partial, JSON.stringify({ i, fields }) + '\n') });
   writeFileSync(arg('out'), out.map(c => JSON.stringify(c)).join('\n') + '\n');
   const r = out.filter(c => c.rendering);
-  console.log({ rendered: r.length, numbers_ok: r.filter(c => c.rendering.check === 'numbers_ok').length, numbers_mismatch: r.filter(c => c.rendering.check === 'numbers_mismatch').length, stopped, spent_usd: client.spent });
+  console.log({ rendered: r.length, numbers_ok: r.filter(c => c.rendering.check === 'numbers_ok').length, numbers_mismatch: r.filter(c => c.rendering.check === 'numbers_mismatch').length, failed, stopped, spent_usd: client.spent });
+  // Not finished: say so in the exit code, so a run script stops here instead of carrying on without English.
+  if (stopped || failed) process.exit(3);
 }
