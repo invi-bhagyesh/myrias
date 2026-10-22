@@ -32,84 +32,93 @@
   {
    "id": 4,
    "lane": "collect",
-   "key": "prepare",
+   "key": "supplied",
    "model": null,
-   "in": 176,
-   "out": 1620,
+   "in": null,
+   "out": 16,
    "calls": 0
   },
   {
    "id": 5,
-   "lane": "read",
-   "key": "extract",
-   "model": "qwen/qwen3.8-flash",
-   "in": 3979,
-   "out": 10695,
-   "calls": 3979
+   "lane": "collect",
+   "key": "prepare",
+   "model": null,
+   "in": 176,
+   "out": 1710,
+   "calls": 0
   },
   {
    "id": 6,
    "lane": "read",
-   "key": "quote",
-   "model": null,
-   "in": 10695,
-   "out": 9849,
-   "calls": 0
+   "key": "extract",
+   "model": "qwen/qwen3.8-flash",
+   "in": 4077,
+   "out": 11102,
+   "calls": 4077
   },
   {
    "id": 7,
    "lane": "read",
-   "key": "map",
-   "model": "qwen/qwen3.8-flash",
-   "in": 9849,
-   "out": 4359,
-   "calls": 18642
+   "key": "quote",
+   "model": null,
+   "in": 11102,
+   "out": 10159,
+   "calls": 0
   },
   {
    "id": 8,
    "lane": "read",
+   "key": "map",
+   "model": "qwen/qwen3.8-flash",
+   "in": 10159,
+   "out": 4486,
+   "calls": 18952
+  },
+  {
+   "id": 9,
+   "lane": "read",
    "key": "verify",
    "model": "z-ai/glm-5.3",
-   "in": 4359,
-   "out": 4333,
-   "calls": 4359,
+   "in": 4486,
+   "out": 4460,
+   "calls": 4486,
    "split": {
-    "supported": 4066,
-    "partial": 267,
+    "supported": 4172,
+    "partial": 288,
     "unsupported": 24,
     "null": 2
    }
   },
   {
-   "id": 9,
+   "id": 10,
    "lane": "read",
    "key": "render",
    "model": "qwen/qwen3.8-flash",
-   "in": 9468,
-   "out": 9468,
-   "calls": 9468
+   "in": 9778,
+   "out": 9778,
+   "calls": 9778
   },
   {
-   "id": 10,
+   "id": 11,
    "lane": "combine",
    "key": "reconcile",
    "model": "anthropic/claude-sonnet-5.5",
    "in": 2409,
    "out": 1063,
-   "calls": 18,
+   "calls": 20,
    "joined_existing": 31
   },
   {
-   "id": 11,
+   "id": 12,
    "lane": "combine",
    "key": "merge",
    "model": null,
-   "in": 4333,
+   "in": 4460,
    "out": 4460,
    "calls": 0
   },
   {
-   "id": 12,
+   "id": 13,
    "lane": "combine",
    "key": "export",
    "model": null,
@@ -118,7 +127,7 @@
    "calls": 0
   },
   {
-   "id": 13,
+   "id": 14,
    "lane": "combine",
    "key": "cluster",
    "model": "anthropic/claude-sonnet-5.5",
@@ -129,7 +138,7 @@
    "embed_only": 298
   },
   {
-   "id": 14,
+   "id": 15,
    "lane": "combine",
    "key": "findings",
    "model": "anthropic/claude-sonnet-5.5",
@@ -139,16 +148,16 @@
    "multi_paper": 79
   },
   {
-   "id": 15,
+   "id": 16,
    "lane": "combine",
    "key": "actions",
    "model": "anthropic/claude-sonnet-5.5",
    "in": 79,
    "out": 18,
-   "calls": 5
+   "calls": 10
   },
   {
-   "id": 16,
+   "id": 17,
    "lane": "combine",
    "key": "rank",
    "model": "anthropic/claude-sonnet-5.5",
@@ -157,7 +166,7 @@
    "calls": 2
   },
   {
-   "id": 17,
+   "id": 18,
    "lane": "check",
    "key": "audit",
    "model": null,
@@ -168,7 +177,7 @@
   }
  ],
  "totals": {
-  "calls": 37863
+  "calls": 38715
  },
  "example": {
   "claim_id": "C0269",

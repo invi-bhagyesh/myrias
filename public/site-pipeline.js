@@ -17,6 +17,9 @@ export const STEP_TEXT = {
   fetch: { name: ['Fetch full text', '获取全文'], in: ['papers', '篇'], out: ['with open full text', '篇有开放全文'],
     what: ['Download the open full text where it exists.', '在有开放全文时下载。'],
     how: ['Europe PMC XML, publisher pages and open PDFs. Paywalled papers are recorded, not fetched.', 'Europe PMC XML、出版商页面和开放 PDF。付费论文只做记录，不下载。'] },
+  supplied: { name: ['Supplied papers', '提供的论文'], in: null, out: ['papers supplied', '篇提供的论文'],
+    what: ['Add papers people supplied directly, such as Chinese database exports the open search cannot reach.', '加入人工直接提供的论文，例如开放检索无法获取的中文数据库导出文献。'],
+    how: ['Kept with an index in the private dataset; each is matched against the papers already held, so none is read twice. Damaged or scanned PDFs are read by OCR first.', '连同索引保存在私有数据集中；每篇都与已有论文比对，不会重复读取。文字层损坏或扫描的 PDF 先做 OCR。'] },
   prepare: { name: ['Prepare', '整理'], in: ['papers', '篇'], out: ['pages to read', '页待读'],
     what: ['Turn each paper into numbered pages and cut the reference list.', '把每篇论文整理成带页码的文本，并去掉参考文献。'],
     how: ['Plain code. Scanned pages are transcribed from images first.', '普通代码。扫描页先从图像转录。'] },
@@ -91,6 +94,7 @@ function exampleHtml(key, e, c) {
     case 'screen': return paper + ok(L('Names the species in the title', '标题中出现该物种')) +
       ok(L('Touches welfare topics: ', '涉及福利主题：') + e.screen.topics.map(t => c.taxonomyLabel('welfare_problems', t).replace(/_/g, ' ')).join(', ')) +
       `<p class="ex-verdict v-pass">${esc(L('Kept', '保留'))}</p>`;
+    case 'supplied': return `<p class="ex-p">${esc(L('Our example came from the open search, not from a supplied batch, so this step passed it by.', '本例来自开放检索，而非人工提供的论文，因此不经过这一步。'))}</p>`;
     case 'fetch': return paper + `<p class="ex-file"><span>${esc((e.fetch.format || 'pdf').toUpperCase())}</span>${esc(L('Open-access full text downloaded. Stays private, never published.', '已下载开放获取全文；仅内部使用，不公开。'))}</p>`;
     case 'prepare': return `<div class="ex-pages">${Array.from({ length: e.prepare.pages }, (_, k) => `<span class="${k + 1 === e.prepare.page ? 'on' : ''}">${k + 1}</span>`).join('')}</div>` +
       `<p class="ex-p">${esc(L(`${e.prepare.pages} pages of text, each with its page number. Our claim will come from page ${e.prepare.page}.`, `共 ${e.prepare.pages} 页文本，每页保留页码；我们的论断来自第 ${e.prepare.page} 页。`))}</p>`;
