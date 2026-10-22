@@ -577,3 +577,23 @@ test('basis: every combine step keeps why it grouped or concluded what it did', 
   assert.deepEqual(F.groupingBasis(['C1'], { C1: { key: 'feeds|live prey' } }, clusters), { names: [], reason: null, model: null });
   assert.equal(F.groupingBasis(['C1'], null, clusters), null);
 });
+
+test('run log: settings changes, results against the snapshot, no costs in the site file', async () => {
+  const { settingsChanges, results, publicLog, modelSettings, promptSettings } = await import('../pipeline/runlog.mjs');
+  const prev = { models: { extract: 'a', map: 'a', suggest: 's' }, prompts: { extract: { version: 'e1', sha: 'x' }, map: { version: null, sha: 'm1' } }, spec_sha: 'p1' };
+  const cur = { models: { extract: 'a', map: 'b', rank: 'r' }, prompts: { extract: { version: 'e2', sha: 'y' }, map: { version: null, sha: 'm2' } }, spec_sha: 'p2' };
+  const ch = settingsChanges(prev, cur).map(c => c.en);
+  assert.deepEqual(ch, ['map: model a → b.', 'New stage rank, on r.', 'Stage suggest removed.', 'extract: prompt e1 → e2.', 'map: prompt changed (same version label).', 'Ranking spec changed (p1 → p2).']);
+  assert.deepEqual(settingsChanges(null, cur), []);
+  const r = results({ claims: 10, papers: 2, findings: { F1: 'a', F2: 'b', F3: 'c' }, actions: [{ id: 'X1', text: 'keep' }, { id: 'X2', text: 'old' }] },
+    { claims: 15, papers: 3, findings: { F1: 'a', F2: 'z', F4: 'd' }, actions: [{ id: 'X1', rank: 2, text: 'keep' }, { id: 'X3', rank: 1, text: 'new' }] });
+  assert.deepEqual(r.claims, { before: 10, after: 15, added: 5 });
+  assert.deepEqual(r.findings, { new: 1, rewritten: 1, unchanged: 1, gone: 1, total: 3 });
+  assert.equal(r.actions.same_text, 1); assert.deepEqual(r.actions.top.map(a => a.id), ['X3', 'X1']);
+  const pub = publicLog([{ id: 'run-1', baseline: { claims: 1 }, steps: [{ step: 's', cost_usd: 1.2, calls: 3 }] }, { id: 'run-2', steps: [] }]);
+  assert.deepEqual(pub.map(x => x.id), ['run-2', 'run-1']);
+  assert.ok(!JSON.stringify(pub).includes('cost_usd') && !JSON.stringify(pub).includes('baseline'));
+  assert.ok(modelSettings().extract && !('profile' in modelSettings()));
+  const ps = await promptSettings();
+  for (const k of ['extract', 'map', 'verify', 'translate', 'reconcile', 'cluster', 'findings', 'actions', 'rank']) assert.ok(ps[k].sha, k);
+});

@@ -197,6 +197,22 @@ so links to claims and findings stay valid.
   before spending more than that; a capped step can be re-run to finish.
 - No step sets an output-length limit, so a model is never cut off mid-answer.
 
+## Keeping a log of each run
+
+```sh
+node pipeline/runlog.mjs start   --store $STORE --run run-3 --title "Run 3: ..." --release public/data/release.json [--inputs inputs.json] [--note "..."]
+# ... the run's steps, each wrapped in step.mjs ...
+node pipeline/runlog.mjs finish  --store $STORE --run run-3 --root $RUN --release public/data/release.json
+node pipeline/runlog.mjs publish --store $STORE --out public/data/runs.json
+```
+
+`start` records the model for each stage, a fingerprint and version of every prompt, the ranking spec's
+checksum and the code version, snapshots the store, and lists what changed since the last run: models, prompts,
+the spec, and every commit to `pipeline/` since that run ended. Add `--note` for anything code cannot see
+(new papers, a fix applied to old data); `note` adds one later. `--planned` lists a run before it starts.
+`finish` reads the step records and writes what the run added: claims, papers, findings new, rewritten,
+unchanged or gone, and actions. `publish` writes the site's Run history without costs.
+
 ## Keeping a record of each step
 
 Wrap any command in `step.mjs` and it writes a numbered folder with a `step.json` (times, exact command,

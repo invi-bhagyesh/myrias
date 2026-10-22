@@ -363,3 +363,14 @@ test('record ids inside sentences become links; partial-width ids stay text', ()
   assert.ok(html.includes('href="#/claims/C0276"') && html.includes('href="#/sources/S023"') && html.includes('href="#/actions?q=X014"'));
   assert.ok(html.includes('F1 hybrids and C18 do not') && html.includes('&lt;b&gt;'));
 });
+
+test('run history: every run renders in both languages, with no cost', async () => {
+  const { runsHtml } = await import('../public/site-runs.js');
+  const R = read('runs.json');
+  assert.ok(R.runs.length >= 2 && !JSON.stringify(R).includes('cost_usd'));
+  for (const lang of ['en', 'zh']) {
+    const html = runsHtml(R, { tr: (k, v) => t(lang, k, v), link: p => '#/' + p });
+    for (const r of R.runs) assert.ok(html.includes(`id="run-${r.id}"`), r.id);
+    assert.ok(!/[>"(]undefined|undefined[<")]|\bNaN\b|rn\.[a-z]/.test(html), lang);
+  }
+});

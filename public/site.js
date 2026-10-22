@@ -2,6 +2,7 @@ import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { pipelineHtml, mountPipeline } from './site-pipeline.js';
+import { runsHtml } from './site-runs.js';
 import { matrixChart } from './site-chart.js';
 
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
@@ -38,10 +39,10 @@ const indexOf = list => new Map((list || []).map(x => [x.id, x]));
 
 async function load() {
   state.error = null; state.full = false; state.listsReady = false; state.fullPromise = null;
-  const [shell, corpus, nextRun, pipeline, papersMeta] = await Promise.all([
+  const [shell, corpus, nextRun, pipeline, papersMeta, runs] = await Promise.all([
     json(useSample ? 'data/sample.json' : 'data/release.json', { cache: 'no-cache' }).catch(e => ({ __error: e.message })),
-    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json'), optional('data/papers.json')]);
-  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline; state.authors = papersMeta;
+    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json'), optional('data/papers.json'), optional('data/runs.json')]);
+  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline; state.authors = papersMeta; state.runs = runs;
   if (shell.__error) { state.data = null; state.error = shell.__error; return; }
   const data = shell, pending = (data.claim_files || []).length > 0;
   const v = encodeURIComponent(data.release?.version || '0');
@@ -112,35 +113,10 @@ function viewPipeline() {
   const P = state.pipeline, start = Number(parseHash().params.get('step')) || 1;
   const body = P ? pipelineHtml(P, { lang: state.lang, tr, link, taxonomyLabel }) : '';
   return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pl.lead', { n: P ? P.steps.length : '' })) + body +
-      `<details class="pl-fold"><summary>${esc(tr('pl.fold.runs'))}</summary>${nextRunHtml(state.nextRun)}</details>`,
+      runsHtml(state.runs, { tr, link }),
     mount: root => mountPipeline(root, { start, onStep: k => history.replaceState(null, '', link('pipeline', k > 1 ? { step: k } : {})) }) };
 }
 
-// The planned run and its settings, from data/next-run.json. Nothing here has been run.
-function nextRunHtml(p) {
-  if (!p) return '';
-  const zh = state.lang === 'zh', L = (o, k) => (zh ? o[k + '_zh'] || o[k + '_en'] : o[k + '_en']) || '', B = o => (zh ? o.zh || o.en : o.en);
-  const actual = ph => (ph.actual ? `<p class="nr-actual">${esc(tr('nr.actual', { extracted: ph.actual.claims_extracted, found: ph.actual.claims_quote_found, relevant: ph.actual.claims_relevant, released: ph.actual.claims_released, supported: ph.actual.claims_supported, sources: ph.actual.sources_released, interventions: ph.actual.interventions }))}</p>${ph.notes_en ? `<p class="small-note">${esc(L(ph, 'notes'))}</p>` : ''}` : '');
-  const phases = p.phases.map(ph => `<article class="nr-phase st-${esc(ph.status || 'planned')}"><div class="nr-phase-head"><span class="nr-id">${esc(ph.id)}</span><h3>${esc(L(ph, 'name'))}</h3><span class="nr-badge">${esc(tr('nr.status.' + (ph.status || 'planned')))}</span></div>
-    <ul class="nr-nums"><li><b>${ph.papers}</b>${esc(tr('nr.papers'))}</li><li><b>${Number(ph.windows).toLocaleString()}</b>${esc(tr('nr.windows'))}</li><li><b>~${ph.minutes} min</b>${esc(tr('nr.time'))}</li></ul>
-    ${actual(ph)}<p>${esc(L(ph, 'why'))}</p><p class="small-note"><code>${esc(ph.input)}</code></p>
-    <details class="nr-cmds"><summary>${esc(tr('nr.commands'))}</summary><pre>${esc(ph.commands.join('\n'))}</pre></details></article>`).join('');
-  const rows = p.stages.map(st => `<tr><td>${esc(st.id)}</td><td>${st.model ? `<code>${esc(st.model)}</code>${st.fallback ? `<br><small>${esc(tr('nr.fallback'))}: <code>${esc(st.fallback.join(', '))}</code></small>` : ''}` : esc(tr('pipe.nomodel'))}</td>
-    <td>${esc(st.reasoning || '—')}</td><td>${st.max_output_tokens ? Number(st.max_output_tokens).toLocaleString() : '—'}</td><td>${esc(st.per)}${st.note_en ? `<br><small>${esc(L(st, 'note'))}</small>` : ''}</td></tr>`).join('');
-  const gates = p.gates.map(g => `<li class="nr-gate g-${esc(g.status)}"><span>${esc(tr('nr.gate.' + g.status))}</span>${esc(B(g))}</li>`).join('');
-  const build = p.to_build_first.map(x => `<li>${esc(B(x))}</li>`).join('');
-  const outs = p.outputs.map(x => `<li>${esc(B(x))}</li>`).join('');
-  return `<section class="next-run"><div class="nr-top"><span class="pill">${esc(tr('nr.status.' + p.status))}</span><h2>${esc(tr('nr.title'))}</h2>
-      <p>${esc(L(p, 'goal'))}</p></div>
-    <div class="nr-phases">${phases}</div>
-    <h3>${esc(tr('nr.config'))}</h3>
-    <dl class="nr-settings"><dt>${esc(tr('nr.profile'))}</dt><dd><code>${esc(p.profile)}</code></dd><dt>${esc(tr('nr.router'))}</dt><dd>${esc(p.provider.router)} · data_collection: <code>${esc(p.provider.data_collection)}</code></dd>
-      <dt>${esc(tr('nr.window'))}</dt><dd>${p.window.size_chars.toLocaleString()} / ${p.window.overlap_chars}</dd><dt>${esc(tr('nr.prompts'))}</dt><dd>${Object.entries(p.prompt_versions).map(([k, v]) => `${esc(k)} <code>${esc(v)}</code>`).join(' · ')}</dd></dl>
-    <div class="nr-table"><table class="plain"><thead><tr><th>${esc(tr('nr.stage'))}</th><th>${esc(tr('pipe.model'))}</th><th>${esc(tr('nr.reasoning'))}</th><th>${esc(tr('nr.maxout'))}</th><th>${esc(tr('nr.per'))}</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div class="nr-cols"><div><h3>${esc(tr('nr.gates'))}</h3><ul class="nr-gates">${gates}</ul></div>
-      <div><h3>${esc(tr('nr.build'))}</h3><ul class="nr-list">${build}</ul><h3>${esc(tr('nr.outputs'))}</h3><ul class="nr-list">${outs}</ul></div></div>
-    <p class="small-note"><b>${esc(tr('nr.notin'))}</b> ${esc(L(p, 'not_in_this_run'))} · <a href="data/next-run.json">next-run.json</a></p></section>`;
-}
 
 const fmtBytes = n => (n >= 1e6 ? (n / 1e6).toFixed(1) + ' MB' : n >= 1e3 ? Math.round(n / 1e3) + ' KB' : n + ' B');
 function viewCorpus() {
@@ -665,7 +641,7 @@ function render(navigated = false) {
 // Sections, pipeline lanes and list groups fade in as they reach the screen, so each reads as its own block.
 function setupReveal() {
   if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const els = [...document.querySelectorAll('#content .sp-sec, #content .fw-over, #content .fw-walk, #content .br-group, #content .corpus-tree, #content .cv-two')];
+  const els = [...document.querySelectorAll('#content .sp-sec, #content .fw-over, #content .fw-walk, #content .rn, #content .br-group, #content .corpus-tree, #content .cv-two')];
   const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }, { rootMargin: '0px 0px -8% 0px' });
   for (const el of els) { if (el.getBoundingClientRect().top < innerHeight) continue; el.classList.add('reveal'); io.observe(el); }
   observers.push(io);
