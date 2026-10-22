@@ -620,3 +620,10 @@ test('versions: what changed or went between two releases is archived with its p
   assert.deepEqual(d.findings.map(f => [f.id, f._change]), [['F2', 'changed'], ['F3', 'gone']]);
   assert.deepEqual(d.actions, oldR.actions);
 });
+
+test('render: only claims that can reach the release are rendered by default', async () => {
+  const { releasable } = await import('../pipeline/render.mjs');
+  const c = (x = {}) => ({ quote_check: 'found', statement: '驯化率70%', map: { welfare_relevant: true }, verify: { verdict: 'supported' }, ...x });
+  assert.ok(releasable(c()) && releasable(c({ verify: { verdict: 'partial' } })) && releasable(c({ verify: undefined })));
+  assert.ok(!releasable(c({ map: { welfare_relevant: false } })) && !releasable(c({ verify: { verdict: 'unsupported' } })) && !releasable(c({ quote_check: 'not_found' })));
+});
