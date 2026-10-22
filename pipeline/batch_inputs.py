@@ -26,6 +26,18 @@ def text_by_source(pages):
     return t, n
 
 
+def collapse_repeats(text, keep=3):
+    """OCR models sometimes loop on one line until they hit their length limit; keep a repeated line at most
+    `keep` times in a row. Returns the text and how many lines were dropped."""
+    out, dropped, prev, run = [], 0, None, 0
+    for line in text.split('\n'):
+        run = run + 1 if line == prev and line.strip() else 1
+        prev = line
+        if run > keep: dropped += 1; continue
+        out.append(line)
+    return '\n'.join(out), dropped
+
+
 def damaged(text, pages):
     return len(BAD.findall(text)) / max(1, len(text)) > 0.05 or len(text) < 60 * max(1, pages)
 
@@ -44,7 +56,7 @@ def main():
     if ocr:
         for l in open(ocr, encoding='utf-8'):
             if l.strip(): p = json.loads(l); ocr_pages[p['source']].append(p)
-    n_ocr = 0
+    n_ocr = n_dropped = 0
     with open(f'{out}/pages.jsonl', 'w', encoding='utf-8') as f:
         for l in open(norm, encoding='utf-8'):
             if not l.strip(): continue
@@ -54,13 +66,15 @@ def main():
             if s not in want: continue
             n_ocr += 1
             for p in sorted(ps, key=lambda p: p['page']):
-                f.write(json.dumps({'source': s, 'page': p['page'], 'text': p['text'], 'ocr': p.get('ocr')}, ensure_ascii=False) + '\n')
+                text, dropped = collapse_repeats(p['text'])
+                n_dropped += dropped
+                f.write(json.dumps({'source': s, 'page': p['page'], 'text': text, 'ocr': {**(p.get('ocr') or {}), **({'repeated_lines_dropped': dropped} if dropped else {})}}, ensure_ascii=False) + '\n')
     with open(f'{out}/records.jsonl', 'w', encoding='utf-8') as f:
         for s, r in sorted(want.items()):
             f.write(json.dumps({'id': s, 'title': r['title'], 'title_en': r.get('title_en'), 'authors': [r['first_author']] if r.get('first_author') else [],
                                 'year': r.get('year'), 'lang': r.get('lang') or 'zh', 'venue': r.get('journal'), 'doi': r.get('doi'), 'type': r.get('type'),
                                 'topic_en': r.get('topic_en'), 'relevance': r.get('relevance'), 'raw_path': r['path']}, ensure_ascii=False) + '\n')
-    print({'papers': len(want), 'from_ocr': n_ocr, 'from_text_layer': len([s for s in want if s in text and s not in ocr_pages]), 'no_text': len([s for s in want if s not in text and s not in ocr_pages])})
+    print({'papers': len(want), 'from_ocr': n_ocr, 'ocr_repeated_lines_dropped': n_dropped, 'from_text_layer': len([s for s in want if s in text and s not in ocr_pages]), 'no_text': len([s for s in want if s not in text and s not in ocr_pages])})
 
 
 if __name__ == '__main__':
