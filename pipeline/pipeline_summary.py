@@ -1,45 +1,88 @@
 #!/usr/bin/env python3
 """Write the numbers the Pipeline page draws: one entry per step with what went in, what came out, whether a
-model or plain code did it, and how many model calls it made. Everything is read from the run folder, the species store and
-the release; nothing is typed in by hand.
+model or plain code did it, and how many model calls it made, over every run so far. Reading steps (extract to
+English text) add up across runs; combining steps (practices, findings, actions) show the store and release as
+they stand. Everything is read from the run folders, the species store and the release; nothing is typed in.
 
-  python3 pipeline/pipeline_summary.py RUN_DIR STORE_DIR public/data [EXAMPLE_CLAIM_ID]
+  python3 pipeline/pipeline_summary.py STORE_DIR public/data RUN_DIR[,RUN_DIR...] [EXAMPLE_CLAIM_ID]
+
+A run folder holds one folder per phase; a phase holds numbered step folders (NN-name, written by step.mjs)
+or, for the oldest phase, flat files (claims.jsonl, mapped.jsonl, verified.jsonl, calls.jsonl).
 """
-import json, os, sys, collections
+import json, os, re, sys, glob, collections
 
-run, store, data = sys.argv[1:4]
-jl = lambda p: [json.loads(l) for l in open(p) if l.strip()]
+store, data, runs = sys.argv[1], sys.argv[2], sys.argv[3].split(',')
+jl = lambda p: [json.loads(l) for l in open(p) if l.strip()] if os.path.exists(p) else []
 js = lambda p: json.load(open(p))
-ledger = jl(os.path.join(run, 'ledger.jsonl'))
-cost = collections.defaultdict(float); calls = collections.Counter()
-for r in ledger:
-    if r['phase'] == 'B':
-        k = r['step'].split('-', 1)[1]; cost[k] += r.get('cost_usd') or 0; calls[k] += r.get('calls') or 0
-# The first findings pass logged its calls beside the store.
+cost = collections.defaultdict(float); calls = collections.Counter(); last = ''
+for run in runs:
+    for r in jl(os.path.join(run, 'ledger.jsonl')):
+        k = r['step'].split('-', 1)[1]; cost[k] += r.get('cost_usd') or 0; calls[k] += r.get('calls') or 0; last = max(last, r['finished'])
+# The first findings pass and later re-ranks logged their calls beside the store.
 for f in os.listdir(os.path.dirname(store)):
     k = f.split('-', 1)[0]
-    if k in ('findings', 'rank') and f.endswith('.calls.jsonl'):
+    if k in ('findings', 'rank', 'actions') and f.endswith('.calls.jsonl'):
         for c in jl(os.path.join(os.path.dirname(store), f)): cost[k] += c.get('cost_usd') or 0; calls[k] += 1
+
+def phases():
+    for run in runs:
+        for ph in sorted(d for d in glob.glob(os.path.join(run, '*')) if os.path.isdir(d) and re.fullmatch(r'[A-Z]', os.path.basename(d))):
+            yield run, ph
+
+def step_dir(ph, name):
+    hits = sorted(glob.glob(os.path.join(ph, f'[0-9][0-9]-{name}')))
+    return hits[-1] if hits else None
+
+# Reading steps, summed over every phase of every run.
+R = collections.Counter(); verdicts = collections.Counter()
+for run, ph in phases():
+    ext = step_dir(ph, 'extract')
+    if ext:
+        sm = js(os.path.join(ext, 'summary.json')); R['windows'] += sm['windows']; R['claims'] += sm['claims_after_merge']; R['quote'] += sm['quote_found']
+        prep = step_dir(ph, 'prepare'); pr = json.loads(open(os.path.join(prep, 'stdout.log')).read()) if prep else {}
+        R['pages'] += pr.get('pages', 0)
+        mapped = jl(os.path.join(step_dir(ph, 'map'), 'mapped.jsonl')); ver = jl(os.path.join(step_dir(ph, 'verify'), 'verified.jsonl'))
+    else:  # the oldest phase: flat files
+        if not os.path.exists(os.path.join(ph, 'claims.jsonl')): continue
+        cl = jl(os.path.join(ph, 'claims.jsonl')); R['windows'] += len(jl(os.path.join(ph, 'calls.jsonl'))); R['claims'] += len(cl)
+        R['quote'] += sum(1 for c in cl if c.get('quote_check') == 'found'); R['pages'] += len(jl(os.path.join(ph, 'pages.jsonl')))
+        mapped = jl(os.path.join(ph, 'mapped.jsonl')); ver = jl(os.path.join(ph, 'verified.jsonl'))
+        for name, f in (('extract', 'calls.jsonl'), ('map', 'mapped.jsonl.calls.jsonl'), ('verify', 'verified.jsonl.calls.jsonl'), ('render', 'final.jsonl.calls.jsonl'), ('reconcile', 'reconciled.jsonl.calls.jsonl')):
+            for c in jl(os.path.join(ph, f)): calls[name] += 1; cost[name] += c.get('cost_usd') or 0
+    R['relevant'] += sum(1 for c in mapped if c.get('quote_check') == 'found' and (c.get('map') or {}).get('welfare_relevant') is True)
+    verdicts.update((c.get('verify') or {}).get('verdict') for c in ver if c.get('verify'))
+    mg = step_dir(ph, 'merge')
+    if mg: R['passing'] += json.loads(open(os.path.join(mg, 'stdout.log')).read())['claims_passing']
+    else: R['passing'] += sum(1 for c in ver if (c.get('verify') or {}).get('verdict') in ('supported', 'partial'))
+# English text: count the calls from the step's own call logs, since a step that was resumed later (run 3's
+# render-finish) logged its calls into the first step's folder.
+render_calls = 0
+for run, ph in phases():
+    d = step_dir(ph, 'render')
+    if d: render_calls += sum(len(jl(f)) for f in glob.glob(os.path.join(d, '*calls.jsonl')))
+if render_calls:
+    flat = sum(len(jl(os.path.join(ph, 'final.jsonl.calls.jsonl'))) for run, ph in phases() if not step_dir(ph, 'render'))
+    calls['render'] = render_calls + flat
+    calls.pop('render-finish', None)
+# The latest naming step: how many new names it grouped and how many joined groups already in the store.
+rc_txt = ''
+for run, ph in phases():
+    d = step_dir(ph, 'reconcile')
+    if d: rc_txt = open(os.path.join(d, 'stdout.log')).read()
+rc_num = lambda k: int(m.group(1)) if (m := re.search(r'(?<![_a-z])' + k + r':\s*(\d+)', rc_txt)) else None
 
 corpus = js(os.path.join(data, 'corpus.json')); h = corpus['headline']
 stages = {s['id']: s for s in corpus['charts']['stages']}
-B = os.path.join(run, 'B')
-prep = json.loads(open(os.path.join(B, '01-prepare', 'stdout.log')).read())
-ext = js(os.path.join(B, '02-extract', 'summary.json'))
-mapped = jl(os.path.join(B, '03-map', 'mapped.jsonl'))
-relevant = sum(1 for c in mapped if c.get('quote_check') == 'found' and (c.get('map') or {}).get('welfare_relevant') is True)
-verified = jl(os.path.join(B, '04-verify', 'verified.jsonl'))
-verdicts = collections.Counter((c.get('verify') or {}).get('verdict') for c in verified if c.get('verify'))
-merge = json.loads(open(os.path.join(B, '07-merge', 'stdout.log')).read())
+sources = js(os.path.join(store, 'sources.json'))
+# Supplied papers: any the open search did not find (not in the intake's records).
+intake_ids = {r['id'] for r in jl(os.path.join(os.path.dirname(store), 'intake', 'records.jsonl'))}
+supplied = sum(1 for s in sources.values() if s.get('record_id') not in intake_ids)
+claims_store = len(jl(os.path.join(store, 'claims.jsonl')))
 rel = js(os.path.join(data, 'release.json'))
+released = sum(len(json.load(open(os.path.join(data, f)))) for f in rel['claim_files'])
 findings = [f for x in rel.get('finding_files', []) for f in js(os.path.join(data, x))]
 actions = [a for x in rel.get('action_files', []) for a in js(os.path.join(data, x))]
 prac = lambda f: len({p['key'] for p in js(os.path.join(store, f)).values()})
-import re
-rc = open(os.path.join(B, '06-reconcile', 'stdout.log')).read()
-rc_num = lambda k: int(m.group(1)) if (m := re.search(r'(?<![_a-z])' + k + r':\s*(\d+)', rc)) else None
-plan = js(os.path.join(data, 'next-run.json'))
-phase_a = next((p for p in plan['phases'] if p['id'] == 'A'), {}).get('actual') or {}
 
 def step(i, lane, key, model, n_in, n_out, extra=None):
     return {'id': i, 'lane': lane, 'key': key, 'model': model, 'in': n_in, 'out': n_out, 'calls': calls.get(key, 0), **(extra or {})}
@@ -49,26 +92,26 @@ steps = [
     step(1, 'collect', 'search', None, sum(1 for v in h['sources'].values() if v == 'ok'), h['papers_found']),
     step(2, 'collect', 'screen', None, h['papers_found'], stages['about']['n']),
     step(3, 'collect', 'fetch', None, stages['about']['n'], h['full_text']),
-    step(4, 'collect', 'prepare', None, prep['sources'], prep['pages']),
-    step(5, 'read', 'extract', models.get('extract'), ext['windows'], ext['claims_after_merge']),
-    step(6, 'read', 'quote', None, ext['claims_after_merge'], ext['quote_found']),
-    step(7, 'read', 'map', models.get('map'), ext['quote_found'], relevant),
-    step(8, 'read', 'verify', models.get('verify'), relevant, verdicts['supported'] + verdicts['partial'], {'split': dict(verdicts)}),
-    step(9, 'read', 'render', models.get('translate'), calls.get('render', 0), calls.get('render', 0)),
-    step(10, 'combine', 'reconcile', models.get('reconcile'), rc_num('new_names'), rc_num('groups'), {'joined_existing': rc_num('joined_existing')}),
-    step(11, 'combine', 'merge', None, merge['claims_passing'], merge['store_claims']),
-    step(12, 'combine', 'export', None, merge['store_claims'], sum(len(json.load(open(os.path.join(data, f)))) for f in rel['claim_files'])),
-    step(13, 'combine', 'cluster', models.get('cluster'), prac('practices-exact.json'), prac('practices.json'), {'embed_model': models.get('embed'), 'embed_only': prac('practices-embed.json')}),
-    step(14, 'combine', 'findings', models.get('findings'), sum(len(json.load(open(os.path.join(data, f)))) for f in rel['claim_files']), len(findings), {'multi_paper': sum(1 for f in findings if f['counts']['papers'] > 1)}),
-    step(15, 'combine', 'actions', models.get('actions'), sum(1 for f in findings if f['counts']['papers'] > 1), len(actions)),
-    step(16, 'combine', 'rank', models.get('rank'), len(actions), sum(1 for a in actions if a.get('rank'))),
-    step(17, 'check', 'audit', None, None, None, {'status': 'planned'}),
+    step(4, 'collect', 'supplied', None, None, supplied),
+    step(5, 'collect', 'prepare', None, len(sources), R['pages']),
+    step(6, 'read', 'extract', models.get('extract'), R['windows'], R['claims']),
+    step(7, 'read', 'quote', None, R['claims'], R['quote']),
+    step(8, 'read', 'map', models.get('map'), R['quote'], R['relevant']),
+    step(9, 'read', 'verify', models.get('verify'), R['relevant'], verdicts['supported'] + verdicts['partial'], {'split': dict(verdicts)}),
+    step(10, 'read', 'render', models.get('translate'), calls.get('render', 0), calls.get('render', 0)),
+    step(11, 'combine', 'reconcile', models.get('reconcile'), rc_num('new_names'), rc_num('groups'), {'joined_existing': rc_num('joined_existing')}),
+    step(12, 'combine', 'merge', None, R['passing'], claims_store),
+    step(13, 'combine', 'export', None, claims_store, released),
+    step(14, 'combine', 'cluster', models.get('cluster'), prac('practices-exact.json'), prac('practices.json'), {'embed_model': models.get('embed'), 'embed_only': prac('practices-embed.json')}),
+    step(15, 'combine', 'findings', models.get('findings'), released, len(findings), {'multi_paper': sum(1 for f in findings if f['counts']['papers'] > 1)}),
+    step(16, 'combine', 'actions', models.get('actions'), sum(1 for f in findings if f['counts']['papers'] > 1), len(actions)),
+    step(17, 'combine', 'rank', models.get('rank'), len(actions), sum(1 for a in actions if a.get('rank'))),
+    step(18, 'check', 'audit', None, None, None, {'status': 'planned'}),
 ]
-total = sum(cost.values()) + (phase_a.get('spent_usd') or 0)
 # Costs stay in the run records and the private dataset; the public page shows no spending.
-out = {'run': os.path.basename(run), 'as_of': ledger[-1]['finished'][:10], 'steps': steps, 'totals': {'calls': sum(calls.values())}}
+out = {'run': ', '.join(os.path.basename(r) for r in runs), 'as_of': last[:10], 'steps': steps, 'totals': {'calls': sum(calls.values())}}
 json.dump(out, open(os.path.join(data, 'pipeline.json'), 'w'), indent=1)
-print(json.dumps(out['totals']), len(steps), 'steps', 'model cost (not published):', round(total, 2))
+print(json.dumps(out['totals']), len(steps), 'steps', 'model cost (not published):', round(sum(cost.values()), 2))
 
 # One claim followed through every step, for the walkthrough on the Pipeline page. Everything is read from
 # the run, the store and the release: the paper's record, its pages, the model's own labels and verdict,
@@ -79,9 +122,11 @@ def example(cid):
     claim = next((c for c in jl(os.path.join(store, 'claims.jsonl')) if c.get('release_id') == cid), None)
     if not claim: return None
     rec = next((r for r in jl(os.path.join(base, 'intake', 'records.jsonl')) if r['id'] == claim['source']), {})
-    pages = sum(1 for p in jl(os.path.join(B, '01-prepare', 'pages.jsonl')) if p['source'] == claim['source'])
-    ext_all = [c for c in jl(os.path.join(B, '02-extract', 'claims.jsonl')) if c['source'] == claim['source']]
-    windows = sum(1 for t in jl(os.path.join(B, '02-extract', 'tasks.jsonl')) if t.get('source') == claim['source'])
+    # The phase that added the claim: its prepare and extract steps.
+    ph = next(os.path.join(r, claim['added_in']['phase']) for r in runs if os.path.basename(r) == claim['added_in']['run'])
+    pages = sum(1 for p in jl(os.path.join(step_dir(ph, 'prepare'), 'pages.jsonl')) if p['source'] == claim['source'])
+    ext_all = [c for c in jl(os.path.join(step_dir(ph, 'extract'), 'claims.jsonl')) if c['source'] == claim['source']]
+    windows = sum(1 for t in jl(os.path.join(step_dir(ph, 'extract'), 'tasks.jsonl')) if t.get('source') == claim['source'])
     pub = next(c for f in rel['claim_files'] for c in js(os.path.join(data, f)) if c['id'] == cid)
     src = next(s for s in rel['sources'] if s['id'] == pub['source_id'])
     exact, clustered = js(os.path.join(store, 'practices-exact.json')), js(os.path.join(store, 'practices.json'))

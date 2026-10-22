@@ -197,6 +197,35 @@ so links to claims and findings stay valid.
   before spending more than that; a capped step can be re-run to finish.
 - No step sets an output-length limit, so a model is never cut off mid-answer.
 
+## Keeping a log of each run
+
+```sh
+node pipeline/runlog.mjs start   --store $STORE --run run-3 --title "Run 3: ..." --release public/data/release.json [--inputs inputs.json] [--note "..."]
+# ... the run's steps, each wrapped in step.mjs ...
+node pipeline/runlog.mjs finish  --store $STORE --run run-3 --root $RUN --release public/data/release.json
+node pipeline/runlog.mjs publish --store $STORE --out public/data/runs.json
+```
+
+`start` records the model for each stage, a fingerprint and version of every prompt, the ranking spec's
+checksum and the code version, snapshots the store, and lists what changed since the last run: models, prompts,
+the spec, and every commit to `pipeline/` since that run ended. Add `--note` for anything code cannot see
+(new papers, a fix applied to old data); `note` adds one later. `--planned` lists a run before it starts.
+`finish` reads the step records and writes what the run added: claims, papers, findings new, rewritten,
+unchanged or gone, and actions. `publish` writes the site's Run history without costs.
+
+## Keeping earlier versions
+
+Before a run, copy the release files (`public/data/release*.json`) aside. After it, run
+
+```sh
+node pipeline/versions.mjs --old OLD_COPY --new public/data --run run-2
+```
+
+with `--run` naming the run that made the old release. It archives the previous record of every claim and
+finding that changed or went, and the whole previous set of actions, under `public/data/versions/run-2/`, and
+lists them in `versions.json`. Finding and claim pages then offer "Earlier versions", a page for something that
+went shows its last version, and the Actions page can switch to an earlier run's set.
+
 ## Keeping a record of each step
 
 Wrap any command in `step.mjs` and it writes a numbered folder with a `step.json` (times, exact command,
@@ -209,6 +238,18 @@ node pipeline/step.mjs --root $RUN --phase A --step 02-extract --in $RUN/prepare
 ```
 
 `pipeline_summary.py` reads those records to build the Pipeline page's numbers.
+
+## Organising the source PDFs
+
+```sh
+python3 pipeline/organize_raw.py $CORPUS /tmp/out [--batch DIR --batch-index INDEX.xlsx --batch-name NAME]
+```
+
+Gathers every PDF for the species (the intake's open-access downloads, the first run's supplied papers, and
+any supplied batch with its spreadsheet index) into `raw/<species>/zh|en/`, named `year_author_title.pdf`,
+keeps each paper once, and writes `raw/index.csv` with one row per PDF (bibliographic details, topic and
+relevance from a batch index, origin, whether the pipeline has read it, page count, whether it needs OCR,
+checksum, old location). Upload `raw/` to the dataset's top level.
 
 ## Publishing your corpus (optional)
 

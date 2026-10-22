@@ -2,6 +2,8 @@ import { t } from './i18n.js';
 import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { pipelineHtml, mountPipeline } from './site-pipeline.js';
+import { runsHtml } from './site-runs.js';
+import { historyHtml, mountHistory, versionHead, versionsOf, loadVersionFile } from './site-history.js';
 import { matrixChart } from './site-chart.js';
 
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
@@ -38,10 +40,10 @@ const indexOf = list => new Map((list || []).map(x => [x.id, x]));
 
 async function load() {
   state.error = null; state.full = false; state.listsReady = false; state.fullPromise = null;
-  const [shell, corpus, nextRun, pipeline, papersMeta] = await Promise.all([
+  const [shell, corpus, nextRun, pipeline, papersMeta, runs, versions] = await Promise.all([
     json(useSample ? 'data/sample.json' : 'data/release.json', { cache: 'no-cache' }).catch(e => ({ __error: e.message })),
-    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json'), optional('data/papers.json')]);
-  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline; state.authors = papersMeta;
+    optional('data/corpus.json'), optional('data/next-run.json'), optional('data/pipeline.json'), optional('data/papers.json'), optional('data/runs.json'), optional('data/versions.json')]);
+  state.corpus = corpus; state.nextRun = nextRun; state.pipeline = pipeline; state.authors = papersMeta; state.runs = runs; state.versions = versions;
   if (shell.__error) { state.data = null; state.error = shell.__error; return; }
   const data = shell, pending = (data.claim_files || []).length > 0;
   const v = encodeURIComponent(data.release?.version || '0');
@@ -112,35 +114,10 @@ function viewPipeline() {
   const P = state.pipeline, start = Number(parseHash().params.get('step')) || 1;
   const body = P ? pipelineHtml(P, { lang: state.lang, tr, link, taxonomyLabel }) : '';
   return { title: tr('nav.pipeline'), html: lead(tr('pipe.kicker'), tr('pipe.title'), tr('pl.lead', { n: P ? P.steps.length : '' })) + body +
-      `<details class="pl-fold"><summary>${esc(tr('pl.fold.runs'))}</summary>${nextRunHtml(state.nextRun)}</details>`,
+      runsHtml(state.runs, { tr, link }),
     mount: root => mountPipeline(root, { start, onStep: k => history.replaceState(null, '', link('pipeline', k > 1 ? { step: k } : {})) }) };
 }
 
-// The planned run and its settings, from data/next-run.json. Nothing here has been run.
-function nextRunHtml(p) {
-  if (!p) return '';
-  const zh = state.lang === 'zh', L = (o, k) => (zh ? o[k + '_zh'] || o[k + '_en'] : o[k + '_en']) || '', B = o => (zh ? o.zh || o.en : o.en);
-  const actual = ph => (ph.actual ? `<p class="nr-actual">${esc(tr('nr.actual', { extracted: ph.actual.claims_extracted, found: ph.actual.claims_quote_found, relevant: ph.actual.claims_relevant, released: ph.actual.claims_released, supported: ph.actual.claims_supported, sources: ph.actual.sources_released, interventions: ph.actual.interventions }))}</p>${ph.notes_en ? `<p class="small-note">${esc(L(ph, 'notes'))}</p>` : ''}` : '');
-  const phases = p.phases.map(ph => `<article class="nr-phase st-${esc(ph.status || 'planned')}"><div class="nr-phase-head"><span class="nr-id">${esc(ph.id)}</span><h3>${esc(L(ph, 'name'))}</h3><span class="nr-badge">${esc(tr('nr.status.' + (ph.status || 'planned')))}</span></div>
-    <ul class="nr-nums"><li><b>${ph.papers}</b>${esc(tr('nr.papers'))}</li><li><b>${Number(ph.windows).toLocaleString()}</b>${esc(tr('nr.windows'))}</li><li><b>~${ph.minutes} min</b>${esc(tr('nr.time'))}</li></ul>
-    ${actual(ph)}<p>${esc(L(ph, 'why'))}</p><p class="small-note"><code>${esc(ph.input)}</code></p>
-    <details class="nr-cmds"><summary>${esc(tr('nr.commands'))}</summary><pre>${esc(ph.commands.join('\n'))}</pre></details></article>`).join('');
-  const rows = p.stages.map(st => `<tr><td>${esc(st.id)}</td><td>${st.model ? `<code>${esc(st.model)}</code>${st.fallback ? `<br><small>${esc(tr('nr.fallback'))}: <code>${esc(st.fallback.join(', '))}</code></small>` : ''}` : esc(tr('pipe.nomodel'))}</td>
-    <td>${esc(st.reasoning || '—')}</td><td>${st.max_output_tokens ? Number(st.max_output_tokens).toLocaleString() : '—'}</td><td>${esc(st.per)}${st.note_en ? `<br><small>${esc(L(st, 'note'))}</small>` : ''}</td></tr>`).join('');
-  const gates = p.gates.map(g => `<li class="nr-gate g-${esc(g.status)}"><span>${esc(tr('nr.gate.' + g.status))}</span>${esc(B(g))}</li>`).join('');
-  const build = p.to_build_first.map(x => `<li>${esc(B(x))}</li>`).join('');
-  const outs = p.outputs.map(x => `<li>${esc(B(x))}</li>`).join('');
-  return `<section class="next-run"><div class="nr-top"><span class="pill">${esc(tr('nr.status.' + p.status))}</span><h2>${esc(tr('nr.title'))}</h2>
-      <p>${esc(L(p, 'goal'))}</p></div>
-    <div class="nr-phases">${phases}</div>
-    <h3>${esc(tr('nr.config'))}</h3>
-    <dl class="nr-settings"><dt>${esc(tr('nr.profile'))}</dt><dd><code>${esc(p.profile)}</code></dd><dt>${esc(tr('nr.router'))}</dt><dd>${esc(p.provider.router)} · data_collection: <code>${esc(p.provider.data_collection)}</code></dd>
-      <dt>${esc(tr('nr.window'))}</dt><dd>${p.window.size_chars.toLocaleString()} / ${p.window.overlap_chars}</dd><dt>${esc(tr('nr.prompts'))}</dt><dd>${Object.entries(p.prompt_versions).map(([k, v]) => `${esc(k)} <code>${esc(v)}</code>`).join(' · ')}</dd></dl>
-    <div class="nr-table"><table class="plain"><thead><tr><th>${esc(tr('nr.stage'))}</th><th>${esc(tr('pipe.model'))}</th><th>${esc(tr('nr.reasoning'))}</th><th>${esc(tr('nr.maxout'))}</th><th>${esc(tr('nr.per'))}</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div class="nr-cols"><div><h3>${esc(tr('nr.gates'))}</h3><ul class="nr-gates">${gates}</ul></div>
-      <div><h3>${esc(tr('nr.build'))}</h3><ul class="nr-list">${build}</ul><h3>${esc(tr('nr.outputs'))}</h3><ul class="nr-list">${outs}</ul></div></div>
-    <p class="small-note"><b>${esc(tr('nr.notin'))}</b> ${esc(L(p, 'not_in_this_run'))} · <a href="data/next-run.json">next-run.json</a></p></section>`;
-}
 
 const fmtBytes = n => (n >= 1e6 ? (n / 1e6).toFixed(1) + ' MB' : n >= 1e3 ? Math.round(n / 1e3) + ' KB' : n + ' B');
 function viewCorpus() {
@@ -290,11 +267,9 @@ function viewOverview() {
         <button type="button" class="scroll-cue" data-scroll="graph-title"><span>${esc(tr('hero.scroll'))}</span><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 7l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <aside class="hero-side" aria-hidden="true"><img class="hero-art" src="art/research-desk.webp" width="1004" height="849" alt="" decoding="async"><div class="hero-tiles">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</div></aside>
       </section>
-      ${state.corpus && state.corpus.charts ? `<section class="home-flow" aria-labelledby="home-flow-title"><div class="home-flow-head"><h2 id="home-flow-title">${esc(tr('cv.title'))}</h2>
-        <p class="cv-legend">${['en', 'zh'].map(l => `<span><i style="background:${LANG_COLOR[l]}"></i>${esc(tr('cv.lang.' + l))}</span>`).join('')}<a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
-        <div class="cv-card">${corpusFlowHtml(state.corpus, tr)}</div>
-        ${state.authors?.papers?.length ? `<div class="home-flow-head af-head"><h2>${esc(tr('af.title'))}</h2><p class="cv-legend"><span>${esc(tr('af.note'))}</span></p></div>
-        <div class="cv-card">${authorFlowHtml(state.authors, tr)}</div>` : ''}</section>` : ''}
+      ${state.authors?.papers?.length ? `<section class="home-flow" aria-labelledby="home-flow-title"><div class="home-flow-head"><h2 id="home-flow-title">${esc(tr('af.title'))}</h2>
+        <p class="cv-legend"><span>${esc(tr('af.note'))}</span><a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
+        <div class="cv-card">${authorFlowHtml(state.authors, tr)}</div></section>` : ''}
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
       <section class="graph-feature" aria-labelledby="graph-title">
         <figure class="band-card graph-card"><div class="graph-head"><h2 class="graph-name" id="graph-title">${esc(tr('graph.title'))}</h2><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
@@ -346,8 +321,26 @@ document.addEventListener('toggle', e => {
 
 function viewFinding(id) {
   const f = state.index.findings.get(id);
-  if (!f) return viewNotFound();
-  return { title: `${tr('fd.kicker')} ${f.id}`, html: findingPageHtml(f, findingCtx()) };
+  if (!f) return goneView('findings', id, 'fd.kicker');
+  return { title: `${tr('fd.kicker')} ${f.id}`, html: findingPageHtml(f, findingCtx()) + historyHtml(state.versions, 'findings', id, tr), mount: mountVersions };
+}
+
+// Earlier versions. A finding or claim that changed shows what earlier releases said under it; one that is no
+// longer in the release shows its last archived version instead of "not found".
+function historyRecordHtml(kind, x, v) {
+  const lang = state.lang;
+  if (kind === 'findings') return `<article class="hist-v">${versionHead(v, x, tr)}<p class="hist-text">${esc(findingText(x, lang))}</p>
+    <p class="fd-meta">${esc(tr('fd.strength.' + x.strength))} · ${esc(tr(x.counts.papers === 1 ? 'fd.papers.one' : 'fd.papers', { n: x.counts.papers }))} · ${esc(tr(x.counts.claims === 1 ? 'fd.claims.one' : 'fd.claims', { n: x.counts.claims }))}</p>
+    ${x.practice_en ? `<p class="small-note">${esc(tr('fd.practice'))}: ${esc(lang === 'zh' ? x.practice_zh || x.practice_en : x.practice_en)}</p>` : ''}</article>`;
+  return `<article class="hist-v">${versionHead(v, x, tr)}<p class="hist-text">${esc(L.claimText(x, lang).text)}</p>
+    <blockquote class="quote" lang="${esc(x.quote_lang || 'und')}">${esc(x.quote)}</blockquote>
+    <p class="small-note">${esc(tr('claim.intervention'))}: ${esc(x.intervention || '—')} · ${esc(tr('ver.' + x.verification))}</p></article>`;
+}
+const mountVersions = root => mountHistory(root, state.versions, historyRecordHtml);
+function goneView(kind, id, kicker) {
+  if (!versionsOf(state.versions, kind, id).length) return viewNotFound();
+  return { title: `${tr(kicker)} ${id}`, html: `<header class="species-title"><div class="record-type">${esc(tr(kicker))} ${esc(id)}</div><h1>${esc(tr('hist.gone.title'))}</h1></header>
+      <p>${esc(tr('hist.gone.note'))}</p>${historyHtml(state.versions, kind, id, tr, { open: true })}`, mount: mountVersions };
 }
 
 // All findings: an index by technology, filters, and grouped or ranked views.
@@ -369,17 +362,33 @@ function viewFindings(params) {
 }
 
 // All draft actions: ranked by priority or grouped by technology, with filters.
+// The version switch above the actions: the current set, or a set an earlier run drafted (archived).
+function actionVersionsHtml(params) {
+  const vs = (state.versions?.versions || []).filter(v => v.files?.actions);
+  if (!vs.length) return '';
+  const cur = params.get('v') || '', q = Object.fromEntries([...params].filter(([k]) => k !== 'v'));
+  return `<nav class="ac-versions" aria-label="${esc(tr('ac.version'))}"><span>${esc(tr('ac.version'))}</span><a href="${link('actions', q)}"${cur ? '' : ' aria-current="page"'}>${esc(tr('ac.version.current', { v: state.data.release.version }))}</a>${vs.map(v =>
+    `<a href="${link('actions', { ...q, v: v.run })}"${cur === v.run ? ' aria-current="page"' : ''}>${esc(tr('ac.version.run', { run: v.run, v: v.version || '' }))}</a>`).join('')}</nav>`;
+}
+
 function viewActions(params) {
-  const d = state.data, sp = params.get('species') || '';
-  const items = (d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
+  const d = state.data, sp = params.get('species') || '', vr = params.get('v');
+  const ver = vr && (state.versions?.versions || []).find(v => v.run === vr);
+  state.archivedActions ||= {};
+  if (ver && !state.archivedActions[vr]) {
+    loadVersionFile(ver.files.actions).then(a => { state.archivedActions[vr] = a; render(); });
+    return { title: tr('nav.actions'), html: `<p class="loading">${esc(tr('loading'))}</p>` };
+  }
+  const items = (ver ? state.archivedActions[vr] : d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
   const fById = new Map((d.findings || []).map(f => [f.id, f]));
   const filters = [
     { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('ac.search.ph') },
     { key: 'type', type: 'select', label: tr('ac.f.type'), options: ['adopt', 'avoid', 'test_on_farms', 'monitor', 'research'].filter(t => items.some(a => a.type === t)).map(t => [t, tr('ac.type.' + t)]) },
     { key: 'who', type: 'select', label: tr('ac.f.who'), options: [...new Set(items.map(a => a.who))].map(w => [w, tr('ac.who.' + w.replace(/ /g, '_'))]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) }];
-  return { title: tr('nav.actions'), html: lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size })) +
-      browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + rankNoteHtml(d, tr),
+  return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
+      actionVersionsHtml(params) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
+      browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
       render: a => actionItemHtml(a, findingCtx(), fById),
       test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) &&
@@ -485,7 +494,7 @@ function viewSource(id) {
 
 function viewClaim(id) {
   const c = state.index.claims.get(id);
-  if (!c) return viewNotFound();
+  if (!c) return goneView('claims', id, 'claim.kicker');
   const s = state.index.sources.get(c.source_id);
   const pop = c.population || {};
   const popText = [pop.species, pop.life_stage, pop.system].filter(Boolean).join(' · ');
@@ -508,7 +517,8 @@ function viewClaim(id) {
           ...(c.limitations ? [[tr('claim.limits'), esc(c.limitations)]] : []), ...(c.counterevidence ? [[tr('claim.counter'), esc(c.counterevidence)]] : []),
           [tr('claim.welfare'), `${esc(tr('welfare.' + c.welfare_link))}${c.welfare_link_note ? `<br><span class="meta">${esc(c.welfare_link_note)}</span>` : ''}`]]) +
       `<p><a class="button small" href="${esc(issueLink(`Correction: claim ${c.id}`, reportBody))}" target="_blank" rel="noopener noreferrer">${esc(tr('claim.report'))} ↗</a></p>
-       <p class="small-note">${esc(tr('claim.report.note'))}</p>`
+       <p class="small-note">${esc(tr('claim.report.note'))}</p>` + historyHtml(state.versions, 'claims', id, tr),
+    mount: mountVersions
   };
 }
 
@@ -665,7 +675,7 @@ function render(navigated = false) {
 // Sections, pipeline lanes and list groups fade in as they reach the screen, so each reads as its own block.
 function setupReveal() {
   if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const els = [...document.querySelectorAll('#content .sp-sec, #content .fw-over, #content .fw-walk, #content .br-group, #content .corpus-tree, #content .cv-two')];
+  const els = [...document.querySelectorAll('#content .sp-sec, #content .fw-over, #content .fw-walk, #content .rn, #content .br-group, #content .corpus-tree, #content .cv-two')];
   const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }, { rootMargin: '0px 0px -8% 0px' });
   for (const el of els) { if (el.getBoundingClientRect().top < innerHeight) continue; el.classList.add('reveal'); io.observe(el); }
   observers.push(io);

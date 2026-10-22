@@ -1,5 +1,5 @@
 // Run the extract stage over a pages file, end to end and resumable.
-//   node pipeline/run.mjs --pages pages.jsonl --out DIR --cap 1.00 [--profile demo] [--limit N]
+//   node pipeline/run.mjs --pages pages.jsonl --out DIR --cap 1.00 [--profile demo] [--limit N] [--records records.jsonl]
 //        [--concurrency 6] [--max-tokens 6000] [--gold gold.jsonl --min-recall 0.7]
 // pages.jsonl: {"source","page","text"} per line. DIR must be outside the repository (licensed text).
 //
@@ -44,7 +44,9 @@ async function main() {
   const allPages = readJsonl(arg('pages'));
 
   // Stage 0
-  const { pages, dropped } = dedupSources(allPages);
+  // Paper records (id = source), when given, supply the titles and first authors the duplicate check compares.
+  const info = new Map(arg('records') ? readJsonl(arg('records')).map(r => [r.id, r]) : []);
+  const { pages, dropped } = dedupSources(allPages, info);
   // Manifest: refuse to resume into a directory produced with different inputs or settings.
   const config = runConfig({ profile, size, overlap, maxTokens });
   const configHash = sha(JSON.stringify(config)).slice(0, 16);
@@ -55,7 +57,9 @@ async function main() {
     if (prev.config_hash !== configHash || prev.input_hash !== manifest.input_hash) {
       console.error(`${out} holds a run with different inputs or settings; use a new --out directory.`); process.exit(2);
     }
-  } else writeFileSync(mPath, JSON.stringify(manifest, null, 2));
+  }
+  // The duplicate list is rewritten each time, so a fix to the check shows in the manifest.
+  writeFileSync(mPath, JSON.stringify(manifest, null, 2));
 
   // Stage 1
   const bySource = new Map();

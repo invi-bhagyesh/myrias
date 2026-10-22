@@ -1,0 +1,1083 @@
+{
+ "as_of": "2026-10-22",
+ "runs": [
+  {
+   "id": "run-3",
+   "title_en": "Run 3: the 2026-10-20 batch of Chinese papers",
+   "status": "done",
+   "started": "2026-10-22T06:40:48.221Z",
+   "finished": "2026-10-22T11:41:24.924Z",
+   "git": {
+    "commit": "84306b6",
+    "branch": "claude/site-suggestions-t8i6vo"
+   },
+   "inputs": {
+    "papers": 413,
+    "by_lang": {
+     "zh": 413
+    },
+    "by_origin": {
+     "cnki-batch-2026-10-20": 413
+    },
+    "note_en": "All 413 papers of the 2026-10-20 batch not read before (417 in the batch, less 4 already read in run 2). 51 papers whose text layer was damaged or missing (774 pages) were read by OCR first.",
+    "ocr": {
+     "papers": 51,
+     "pages": 774
+    }
+   },
+   "settings": {
+    "profile": "demo",
+    "models": {
+     "extract": "qwen/qwen3.8-flash",
+     "map": "qwen/qwen3.8-flash",
+     "verify": "z-ai/glm-5.3",
+     "translate": "qwen/qwen3.8-flash",
+     "reconcile": "anthropic/claude-sonnet-5.5",
+     "embed": "qwen/qwen3-embedding-8b",
+     "cluster": "anthropic/claude-sonnet-5.5",
+     "findings": "anthropic/claude-sonnet-5.5",
+     "actions": "anthropic/claude-sonnet-5.5",
+     "rank": "anthropic/claude-sonnet-5.5",
+     "affiliations": "qwen/qwen3.8-flash"
+    },
+    "prompts": {
+     "extract": {
+      "version": "extract-0.3",
+      "sha": "47ffd84ca427"
+     },
+     "map": {
+      "version": null,
+      "sha": "a0304e8baedb"
+     },
+     "verify": {
+      "version": null,
+      "sha": "b4846078c841"
+     },
+     "translate": {
+      "version": "render-0.1",
+      "sha": "8d617fed4793"
+     },
+     "reconcile": {
+      "version": "reconcile-0.2",
+      "sha": "108bbc569ef2"
+     },
+     "cluster": {
+      "version": "cluster-0.1",
+      "sha": "a24d28552bb9"
+     },
+     "findings": {
+      "version": "findings-0.2",
+      "sha": "05b8e7094d15"
+     },
+     "actions": {
+      "version": "actions-0.3",
+      "sha": "83f83332f856"
+     },
+     "rank": {
+      "version": "rank-0.1",
+      "sha": "c35437425e0d"
+     },
+     "affiliations": {
+      "version": "affiliations-0.1",
+      "sha": "ed9d1080891e"
+     }
+    },
+    "spec_sha": "c0809ced3ebc"
+   },
+   "changes": {
+    "since": "run-2",
+    "settings": [
+     {
+      "kind": "model",
+      "stage": "rank",
+      "en": "New stage rank, on anthropic/claude-sonnet-5.5."
+     },
+     {
+      "kind": "model",
+      "stage": "affiliations",
+      "en": "New stage affiliations, on qwen/qwen3.8-flash."
+     },
+     {
+      "kind": "prompt",
+      "stage": "reconcile",
+      "en": "reconcile: prompt reconcile-0.1 → reconcile-0.2."
+     },
+     {
+      "kind": "prompt",
+      "stage": "findings",
+      "en": "findings: prompt findings-0.1 → findings-0.2."
+     },
+     {
+      "kind": "prompt",
+      "stage": "actions",
+      "en": "actions: prompt actions-0.1 → actions-0.3."
+     }
+    ],
+    "code": [
+     {
+      "commit": "84306b6",
+      "date": "2026-10-22",
+      "en": "Run 3 tooling: OCR command and page renderer, batch inputs builder, merged papers keep their English title; home shows only the papers chart"
+     },
+     {
+      "commit": "cfb0ef1",
+      "date": "2026-10-22",
+      "en": "Run log: each run's inputs, settings, changes since the last run, steps and results; Run history on the Pipeline page"
+     },
+     {
+      "commit": "3013546",
+      "date": "2026-10-21",
+      "en": "hf_upload: leave PDFs to raw/"
+     },
+     {
+      "commit": "a652ffc",
+      "date": "2026-10-21",
+      "en": "Add organize_raw.py: gather every source PDF into raw/<species>/<lang>/ with one index"
+     },
+     {
+      "commit": "fd5470b",
+      "date": "2026-10-21",
+      "en": "Reasons behind each combine step, spec-based action ranking, author affiliation chart (#35)"
+     },
+     {
+      "commit": "a9b5cc1",
+      "date": "2026-10-21",
+      "en": "Pipeline page: four-phase framework overview and a step-by-step walkthrough of one real claim (#34)"
+     },
+     {
+      "commit": "796c61b",
+      "date": "2026-10-21",
+      "en": "Add a README on running the framework; species options for export, findings, actions (#33)"
+     },
+     {
+      "commit": "a07c0ef",
+      "date": "2026-10-13",
+      "en": "Pipeline page: remove the reconstruction test step"
+     },
+     {
+      "commit": "f48574b",
+      "date": "2026-10-12",
+      "en": "Faster first load: claims download in the background; findings, actions and species pages need only small files"
+     },
+     {
+      "commit": "4c7e042",
+      "date": "2026-10-12",
+      "en": "Site: no spending shown; Methods and Download moved to the footer; page and panel transitions"
+     },
+     {
+      "commit": "4170404",
+      "date": "2026-10-12",
+      "en": "Pipeline page: 17-step diagram from the run records, details on click, older notes folded; compact navbar tools"
+     },
+     {
+      "commit": "08fe542",
+      "date": "2026-10-12",
+      "en": "Corpus: clustering, reconstruction test and actions on Hugging Face"
+     },
+     {
+      "commit": "a067d95",
+      "date": "2026-10-12",
+      "en": "Draft actions from findings: by priority (published formula) and by technology"
+     }
+    ],
+    "notes": [
+     {
+      "en": "Between runs (21 Oct), on run 2's data: each finding now keeps its basis (the practice names joined and why, the counts behind its strength label).",
+      "at": "2026-10-22T06:35:13.149Z"
+     },
+     {
+      "en": "Between runs (21 Oct): draft actions were redrafted so each keeps why its findings were combined and selected, and what each finding contributes (21 actions became 18).",
+      "at": "2026-10-22T06:35:13.149Z"
+     },
+     {
+      "en": "Between runs (21 Oct): actions are ranked by a model against a written spec (pipeline/priority-spec.md) instead of a fixed formula.",
+      "at": "2026-10-22T06:35:13.149Z"
+     },
+     {
+      "en": "Between runs (21 Oct): a cheap model read each paper's title page for where its first author works and what kind of paper it is.",
+      "at": "2026-10-22T06:35:13.149Z"
+     },
+     {
+      "en": "Every source PDF now sits in raw/ on Hugging Face, with one index; the 2026-10-20 batch (419 PDFs with its own spreadsheet) was added there.",
+      "at": "2026-10-22T06:35:13.149Z"
+     },
+     {
+      "en": "OCR: 51 papers, 780 pages. One page looped on a single line until the model's length limit; 8,160 repeated lines were dropped from it before extraction. The inputs step's printed count of text-layer papers was wrong (a code bug, since fixed); all 413 papers went in.",
+      "at": "2026-10-22T07:08:07.922Z"
+     },
+     {
+      "en": "Extraction was stopped at 2,290 windows: the duplicate check read titles from file names written as title_author, but this batch names files year_topic_author_title, so 23 different papers by the same author were dropped as duplicates. The check now compares record titles and first authors; extraction resumed with all 413 papers and no saved window was redone.",
+      "at": "2026-10-22T07:46:04.697Z"
+     },
+     {
+      "en": "English text now covers only claims that can be released (quote found, about welfare, supported or partly supported), 16 calls at a time, and resumes if stopped; run 2 translated every claim with a found quote.",
+      "at": "2026-10-22T08:26:52.944Z"
+     },
+     {
+      "en": "The first English step stopped after 999 claims on a gateway timeout but reported success; the step was fixed to skip a failed call and report it, finished the remaining claims (12,931 rendered, 12,807 with every number carried over), and the English was copied onto the stored claims before a fresh export and findings refresh.",
+      "at": "2026-10-22T11:41:24.370Z"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "phase": "A",
+     "step": "01-ocr",
+     "started": "2026-10-22T06:42:29.086Z",
+     "calls": 780,
+     "exit_code": 0,
+     "rows_out": 780
+    },
+    {
+     "phase": "A",
+     "step": "02-inputs",
+     "started": "2026-10-22T07:07:27.480Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": 6036
+    },
+    {
+     "phase": "A",
+     "step": "03-prepare",
+     "started": "2026-10-22T07:07:28.284Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": 4968
+    },
+    {
+     "phase": "A",
+     "step": "04-extract",
+     "started": "2026-10-22T07:46:09.521Z",
+     "calls": 4343,
+     "exit_code": 0,
+     "rows_out": 27046
+    },
+    {
+     "phase": "A",
+     "step": "05-map",
+     "started": "2026-10-22T08:25:42.765Z",
+     "calls": 22147,
+     "exit_code": 0,
+     "rows_out": 23840
+    },
+    {
+     "phase": "A",
+     "step": "06-verify",
+     "started": "2026-10-22T09:25:57.082Z",
+     "calls": 12996,
+     "exit_code": 0,
+     "rows_out": 23840
+    },
+    {
+     "phase": "A",
+     "step": "07-render",
+     "started": "2026-10-22T09:48:01.755Z",
+     "calls": 999,
+     "exit_code": 0,
+     "rows_out": 23840
+    },
+    {
+     "phase": "A",
+     "step": "08-reconcile",
+     "started": "2026-10-22T09:50:49.386Z",
+     "calls": 24,
+     "exit_code": 0,
+     "rows_out": 23840
+    },
+    {
+     "phase": "A",
+     "step": "09-merge",
+     "started": "2026-10-22T10:54:27.717Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "10-export",
+     "started": "2026-10-22T10:54:29.737Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "11-cluster",
+     "started": "2026-10-22T10:54:31.310Z",
+     "calls": 446,
+     "exit_code": 0,
+     "rows_out": 446
+    },
+    {
+     "phase": "A",
+     "step": "12-findings",
+     "started": "2026-10-22T10:58:27.375Z",
+     "calls": 724,
+     "exit_code": 0,
+     "rows_out": 724
+    },
+    {
+     "phase": "A",
+     "step": "13-actions",
+     "started": "2026-10-22T11:04:49.201Z",
+     "calls": 7,
+     "exit_code": 0,
+     "rows_out": 7
+    },
+    {
+     "phase": "A",
+     "step": "14-rank",
+     "started": "2026-10-22T11:07:21.189Z",
+     "calls": 1,
+     "exit_code": 0,
+     "rows_out": 1
+    },
+    {
+     "phase": "A",
+     "step": "15-affiliations",
+     "started": "2026-10-22T11:08:05.482Z",
+     "calls": 406,
+     "exit_code": 0,
+     "rows_out": 406
+    },
+    {
+     "phase": "A",
+     "step": "16-render-finish",
+     "started": "2026-10-22T11:10:59.766Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "17-english-to-store",
+     "started": "2026-10-22T11:40:56.326Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "18-export",
+     "started": "2026-10-22T11:40:58.403Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "19-findings",
+     "started": "2026-10-22T11:41:00.024Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    }
+   ],
+   "results": {
+    "claims": {
+     "before": 4460,
+     "after": 17406,
+     "added": 12946
+    },
+    "papers": {
+     "before": 176,
+     "after": 582,
+     "added": 406
+    },
+    "findings": {
+     "new": 1508,
+     "rewritten": 109,
+     "unchanged": 167,
+     "gone": 129,
+     "total": 1784
+    },
+    "actions": {
+     "before": 18,
+     "after": 29,
+     "same_text": 0,
+     "top": [
+      {
+       "id": "X026",
+       "rank": 1,
+       "text": "Avoid letting ammonia nitrogen build up in mandarin fish water by testing it regularly and acting when it rises."
+      },
+      {
+       "id": "X007",
+       "rank": 2,
+       "text": "Keep dietary carbohydrate and starch in mandarin fish feeds at about 10-13% and avoid formulating above roughly 13-16%."
+      },
+      {
+       "id": "X008",
+       "rank": 3,
+       "text": "Keep dietary lipid in mandarin fish feeds near 12% and avoid levels of about 16% or more."
+      },
+      {
+       "id": "X010",
+       "rank": 4,
+       "text": "Monitor survival, liver and gut condition, and non-feeding individuals during staged training of mandarin fish from live bait to formulated feed."
+      },
+      {
+       "id": "X027",
+       "rank": 5,
+       "text": "Monitor water temperature in mandarin fish culture as a disease-risk indicator, watching for viral disease risk above about 20°C and for water mould at low temperatures, without cooling so far that feeding drops."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "run-2",
+   "title_en": "Run 2: the Chinese papers again, then 176 open-access papers",
+   "status": "done",
+   "started": "2026-10-11T16:23:08Z",
+   "finished": "2026-10-12T01:09:00Z",
+   "git": {
+    "commit": "8ced161",
+    "branch": "claude/site-suggestions-t8i6vo"
+   },
+   "inputs": {
+    "papers": 196,
+    "by_lang": {
+     "zh": 26,
+     "en": 170
+    },
+    "by_origin": {
+     "supplied (first batch)": 20,
+     "open-access intake": 176
+    },
+    "note_en": "Phase A re-read 19 of the first 20 Chinese papers; phase B read the 176 papers with open full text found by the new search (2,005 found, 964 about the fish and a welfare topic)."
+   },
+   "settings": {
+    "profile": "demo",
+    "models": {
+     "extract": "qwen/qwen3.8-flash",
+     "map": "qwen/qwen3.8-flash",
+     "verify": "z-ai/glm-5.3",
+     "translate": "qwen/qwen3.8-flash",
+     "reconcile": "anthropic/claude-sonnet-5.5",
+     "embed": "qwen/qwen3-embedding-8b",
+     "cluster": "anthropic/claude-sonnet-5.5",
+     "findings": "anthropic/claude-sonnet-5.5",
+     "actions": "anthropic/claude-sonnet-5.5"
+    },
+    "prompts": {
+     "extract": {
+      "version": "extract-0.3",
+      "sha": null
+     },
+     "translate": {
+      "version": "render-0.1",
+      "sha": null
+     },
+     "reconcile": {
+      "version": "reconcile-0.1",
+      "sha": null
+     },
+     "cluster": {
+      "version": "cluster-0.1",
+      "sha": null
+     },
+     "findings": {
+      "version": "findings-0.1",
+      "sha": null
+     },
+     "actions": {
+      "version": "actions-0.1",
+      "sha": null
+     }
+    },
+    "spec_sha": null,
+    "window_en": "overlapping windows of 1,800 characters, 300 overlapping"
+   },
+   "changes": {
+    "since": "run-1",
+    "settings": [
+     {
+      "kind": "model",
+      "stage": "translate",
+      "en": "New stage translate, on qwen/qwen3.8-flash: an English rendering beside each Chinese claim, with every number checked."
+     },
+     {
+      "kind": "model",
+      "stage": "reconcile",
+      "en": "New stage reconcile: one name per practice. Phase A used qwen/qwen3.8-max-0902; phase B anthropic/claude-sonnet-5.5, after the first model cut its answers short."
+     },
+     {
+      "kind": "model",
+      "stage": "findings",
+      "en": "New stages after the run (12 Oct): cluster and findings on anthropic/claude-sonnet-5.5 with qwen/qwen3-embedding-8b embeddings; actions on anthropic/claude-sonnet-5.5."
+     },
+     {
+      "kind": "model",
+      "stage": "suggest",
+      "en": "Stage suggest retired; draft actions now come from findings."
+     }
+    ],
+    "code": [
+     {
+      "commit": "4c7e042",
+      "date": "2026-10-12",
+      "en": "Site: no spending shown; Methods and Download moved to the footer; page and panel transitions"
+     },
+     {
+      "commit": "4170404",
+      "date": "2026-10-12",
+      "en": "Pipeline page: 17-step diagram from the run records, details on click, older notes folded; compact navbar tools"
+     },
+     {
+      "commit": "08fe542",
+      "date": "2026-10-12",
+      "en": "Corpus: clustering, reconstruction test and actions on Hugging Face"
+     },
+     {
+      "commit": "a067d95",
+      "date": "2026-10-12",
+      "en": "Draft actions from findings: by priority (published formula) and by technology"
+     },
+     {
+      "commit": "2cc5fde",
+      "date": "2026-10-12",
+      "en": "Practice clustering (embed, cluster, model test), findings on clustered practices, reconstruction test"
+     },
+     {
+      "commit": "b708603",
+      "date": "2026-10-12",
+      "en": "Corpus: findings on Hugging Face"
+     },
+     {
+      "commit": "02a500f",
+      "date": "2026-10-12",
+      "en": "Findings: one per practice and welfare problem, written from the claims, with the claims shown under each"
+     },
+     {
+      "commit": "e5ec773",
+      "date": "2026-10-11",
+      "en": "Corpus: Run B steps, store and ledger on Hugging Face"
+     },
+     {
+      "commit": "15877ed",
+      "date": "2026-10-11",
+      "en": "Release 0.3: Run B merged (4,458 claims, 176 papers); claims split into files; capped practice lists"
+     },
+     {
+      "commit": "1fdaaa9",
+      "date": "2026-10-11",
+      "en": "No output token limit on any stage"
+     },
+     {
+      "commit": "f0d2637",
+      "date": "2026-10-11",
+      "en": "Stages can override provider routing; reconcile allows any Sonnet provider"
+     },
+     {
+      "commit": "67c2747",
+      "date": "2026-10-11",
+      "en": "Reconcile on Claude Sonnet 5.5"
+     },
+     {
+      "commit": "27337ef",
+      "date": "2026-10-11",
+      "en": "No output token limit unless a stage sets one; reconcile sets none"
+     },
+     {
+      "commit": "a765030",
+      "date": "2026-10-11",
+      "en": "reconcile: send names in batches; each batch sees the groups so far"
+     },
+     {
+      "commit": "2a1f3c5",
+      "date": "2026-10-11",
+      "en": "claimstage: save each result as it arrives and resume a stopped run"
+     },
+     {
+      "commit": "37c4245",
+      "date": "2026-10-11",
+      "en": "claimstage: --concurrency option"
+     },
+     {
+      "commit": "ebae4b0",
+      "date": "2026-10-11",
+      "en": "Runs build on what exists: species store with permanent claim and paper ids, incremental reconcile, recorded numbered steps"
+     },
+     {
+      "commit": "ed245ef",
+      "date": "2026-10-11",
+      "en": "Upload: describe run folders; corpus summary includes run 2"
+     },
+     {
+      "commit": "3b4081f",
+      "date": "2026-10-11",
+      "en": "Phase A of run 2: new release from 19 Chinese papers (Chinese records, English renderings, reconciled interventions); compact home hero with the corpus flow below it; Myrias pixel icon; no Staff workspace link"
+     },
+     {
+      "commit": "6a80495",
+      "date": "2026-10-11",
+      "en": "No spending cap unless one is given (costs still logged); reconcile step groups intervention names for the same practice"
+     },
+     {
+      "commit": "1c691d0",
+      "date": "2026-10-11",
+      "en": "Quote check: accept ellipsis gaps when every piece (6+ characters) is on the page in order; record the gaps"
+     },
+     {
+      "commit": "9053984",
+      "date": "2026-10-11",
+      "en": "verify --only-relevant: skip claims mapping marked as not about welfare (the export drops them anyway)"
+     },
+     {
+      "commit": "753e507",
+      "date": "2026-10-11",
+      "en": "Corpus page: flow chart, topic and decade charts, and a searchable list of every paper with tags"
+     },
+     {
+      "commit": "0af62a0",
+      "date": "2026-10-11",
+      "en": "Corpus: Hugging Face upload script with a manifest, and a Corpus page showing what the private dataset holds"
+     },
+     {
+      "commit": "8f72aaa",
+      "date": "2026-10-11",
+      "en": "Intake: stable record ids, species-in-title flag, tighter transport keywords, exclude Synchropus"
+     },
+     {
+      "commit": "e1969fd",
+      "date": "2026-10-11",
+      "en": "Intake: search open indexes for one species in English and Chinese, tag welfare topics, fetch open full text"
+     },
+     {
+      "commit": "8fa9f08",
+      "date": "2026-10-11",
+      "en": "Language-gap pilot: Chinese vs English evidence for mandarin fish interventions"
+     },
+     {
+      "commit": "8204017",
+      "date": "2026-10-11",
+      "en": "Chinese original is the record; English is a derived view beside it"
+     },
+     {
+      "commit": "983846c",
+      "date": "2026-10-11",
+      "en": "Adopt WelfareLens pipeline ideas: dedup, overlapping windows, richer claims, budget reservation, resumable runs, recall gate"
+     },
+     {
+      "commit": "3784d83",
+      "date": "2026-10-08",
+      "en": "Pipeline tab: every stage with model, method and checks, plus the papers-to-claims funnel"
+     },
+     {
+      "commit": "391264b",
+      "date": "2026-10-08",
+      "en": "Release 0.1.0 demo data (120 machine-checked claims), floating glass header, calmer backgrounds, export script"
+     }
+    ],
+    "notes": [
+     {
+      "en": "New search across Europe PMC, Crossref, DOAJ, OpenAlex and Semantic Scholar, in English and Chinese, with open full text downloaded."
+     },
+     {
+      "en": "Extraction reads overlapping windows instead of one page per call, so claims across a page break are seen whole; each claim records what was measured versus stated, its direction, limitations and counterevidence."
+     },
+     {
+      "en": "The source language is the record: Chinese claims stay in Chinese, English is a rendering beside them."
+     },
+     {
+      "en": "A species store keeps every claim that passed with a permanent id, so later runs add to it instead of starting over."
+     },
+     {
+      "en": "Three reconcile attempts were cut off before names were sent in batches; their calls are in the log."
+     }
+    ]
+   },
+   "steps": [
+    {
+     "phase": "A",
+     "step": "extract",
+     "calls": 98,
+     "started": "2026-10-11T16:23:08.315Z",
+     "seconds": 213,
+     "exit_code": 0,
+     "rows_out": 407
+    },
+    {
+     "phase": "A",
+     "step": "map",
+     "calls": 310,
+     "started": "2026-10-11T16:26:56.713Z",
+     "seconds": 192,
+     "exit_code": 0,
+     "rows_out": 310
+    },
+    {
+     "phase": "A",
+     "step": "verify (first try, stopped)",
+     "calls": 51,
+     "started": "2026-10-11T16:30:09.650Z",
+     "seconds": 9,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "translate (first try)",
+     "calls": 310,
+     "started": "2026-10-11T16:30:20.972Z",
+     "seconds": 83,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "verify",
+     "calls": 127,
+     "started": "2026-10-11T16:31:57.098Z",
+     "seconds": 28,
+     "exit_code": 0,
+     "rows_out": 127
+    },
+    {
+     "phase": "A",
+     "step": "translate",
+     "calls": 310,
+     "started": "2026-10-11T16:33:02.010Z",
+     "seconds": 115,
+     "exit_code": 0,
+     "rows_out": 310
+    },
+    {
+     "phase": "A",
+     "step": "reconcile",
+     "calls": 2,
+     "started": "2026-10-11T16:38:04.651Z",
+     "seconds": 259,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "B",
+     "step": "01-prepare",
+     "started": "2026-10-11T16:46:59.423Z",
+     "seconds": 0,
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": 1620
+    },
+    {
+     "phase": "B",
+     "step": "02-extract",
+     "started": "2026-10-11T16:47:03.929Z",
+     "seconds": 3360,
+     "calls": 3979,
+     "exit_code": 0,
+     "rows_out": 11683
+    },
+    {
+     "phase": "B",
+     "step": "03-map",
+     "started": "2026-10-11T18:20:32.212Z",
+     "seconds": 1146,
+     "calls": 18642,
+     "exit_code": 0,
+     "rows_out": 18642
+    },
+    {
+     "phase": "B",
+     "step": "04-verify",
+     "started": "2026-10-11T18:39:39.191Z",
+     "seconds": 274,
+     "calls": 4359,
+     "exit_code": 0,
+     "rows_out": 10695
+    },
+    {
+     "phase": "B",
+     "step": "05-render",
+     "started": "2026-10-11T18:44:14.446Z",
+     "seconds": 2710,
+     "calls": 9468,
+     "exit_code": 0,
+     "rows_out": 10695
+    },
+    {
+     "phase": "B",
+     "step": "06-reconcile",
+     "started": "2026-10-11T19:29:24.962Z",
+     "seconds": 170,
+     "calls": 1,
+     "exit_code": 1,
+     "rows_out": 1
+    },
+    {
+     "phase": "B",
+     "step": "06-reconcile",
+     "started": "2026-10-11T19:35:13.599Z",
+     "seconds": 454,
+     "calls": 2,
+     "exit_code": 1,
+     "rows_out": 2
+    },
+    {
+     "phase": "B",
+     "step": "06-reconcile",
+     "started": "2026-10-11T19:48:04.706Z",
+     "seconds": 0,
+     "calls": 3,
+     "exit_code": 1,
+     "rows_out": 3
+    },
+    {
+     "phase": "B",
+     "step": "06-reconcile",
+     "started": "2026-10-11T19:48:42.587Z",
+     "seconds": 892,
+     "calls": 12,
+     "exit_code": 0,
+     "rows_out": 10695
+    },
+    {
+     "phase": "B",
+     "step": "07-merge",
+     "started": "2026-10-11T20:03:34.980Z",
+     "seconds": 0,
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "B",
+     "step": "08-export",
+     "started": "2026-10-11T20:03:35.619Z",
+     "seconds": 0,
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "B",
+     "step": "09-findings",
+     "started": "2026-10-12T00:51:54.138Z",
+     "seconds": 89,
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "B",
+     "step": "10-cluster",
+     "started": "2026-10-12T01:01:50.508Z",
+     "seconds": 25,
+     "calls": 87,
+     "exit_code": 0,
+     "rows_out": 87
+    },
+    {
+     "phase": "B",
+     "step": "11-findings",
+     "started": "2026-10-12T01:02:34.265Z",
+     "seconds": 48,
+     "calls": 94,
+     "exit_code": 0,
+     "rows_out": 94
+    },
+    {
+     "phase": "B",
+     "step": "12-reconstruct",
+     "started": "2026-10-12T01:04:13.612Z",
+     "seconds": 170,
+     "calls": 1011,
+     "exit_code": 0,
+     "rows_out": 1011
+    },
+    {
+     "phase": "B",
+     "step": "13-actions",
+     "started": "2026-10-12T01:08:08.854Z",
+     "seconds": 61,
+     "calls": 5,
+     "exit_code": 0,
+     "rows_out": 5
+    }
+   ],
+   "results": {
+    "claims": {
+     "before": 120,
+     "after": 4460,
+     "added": 4340
+    },
+    "papers": {
+     "before": 11,
+     "after": 176,
+     "added": 165
+    },
+    "findings": {
+     "new": 405,
+     "rewritten": 0,
+     "unchanged": 0,
+     "gone": 0,
+     "total": 405
+    },
+    "actions": {
+     "before": 0,
+     "after": 21,
+     "same_text": 0,
+     "top": []
+    },
+    "funnel": {
+     "claims_extracted": 11102,
+     "quote_found": 10159,
+     "about_welfare": 4486,
+     "released": 4458
+    },
+    "note_en": "The first run's 120 claims were replaced by phase A's re-reading of the same papers; the store started at run 2."
+   }
+  },
+  {
+   "id": "run-1",
+   "title_en": "First run: the supplied Chinese papers",
+   "status": "done",
+   "started": "2026-10-08T16:00:00Z",
+   "finished": "2026-10-08T17:12:00Z",
+   "git": {
+    "commit": "391264b",
+    "branch": "main"
+   },
+   "inputs": {
+    "papers": 21,
+    "read": 14,
+    "by_lang": {
+     "zh": 21
+    },
+    "by_origin": {
+     "supplied (first batch)": 21
+    },
+    "note_en": "14 of the 21 PDFs had a usable text layer; some pages were transcribed by hand."
+   },
+   "settings": {
+    "profile": "demo",
+    "models": {
+     "extract": "qwen/qwen3.8-flash",
+     "map": "qwen/qwen3.8-flash",
+     "verify": "z-ai/glm-5.3",
+     "suggest": "qwen/qwen3.8-max-0902"
+    },
+    "prompts": {},
+    "spec_sha": null,
+    "window_en": "one page per extraction call"
+   },
+   "changes": {
+    "since": null,
+    "settings": [],
+    "code": [
+     {
+      "commit": "da7dfc8",
+      "date": "2026-10-08",
+      "en": "Group suggestions by technology and problem; reasoning low for reconcile and suggest"
+     },
+     {
+      "commit": "d8a5b11",
+      "date": "2026-10-08",
+      "en": "Map and verify claim stages; verifier uses low reasoning"
+     },
+     {
+      "commit": "36385e6",
+      "date": "2026-10-08",
+      "en": "Turn model reasoning off for extraction stages; it was exhausting the output budget"
+     },
+     {
+      "commit": "c42f5bc",
+      "date": "2026-10-08",
+      "en": "OCR stage with image input and vision model prices"
+     },
+     {
+      "commit": "dc1053f",
+      "date": "2026-10-08",
+      "en": "Suggested actions, Normalize stage, model fallback and concurrent runs"
+     },
+     {
+      "commit": "bf75899",
+      "date": "2026-10-08",
+      "en": "Pipeline: run script, suggested-action stage, reasoning effort and retry on rate limits"
+     },
+     {
+      "commit": "6a83ccf",
+      "date": "2026-10-08",
+      "en": "Graph view switcher and model-per-stage pipeline scaffold"
+     }
+    ],
+    "notes": [
+     {
+      "en": "First run. Claims were extracted one page per call, quotes checked against the page text, mapped to the taxonomy and checked by a second model. Draft suggestions were written per technology."
+     }
+    ]
+   },
+   "steps": [
+    {
+     "phase": "",
+     "step": "map",
+     "calls": 206,
+     "started": "2026-10-08T16:23:04.855Z",
+     "seconds": 1014,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "",
+     "step": "verify",
+     "calls": 206,
+     "started": "2026-10-08T16:40:29.388Z",
+     "seconds": 61,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "",
+     "step": "suggest",
+     "calls": 19,
+     "started": "2026-10-08T16:42:13.277Z",
+     "seconds": 477,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "",
+     "step": "map (final pass)",
+     "calls": 206,
+     "started": "2026-10-08T16:56:24.217Z",
+     "seconds": 932,
+     "exit_code": 0,
+     "rows_out": null
+    }
+   ],
+   "results": {
+    "claims": {
+     "before": 0,
+     "after": 120,
+     "added": 120
+    },
+    "papers": {
+     "before": 0,
+     "after": 11,
+     "added": 11
+    },
+    "findings": {
+     "new": 0,
+     "rewritten": 0,
+     "unchanged": 0,
+     "gone": 0,
+     "total": 0
+    },
+    "actions": {
+     "before": 0,
+     "after": 0,
+     "same_text": 0,
+     "top": []
+    },
+    "funnel": {
+     "claims_extracted": 231,
+     "quote_found": 206,
+     "about_welfare": 120,
+     "released": 120
+    }
+   }
+  }
+ ]
+}

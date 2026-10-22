@@ -197,6 +197,16 @@ test('stage 0 drops the same text or the same title and says why', () => {
   assert.deepEqual(r.dropped.map(d => d.reason).sort(), ['same_text', 'same_title']);
 });
 
+test('stage 0 with paper records: same title and same first author is a duplicate; same author alone or same title alone is not', () => {
+  const pages = ['2002_Spotted_Xu_Culture techniques.pdf', '2002_Spotted_Xu_Preliminary study.pdf', '2003_Spotted_Xu_Culture techniques again.pdf', '2003_Spotted_Li_Same title other author.pdf']
+    .map((source, i) => ({ source, page: 1, text: 'text ' + i }));
+  const info = new Map([['2002_Spotted_Xu_Culture techniques.pdf', { title: '斑鳜养殖技术', authors: ['徐'] }], ['2002_Spotted_Xu_Preliminary study.pdf', { title: '斑鳜人工养殖初步研究', authors: ['徐'] }],
+    ['2003_Spotted_Xu_Culture techniques again.pdf', { title: '斑鳜养殖技术', authors: ['徐'] }], ['2003_Spotted_Li_Same title other author.pdf', { title: '斑鳜养殖技术', authors: ['李'] }]]);
+  const r = dedupSources(pages, info);
+  assert.deepEqual(r.dropped.map(d => [d.source, d.reason]), [['2003_Spotted_Xu_Culture techniques again.pdf', 'same_title']]);
+  assert.equal(r.kept.length, 3);
+});
+
 test('budget reservation: concurrent calls can never pass the cap', async () => {
   let inFlight = 0, maxInFlight = 0;
   const fetchImpl = async () => { inFlight++; maxInFlight = Math.max(maxInFlight, inFlight); await new Promise(r => setTimeout(r, 5)); inFlight--; return okFetch('{"claims":[]}', 0.0001)(); };
@@ -576,4 +586,54 @@ test('basis: every combine step keeps why it grouped or concluded what it did', 
   assert.deepEqual(F.groupingBasis(['C1'], practices, clusters), { names: ['high-temperature farming', 'water temperature control'], dropped: ['ammonia'], reason: 'all set the temperature', model: 'm' });
   assert.deepEqual(F.groupingBasis(['C1'], { C1: { key: 'feeds|live prey' } }, clusters), { names: [], reason: null, model: null });
   assert.equal(F.groupingBasis(['C1'], null, clusters), null);
+});
+
+test('run log: settings changes, results against the snapshot, no costs in the site file', async () => {
+  const { settingsChanges, results, publicLog, modelSettings, promptSettings } = await import('../pipeline/runlog.mjs');
+  const prev = { models: { extract: 'a', map: 'a', suggest: 's' }, prompts: { extract: { version: 'e1', sha: 'x' }, map: { version: null, sha: 'm1' } }, spec_sha: 'p1' };
+  const cur = { models: { extract: 'a', map: 'b', rank: 'r' }, prompts: { extract: { version: 'e2', sha: 'y' }, map: { version: null, sha: 'm2' } }, spec_sha: 'p2' };
+  const ch = settingsChanges(prev, cur).map(c => c.en);
+  assert.deepEqual(ch, ['map: model a → b.', 'New stage rank, on r.', 'Stage suggest removed.', 'extract: prompt e1 → e2.', 'map: prompt changed (same version label).', 'Ranking spec changed (p1 → p2).']);
+  assert.deepEqual(settingsChanges(null, cur), []);
+  const r = results({ claims: 10, papers: 2, findings: { F1: 'a', F2: 'b', F3: 'c' }, actions: [{ id: 'X1', text: 'keep' }, { id: 'X2', text: 'old' }] },
+    { claims: 15, papers: 3, findings: { F1: 'a', F2: 'z', F4: 'd' }, actions: [{ id: 'X1', rank: 2, text: 'keep' }, { id: 'X3', rank: 1, text: 'new' }] });
+  assert.deepEqual(r.claims, { before: 10, after: 15, added: 5 });
+  assert.deepEqual(r.findings, { new: 1, rewritten: 1, unchanged: 1, gone: 1, total: 3 });
+  assert.equal(r.actions.same_text, 1); assert.deepEqual(r.actions.top.map(a => a.id), ['X3', 'X1']);
+  const pub = publicLog([{ id: 'run-1', baseline: { claims: 1 }, steps: [{ step: 's', cost_usd: 1.2, calls: 3 }] }, { id: 'run-2', steps: [] }]);
+  assert.deepEqual(pub.map(x => x.id), ['run-2', 'run-1']);
+  assert.ok(!JSON.stringify(pub).includes('cost_usd') && !JSON.stringify(pub).includes('baseline'));
+  assert.ok(modelSettings().extract && !('profile' in modelSettings()));
+  const ps = await promptSettings();
+  for (const k of ['extract', 'map', 'verify', 'translate', 'reconcile', 'cluster', 'findings', 'actions', 'rank']) assert.ok(ps[k].sha, k);
+});
+
+test('versions: what changed or went between two releases is archived with its previous record', async () => {
+  const { diffReleases } = await import('../pipeline/versions.mjs');
+  const oldR = { claims: [{ id: 'C1', text_en: 'a' }, { id: 'C2', text_en: 'b' }, { id: 'C3', text_en: 'c' }],
+    findings: [{ id: 'F1', statement_en: 'x', claim_ids: ['C1'], strength: 'one_paper' }, { id: 'F2', statement_en: 'y', claim_ids: ['C2'], strength: 'agree' }, { id: 'F3', statement_en: 'z', claim_ids: ['C3'], strength: 'agree' }],
+    actions: [{ id: 'X1' }] };
+  const newR = { claims: [{ id: 'C1', text_en: 'a' }, { id: 'C2', text_en: 'b2' }],
+    findings: [{ id: 'F1', statement_en: 'x', claim_ids: ['C1'], strength: 'one_paper' }, { id: 'F2', statement_en: 'y', claim_ids: ['C2', 'C9'], strength: 'agree' }], actions: [{ id: 'X1' }, { id: 'X2' }] };
+  const d = diffReleases(oldR, newR);
+  assert.deepEqual(d.claims.map(c => [c.id, c._change, c.text_en]), [['C2', 'changed', 'b'], ['C3', 'gone', 'c']]);
+  assert.deepEqual(d.findings.map(f => [f.id, f._change]), [['F2', 'changed'], ['F3', 'gone']]);
+  assert.deepEqual(d.actions, oldR.actions);
+});
+
+test('render: only claims that can reach the release are rendered by default', async () => {
+  const { releasable } = await import('../pipeline/render.mjs');
+  const c = (x = {}) => ({ quote_check: 'found', statement: '驯化率70%', map: { welfare_relevant: true }, verify: { verdict: 'supported' }, ...x });
+  assert.ok(releasable(c()) && releasable(c({ verify: { verdict: 'partial' } })) && releasable(c({ verify: undefined })));
+  assert.ok(!releasable(c({ map: { welfare_relevant: false } })) && !releasable(c({ verify: { verdict: 'unsupported' } })) && !releasable(c({ quote_check: 'not_found' })));
+});
+
+test('merge: English rendered after the merge is copied onto the stored claims by uid, nothing else changes', async () => {
+  const { refreshEnglish, claimUid } = await import('../pipeline/merge.mjs');
+  const a = { source: 's.pdf', page: 2, quote: '驯化率70%' }, b = { source: 's.pdf', page: 3, quote: '成活率90%' };
+  const store = { claims: [{ ...a, uid: claimUid(a), release_id: 'C0001', intervention_en: 'feed training' }, { ...b, uid: claimUid(b), release_id: 'C0002', statement_en: 'kept', rendering: { check: 'numbers_ok' } }] };
+  const r = refreshEnglish(store, [{ ...a, statement_en: 'Rate 70%.', intervention_en: 'other name', rendering: { check: 'numbers_ok' } }, { ...b, statement_en: 'kept', rendering: { check: 'numbers_ok' } }]);
+  assert.equal(r.updated, 1);
+  assert.equal(r.claims[0].statement_en, 'Rate 70%.'); assert.equal(r.claims[0].intervention_en, 'feed training'); assert.equal(r.claims[0].release_id, 'C0001');
+  assert.equal(r.claims[1], store.claims[1]);
 });

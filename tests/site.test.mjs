@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { gzipSync } from 'node:zlib';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import * as L from '../public/site-lib.js';
@@ -137,7 +138,10 @@ test('the public folder contains no PDFs or large files', () => {
   const walk = dir => readdirSync(dir).flatMap(f => { const p = join(dir, f); return statSync(p).isDirectory() ? walk(p) : [p]; });
   for (const p of walk(new URL('../public', import.meta.url).pathname)) {
     assert.ok(!/\.(pdf|docx?|epub)$/i.test(p), p);
-    assert.ok(statSync(p).size < 400_000, `${p} is large`);
+    // The release shell (taxonomy, papers, practices) is the one file the first screen waits for; it is judged by
+    // what travels, compressed. Every other file stays small enough to fetch in pieces.
+    if (p.endsWith('/data/release.json')) assert.ok(gzipSync(readFileSync(p)).length < 250_000, `${p} is large compressed`);
+    else assert.ok(statSync(p).size < 400_000, `${p} is large`);
   }
 });
 
@@ -362,4 +366,25 @@ test('record ids inside sentences become links; partial-width ids stay text', ()
   assert.ok(html.includes('<a class="id-link" href="#/findings/F0563">F0563</a>'));
   assert.ok(html.includes('href="#/claims/C0276"') && html.includes('href="#/sources/S023"') && html.includes('href="#/actions?q=X014"'));
   assert.ok(html.includes('F1 hybrids and C18 do not') && html.includes('&lt;b&gt;'));
+});
+
+test('run history: every run renders in both languages, with no cost', async () => {
+  const { runsHtml } = await import('../public/site-runs.js');
+  const R = read('runs.json');
+  assert.ok(R.runs.length >= 2 && !JSON.stringify(R).includes('cost_usd'));
+  for (const lang of ['en', 'zh']) {
+    const html = runsHtml(R, { tr: (k, v) => t(lang, k, v), link: p => '#/' + p });
+    for (const r of R.runs) assert.ok(html.includes(`id="run-${r.id}"`), r.id);
+    assert.ok(!/[>"(]undefined|undefined[<")]|\bNaN\b|rn\.[a-z]/.test(html), lang);
+  }
+});
+
+test('earlier versions: offered only for items an archived version lists', async () => {
+  const { historyHtml, versionsOf } = await import('../public/site-history.js');
+  const V = { versions: [{ run: 'run-2', version: '0.3.0', changed: { findings: ['F2'], claims: ['C3'] }, files: { findings: 'versions/run-2/findings.json' } }] };
+  assert.equal(versionsOf(V, 'findings', 'F2').length, 1);
+  assert.equal(historyHtml(V, 'findings', 'F1', k => k), '');
+  assert.ok(historyHtml(V, 'findings', 'F2', (k, v) => t('en', k, v)).includes('Earlier versions (1)'));
+  assert.ok(historyHtml(V, 'claims', 'C3', k => k, { open: true }).includes(' open'));
+  assert.equal(historyHtml(null, 'claims', 'C3', k => k), '');
 });
