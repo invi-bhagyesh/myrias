@@ -6,3 +6,4 @@ test-results/
 playwright-report/
 pipeline/gold/*.jsonl
 pipeline/runs/
+__pycache__/
