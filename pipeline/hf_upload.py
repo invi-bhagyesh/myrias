@@ -299,7 +299,7 @@ def main():
     api.create_repo(repo, repo_type='dataset', private=private, exist_ok=True)
     api.upload_file(path_or_fileobj=CARD.encode(), path_in_repo='README.md', repo_id=repo, repo_type='dataset', commit_message='Dataset card')
     # PDFs live once, in the dataset's top-level raw/ folder (pipeline/organize_raw.py), not in the species folder.
-    info = api.upload_folder(folder_path=root, path_in_repo=species, repo_id=repo, repo_type='dataset', commit_message=f'Upload {species} corpus', ignore_patterns=['*.pdf'])
+    info = api.upload_folder(folder_path=root, path_in_repo=species, repo_id=repo, repo_type='dataset', commit_message=f'Upload {species} corpus', ignore_patterns=['*.pdf', '*.bak', '*/01-normalize/*.md'])  # normalize .md: same text as pages.jsonl, and some hold control characters the Hub refuses
     print(json.dumps({'repo': repo, 'private': private, 'folder': species, 'commit': str(info)}, indent=1))
 
 if __name__ == '__main__':
