@@ -3,6 +3,8 @@ import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { pipelineHtml, mountPipeline } from './site-pipeline.js';
 import { runsHtml } from './site-runs.js';
+import { claimReviewPanelHtml, mountReviewForms, reviewCardHtml, loadReviews, saveReview, exportRows, toCsv, reviewStats } from './site-review.js';
+import { feedModel, feedPageHtml } from './site-topic.js';
 import { historyHtml, mountHistory, versionHead, versionsOf, loadVersionFile } from './site-history.js';
 import { matrixChart } from './site-chart.js';
 
@@ -319,6 +321,70 @@ document.addEventListener('toggle', e => {
   if (state.full) fill(); else { ol.innerHTML = `<li class="loading">${esc(tr('loading.data'))}</li>`; (state.fullPromise || Promise.resolve()).then(fill); }
 }, true);
 
+// Feed acclimation: findings on moving fish from live or fresh food onto formulated feed (see site-topic.js).
+function viewFeedAcclimation() {
+  const m = feedModel(state.data), fById = new Map((state.data.findings || []).map(f => [f.id, f]));
+  return { title: tr('fa.title'), html: feedPageHtml(m, { tr, link,
+    findingsHtml: (list, o) => findingsListHtml(list, findingCtx(), o),
+    actionsHtml: list => `<ol class="ac-list">${list.map(a => actionItemHtml(a, findingCtx(), fById)).join('')}</ol>` }),
+    mount: root => root.querySelectorAll('[data-jump-id]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); document.getElementById(a.dataset.jumpId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); })) };
+}
+
+// Expert review (front-end demo). A queue of claims, one at a time: by default the claims behind the top-ranked
+// actions, which matter most; ?finding=F… or ?source=S… reviews one finding or one paper. Reviews stay in the browser.
+function reviewQueue(params) {
+  const d = state.data, fById = new Map((d.findings || []).map(f => [f.id, f]));
+  let ids;
+  if (params.get('finding')) ids = fById.get(params.get('finding'))?.claim_ids || [];
+  else if (params.get('source')) ids = d.claims.filter(c => c.source_id === params.get('source')).map(c => c.id);
+  else ids = [...(d.actions || [])].sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9)).flatMap(a => a.finding_ids.flatMap(f => fById.get(f)?.claim_ids || []));
+  return [...new Set(ids)].map(id => state.index.claims.get(id)).filter(Boolean);
+}
+function viewReview(params) {
+  const queue = reviewQueue(params), reviews = loadReviews();
+  const todo = params.get('all') ? queue : queue.filter(c => !reviews[c.id]);
+  const i = Math.min(Math.max(0, Number(params.get('i')) || 0), Math.max(0, todo.length - 1));
+  const c = todo[i], q = Object.fromEntries([...params].filter(([k]) => k !== 'i'));
+  const st = reviewStats(reviews, state.index.claims);
+  const pct = k => (st.n ? Math.round(100 * (st.by[k] || 0) / st.n) + '%' : '—');
+  const scope = params.get('finding') ? tr('rv.scope.finding', { id: params.get('finding') }) : params.get('source') ? tr('rv.scope.source', { id: params.get('source') }) : tr('rv.scope.actions');
+  const nav = `<div class="rv-nav"><a class="button small" href="${link('review', { ...q, i: Math.max(0, i - 1) })}"${i ? '' : ' aria-disabled="true"'}>← ${esc(tr('rv.prev'))}</a>
+      <span>${esc(tr('rv.pos', { i: todo.length ? i + 1 : 0, n: todo.length, all: queue.length }))}</span>
+      <a class="button small" href="${link('review', { ...q, i: i + 1 })}"${i + 1 < todo.length ? '' : ' aria-disabled="true"'}>${esc(tr('rv.next'))} →</a>
+      <a class="rv-toggle" href="${link('review', { ...q, all: params.get('all') ? '' : '1', i: 0 })}">${esc(tr(params.get('all') ? 'rv.only.todo' : 'rv.show.all'))}</a></div>`;
+  return { title: tr('rv.title'), html: lead(tr('rv.kicker'), tr('rv.title'), tr('rv.lead')) +
+      `<p class="rv-demo">${esc(tr('rv.demo'))}</p>
+      <div class="rv-stats"><span><b>${st.n}</b> ${esc(tr('rv.st.n'))}</span>${['correct', 'partly', 'wrong', 'unsure'].map(k => `<span class="v-${k}"><b>${pct(k)}</b> ${esc(tr('rv.v.' + k))}</span>`).join('')}
+        <button type="button" class="button small" data-rv-export="json">${esc(tr('rv.export.json'))}</button><button type="button" class="button small" data-rv-export="csv">${esc(tr('rv.export.csv'))}</button>
+        <label class="button small rv-import">${esc(tr('rv.import'))}<input type="file" accept=".json" data-rv-import hidden></label></div>
+      <p class="small-note">${esc(scope)}</p>${nav}` +
+      (c ? reviewCardHtml(c, { ...findingCtx() }) : `<p class="empty">${esc(tr(queue.length ? 'rv.done' : 'rv.empty'))}</p>`),
+    mount: root => {
+      mountReviewForms(root, tr, () => { if (!params.get('all')) setTimeout(() => render(), 350); else render(); });
+      // Keys 1 to 4 pick a verdict; Enter saves (outside the comment box).
+      const form = root.querySelector('[data-rv-form]');
+      const onKey = e => {
+        if (!root.isConnected) { document.removeEventListener('keydown', onKey); return; }
+        if (!form || /^(TEXTAREA|INPUT)$/.test(e.target.tagName) && e.target.type !== 'radio' && e.target.type !== 'checkbox') return;
+        const k = Number(e.key);
+        if (k >= 1 && k <= 4) { const r = form.querySelectorAll('[name=verdict]')[k - 1]; r.checked = true; r.focus(); e.preventDefault(); }
+        else if (e.key === 'Enter') { form.requestSubmit(); e.preventDefault(); }
+      };
+      document.addEventListener('keydown', onKey);
+      root.querySelectorAll('[data-rv-export]').forEach(b => b.addEventListener('click', () => {
+        const rows = exportRows(loadReviews(), state.index.claims), kind = b.dataset.rvExport;
+        const blob = new Blob([kind === 'csv' ? toCsv(rows) : JSON.stringify(rows, null, 1)], { type: kind === 'csv' ? 'text/csv' : 'application/json' });
+        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `myrias-reviews-${new Date().toISOString().slice(0, 10)}.${kind}` });
+        a.click(); URL.revokeObjectURL(a.href);
+      }));
+      root.querySelector('[data-rv-import]')?.addEventListener('change', async e => {
+        const f = e.target.files?.[0]; if (!f) return;
+        try { for (const r of JSON.parse(await f.text())) if (r.claim_id && r.verdict) saveReview(r.claim_id, { verdict: r.verdict, issues: String(r.issues || '').split(';').filter(Boolean), comment: r.comment || '', reviewer: r.reviewer || '' }); render(); }
+        catch { alert(tr('rv.import.bad')); }
+      });
+    } };
+}
+
 function viewFinding(id) {
   const f = state.index.findings.get(id);
   if (!f) return goneView('findings', id, 'fd.kicker');
@@ -354,6 +420,7 @@ function viewFindings(params) {
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: tax.welfare_problems.map(p => [p.id, pick(p, '', state.lang)]) },
     { key: 'multi', type: 'check', label: tr('fd.f.multi') }];
   return { title: tr('nav.findings'), html: lead(tr('fd.kicker'), tr('fd.page.title'), tr('fd.page.lead', { n: items.length.toLocaleString(), multi: items.filter(f => f.counts.papers > 1).length })) +
+      `<p class="fa-banner"><a href="${link('topics/feed-acclimation')}"><b>${esc(tr('fa.title'))}</b> ${esc(tr('fa.banner'))} →</a></p>` +
       browseHtml({ filters, views: [['group', tr('br.view.group')], ['rank', tr('br.view.rank')]], tr }),
     mount: root => mountBrowse(root, { items, tr, listClass: 'fd-list', groups: tax.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: f => f.technology_class,
       render: f => findingItemHtml(f, findingCtx()),
@@ -517,8 +584,8 @@ function viewClaim(id) {
           ...(c.limitations ? [[tr('claim.limits'), esc(c.limitations)]] : []), ...(c.counterevidence ? [[tr('claim.counter'), esc(c.counterevidence)]] : []),
           [tr('claim.welfare'), `${esc(tr('welfare.' + c.welfare_link))}${c.welfare_link_note ? `<br><span class="meta">${esc(c.welfare_link_note)}</span>` : ''}`]]) +
       `<p><a class="button small" href="${esc(issueLink(`Correction: claim ${c.id}`, reportBody))}" target="_blank" rel="noopener noreferrer">${esc(tr('claim.report'))} ↗</a></p>
-       <p class="small-note">${esc(tr('claim.report.note'))}</p>` + historyHtml(state.versions, 'claims', id, tr),
-    mount: mountVersions
+       <p class="small-note">${esc(tr('claim.report.note'))}</p>` + claimReviewPanelHtml(c, tr, link) + historyHtml(state.versions, 'claims', id, tr),
+    mount: root => { mountVersions(root); mountReviewForms(root, tr); }
   };
 }
 
@@ -614,7 +681,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.topbar')) setM
 // Findings and Actions lists need only the small findings and actions files; a single finding, the species page,
 // sources, claims, Explore and Download need the claims too.
 const needsLists = (head, id) => (head === 'findings' && !id) || head === 'actions' || (head === 'species' && id);
-const needsFull = (head, id) => !needsLists(head, id) && ['explore', 'species', 'sources', 'claims', 'findings', 'download'].includes(head);
+const needsFull = (head, id) => !needsLists(head, id) && ['explore', 'species', 'sources', 'claims', 'findings', 'download', 'review', 'topics'].includes(head);
 
 function render(navigated = false) {
   setMenu(false);
@@ -638,6 +705,8 @@ function render(navigated = false) {
     else if (head === 'species') view = id ? viewSpecies(id) : viewSpeciesList();
     else if (head === 'sources') view = id ? viewSource(id) : viewSources(params);
     else if (head === 'claims' && id) view = viewClaim(id);
+    else if (head === 'review') view = viewReview(params);
+    else if (head === 'topics' && id === 'feed-acclimation') view = viewFeedAcclimation();
     else if (head === 'findings') view = id ? viewFinding(id) : viewFindings(params);
     else if (head === 'actions') view = viewActions(params);
     else if (head === 'pipeline') view = viewPipeline();
@@ -688,8 +757,8 @@ function renderFooter() {
   const list = items => `<ul>${items.map(([label, href, ext]) => `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(label)}${ext ? ' ↗' : ''}</a></li>`).join('')}</ul>`;
   const card = (key, items) => `<nav class="site-footer-card" aria-label="${esc(tr(key))}"><h2>${esc(tr(key))}</h2>${list(items)}</nav>`;
   $('#site-footer').innerHTML = `<div class="site-footer-panel"><div class="site-footer-cards">
-      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.findings'), link('findings')], [tr('nav.actions'), link('actions')], [tr('nav.sources'), link('sources')]])}
-      ${card('foot.learn', [[tr('nav.methods'), link('methods')], [tr('nav.download'), link('download')], [tr('nav.pipeline'), link('pipeline')], [tr('nav.corpus'), link('corpus')]])}
+      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.findings'), link('findings')], [tr('fa.nav'), link('topics/feed-acclimation')], [tr('nav.actions'), link('actions')], [tr('nav.sources'), link('sources')]])}
+      ${card('foot.learn', [[tr('nav.methods'), link('methods')], [tr('nav.download'), link('download')], [tr('nav.pipeline'), link('pipeline')], [tr('nav.corpus'), link('corpus')], [tr('rv.nav'), link('review')]])}
       ${card('foot.open', [['myrias.org', 'https://myrias.org/', true], [tr('footer.repo'), 'https://github.com/invi-bhagyesh/myrias', true]])}
       <div class="site-footer-card site-footer-cta"><div><p>${esc(tr('foot.cta'))}</p><a class="site-footer-button" href="${reviewLink}" target="_blank" rel="noopener noreferrer">${esc(tr('foot.cta.btn'))} <span aria-hidden="true">→</span></a></div></div>
     </div>

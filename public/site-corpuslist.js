@@ -3,7 +3,9 @@
 import { escapeHtml as esc, safeUrl } from './site-lib.js';
 
 export const PAGE = 50;
-export const FILTER_DEFAULTS = { q: '', lang: 'all', topic: 'all', ft: 'all', set: 'all', about: true, sort: 'new' };
+// Every paper is shown by default, screened out or not, so the filtering can be audited.
+export const FILTER_DEFAULTS = { q: '', lang: 'all', topic: 'all', ft: 'all', set: 'all', stage: 'all', group: 'all', species: 'all', sort: 'new' };
+export const STAGES = ['read', 'read_no_claims', 'no_full_text', 'screened_out'];
 
 // The file is in column format ({fields, rows}); a file of 'x' means the Europe PMC full-text pages.
 export function unpackPapers(j) {
@@ -11,7 +13,8 @@ export function unpackPapers(j) {
   return (j.rows || []).map(r => {
     const p = Object.fromEntries(j.fields.map((k, i) => [k, r[i]]));
     if (p.file === 'x') p.file = 'intake/xml-pages.jsonl';
-    for (const k of ['authors', 'sources', 'topics']) p[k] = p[k] || [];
+    for (const k of ['authors', 'sources', 'topics', 'why_out']) p[k] = p[k] || [];
+    p.stage ||= p.about === false ? 'screened_out' : p.full_text ? 'read' : 'no_full_text';
     return p;
   });
 }
@@ -19,10 +22,11 @@ export function unpackPapers(j) {
 // Pure: which papers a filter keeps, in order.
 export function filterPapers(papers, f) {
   const q = (f.q || '').trim().toLowerCase();
-  const hit = p => !q || [p.title, p.venue, p.doi, p.pmid, p.pmcid, ...(p.authors || [])].some(x => String(x || '').toLowerCase().includes(q));
+  const hit = p => !q || [p.title, p.title_en, p.venue, p.doi, p.pmid, p.pmcid, p.source_id, p.institution, ...(p.authors || [])].some(x => String(x || '').toLowerCase().includes(q));
   const ft = p => (f.ft === 'all' ? true : f.ft === 'with' ? Boolean(p.full_text) : !p.full_text);
   const out = papers.filter(p => hit(p) && (f.lang === 'all' || p.lang === f.lang) && (f.topic === 'all' || (p.topics || []).includes(f.topic))
-    && ft(p) && (f.set === 'all' || p.set === f.set) && (!f.about || p.about));
+    && ft(p) && (f.set === 'all' || p.set === f.set) && (!f.stage || f.stage === 'all' || p.stage === f.stage)
+    && (!f.group || f.group === 'all' || p.inst_group === f.group) && (!f.species || f.species === 'all' || p.species === f.species));
   const year = p => p.year || 0;
   if (f.sort === 'old') out.sort((a, b) => (year(a) || 9999) - (year(b) || 9999));
   else if (f.sort === 'title') out.sort((a, b) => String(a.title).localeCompare(String(b.title)));
@@ -34,10 +38,11 @@ const chip = (cls, text, title = '') => `<span class="cl-tag ${cls}"${title ? ` 
 
 export function tagsHtml(p, tr) {
   const t = [chip('t-lang', p.lang === 'zh' ? '中文' : 'EN')];
-  if (p.set === 'first-run') t.push(chip('t-first', tr('cl.tag.first')));
+  t.push(chip('t-stage s-' + p.stage, p.stage === 'read' && p.claims ? tr('cl.stage.read.n', { n: p.claims }) : tr('cl.stage.' + p.stage)));
+  for (const w of p.why_out || []) t.push(chip('t-out', tr('cl.why.' + w)));
+  if (p.set === 'first-run' || p.set === 'supplied') t.push(chip('t-first', tr('cl.tag.' + (p.set === 'supplied' ? 'supplied' : 'first'))));
   if (p.full_text) t.push(chip('t-ft', tr('cl.tag.ft.' + p.full_text)));
   else if (p.tried) t.push(chip('t-noft', tr('cl.tag.why.' + (p.why_not || 'failed'))));
-  if (!p.about) t.push(chip('t-out', tr('cl.tag.outside')));
   for (const k of p.topics || []) t.push(chip('t-topic', tr('cv.topic.' + k)));
   for (const s of p.sources || []) t.push(chip('t-src', tr('corpus.src.' + s)));
   return `<span class="cl-tags">${t.join('')}</span>`;
@@ -54,6 +59,9 @@ export function paperHtml(p, tr, c) {
     [tr('cl.f.authors'), esc((p.authors || []).join(', ') || '—')], [tr('cl.f.venue'), esc(p.venue || '—')], [tr('cl.f.year'), esc(p.year || '—')],
     p.type ? [tr('cl.f.type'), esc(p.type)] : null, [tr('cl.f.ids'), ids || '—'], [tr('cl.f.found'), esc((p.sources || []).map(s => tr('corpus.src.' + s)).join(', '))],
     [tr('cl.f.topics'), esc((p.topics || []).map(k => tr('cv.topic.' + k)).join(', ') || tr('cl.notopic'))], [tr('cl.f.fulltext'), esc(ft)],
+    [tr('cl.f.stage'), esc(tr('cl.stage.' + p.stage)) + ((p.why_out || []).length ? ': ' + esc(p.why_out.map(w => tr('cl.why.' + w)).join(', ')) : '')],
+    p.source_id ? [tr('cl.f.read'), `<a href="#/sources/${esc(encodeURIComponent(p.source_id))}">${esc(p.source_id)}</a>${p.claims ? ' · ' + esc(tr('cl.stage.read.n', { n: p.claims })) : ''}`] : null,
+    p.institution ? [tr('cl.f.inst'), esc(p.institution)] : null,
     file ? [tr('cl.f.file'), file] : null, open ? [tr('cl.f.links'), open] : null, [tr('cl.f.id'), `<code>${esc(p.id)}</code>`]
   ].filter(Boolean);
   const meta = [p.year, p.venue, (p.authors || []).slice(0, 3).join(', ') + ((p.authors || []).length > 3 ? ' …' : '')].filter(Boolean).map(x => esc(x)).join(' · ');
@@ -68,9 +76,11 @@ export function controlsHtml(f, topics, tr) {
     <select data-cl="lang" aria-label="${esc(tr('cl.lang'))}">${opt('all', tr('cl.lang.all'), f.lang)}${opt('en', tr('cv.lang.en'), f.lang)}${opt('zh', tr('cv.lang.zh'), f.lang)}</select>
     <select data-cl="topic" aria-label="${esc(tr('cl.topic'))}">${opt('all', tr('cl.topic.all'), f.topic)}${topics.map(k => opt(k, tr('cv.topic.' + k), f.topic)).join('')}</select>
     <select data-cl="ft" aria-label="${esc(tr('cl.ft'))}">${opt('all', tr('cl.ft.all'), f.ft)}${opt('with', tr('cl.ft.with'), f.ft)}${opt('without', tr('cl.ft.without'), f.ft)}</select>
-    <select data-cl="set" aria-label="${esc(tr('cl.set'))}">${opt('all', tr('cl.set.all'), f.set)}${opt('intake', tr('cl.set.intake'), f.set)}${opt('first-run', tr('cl.set.first'), f.set)}</select>
+    <select data-cl="stage" aria-label="${esc(tr('cl.stage'))}">${opt('all', tr('cl.stage.all'), f.stage)}${STAGES.map(s => opt(s, tr('cl.stage.' + s), f.stage)).join('')}</select>
+    <select data-cl="set" aria-label="${esc(tr('cl.set'))}">${opt('all', tr('cl.set.all'), f.set)}${opt('intake', tr('cl.set.intake'), f.set)}${opt('supplied', tr('cl.set.supplied'), f.set)}</select>
+    <select data-cl="group" aria-label="${esc(tr('cl.group'))}">${opt('all', tr('cl.group.all'), f.group)}${['cn_university', 'cn_institute', 'cn_company', 'cn_other', 'KR', 'JP', 'unknown'].map(g => opt(g, tr('cl.group.' + g), f.group)).join('')}</select>
     <select data-cl="sort" aria-label="${esc(tr('cl.sort'))}">${opt('new', tr('cl.sort.new'), f.sort)}${opt('old', tr('cl.sort.old'), f.sort)}${opt('title', tr('cl.sort.title'), f.sort)}</select>
-    <label class="cl-check"><input type="checkbox" data-cl="about" ${f.about ? 'checked' : ''}> ${esc(tr('cl.about'))}</label></div>`;
+    </div><details class="cl-insts" data-cl-insts><summary>${esc(tr('cl.insts'))}</summary><ol data-cl-inst-list></ol></details>`;
 }
 
 // Wires the controls to the list. Re-renders only the list, so typing keeps focus.
@@ -89,5 +99,16 @@ export function mountCorpusList(root, papers, c, tr, state) {
     f[el.dataset.cl] = el.type === 'checkbox' ? el.checked : el.value; shown = PAGE; draw();
   }));
   more.addEventListener('click', () => { shown += PAGE; draw(); });
+  // Institutions, most papers first: clicking one searches for it.
+  const insts = [...papers.reduce((m, p) => (p.institution ? m.set(p.institution, (m.get(p.institution) || 0) + 1) : m), new Map())].sort((a, b) => b[1] - a[1]);
+  const il = root.querySelector('[data-cl-inst-list]');
+  if (il) {
+    il.innerHTML = insts.map(([name, k]) => `<li><button type="button" data-inst="${esc(name)}">${esc(name)}</button><b>${k}</b></li>`).join('');
+    il.addEventListener('click', e => {
+      const b = e.target.closest('[data-inst]'); if (!b) return;
+      f.q = b.dataset.inst; const box = root.querySelector('[data-cl="q"]'); if (box) box.value = f.q; shown = PAGE; draw();
+      root.querySelector('[data-cl-count]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
   draw();
 }
