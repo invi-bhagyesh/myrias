@@ -68,6 +68,13 @@ export function speciesModel(data, id, { corpus = null, nextRun = null } = {}) {
 export function speciesSteps(m) {
   const steps = [];
   const c = m.corpus;
+  // A species without a corpus summary (searched online, one run so far) carries its own search counts.
+  const sr = !c && m.s.search;
+  if (sr) {
+    steps.push({ key: 'search', status: 'done', n: sr.papers_found, vars: { db: sr.databases, en: n(sr.found.en), zh: n(sr.found.zh) } });
+    steps.push({ key: 'screen', status: 'done', n: sr.about.en + sr.about.zh, vars: { en: n(sr.about.en), zh: n(sr.about.zh) } });
+    steps.push({ key: 'fulltext', status: 'done', n: sr.with_full_text.en + sr.with_full_text.zh, vars: { en: n(sr.with_full_text.en), zh: n(sr.with_full_text.zh) } });
+  }
   if (c) {
     const st = Object.fromEntries((c.charts?.stages || []).map(x => [x.id, x]));
     const ok = Object.values(c.headline.sources || {}).filter(v => v === 'ok').length;
@@ -75,7 +82,8 @@ export function speciesSteps(m) {
     if (st.about) steps.push({ key: 'screen', status: 'done', n: st.about.n, vars: { en: n(st.about.by_lang.en), zh: n(st.about.by_lang.zh) } });
     if (st.full_text) steps.push({ key: 'fulltext', status: 'done', n: st.full_text.n, vars: { en: n(st.full_text.by_lang.en), zh: n(st.full_text.by_lang.zh) } });
   }
-  const phases = m.plan ? m.plan.phases : [];
+  // Without a run plan, each run's released counts stand for its phase.
+  const phases = m.plan ? m.plan.phases : m.runs.filter(r => r.counts).map((r, k) => ({ id: String(k + 1), status: 'done', papers: r.counts.documents_processed, actual: r.counts }));
   for (const ph of phases) {
     const a = ph.actual;
     steps.push({ key: 'phase', status: ph.status || 'planned', n: a ? a.claims_released : null, phase: ph,
@@ -97,7 +105,7 @@ export function speciesPageHtml(m, ctx) {
   const other = lang === 'zh' ? s.common_en : s.common_zh;
   const supported = m.verdicts.supported || 0, partial = m.verdicts.partial || 0;
   const zhPapers = m.sources.filter(x => x.lang === 'zh').length;
-  const tiles = [[supported, 'sp.t.supported'], [m.sources.length, 'sp.t.papers'], [m.top.length, 'sp.t.interventions'], [m.corpus ? m.corpus.headline.papers_found : null, 'sp.t.found']];
+  const tiles = [[supported, 'sp.t.supported'], [m.sources.length, 'sp.t.papers'], [m.top.length, 'sp.t.interventions'], [m.corpus ? m.corpus.headline.papers_found : m.s.search?.papers_found ?? null, 'sp.t.found']];
   const cls = id => ctx.taxonomyLabel('technology_classes', id), prob = id => ctx.taxonomyLabel('welfare_problems', id);
 
   const hero = `<section class="sp-hero"><div class="sp-hero-copy">

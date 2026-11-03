@@ -1,7 +1,298 @@
 {
- "as_of": "2026-10-22",
+ "as_of": "2026-11-03",
  "runs": [
   {
+   "species_id": "crucian-carp",
+   "id": "crucian-run-1",
+   "title_en": "Crucian carp, run 1: open papers found by searching online",
+   "status": "done",
+   "started": "2026-11-03T12:41:57.575Z",
+   "finished": "2026-11-03T18:29:11.685Z",
+   "git": {
+    "commit": "d6df2ef",
+    "branch": "claude/site-suggestions-t8i6vo"
+   },
+   "inputs": {
+    "papers": 381,
+    "by_lang": {},
+    "by_origin": {
+     "open-access search (Europe PMC, Crossref, DOAJ)": 381
+    },
+    "note_en": "Search of open indexes in English and Chinese for crucian carp: 4,162 papers found, 1,810 naming the fish in the title and touching a welfare topic, 381 with open full text (256 from Europe PMC, 125 PDFs). OpenAlex refused (it now needs an API key) and Semantic Scholar was rate-limited, so both are missing from this search."
+   },
+   "settings": {
+    "profile": "demo",
+    "models": {
+     "extract": "qwen/qwen3.8-flash",
+     "map": "qwen/qwen3.8-flash",
+     "verify": "z-ai/glm-5.3",
+     "translate": "qwen/qwen3.8-flash",
+     "reconcile": "anthropic/claude-sonnet-5.5",
+     "embed": "qwen/qwen3-embedding-8b",
+     "cluster": "anthropic/claude-sonnet-5.5",
+     "findings": "anthropic/claude-sonnet-5.5",
+     "actions": "anthropic/claude-sonnet-5.5",
+     "rank": "anthropic/claude-sonnet-5.5",
+     "affiliations": "qwen/qwen3.8-flash"
+    },
+    "prompts": {
+     "extract": {
+      "version": "extract-0.3",
+      "sha": "47ffd84ca427"
+     },
+     "map": {
+      "version": null,
+      "sha": "a0304e8baedb"
+     },
+     "verify": {
+      "version": null,
+      "sha": "b4846078c841"
+     },
+     "translate": {
+      "version": "render-0.1",
+      "sha": "8d617fed4793"
+     },
+     "reconcile": {
+      "version": "reconcile-0.2",
+      "sha": "108bbc569ef2"
+     },
+     "cluster": {
+      "version": "cluster-0.1",
+      "sha": "a24d28552bb9"
+     },
+     "findings": {
+      "version": "findings-0.2",
+      "sha": "05b8e7094d15"
+     },
+     "actions": {
+      "version": "actions-0.3",
+      "sha": "83f83332f856"
+     },
+     "rank": {
+      "version": "rank-0.1",
+      "sha": "c35437425e0d"
+     },
+     "affiliations": {
+      "version": "affiliations-0.1",
+      "sha": "ed9d1080891e"
+     }
+    },
+    "spec_sha": "c0809ced3ebc"
+   },
+   "changes": {
+    "since": null,
+    "settings": [],
+    "code": [],
+    "notes": []
+   },
+   "steps": [
+    {
+     "phase": "A",
+     "step": "01-normalize",
+     "started": "2026-11-03T12:41:57.771Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": 1341
+    },
+    {
+     "phase": "A",
+     "step": "02-prepare",
+     "started": "2026-11-03T12:42:04.538Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": 3601
+    },
+    {
+     "phase": "A",
+     "step": "03-extract",
+     "started": "2026-11-03T12:42:05.595Z",
+     "calls": 9687,
+     "exit_code": 0,
+     "rows_out": 28447
+    },
+    {
+     "phase": "A",
+     "step": "04-map",
+     "started": "2026-11-03T14:08:27.799Z",
+     "calls": 46,
+     "exit_code": 0,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "05-verify",
+     "started": "2026-11-03T14:19:13.680Z",
+     "calls": 34,
+     "exit_code": 0,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "04-map",
+     "started": "2026-11-03T14:24:17.376Z",
+     "calls": 24174,
+     "exit_code": 3,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "04-map",
+     "started": "2026-11-03T15:42:19.241Z",
+     "calls": 4,
+     "exit_code": 0,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "05-verify",
+     "started": "2026-11-03T15:42:28.121Z",
+     "calls": 11386,
+     "exit_code": 0,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "06-render",
+     "started": "2026-11-03T16:26:45.065Z",
+     "calls": 8122,
+     "exit_code": 3,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "06-render",
+     "started": "2026-11-03T17:02:06.352Z",
+     "calls": 302,
+     "exit_code": 3,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "06-render",
+     "started": "2026-11-03T17:03:42.374Z",
+     "calls": 5,
+     "exit_code": 0,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "07-reconcile",
+     "started": "2026-11-03T17:03:46.181Z",
+     "calls": 20,
+     "exit_code": 0,
+     "rows_out": 25952
+    },
+    {
+     "phase": "A",
+     "step": "08-merge",
+     "started": "2026-11-03T17:47:18.017Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "09-export",
+     "started": "2026-11-03T17:47:19.573Z",
+     "calls": 0,
+     "exit_code": 0,
+     "rows_out": null
+    },
+    {
+     "phase": "A",
+     "step": "10-cluster",
+     "started": "2026-11-03T17:47:22.331Z",
+     "calls": 212,
+     "exit_code": 0,
+     "rows_out": 212
+    },
+    {
+     "phase": "A",
+     "step": "11-findings",
+     "started": "2026-11-03T17:49:34.263Z",
+     "calls": 380,
+     "exit_code": 0,
+     "rows_out": 380
+    },
+    {
+     "phase": "A",
+     "step": "12-actions",
+     "started": "2026-11-03T17:53:23.421Z",
+     "calls": 6,
+     "exit_code": 0,
+     "rows_out": 6
+    },
+    {
+     "phase": "A",
+     "step": "13-rank",
+     "started": "2026-11-03T17:56:01.056Z",
+     "calls": 1,
+     "exit_code": 0,
+     "rows_out": 1
+    },
+    {
+     "phase": "A",
+     "step": "14-affiliations",
+     "started": "2026-11-03T17:56:45.305Z",
+     "calls": 350,
+     "exit_code": 0,
+     "rows_out": 350
+    }
+   ],
+   "results": {
+    "claims": {
+     "before": 0,
+     "after": 11296,
+     "added": 11296
+    },
+    "papers": {
+     "before": 0,
+     "after": 350,
+     "added": 350
+    },
+    "findings": {
+     "new": 868,
+     "rewritten": 0,
+     "unchanged": 0,
+     "gone": 0,
+     "total": 868
+    },
+    "actions": {
+     "before": 29,
+     "after": 55,
+     "same_text": 29,
+     "top": [
+      {
+       "id": "X026",
+       "rank": 1,
+       "text": "Avoid letting ammonia nitrogen build up in mandarin fish water by testing it regularly and acting when it rises."
+      },
+      {
+       "id": "X033",
+       "rank": 1,
+       "text": "Trial strain-specific Bacillus and lactic acid bacteria probiotics in feed on commercial crucian carp farms, with Aeromonas challenge or disease-outbreak records as the outcome."
+      },
+      {
+       "id": "X007",
+       "rank": 2,
+       "text": "Keep dietary carbohydrate and starch in mandarin fish feeds at about 10-13% and avoid formulating above roughly 13-16%."
+      },
+      {
+       "id": "X034",
+       "rank": 2,
+       "text": "Avoid high fishmeal replacement with plant protein (about 45% or more) in crucian carp feeds unless a specific plant-protein mix has been shown to protect gut health."
+      },
+      {
+       "id": "X008",
+       "rank": 3,
+       "text": "Keep dietary lipid in mandarin fish feeds near 12% and avoid levels of about 16% or more."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "species_id": "mandarin-fish",
    "id": "run-3",
    "title_en": "Run 3: the 2026-10-20 batch of Chinese papers",
    "status": "done",
@@ -426,6 +717,7 @@
    }
   },
   {
+   "species_id": "mandarin-fish",
    "id": "run-2",
    "title_en": "Run 2: the Chinese papers again, then 176 open-access papers",
    "status": "done",
@@ -931,6 +1223,7 @@
    }
   },
   {
+   "species_id": "mandarin-fish",
    "id": "run-1",
    "title_en": "First run: the supplied Chinese papers",
    "status": "done",

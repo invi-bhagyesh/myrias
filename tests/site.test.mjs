@@ -139,8 +139,12 @@ test('the public folder contains no PDFs or large files', () => {
   for (const p of walk(new URL('../public', import.meta.url).pathname)) {
     assert.ok(!/\.(pdf|docx?|epub)$/i.test(p), p);
     // The release shell (taxonomy, papers, practices) is the one file the first screen waits for; it is judged by
-    // what travels, compressed. Every other file stays small enough to fetch in pieces.
-    if (p.endsWith('/data/release.json')) assert.ok(gzipSync(readFileSync(p)).length < 250_000, `${p} is large compressed`);
+    // what travels, compressed, and grows with each species (its papers and practices). Every other file stays
+    // small enough to fetch in pieces.
+    if (p.endsWith('/data/release.json')) {
+      const nSpecies = JSON.parse(readFileSync(p, 'utf8')).species.length;
+      assert.ok(gzipSync(readFileSync(p)).length < 160_000 * nSpecies, `${p} is large compressed`);
+    }
     else assert.ok(statSync(p).size < 400_000, `${p} is large`);
   }
 });

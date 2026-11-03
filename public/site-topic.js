@@ -6,7 +6,7 @@
 import { escapeHtml as esc } from './site-lib.js';
 
 const FEED = /(feed|feeding|diet|bait|pellet|prey|food|饲料|饵|食)/i;
-const TRAIN = /(train|domesticat|wean|transition|acclimat|accept|switch|induc\w* consumption|co-feeding|驯食|驯化|转食|诱食)/i;
+const TRAIN = /(\btrain|domesticat|wean|transition|acclimat|accept|switch|induc\w* consumption|co-feeding|驯食|驯化|转食|诱食)/i;
 const COMPARE = /(replac\w*|versus|\bvs\.?|instead of|comparison|compared)/i;
 const FRESH = /(live|trash|fresh|chilled|frozen|dead) (bait|fish|prey|feed|food)|活饵|冰鲜|鲜鱼|饵料鱼/i;
 const FORMULATED = /(artificial|formulated|compound|pellet|dry) (feed|diet)|人工饲料|配合饲料|颗粒饲料/i;

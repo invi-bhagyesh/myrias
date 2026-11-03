@@ -176,7 +176,7 @@ function viewExplore(params) {
   const speciesId = params.get('species') || 'all';
   const matrix = L.buildMatrix(d, speciesId);
   const selected = params.get('cell') || '';
-  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : (d.runs[0]?.counts?.claims_supported ?? 0);
+  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : d.runs.reduce((n, r) => n + (r.counts?.claims_supported ?? 0), 0);
   const zhSources = d.sources.filter(s => s.lang === 'zh').length;
   const aside = `<aside class="lead-aside"><h2>${esc(tr('land.ledger'))}</h2><dl class="ledger">
     <dt>${esc(tr('land.l.species'))}</dt><dd>${d.species.length}</dd>
@@ -241,7 +241,7 @@ const SECTIONS = [['numbers', 'sec.numbers'], ['how', 'how.title'], ['map', 'fig
 
 function viewOverview() {
   const d = state.data;
-  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : (d.runs[0]?.counts?.claims_supported ?? 0);
+  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : d.runs.reduce((n, r) => n + (r.counts?.claims_supported ?? 0), 0);
   const zhSources = d.sources.filter(x => x.lang === 'zh').length;
   const stats = [[supported, isDemo(d) ? 'stats.claims.demo' : 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
   const note = isDemo(d) ? 'stats.note.demo' : d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
@@ -462,7 +462,7 @@ function viewActions(params) {
     { key: 'who', type: 'select', label: tr('ac.f.who'), options: [...new Set(items.map(a => a.who))].map(w => [w, tr('ac.who.' + w.replace(/ /g, '_'))]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) },
     ...speciesFilter(items)];
-  return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
+  return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => (!sp || f.species_id === sp) && f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
       actionVersionsHtml(params) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
       browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
