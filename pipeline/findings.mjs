@@ -1,5 +1,7 @@
 // Findings: what the claims about one practice and one welfare problem say together.
-//   node pipeline/findings.mjs --release public/data/release.json --store STORE_DIR [--practices STORE/practices.json] [--species-name "mandarin fish (Siniperca chuatsi)"] [--log FILE] [--concurrency 8]
+//   node pipeline/findings.mjs --release public/data/release.json --store STORE_DIR [--practices STORE/practices.json] [--species-id ID --species-name "..."] [--first-id 50001] [--log FILE] [--concurrency 8]
+// With --species-id only that species' claims are grouped, from that species' store; the other species' findings
+// already in the release are kept as they are. --first-id is where a new species' finding ids start.
 // Run after export. Groups the released claims by technology class, welfare problem and practice name
 // (two records with the same name are one practice), and writes one finding per group:
 //   - code counts claims, papers, measured claims, and how many support, contradict or show no effect,
@@ -37,11 +39,12 @@ const pad = (n, w) => String(n).padStart(w, '0');
 // Pure: groups of released claims, one per technology class x welfare problem x practice. The practice is
 // the claim's own practice name, or, given a practice map (claim id -> { key, name_en, name_zh } from
 // cluster.mjs), the clustered practice the claim was tested into.
-export function findingGroups(release, practices = null) {
+export function findingGroups(release, practices = null, speciesId = null) {
   const iv = new Map(release.interventions.map(i => [i.id, i]));
   const claims = new Map(release.claims.map(c => [c.id, c]));
   const groups = new Map();
   for (const a of release.applications) {
+    if (speciesId && a.species_id !== speciesId) continue;
     const i = iv.get(a.intervention_id);
     for (const id of a.claim_ids) {
       if (!claims.has(id)) continue;
@@ -124,12 +127,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const problemLabel = new Map(rel.taxonomy.welfare_problems.map(p => [p.id, p.en || p.name_en || p.id]));
   const cachePath = join(arg('store'), 'findings.jsonl');
   const cache = new Map(existsSync(cachePath) ? readFileSync(cachePath, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l)).map(f => [f.key, f]) : []);
-  let next = [...cache.values()].reduce((m, f) => Math.max(m, Number(f.id.slice(1)) || 0), 0);
+  let next = [...cache.values()].reduce((m, f) => Math.max(m, Number(f.id.slice(1)) || 0), Number(arg('first-id', 1)) - 1);
+  const speciesId = arg('species-id') || null;
+  // The other species' findings, kept as they are in the release files.
+  const others = speciesId ? (rel.finding_files || []).flatMap(f => JSON.parse(readFileSync(join(dir, f), 'utf8'))).filter(f => f.species_id !== speciesId) : [];
   const client = createClient({ logPath: arg('log', join(arg('store'), '..', `findings-${new Date().toISOString().slice(0, 10)}.calls.jsonl`)) });
   const practices = arg('practices') ? JSON.parse(readFileSync(arg('practices'), 'utf8')) : null;
   const clusterPath = arg('practices') ? join(dirname(arg('practices')), 'practice-clusters.json') : null;
   const clusters = clusterPath && existsSync(clusterPath) ? JSON.parse(readFileSync(clusterPath, 'utf8')).clusters : [];
-  const groups = findingGroups(rel, practices);
+  const groups = findingGroups(rel, practices, speciesId);
   const out = [];
   let reused = 0, single = 0, written = 0;
   const todo = [];
@@ -172,9 +178,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Beside the release: findings in files under 350 KB, listed in release.json.
   for (const f of readdirSync(dir)) if (new RegExp(`^${stem}-findings-\\d+\\.json$`).test(f)) unlinkSync(join(dir, f));
   const pub = out.filter(f => f.statement_en || f.statement_zh).map(({ key, claims_hash, ...f }) => f);
+  const all = [...others, ...pub].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
   const files = []; let part = [], size = 0;
   const flush = () => { if (!part.length) return; const f = `${stem}-findings-${files.length}.json`; writeFileSync(join(dir, f), JSON.stringify(part) + '\n'); files.push(f); part = []; size = 0; };
-  for (const f of pub) { const n = Buffer.byteLength(JSON.stringify(f)); if (size + n > 350_000) flush(); part.push(f); size += n + 1; }
+  for (const f of all) { const n = Buffer.byteLength(JSON.stringify(f)); if (size + n > 350_000) flush(); part.push(f); size += n + 1; }
   flush();
   const shell = JSON.parse(readFileSync(relPath, 'utf8'));
   writeFileSync(relPath, JSON.stringify({ ...shell, finding_files: files }, null, 1) + '\n');

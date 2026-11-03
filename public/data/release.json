@@ -145,6 +145,16 @@
    "run_status": "in_progress",
    "summary_en": "Two runs so far: 20 Chinese papers, then 176 open-access papers, mostly in English. Machine-verified, not yet audited by an expert.",
    "summary_zh": "目前完成两轮：先读取 20 篇中文论文，再读取 176 篇开放获取论文（以英文为主）。经模型核验，尚未经过专家审核。"
+  },
+  {
+   "id": "crucian-carp",
+   "common_en": "Crucian carp",
+   "common_zh": "鲫鱼",
+   "scientific": "Carassius auratus / C. gibelio",
+   "group": "finfish",
+   "run_status": "in_progress",
+   "summary_en": "A second species, run with the same framework to check that it carries over: papers found by searching open indexes in English and Chinese, read and checked by the same steps. Machine-verified, not yet audited by an expert.",
+   "summary_zh": "第二个物种，用同一框架运行，以检验框架能否推广：论文来自开放数据库的中英文检索，经相同步骤读取和核验。经模型核验，尚未经过专家审核。"
   }
  ],
  "sources": [

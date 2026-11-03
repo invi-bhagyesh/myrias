@@ -1,5 +1,6 @@
 // Draft actions: what farms, feed makers, vets or researchers could do next, from the findings.
-//   node pipeline/actions.mjs --release public/data/release.json [--min-papers 2] [--species-name "mandarin fish (Siniperca chuatsi)"] [--log FILE]
+//   node pipeline/actions.mjs --release public/data/release.json [--min-papers 2] [--species-id ID --species-name "mandarin fish (Siniperca chuatsi)"] [--log FILE]
+// With --species-id only that species' findings are used, and the other species' actions are kept as they are.
 // Only findings that rest on at least --min-papers papers are used. For each technology class (the same
 // categories as the map), the actions model reads those findings and proposes a few actions, each citing
 // the findings it rests on and saying what type of action it is, who would do it, what evidence is missing
@@ -10,7 +11,7 @@
 // findings into one action and chose them over the other findings for this technology (basis.reason), what
 // each cited finding contributes (basis.findings[].why), and each finding's strength and counts.
 // Output: release-actions.json beside the release, listed in action_files.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, basename, join } from 'node:path';
 import { createClient } from './llm.mjs';
 
@@ -43,7 +44,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const findings = (rel.finding_files || []).flatMap(f => JSON.parse(readFileSync(join(dir, f), 'utf8')));
   const byId = new Map(findings.map(f => [f.id, f]));
   const minPapers = Number(arg('min-papers', 2));
-  const used = findings.filter(f => f.counts.papers >= minPapers && (f.statement_en || f.statement_zh));
+  const speciesId = arg('species-id') || null;
+  const used = findings.filter(f => f.counts.papers >= minPapers && (f.statement_en || f.statement_zh) && (!speciesId || f.species_id === speciesId));
+  const actionsPath = join(dir, `${stem}-actions.json`);
+  const others = speciesId && existsSync(actionsPath) ? JSON.parse(readFileSync(actionsPath, 'utf8')).filter(a => a.species_id !== speciesId) : [];
   const classLabel = new Map(rel.taxonomy.technology_classes.map(t => [t.id, t.en]));
   const problemLabel = new Map(rel.taxonomy.welfare_problems.map(p => [p.id, p.en]));
   const client = createClient({ logPath: arg('log', join(dir, '..', '..', `actions-${new Date().toISOString().slice(0, 10)}.calls.jsonl`)) });
@@ -68,8 +72,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   // Ids by technology class; rank.mjs sets rank and priority.
   out.sort((a, b) => a.technology_class.localeCompare(b.technology_class));
-  out.forEach((a, i) => { a.id = 'X' + String(i + 1).padStart(3, '0'); a.rank = null; a.priority = null; });
-  writeFileSync(join(dir, `${stem}-actions.json`), JSON.stringify(out) + '\n');
+  // New ids follow the other species' actions, so every id stays unique in the release.
+  const first = others.reduce((m, a) => Math.max(m, Number(String(a.id).slice(1)) || 0), 0);
+  out.forEach((a, i) => { a.id = 'X' + String(first + i + 1).padStart(3, '0'); a.rank = null; a.priority = null; });
+  writeFileSync(actionsPath, JSON.stringify([...others, ...out]) + '\n');
   const shell = JSON.parse(readFileSync(relPath, 'utf8'));
   writeFileSync(relPath, JSON.stringify({ ...shell, action_files: [`${stem}-actions.json`] }, null, 1) + '\n');
   console.log({ findings_used: used.length, classes: new Set(used.map(f => f.technology_class)).size, actions: out.length,

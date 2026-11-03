@@ -1,6 +1,6 @@
 // Rank the draft actions: a model places every action against a written spec (pipeline/priority-spec.md
 // by default), with a score and a reason for each place.
-//   node pipeline/rank.mjs --release public/data/release.json [--spec pipeline/priority-spec.md] [--log FILE]
+//   node pipeline/rank.mjs --release public/data/release.json [--spec pipeline/priority-spec.md] [--species-id ID] [--log FILE]
 // The spec is plain text, so what "priority" means can be changed without touching code. The model sees all
 // actions at once, so it compares them with each other, and for each one sees its type, who it is for, the
 // evidence gap, the risks and every finding it cites (practice, welfare problem, strength, papers, claims,
@@ -52,16 +52,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const findings = (rel.finding_files || []).flatMap(f => JSON.parse(readFileSync(join(dir, f), 'utf8')));
   const fById = new Map(findings.map(f => [f.id, f]));
   const actionsFile = join(dir, rel.action_files[0]);
-  const actions = JSON.parse(readFileSync(actionsFile, 'utf8'));
+  // With --species-id only that species' actions are ranked, against each other; the others keep their ranks.
+  const speciesId = arg('species-id') || null;
+  const allActions = JSON.parse(readFileSync(actionsFile, 'utf8'));
+  const actions = allActions.filter(a => !speciesId || a.species_id === speciesId), others = allActions.filter(a => speciesId && a.species_id !== speciesId);
   const label = (kind, id) => (rel.taxonomy[kind].find(x => x.id === id) || {}).en || id;
   const client = createClient({ logPath: arg('log', join(dir, '..', '..', `rank-${new Date().toISOString().slice(0, 10)}.calls.jsonl`)) });
   const r = await client.call('rank', { system: RANK_SYSTEM, user: rankUser(spec, actions, fById, label), schema: RANK_SCHEMA });
   if (!r.data) { console.error('rank: unparsed output; nothing changed'); process.exit(1); }
   const by = { model: r.entry.model, version: RANK_VERSION, spec: specPath.replace(/^.*pipeline\//, 'pipeline/'), spec_sha: specSha, as_of: new Date().toISOString().slice(0, 10) };
   const out = applyRanking(actions, r.data.ranking);
-  writeFileSync(actionsFile, JSON.stringify(out.actions.map(a => ({ ...a, priority: { ...a.priority, by } }))) + '\n');
+  writeFileSync(actionsFile, JSON.stringify([...others, ...out.actions.map(a => ({ ...a, priority: { ...a.priority, by } }))]) + '\n');
   const shell = JSON.parse(readFileSync(relPath, 'utf8'));
-  writeFileSync(relPath, JSON.stringify({ ...shell, action_ranking: by }, null, 1) + '\n');
+  writeFileSync(relPath, JSON.stringify({ ...shell, action_ranking: { ...by, ...(speciesId ? { species: { ...(shell.action_ranking?.species || {}), [speciesId]: by.as_of } } : {}) } }, null, 1) + '\n');
   console.log({ actions: actions.length, ranked: actions.length - out.missing.length, missing: out.missing, spec: by.spec, spec_sha: specSha,
     top: out.actions.slice(0, 5).map(a => [a.rank, a.priority.score, a.type, a.action_en]), spent_usd: client.spent });
 }

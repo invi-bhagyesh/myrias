@@ -3,6 +3,7 @@
 // not exported here: they stay drafts until a person has reviewed them.
 //   node pipeline/export.mjs --claims claims-final.jsonl --base public/data/release.json --meta pipeline/sources-meta.json --out public/data/release.json
 //   node pipeline/export.mjs --store STORE_DIR --base public/data/release.json --out public/data/release.json [--species-id mandarin-fish]
+//   node pipeline/export.mjs --store A --species-id a --store B --species-id b --base ... --out ...   (several species in one release)
 // With --store the release is built from the species store (pipeline/merge.mjs): every claim that has
 // passed in any run, with public ids that never change, paper details from the intake records, and one
 // changelog line per merge.
@@ -41,7 +42,7 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
   const out = keep.map((c, i) => ({
     id: c.release_id || 'C' + pad(i + 1, 3), source_id: sid.get(c.source), species_id: speciesId, locator: { page: c.page },
     quote: c.quote.trim(), quote_lang: lang(c.quote), ...statementFields(c), kind: c.basis || c.map.kind,
-    population: { species: c.species || 'Siniperca chuatsi', life_stage: null, system: c.production_system || null }, intervention: c.intervention_en || c.intervention || null, ...(c.intervention_en && c.intervention && c.intervention_en !== c.intervention ? { intervention_record: c.intervention } : {}),
+    population: { species: c.species || base.species.find(s => s.id === speciesId)?.scientific || null, life_stage: null, system: c.production_system || null }, intervention: c.intervention_en || c.intervention || null, ...(c.intervention_en && c.intervention && c.intervention_en !== c.intervention ? { intervention_record: c.intervention } : {}),
     comparator: null, outcome: c.welfare_relevance || null, direction: null, magnitude: null,
     ...(c.polarity ? { polarity: c.polarity } : {}), ...(c.limitations ? { limitations: c.limitations } : {}), ...(c.counterevidence ? { counterevidence: c.counterevidence } : {}), welfare_link: c.map.welfare_link,
     verification: c.verify.verdict, audit: 'not_audited', _cell: c.map.technology_class + '|' + c.map.welfare_problem, _ev: c.map.outcome_evidence, _key: c.intervention_key || '', _status: c.candidate_status || ''
@@ -75,7 +76,7 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
   for (const t of base.taxonomy.technology_classes) for (const p of base.taxonomy.welfare_problems) if (!have.has(t.id + '|' + p.id)) cells_status.push({ species_id: speciesId, technology_class: t.id, welfare_problem: p.id, status: 'not_collected' });
   for (const c of out) { delete c._cell; delete c._ev; delete c._key; delete c._status; }
   const extracted = store ? store.runs.reduce((n, r) => n + (r.claims_in || 0), 0) : claims.length;
-  const run = { ...base.runs[0], status: 'in_progress', focus_en: store ? `Welfare-technology claims from ${sources.length} papers in Chinese and English, added run by run (machine-extracted and machine-verified; no expert audit yet).` : 'All welfare-technology claims in the first 14 Chinese-language papers (machine-extracted and machine-verified; no expert audit yet).', focus_zh: store ? `来自 ${sources.length} 篇中英文论文的福利技术论断，逐次运行累加（由模型提取和核验，尚无专家审核）。` : null,
+  const run = { ...base.runs[0], id: `${speciesId}-run-0`, species_id: speciesId, status: 'in_progress', focus_en: store ? `Welfare-technology claims from ${sources.length} papers in Chinese and English, added run by run (machine-extracted and machine-verified; no expert audit yet).` : 'All welfare-technology claims in the first 14 Chinese-language papers (machine-extracted and machine-verified; no expert audit yet).', focus_zh: store ? `来自 ${sources.length} 篇中英文论文的福利技术论断，逐次运行累加（由模型提取和核验，尚无专家审核）。` : null,
     counts: store ? { documents_collected: Math.max(base.runs[0].counts.documents_collected, Object.keys(store.sources).length), documents_processed: Object.keys(store.sources).length, sources_released: sources.length, claims_extracted: extracted,
         claims_quote_found: store.runs.reduce((n, r) => n + (r.claims_quote_found ?? 0), 0) || null, claims_relevant: store.runs.reduce((n, r) => n + (r.claims_relevant ?? 0), 0) || null, claims_released: out.length, claims_supported: out.filter(c => c.verification === 'supported').length }
       : { documents_collected: base.runs[0].counts.documents_collected, documents_processed: new Set(claims.map(c => c.source)).size, sources_released: sources.length, claims_extracted: extracted, claims_quote_found: claims.filter(c => c.quote_check === 'found').length, claims_relevant: claims.filter(c => c.quote_check === 'found' && c.map?.welfare_relevant === true).length, claims_released: out.length, claims_supported: out.filter(c => c.verification === 'supported').length }, models, audit: null,
@@ -91,10 +92,29 @@ export function buildRelease({ claims, base, meta = {}, speciesId = 'mandarin-fi
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = n => { const i = process.argv.indexOf('--' + n); return i < 0 ? null : process.argv[i + 1]; };
-  const store = arg('store') ? readStore(arg('store')) : null;
-  const claims = store ? store.claims : readFileSync(arg('claims'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
-  const models = [...new Set(claims.flatMap(c => [c.model && `${c.model} (extract)`, c.map?.model && `${c.map.model} (map)`, c.verify?.model && `${c.verify.model} (verify)`, c.rendering?.model && `${c.rendering.model} (render)`]).filter(Boolean))];
-  const rel = buildRelease({ speciesId: arg('species-id') || undefined, claims, store, base: JSON.parse(readFileSync(arg('base'), 'utf8')), meta: arg('meta') ? JSON.parse(readFileSync(arg('meta'), 'utf8')) : {}, models });
+  const all = n => process.argv.flatMap((a, i) => (a === '--' + n ? [process.argv[i + 1]] : []));
+  const base = JSON.parse(readFileSync(arg('base'), 'utf8'));
+  const modelsOf = claims => [...new Set(claims.flatMap(c => [c.model && `${c.model} (extract)`, c.map?.model && `${c.map.model} (map)`, c.verify?.model && `${c.verify.model} (verify)`, c.rendering?.model && `${c.rendering.model} (render)`]).filter(Boolean))];
+  let rel, models;
+  if (all('store').length > 1) {
+    // Several species: one release per store, joined. Practice and application ids are renumbered so they stay
+    // unique; claim, paper and finding ids come from each store's own range and are left as they are.
+    const parts = all('store').map((dir, k) => { const store = readStore(dir); return buildRelease({ speciesId: all('species-id')[k], claims: store.claims, store, base, models: modelsOf(store.claims) }); });
+    const interventions = [], applications = [];
+    for (const p of parts) {
+      const map = new Map(p.interventions.map(iv => [iv.id, 'I' + pad(interventions.length + p.interventions.indexOf(iv) + 1, 2)]));
+      interventions.push(...p.interventions.map(iv => ({ ...iv, id: map.get(iv.id) })));
+      applications.push(...p.applications.map((a, i) => ({ ...a, id: 'A' + pad(applications.length + i + 1, 2), intervention_id: map.get(a.intervention_id) })));
+    }
+    models = [...new Set(parts.flatMap(p => p.runs[0].models))];
+    rel = { ...parts[0], sources: parts.flatMap(p => p.sources), claims: parts.flatMap(p => p.claims), interventions, applications,
+      cells_status: parts.flatMap(p => p.cells_status), runs: parts.map(p => p.runs[0]) };
+  } else {
+    const store = arg('store') ? readStore(arg('store')) : null;
+    const claims = store ? store.claims : readFileSync(arg('claims'), 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
+    models = modelsOf(claims);
+    rel = buildRelease({ speciesId: arg('species-id') || undefined, claims, store, base, meta: arg('meta') ? JSON.parse(readFileSync(arg('meta'), 'utf8')) : {}, models });
+  }
   const errors = validateExport(rel);
   if (errors.length) { console.error(errors.slice(0, 20).join('\n')); process.exit(1); }
   // Claims go in numbered files beside the release, each under 350 KB, so no single file is large;
