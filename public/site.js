@@ -321,6 +321,12 @@ document.addEventListener('toggle', e => {
   if (state.full) fill(); else { ol.innerHTML = `<li class="loading">${esc(tr('loading.data'))}</li>`; (state.fullPromise || Promise.resolve()).then(fill); }
 }, true);
 
+// A species filter for a list, only when the list holds more than one species.
+function speciesFilter(items) {
+  const ids = [...new Set(items.map(x => x.species_id))];
+  return ids.length > 1 ? [{ key: 'species', type: 'select', label: tr('nav.species'), options: state.data.species.filter(s => ids.includes(s.id)).map(s => [s.id, pick(s, 'common', state.lang)]) }] : [];
+}
+
 // Feed acclimation: findings on moving fish from live or fresh food onto formulated feed (see site-topic.js).
 function viewFeedAcclimation() {
   const m = feedModel(state.data), fById = new Map((state.data.findings || []).map(f => [f.id, f]));
@@ -418,13 +424,13 @@ function viewFindings(params) {
     { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('fd.search.ph') },
     { key: 'strength', type: 'select', label: tr('fd.f.strength'), options: ['agree', 'mixed', 'against', 'described', 'one_paper'].map(k => [k, tr('fd.strength.' + k)]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: tax.welfare_problems.map(p => [p.id, pick(p, '', state.lang)]) },
-    { key: 'multi', type: 'check', label: tr('fd.f.multi') }];
+    { key: 'multi', type: 'check', label: tr('fd.f.multi') }, ...speciesFilter(items)];
   return { title: tr('nav.findings'), html: lead(tr('fd.kicker'), tr('fd.page.title'), tr('fd.page.lead', { n: items.length.toLocaleString(), multi: items.filter(f => f.counts.papers > 1).length })) +
       `<p class="fa-banner"><a href="${link('topics/feed-acclimation')}"><b>${esc(tr('fa.title'))}</b> ${esc(tr('fa.banner'))} →</a></p>` +
       browseHtml({ filters, views: [['group', tr('br.view.group')], ['rank', tr('br.view.rank')]], tr }),
     mount: root => mountBrowse(root, { items, tr, listClass: 'fd-list', groups: tax.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: f => f.technology_class,
       render: f => findingItemHtml(f, findingCtx()),
-      test: (f, v) => (!v.strength || f.strength === v.strength) && (!v.problem || f.welfare_problem === v.problem) && (!v.multi || f.counts.papers > 1) &&
+      test: (f, v) => (!v.species || f.species_id === v.species) && (!v.strength || f.strength === v.strength) && (!v.problem || f.welfare_problem === v.problem) && (!v.multi || f.counts.papers > 1) &&
         (!v.q || [f.statement_en, f.statement_zh, f.practice_en, f.practice_zh].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
 }
 
@@ -446,19 +452,22 @@ function viewActions(params) {
     loadVersionFile(ver.files.actions).then(a => { state.archivedActions[vr] = a; render(); });
     return { title: tr('nav.actions'), html: `<p class="loading">${esc(tr('loading'))}</p>` };
   }
-  const items = (ver ? state.archivedActions[vr] : d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
+  // Ranks are within a species, so actions are listed by species first, then by rank.
+  const spOrder = id => d.species.findIndex(s => s.id === id);
+  const items = (ver ? state.archivedActions[vr] : d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => spOrder(a.species_id) - spOrder(b.species_id) || (a.rank ?? 1e9) - (b.rank ?? 1e9));
   const fById = new Map((d.findings || []).map(f => [f.id, f]));
   const filters = [
     { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('ac.search.ph') },
     { key: 'type', type: 'select', label: tr('ac.f.type'), options: ['adopt', 'avoid', 'test_on_farms', 'monitor', 'research'].filter(t => items.some(a => a.type === t)).map(t => [t, tr('ac.type.' + t)]) },
     { key: 'who', type: 'select', label: tr('ac.f.who'), options: [...new Set(items.map(a => a.who))].map(w => [w, tr('ac.who.' + w.replace(/ /g, '_'))]) },
-    { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) }];
+    { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) },
+    ...speciesFilter(items)];
   return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
       actionVersionsHtml(params) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
       browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
       render: a => actionItemHtml(a, findingCtx(), fById),
-      test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) &&
+      test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) && (!v.species || a.species_id === v.species) &&
         (!v.q || [a.id, a.action_en, a.action_zh, a.evidence_gap, a.risks].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
 }
 
