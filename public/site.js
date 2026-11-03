@@ -3,7 +3,7 @@ import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { pipelineHtml, mountPipeline } from './site-pipeline.js';
 import { runsHtml } from './site-runs.js';
-import { claimReviewPanelHtml, mountReviewForms, reviewCardHtml, loadReviews, saveReview, exportRows, toCsv, reviewStats } from './site-review.js';
+import { claimReviewPanelHtml, mountReviewForms, reviewCardHtml, reviewActionCardHtml, bindReviews, loadReviews, saveReview, exportRows, exportActionRows, toCsv, reviewStats } from './site-review.js';
 import { feedModel, feedPageHtml } from './site-topic.js';
 import { historyHtml, mountHistory, versionHead, versionsOf, loadVersionFile } from './site-history.js';
 import { matrixChart } from './site-chart.js';
@@ -313,6 +313,9 @@ function applicationCard(app) {
 
 const findingCtx = () => ({ tr, link, lang: state.lang, claims: state.index.claims, sources: state.index.sources, taxonomyLabel, claimText: L.claimText });
 
+// Review forms anywhere on the site (claim pages, action cards, the review page) save through one handler.
+bindReviews(tr);
+
 // A finding's claim list is filled in when it is first opened, so the lists load without the claims.
 document.addEventListener('toggle', e => {
   const d = e.target;
@@ -338,10 +341,16 @@ function viewFeedAcclimation() {
     mount: root => root.querySelectorAll('[data-jump-id]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); document.getElementById(a.dataset.jumpId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); })) };
 }
 
-// Expert review (front-end demo). A queue of claims, one at a time: by default the claims behind the top-ranked
-// actions, which matter most; ?finding=F… or ?source=S… reviews one finding or one paper. Reviews stay in the browser.
+// Expert review (front-end demo). A queue of claims or draft actions, one at a time. Claims: by default the claims
+// behind the top-ranked actions, which matter most; ?finding=F… or ?source=S… reviews one finding or one paper.
+// Actions (?kind=action): every current draft action, by species and rank; ?species= narrows to one species.
+// Reviews stay in the browser.
 function reviewQueue(params) {
   const d = state.data, fById = new Map((d.findings || []).map(f => [f.id, f]));
+  if (params.get('kind') === 'action') {
+    const spOrder = id => d.species.findIndex(s => s.id === id), sp = params.get('species');
+    return [...(d.actions || [])].filter(a => !sp || a.species_id === sp).sort((a, b) => spOrder(a.species_id) - spOrder(b.species_id) || (a.rank ?? 1e9) - (b.rank ?? 1e9));
+  }
   let ids;
   if (params.get('finding')) ids = fById.get(params.get('finding'))?.claim_ids || [];
   else if (params.get('source')) ids = d.claims.filter(c => c.source_id === params.get('source')).map(c => c.id);
@@ -349,46 +358,57 @@ function reviewQueue(params) {
   return [...new Set(ids)].map(id => state.index.claims.get(id)).filter(Boolean);
 }
 function viewReview(params) {
+  const d = state.data, isAction = params.get('kind') === 'action', kind = isAction ? 'action' : 'claim', vp = isAction ? 'rv.a.v.' : 'rv.v.';
   const queue = reviewQueue(params), reviews = loadReviews();
   const todo = params.get('all') ? queue : queue.filter(c => !reviews[c.id]);
   const i = Math.min(Math.max(0, Number(params.get('i')) || 0), Math.max(0, todo.length - 1));
   const c = todo[i], q = Object.fromEntries([...params].filter(([k]) => k !== 'i'));
-  const st = reviewStats(reviews, state.index.claims);
+  const actionsById = new Map((d.actions || []).map(a => [a.id, a]));
+  const st = reviewStats(reviews, state.index.claims, kind);
   const pct = k => (st.n ? Math.round(100 * (st.by[k] || 0) / st.n) + '%' : '—');
-  const scope = params.get('finding') ? tr('rv.scope.finding', { id: params.get('finding') }) : params.get('source') ? tr('rv.scope.source', { id: params.get('source') }) : tr('rv.scope.actions');
+  const spName = id => pick(d.species.find(s => s.id === id) || {}, 'common', state.lang) || id;
+  const scope = isAction ? (params.get('species') ? tr('rv.a.scope.species', { s: spName(params.get('species')) }) : tr('rv.a.scope'))
+    : params.get('finding') ? tr('rv.scope.finding', { id: params.get('finding') }) : params.get('source') ? tr('rv.scope.source', { id: params.get('source') }) : tr('rv.scope.actions');
+  const tabs = `<nav class="rv-tabs" aria-label="${esc(tr('rv.kicker'))}"><a href="${link('review')}"${isAction ? '' : ' aria-current="page"'}>${esc(tr('rv.tab.claims'))}</a><a href="${link('review', { kind: 'action' })}"${isAction ? ' aria-current="page"' : ''}>${esc(tr('rv.tab.actions'))}</a></nav>`;
   const nav = `<div class="rv-nav"><a class="button small" href="${link('review', { ...q, i: Math.max(0, i - 1) })}"${i ? '' : ' aria-disabled="true"'}>← ${esc(tr('rv.prev'))}</a>
       <span>${esc(tr('rv.pos', { i: todo.length ? i + 1 : 0, n: todo.length, all: queue.length }))}</span>
       <a class="button small" href="${link('review', { ...q, i: i + 1 })}"${i + 1 < todo.length ? '' : ' aria-disabled="true"'}>${esc(tr('rv.next'))} →</a>
       <a class="rv-toggle" href="${link('review', { ...q, all: params.get('all') ? '' : '1', i: 0 })}">${esc(tr(params.get('all') ? 'rv.only.todo' : 'rv.show.all'))}</a></div>`;
-  return { title: tr('rv.title'), html: lead(tr('rv.kicker'), tr('rv.title'), tr('rv.lead')) +
+  const card = !c ? `<p class="empty">${esc(tr(queue.length ? (isAction ? 'rv.a.done' : 'rv.done') : 'rv.empty'))}</p>`
+    : isAction ? reviewActionCardHtml(c, { ...findingCtx(), findings: new Map((d.findings || []).map(f => [f.id, f])), speciesName: spName }) : reviewCardHtml(c, { ...findingCtx() });
+  return { title: tr(isAction ? 'rv.a.title' : 'rv.title'), html: lead(tr('rv.kicker'), tr(isAction ? 'rv.a.title' : 'rv.title'), tr(isAction ? 'rv.a.lead' : 'rv.lead')) + tabs +
       `<p class="rv-demo">${esc(tr('rv.demo'))}</p>
-      <div class="rv-stats"><span><b>${st.n}</b> ${esc(tr('rv.st.n'))}</span>${['correct', 'partly', 'wrong', 'unsure'].map(k => `<span class="v-${k}"><b>${pct(k)}</b> ${esc(tr('rv.v.' + k))}</span>`).join('')}
+      <div class="rv-stats"><span><b>${st.n}</b> ${esc(tr('rv.st.n'))}</span>${['correct', 'partly', 'wrong', 'unsure'].map(k => `<span class="v-${k}"><b>${pct(k)}</b> ${esc(tr(vp + k))}</span>`).join('')}
         <button type="button" class="button small" data-rv-export="json">${esc(tr('rv.export.json'))}</button><button type="button" class="button small" data-rv-export="csv">${esc(tr('rv.export.csv'))}</button>
         <label class="button small rv-import">${esc(tr('rv.import'))}<input type="file" accept=".json" data-rv-import hidden></label></div>
-      <p class="small-note">${esc(scope)}</p>${nav}` +
-      (c ? reviewCardHtml(c, { ...findingCtx() }) : `<p class="empty">${esc(tr(queue.length ? 'rv.done' : 'rv.empty'))}</p>`),
+      <p class="small-note">${esc(scope)}</p>${nav}` + card,
     mount: root => {
       mountReviewForms(root, tr, () => { if (!params.get('all')) setTimeout(() => render(), 350); else render(); });
-      // Keys 1 to 4 pick a verdict; Enter saves (outside the comment box).
+      // Keys 1 to 4 pick an answer; Enter saves (outside the comment box).
       const form = root.querySelector('[data-rv-form]');
       const onKey = e => {
-        if (!root.isConnected) { document.removeEventListener('keydown', onKey); return; }
-        if (!form || /^(TEXTAREA|INPUT)$/.test(e.target.tagName) && e.target.type !== 'radio' && e.target.type !== 'checkbox') return;
+        if (!root.isConnected || !form?.isConnected) { document.removeEventListener('keydown', onKey); return; }
+        if (/^(TEXTAREA|INPUT)$/.test(e.target.tagName) && e.target.type !== 'radio' && e.target.type !== 'checkbox') return;
         const k = Number(e.key);
         if (k >= 1 && k <= 4) { const r = form.querySelectorAll('[name=verdict]')[k - 1]; r.checked = true; r.focus(); e.preventDefault(); }
         else if (e.key === 'Enter') { form.requestSubmit(); e.preventDefault(); }
       };
-      document.addEventListener('keydown', onKey);
+      if (form) document.addEventListener('keydown', onKey);
       root.querySelectorAll('[data-rv-export]').forEach(b => b.addEventListener('click', () => {
-        const rows = exportRows(loadReviews(), state.index.claims), kind = b.dataset.rvExport;
-        const blob = new Blob([kind === 'csv' ? toCsv(rows) : JSON.stringify(rows, null, 1)], { type: kind === 'csv' ? 'text/csv' : 'application/json' });
-        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `myrias-reviews-${new Date().toISOString().slice(0, 10)}.${kind}` });
+        const rows = isAction ? exportActionRows(loadReviews(), actionsById) : exportRows(loadReviews(), state.index.claims), type = b.dataset.rvExport;
+        const blob = new Blob([type === 'csv' ? toCsv(rows) : JSON.stringify(rows, null, 1)], { type: type === 'csv' ? 'text/csv' : 'application/json' });
+        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `myrias-${isAction ? 'action' : 'claim'}-reviews-${new Date().toISOString().slice(0, 10)}.${type}` });
         a.click(); URL.revokeObjectURL(a.href);
       }));
       root.querySelector('[data-rv-import]')?.addEventListener('change', async e => {
         const f = e.target.files?.[0]; if (!f) return;
-        try { for (const r of JSON.parse(await f.text())) if (r.claim_id && r.verdict) saveReview(r.claim_id, { verdict: r.verdict, issues: String(r.issues || '').split(';').filter(Boolean), comment: r.comment || '', reviewer: r.reviewer || '' }); render(); }
-        catch { alert(tr('rv.import.bad')); }
+        try {
+          for (const r of JSON.parse(await f.text())) {
+            const id = r.claim_id || r.action_id;
+            if (id && r.verdict) saveReview(id, { verdict: r.verdict, issues: String(r.issues || '').split(';').filter(Boolean), comment: r.comment || '', reviewer: r.reviewer || '' });
+          }
+          render();
+        } catch { alert(tr('rv.import.bad')); }
       });
     } };
 }
@@ -465,10 +485,11 @@ function viewActions(params) {
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) },
     ...speciesFilter(items)];
   return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => (!sp || f.species_id === sp) && f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
+      (ver ? '' : `<p class="ac-review-link"><a href="${link('review', { kind: 'action', ...(sp ? { species: sp } : {}) })}">${esc(tr('rv.a.go'))} →</a></p>`) +
       actionVersionsHtml(params) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
       browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
-      render: a => actionItemHtml(a, findingCtx(), fById),
+      render: a => actionItemHtml(a, { ...findingCtx(), review: !ver }, fById),
       test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) && (!v.species || a.species_id === v.species) &&
         (!v.q || [a.id, a.action_en, a.action_zh, a.evidence_gap, a.risks].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
 }

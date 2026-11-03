@@ -420,3 +420,18 @@ test('expert review: export rows carry what the reviewer saw; stats split by the
   assert.ok(toCsv(rows).includes('"a ""b"""'));
   assert.deepEqual(reviewStats(reviews, claims), { n: 2, by: { wrong: 1, correct: 1 }, by_model: { supported: { wrong: 1 }, partial: { correct: 1 } } });
 });
+
+test('expert review of actions: own question and issues; claims and actions export and count apart', async () => {
+  const { exportRows, exportActionRows, reviewStats, reviewFormHtml, kindOf } = await import('../public/site-review.js');
+  const tr = k => k;
+  assert.equal(kindOf('X012'), 'action'); assert.equal(kindOf('C50001'), 'claim');
+  const a = { id: 'X012', species_id: 'crucian-carp', rank: 2, type: 'avoid', who: 'farmers', action_en: 'Avoid y', finding_ids: ['F1', 'F2'] };
+  const form = reviewFormHtml(a, null, tr);
+  assert.ok(form.includes('rv.a.q') && form.includes('rv.a.i.practical') && !form.includes('rv.i.quote'));
+  const reviews = { C1: { verdict: 'correct', at: 't' }, X012: { verdict: 'partly', issues: ['who', 'priority'], comment: 'vets too', at: 't' } };
+  const rows = exportActionRows(reviews, new Map([[a.id, a]]));
+  assert.deepEqual([rows.length, rows[0].action_id, rows[0].rank, rows[0].issues, rows[0].finding_ids], [1, 'X012', 2, 'who;priority', 'F1;F2']);
+  assert.equal(exportRows(reviews, new Map()).length, 1);
+  assert.deepEqual(reviewStats(reviews, new Map(), 'action').by, { partly: 1 });
+  assert.deepEqual(reviewStats(reviews, new Map()).by, { correct: 1 });
+});
