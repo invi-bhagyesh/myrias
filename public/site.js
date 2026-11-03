@@ -3,6 +3,8 @@ import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { pipelineHtml, mountPipeline } from './site-pipeline.js';
 import { runsHtml } from './site-runs.js';
+import { claimReviewPanelHtml, mountReviewForms, reviewCardHtml, loadReviews, saveReview, exportRows, toCsv, reviewStats } from './site-review.js';
+import { feedModel, feedPageHtml } from './site-topic.js';
 import { historyHtml, mountHistory, versionHead, versionsOf, loadVersionFile } from './site-history.js';
 import { matrixChart } from './site-chart.js';
 
@@ -157,8 +159,10 @@ function viewCorpus() {
       .then(parts => { state.papers = parts.flatMap(unpackPapers); if (parseHash().parts[0] === 'corpus') render(); }).catch(() => { state.papers = []; });
   }
   const topics = c.charts ? Object.keys(c.charts.topics) : [];
+  const inList = new Set((state.papers || []).map(p => p.species));
+  const listSpecies = state.data.species.filter(s => inList.has(s.id)).map(s => [s.id, pick(s, 'common', state.lang)]);
   const listBlock = `<h2 id="papers">${esc(tr('cl.title'))}</h2><p class="cv-note">${esc(tr('cl.lead'))}</p>` + (state.papers
-    ? `<div class="cl-root" data-cl-root>${controlsHtml(state.corpusFilter || FILTER_DEFAULTS, topics, tr)}<p class="cl-count" data-cl-count></p><ul class="cl-list" data-cl-list></ul><button type="button" class="button small" data-cl-more hidden></button></div>`
+    ? `<div class="cl-root" data-cl-root>${controlsHtml(state.corpusFilter || FILTER_DEFAULTS, topics, tr, listSpecies)}<p class="cl-count" data-cl-count></p><ul class="cl-list" data-cl-list></ul><button type="button" class="button small" data-cl-more hidden></button></div>`
     : `<p class="loading">${esc(tr('loading'))}</p>`);
   return {
     title: tr('nav.corpus'),
@@ -174,7 +178,7 @@ function viewExplore(params) {
   const speciesId = params.get('species') || 'all';
   const matrix = L.buildMatrix(d, speciesId);
   const selected = params.get('cell') || '';
-  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : (d.runs[0]?.counts?.claims_supported ?? 0);
+  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : d.runs.reduce((n, r) => n + (r.counts?.claims_supported ?? 0), 0);
   const zhSources = d.sources.filter(s => s.lang === 'zh').length;
   const aside = `<aside class="lead-aside"><h2>${esc(tr('land.ledger'))}</h2><dl class="ledger">
     <dt>${esc(tr('land.l.species'))}</dt><dd>${d.species.length}</dd>
@@ -239,7 +243,7 @@ const SECTIONS = [['numbers', 'sec.numbers'], ['how', 'how.title'], ['map', 'fig
 
 function viewOverview() {
   const d = state.data;
-  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : (d.runs[0]?.counts?.claims_supported ?? 0);
+  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : d.runs.reduce((n, r) => n + (r.counts?.claims_supported ?? 0), 0);
   const zhSources = d.sources.filter(x => x.lang === 'zh').length;
   const stats = [[supported, isDemo(d) ? 'stats.claims.demo' : 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
   const note = isDemo(d) ? 'stats.note.demo' : d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
@@ -319,6 +323,76 @@ document.addEventListener('toggle', e => {
   if (state.full) fill(); else { ol.innerHTML = `<li class="loading">${esc(tr('loading.data'))}</li>`; (state.fullPromise || Promise.resolve()).then(fill); }
 }, true);
 
+// A species filter for a list, only when the list holds more than one species.
+function speciesFilter(items) {
+  const ids = [...new Set(items.map(x => x.species_id))];
+  return ids.length > 1 ? [{ key: 'species', type: 'select', label: tr('nav.species'), options: state.data.species.filter(s => ids.includes(s.id)).map(s => [s.id, pick(s, 'common', state.lang)]) }] : [];
+}
+
+// Feed acclimation: findings on moving fish from live or fresh food onto formulated feed (see site-topic.js).
+function viewFeedAcclimation() {
+  const m = feedModel(state.data), fById = new Map((state.data.findings || []).map(f => [f.id, f]));
+  return { title: tr('fa.title'), html: feedPageHtml(m, { tr, link,
+    findingsHtml: (list, o) => findingsListHtml(list, findingCtx(), o),
+    actionsHtml: list => `<ol class="ac-list">${list.map(a => actionItemHtml(a, findingCtx(), fById)).join('')}</ol>` }),
+    mount: root => root.querySelectorAll('[data-jump-id]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); document.getElementById(a.dataset.jumpId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); })) };
+}
+
+// Expert review (front-end demo). A queue of claims, one at a time: by default the claims behind the top-ranked
+// actions, which matter most; ?finding=F… or ?source=S… reviews one finding or one paper. Reviews stay in the browser.
+function reviewQueue(params) {
+  const d = state.data, fById = new Map((d.findings || []).map(f => [f.id, f]));
+  let ids;
+  if (params.get('finding')) ids = fById.get(params.get('finding'))?.claim_ids || [];
+  else if (params.get('source')) ids = d.claims.filter(c => c.source_id === params.get('source')).map(c => c.id);
+  else ids = [...(d.actions || [])].sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9)).flatMap(a => a.finding_ids.flatMap(f => fById.get(f)?.claim_ids || []));
+  return [...new Set(ids)].map(id => state.index.claims.get(id)).filter(Boolean);
+}
+function viewReview(params) {
+  const queue = reviewQueue(params), reviews = loadReviews();
+  const todo = params.get('all') ? queue : queue.filter(c => !reviews[c.id]);
+  const i = Math.min(Math.max(0, Number(params.get('i')) || 0), Math.max(0, todo.length - 1));
+  const c = todo[i], q = Object.fromEntries([...params].filter(([k]) => k !== 'i'));
+  const st = reviewStats(reviews, state.index.claims);
+  const pct = k => (st.n ? Math.round(100 * (st.by[k] || 0) / st.n) + '%' : '—');
+  const scope = params.get('finding') ? tr('rv.scope.finding', { id: params.get('finding') }) : params.get('source') ? tr('rv.scope.source', { id: params.get('source') }) : tr('rv.scope.actions');
+  const nav = `<div class="rv-nav"><a class="button small" href="${link('review', { ...q, i: Math.max(0, i - 1) })}"${i ? '' : ' aria-disabled="true"'}>← ${esc(tr('rv.prev'))}</a>
+      <span>${esc(tr('rv.pos', { i: todo.length ? i + 1 : 0, n: todo.length, all: queue.length }))}</span>
+      <a class="button small" href="${link('review', { ...q, i: i + 1 })}"${i + 1 < todo.length ? '' : ' aria-disabled="true"'}>${esc(tr('rv.next'))} →</a>
+      <a class="rv-toggle" href="${link('review', { ...q, all: params.get('all') ? '' : '1', i: 0 })}">${esc(tr(params.get('all') ? 'rv.only.todo' : 'rv.show.all'))}</a></div>`;
+  return { title: tr('rv.title'), html: lead(tr('rv.kicker'), tr('rv.title'), tr('rv.lead')) +
+      `<p class="rv-demo">${esc(tr('rv.demo'))}</p>
+      <div class="rv-stats"><span><b>${st.n}</b> ${esc(tr('rv.st.n'))}</span>${['correct', 'partly', 'wrong', 'unsure'].map(k => `<span class="v-${k}"><b>${pct(k)}</b> ${esc(tr('rv.v.' + k))}</span>`).join('')}
+        <button type="button" class="button small" data-rv-export="json">${esc(tr('rv.export.json'))}</button><button type="button" class="button small" data-rv-export="csv">${esc(tr('rv.export.csv'))}</button>
+        <label class="button small rv-import">${esc(tr('rv.import'))}<input type="file" accept=".json" data-rv-import hidden></label></div>
+      <p class="small-note">${esc(scope)}</p>${nav}` +
+      (c ? reviewCardHtml(c, { ...findingCtx() }) : `<p class="empty">${esc(tr(queue.length ? 'rv.done' : 'rv.empty'))}</p>`),
+    mount: root => {
+      mountReviewForms(root, tr, () => { if (!params.get('all')) setTimeout(() => render(), 350); else render(); });
+      // Keys 1 to 4 pick a verdict; Enter saves (outside the comment box).
+      const form = root.querySelector('[data-rv-form]');
+      const onKey = e => {
+        if (!root.isConnected) { document.removeEventListener('keydown', onKey); return; }
+        if (!form || /^(TEXTAREA|INPUT)$/.test(e.target.tagName) && e.target.type !== 'radio' && e.target.type !== 'checkbox') return;
+        const k = Number(e.key);
+        if (k >= 1 && k <= 4) { const r = form.querySelectorAll('[name=verdict]')[k - 1]; r.checked = true; r.focus(); e.preventDefault(); }
+        else if (e.key === 'Enter') { form.requestSubmit(); e.preventDefault(); }
+      };
+      document.addEventListener('keydown', onKey);
+      root.querySelectorAll('[data-rv-export]').forEach(b => b.addEventListener('click', () => {
+        const rows = exportRows(loadReviews(), state.index.claims), kind = b.dataset.rvExport;
+        const blob = new Blob([kind === 'csv' ? toCsv(rows) : JSON.stringify(rows, null, 1)], { type: kind === 'csv' ? 'text/csv' : 'application/json' });
+        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `myrias-reviews-${new Date().toISOString().slice(0, 10)}.${kind}` });
+        a.click(); URL.revokeObjectURL(a.href);
+      }));
+      root.querySelector('[data-rv-import]')?.addEventListener('change', async e => {
+        const f = e.target.files?.[0]; if (!f) return;
+        try { for (const r of JSON.parse(await f.text())) if (r.claim_id && r.verdict) saveReview(r.claim_id, { verdict: r.verdict, issues: String(r.issues || '').split(';').filter(Boolean), comment: r.comment || '', reviewer: r.reviewer || '' }); render(); }
+        catch { alert(tr('rv.import.bad')); }
+      });
+    } };
+}
+
 function viewFinding(id) {
   const f = state.index.findings.get(id);
   if (!f) return goneView('findings', id, 'fd.kicker');
@@ -352,12 +426,13 @@ function viewFindings(params) {
     { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('fd.search.ph') },
     { key: 'strength', type: 'select', label: tr('fd.f.strength'), options: ['agree', 'mixed', 'against', 'described', 'one_paper'].map(k => [k, tr('fd.strength.' + k)]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: tax.welfare_problems.map(p => [p.id, pick(p, '', state.lang)]) },
-    { key: 'multi', type: 'check', label: tr('fd.f.multi') }];
+    { key: 'multi', type: 'check', label: tr('fd.f.multi') }, ...speciesFilter(items)];
   return { title: tr('nav.findings'), html: lead(tr('fd.kicker'), tr('fd.page.title'), tr('fd.page.lead', { n: items.length.toLocaleString(), multi: items.filter(f => f.counts.papers > 1).length })) +
+      `<p class="fa-banner"><a href="${link('topics/feed-acclimation')}"><b>${esc(tr('fa.title'))}</b> ${esc(tr('fa.banner'))} →</a></p>` +
       browseHtml({ filters, views: [['group', tr('br.view.group')], ['rank', tr('br.view.rank')]], tr }),
     mount: root => mountBrowse(root, { items, tr, listClass: 'fd-list', groups: tax.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: f => f.technology_class,
       render: f => findingItemHtml(f, findingCtx()),
-      test: (f, v) => (!v.strength || f.strength === v.strength) && (!v.problem || f.welfare_problem === v.problem) && (!v.multi || f.counts.papers > 1) &&
+      test: (f, v) => (!v.species || f.species_id === v.species) && (!v.strength || f.strength === v.strength) && (!v.problem || f.welfare_problem === v.problem) && (!v.multi || f.counts.papers > 1) &&
         (!v.q || [f.statement_en, f.statement_zh, f.practice_en, f.practice_zh].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
 }
 
@@ -379,19 +454,22 @@ function viewActions(params) {
     loadVersionFile(ver.files.actions).then(a => { state.archivedActions[vr] = a; render(); });
     return { title: tr('nav.actions'), html: `<p class="loading">${esc(tr('loading'))}</p>` };
   }
-  const items = (ver ? state.archivedActions[vr] : d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9));
+  // Ranks are within a species, so actions are listed by species first, then by rank.
+  const spOrder = id => d.species.findIndex(s => s.id === id);
+  const items = (ver ? state.archivedActions[vr] : d.actions || []).filter(a => !sp || a.species_id === sp).sort((a, b) => spOrder(a.species_id) - spOrder(b.species_id) || (a.rank ?? 1e9) - (b.rank ?? 1e9));
   const fById = new Map((d.findings || []).map(f => [f.id, f]));
   const filters = [
     { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('ac.search.ph') },
     { key: 'type', type: 'select', label: tr('ac.f.type'), options: ['adopt', 'avoid', 'test_on_farms', 'monitor', 'research'].filter(t => items.some(a => a.type === t)).map(t => [t, tr('ac.type.' + t)]) },
     { key: 'who', type: 'select', label: tr('ac.f.who'), options: [...new Set(items.map(a => a.who))].map(w => [w, tr('ac.who.' + w.replace(/ /g, '_'))]) },
-    { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) }];
-  return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
+    { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) },
+    ...speciesFilter(items)];
+  return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => (!sp || f.species_id === sp) && f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
       actionVersionsHtml(params) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
       browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
       render: a => actionItemHtml(a, findingCtx(), fById),
-      test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) &&
+      test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) && (!v.species || a.species_id === v.species) &&
         (!v.q || [a.id, a.action_en, a.action_zh, a.evidence_gap, a.risks].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
 }
 
@@ -517,8 +595,8 @@ function viewClaim(id) {
           ...(c.limitations ? [[tr('claim.limits'), esc(c.limitations)]] : []), ...(c.counterevidence ? [[tr('claim.counter'), esc(c.counterevidence)]] : []),
           [tr('claim.welfare'), `${esc(tr('welfare.' + c.welfare_link))}${c.welfare_link_note ? `<br><span class="meta">${esc(c.welfare_link_note)}</span>` : ''}`]]) +
       `<p><a class="button small" href="${esc(issueLink(`Correction: claim ${c.id}`, reportBody))}" target="_blank" rel="noopener noreferrer">${esc(tr('claim.report'))} ↗</a></p>
-       <p class="small-note">${esc(tr('claim.report.note'))}</p>` + historyHtml(state.versions, 'claims', id, tr),
-    mount: mountVersions
+       <p class="small-note">${esc(tr('claim.report.note'))}</p>` + claimReviewPanelHtml(c, tr, link) + historyHtml(state.versions, 'claims', id, tr),
+    mount: root => { mountVersions(root); mountReviewForms(root, tr); }
   };
 }
 
@@ -614,7 +692,7 @@ document.addEventListener('click', e => { if (!e.target.closest('.topbar')) setM
 // Findings and Actions lists need only the small findings and actions files; a single finding, the species page,
 // sources, claims, Explore and Download need the claims too.
 const needsLists = (head, id) => (head === 'findings' && !id) || head === 'actions' || (head === 'species' && id);
-const needsFull = (head, id) => !needsLists(head, id) && ['explore', 'species', 'sources', 'claims', 'findings', 'download'].includes(head);
+const needsFull = (head, id) => !needsLists(head, id) && ['explore', 'species', 'sources', 'claims', 'findings', 'download', 'review', 'topics'].includes(head);
 
 function render(navigated = false) {
   setMenu(false);
@@ -638,6 +716,8 @@ function render(navigated = false) {
     else if (head === 'species') view = id ? viewSpecies(id) : viewSpeciesList();
     else if (head === 'sources') view = id ? viewSource(id) : viewSources(params);
     else if (head === 'claims' && id) view = viewClaim(id);
+    else if (head === 'review') view = viewReview(params);
+    else if (head === 'topics' && id === 'feed-acclimation') view = viewFeedAcclimation();
     else if (head === 'findings') view = id ? viewFinding(id) : viewFindings(params);
     else if (head === 'actions') view = viewActions(params);
     else if (head === 'pipeline') view = viewPipeline();
@@ -688,8 +768,8 @@ function renderFooter() {
   const list = items => `<ul>${items.map(([label, href, ext]) => `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(label)}${ext ? ' ↗' : ''}</a></li>`).join('')}</ul>`;
   const card = (key, items) => `<nav class="site-footer-card" aria-label="${esc(tr(key))}"><h2>${esc(tr(key))}</h2>${list(items)}</nav>`;
   $('#site-footer').innerHTML = `<div class="site-footer-panel"><div class="site-footer-cards">
-      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.findings'), link('findings')], [tr('nav.actions'), link('actions')], [tr('nav.sources'), link('sources')]])}
-      ${card('foot.learn', [[tr('nav.methods'), link('methods')], [tr('nav.download'), link('download')], [tr('nav.pipeline'), link('pipeline')], [tr('nav.corpus'), link('corpus')]])}
+      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.findings'), link('findings')], [tr('fa.nav'), link('topics/feed-acclimation')], [tr('nav.actions'), link('actions')], [tr('nav.sources'), link('sources')]])}
+      ${card('foot.learn', [[tr('nav.methods'), link('methods')], [tr('nav.download'), link('download')], [tr('nav.pipeline'), link('pipeline')], [tr('nav.corpus'), link('corpus')], [tr('rv.nav'), link('review')]])}
       ${card('foot.open', [['myrias.org', 'https://myrias.org/', true], [tr('footer.repo'), 'https://github.com/invi-bhagyesh/myrias', true]])}
       <div class="site-footer-card site-footer-cta"><div><p>${esc(tr('foot.cta'))}</p><a class="site-footer-button" href="${reviewLink}" target="_blank" rel="noopener noreferrer">${esc(tr('foot.cta.btn'))} <span aria-hidden="true">→</span></a></div></div>
     </div>

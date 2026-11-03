@@ -1,6 +1,7 @@
 // Merge a run's claims into the species store, so each run adds to what exists instead of starting over.
 //   node pipeline/merge.mjs --store DIR --claims final.jsonl --run run-2 --phase B [--records records.jsonl] [--meta sources-meta.json] [--date 2026-10-11]
 //   node pipeline/merge.mjs --store DIR --refresh-english rendered.jsonl   (copy English onto claims already merged)
+//   --first-claim 50001 --first-source 5001: where a new species' ids start, so they never collide with another species'
 // The store holds every claim that has passed (quote on the page, about welfare, supported or partly
 // supported), in the order it was added:
 //   DIR/claims.jsonl  one claim per line; uid (source + page + quote), release_id (C0001…, never reused),
@@ -30,11 +31,13 @@ export function sourceInfo(source, records, meta, sampleQuote = '') {
 }
 
 // Pure: the merged store and what changed.
-export function mergeIntoStore(store, incoming, { run, phase, date, records = new Map(), meta = {} }) {
+// A new species' store can start its ids in its own range (firstClaim, firstSource), so ids stay unique when
+// several species share one release.
+export function mergeIntoStore(store, incoming, { run, phase, date, records = new Map(), meta = {}, firstClaim = 1, firstSource = 1 }) {
   const claims = store.claims.map(c => ({ ...c })), sources = { ...store.sources };
   const byUid = new Map(claims.map((c, i) => [c.uid, i]));
-  let nextC = claims.reduce((m, c) => Math.max(m, Number(String(c.release_id).slice(1)) || 0), 0);
-  let nextS = Object.values(sources).reduce((m, s) => Math.max(m, Number(String(s.id).slice(1)) || 0), 0);
+  let nextC = claims.reduce((m, c) => Math.max(m, Number(String(c.release_id).slice(1)) || 0), firstClaim - 1);
+  let nextS = Object.values(sources).reduce((m, s) => Math.max(m, Number(String(s.id).slice(1)) || 0), firstSource - 1);
   const tag = { run, phase, date };
   let added = 0, again = 0, sourcesAdded = 0;
   for (const c of incoming.filter(passes)) {
@@ -93,7 +96,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(JSON.stringify({ english_updated: r.updated, store_claims: r.claims.length, with_english: r.claims.filter(c => c.statement_en).length }));
     process.exit(0);
   }
-  const merged = mergeIntoStore(readStore(dir), jl(arg('claims')), { run: arg('run'), phase: arg('phase'), date: arg('date', new Date().toISOString().slice(0, 10)), records, meta });
+  const merged = mergeIntoStore(readStore(dir), jl(arg('claims')), { run: arg('run'), phase: arg('phase'), date: arg('date', new Date().toISOString().slice(0, 10)), records, meta,
+    firstClaim: Number(arg('first-claim', 1)), firstSource: Number(arg('first-source', 1)) });
   writeStore(dir, merged);
   console.log(JSON.stringify({ ...merged.entry, store_claims: merged.claims.length, store_sources: Object.keys(merged.sources).length }));
 }

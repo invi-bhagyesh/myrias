@@ -32,7 +32,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const trim = process.argv.includes('--trim-references');
   const records = arg('records') ? new Map(jl(arg('records')).map(r => [r.id, r])) : new Map();
   const bySource = new Map();
-  for (const f of arg('pages').split(',')) for (const p of jl(f)) (bySource.get(p.source) || bySource.set(p.source, []).get(p.source)).push(p);
+  // A PDF's pages are named after its file (R….pdf); when that is a search record, use the record id, so later
+  // steps find the paper's details.
+  const name = s => (!records.has(s) && records.has(String(s).replace(/\.pdf$/i, '')) ? String(s).replace(/\.pdf$/i, '') : s);
+  for (const f of arg('pages').split(',')) for (const p0 of jl(f)) { const p = { ...p0, source: name(p0.source) }; (bySource.get(p.source) || bySource.set(p.source, []).get(p.source)).push(p); }
   const pages = [], sources = [];
   for (const [source, list] of [...bySource.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
     const kept = trim ? trimReferences(list) : [...list].sort((a, b) => a.page - b.page);

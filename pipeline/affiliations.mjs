@@ -10,7 +10,7 @@
 // Results are cached in STORE/paper-meta.json, so a later run only reads new papers. The site file holds
 // bibliographic metadata only (institution names, countries, kinds), never paper text.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, basename, dirname } from 'node:path';
 import { createClient } from './llm.mjs';
 
 export const AFFIL_VERSION = 'affiliations-0.1';
@@ -46,6 +46,7 @@ export function affiliationGroup(meta) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i < 0 ? d : process.argv[i + 1]; };
   const store = arg('store'), cachePath = join(store, 'paper-meta.json');
+  const species = basename(dirname(join(store, '.')));
   const sources = JSON.parse(readFileSync(join(store, 'sources.json'), 'utf8'));
   const first = new Map();
   for (const f of arg('pages').split(',')) for (const l of readFileSync(f, 'utf8').split('\n')) {
@@ -86,11 +87,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // The site file: one row per paper we read, by its release id.
   const papers = Object.entries(sources).map(([k, s]) => {
     const m = cache[k], inst = m?.institutions?.[m.first_author];
-    return { id: s.id, lang: s.lang, year: s.year, group: affiliationGroup(m), kind: m?.kind || 'unknown', country: inst?.country?.toUpperCase() || null,
+    return { id: s.id, species, lang: s.lang, year: s.year, group: affiliationGroup(m), kind: m?.kind || 'unknown', country: inst?.country?.toUpperCase() || null,
       institution: inst?.name || null, countries: m ? [...new Set(m.institutions.map(i => String(i.country).toUpperCase()).filter(Boolean))] : [] };
   }).sort((a, b) => a.id.localeCompare(b.id));
   const models = [...new Set(Object.values(cache).map(m => m.model))];
-  writeFileSync(arg('out'), JSON.stringify({ version: AFFIL_VERSION, as_of: new Date().toISOString().slice(0, 10), models, papers }) + '\n');
+  // Other species' rows already in the site file are kept, so each species can be run on its own.
+  const prev = existsSync(arg('out')) ? JSON.parse(readFileSync(arg('out'), 'utf8')) : { papers: [], models: [] };
+  const kept = (prev.papers || []).filter(p => (p.species || 'mandarin-fish') !== species).map(p => ({ species: 'mandarin-fish', ...p }));
+  writeFileSync(arg('out'), JSON.stringify({ version: AFFIL_VERSION, as_of: new Date().toISOString().slice(0, 10), models: [...new Set([...(prev.models || []), ...models])], papers: [...kept, ...papers] }) + '\n');
   const count = f => papers.reduce((m, p) => ({ ...m, [f(p)]: (m[f(p)] || 0) + 1 }), {});
   console.log({ papers: papers.length, read_now: todo.length, europepmc_lists: epmc.size, no_pages: missing.length, by_group: count(p => p.group), by_kind: count(p => p.kind),
     international: papers.filter(p => p.countries.length > 1).length, spent_usd: client.spent });

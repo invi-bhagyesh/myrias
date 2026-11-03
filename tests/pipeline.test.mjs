@@ -411,6 +411,9 @@ test('step record: call logs summarised by model and finish reason', async () =>
   assert.equal(s.cost_usd, 0.503);
   assert.equal(s.models['a/x'].calls, 2);
   assert.deepEqual(s.finish, { stop: 2, length: 1 });
+  // A resumed step appends to the same log; only calls from its own start count.
+  const timed = [{ at: '2026-11-03T10:00:00Z', cost_usd: 1 }, { at: '2026-11-03T12:00:00Z', cost_usd: 2 }].map(JSON.stringify);
+  assert.equal(callSummary(timed, '2026-11-03T11:00:00Z').cost_usd, 2);
 });
 
 test('merge: claims add to the store once, public ids never change, papers get details from records', async () => {

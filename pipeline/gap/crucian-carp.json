@@ -1,0 +1,11 @@
+{
+ "_note": "Search terms for crucian carp. Only the species block is used by pipeline/intake.mjs. Carassius auratus is also the goldfish, a laboratory and ornamental animal; papers that say goldfish are left out so the search stays on the farmed fish.",
+ "species": {
+  "id": "crucian-carp",
+  "scientific": "Carassius auratus / Carassius gibelio",
+  "english_terms": ["crucian carp", "gibel carp", "Prussian carp", "Carassius gibelio", "Carassius auratus gibelio", "Carassius carassius", "Carassius auratus"],
+  "chinese_terms": ["鲫"],
+  "chinese_query_terms": ["鲫鱼", "异育银鲫"],
+  "exclude_terms": ["goldfish"]
+ }
+}

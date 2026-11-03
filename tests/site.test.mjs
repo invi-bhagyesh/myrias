@@ -139,8 +139,12 @@ test('the public folder contains no PDFs or large files', () => {
   for (const p of walk(new URL('../public', import.meta.url).pathname)) {
     assert.ok(!/\.(pdf|docx?|epub)$/i.test(p), p);
     // The release shell (taxonomy, papers, practices) is the one file the first screen waits for; it is judged by
-    // what travels, compressed. Every other file stays small enough to fetch in pieces.
-    if (p.endsWith('/data/release.json')) assert.ok(gzipSync(readFileSync(p)).length < 250_000, `${p} is large compressed`);
+    // what travels, compressed, and grows with each species (its papers and practices). Every other file stays
+    // small enough to fetch in pieces.
+    if (p.endsWith('/data/release.json')) {
+      const nSpecies = JSON.parse(readFileSync(p, 'utf8')).species.length;
+      assert.ok(gzipSync(readFileSync(p)).length < 160_000 * nSpecies, `${p} is large compressed`);
+    }
     else assert.ok(statSync(p).size < 400_000, `${p} is large`);
   }
 });
@@ -313,14 +317,17 @@ test('corpus list: unpacks the column format, filters and sorts', async () => {
   const papers = unpackPapers(j);
   assert.equal(papers[0].file, 'intake/xml-pages.jsonl');
   assert.deepEqual(papers[1].topics, []);
-  assert.deepEqual(filterPapers(papers, FILTER_DEFAULTS).map(p => p.id), ['a', 'b']);
-  assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, about: false, sort: 'old' }).map(p => p.id), ['b', 'a', 'c']);
+  // Every paper by default, screened out or not; the stage filter narrows it.
+  assert.deepEqual(filterPapers(papers, FILTER_DEFAULTS).map(p => p.id), ['c', 'a', 'b']);
+  assert.deepEqual(papers.map(p => p.stage), ['read', 'no_full_text', 'screened_out']);
+  assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, stage: 'screened_out' }).map(p => p.id), ['c']);
+  assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, sort: 'old' }).map(p => p.id), ['b', 'a', 'c']);
   assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, q: 'li x' }).map(p => p.id), ['a']);
   assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, lang: 'zh' }).map(p => p.id), ['b']);
   assert.deepEqual(filterPapers(papers, { ...FILTER_DEFAULTS, ft: 'with' }).map(p => p.id), ['a']);
   for (const f of readdirSync(new URL('../public/data', import.meta.url)).filter(f => f.startsWith('corpus-papers'))) {
     const rows = unpackPapers(read(f));
-    assert.ok(rows.length && rows.every(p => p.id && p.title && !('abstract' in p)), f);
+    assert.ok(rows.length && rows.every(p => p.id && p.title && p.stage && !('abstract' in p)), f);
   }
 });
 
@@ -387,4 +394,29 @@ test('earlier versions: offered only for items an archived version lists', async
   assert.ok(historyHtml(V, 'findings', 'F2', (k, v) => t('en', k, v)).includes('Earlier versions (1)'));
   assert.ok(historyHtml(V, 'claims', 'C3', k => k, { open: true }).includes(' open'));
   assert.equal(historyHtml(null, 'claims', 'C3', k => k), '');
+});
+
+test('feed acclimation: practices about moving fish onto formulated feed, sorted into four groups; look-alikes left out', async () => {
+  const { isFeedAcclimation, feedGroup, feedModel } = await import('../public/site-topic.js');
+  for (const n of ['training mandarin fish to accept formulated feed', 'replacing live bait with artificial feed', 'feeding mode comparison (live prey vs formulated feed)', '驯食方法', 'timing of start of feed training'])
+    assert.ok(isFeedAcclimation(n), n);
+  for (const n of ['temperature acclimation control', 'flow velocity acclimation', 'recirculating aquaculture system acclimation', 'phosphorus/energy ratio in artificial feed', 'dietary carbohydrate level'])
+    assert.ok(!isFeedAcclimation(n), n);
+  assert.equal(feedGroup('domestication and selective breeding for formulated feed acceptance'), 'breeding');
+  assert.equal(feedGroup('compound probiotics during feed training'), 'aids');
+  assert.equal(feedGroup('live bait versus artificial feed'), 'compare');
+  assert.equal(feedGroup('timing of start of feed training'), 'method');
+  const m = feedModel(live);
+  assert.ok(m.findings.length > 20 && m.claims > 0 && m.papers > 0);
+  assert.equal(Object.values(m.byGroup).flat().length, m.findings.length);
+});
+
+test('expert review: export rows carry what the reviewer saw; stats split by the model verdict; CSV quotes safely', async () => {
+  const { exportRows, toCsv, reviewStats } = await import('../public/site-review.js');
+  const claims = new Map([['C1', { id: 'C1', source_id: 'S1', locator: { page: 3 }, quote: 'a "b"', text_en: 'x', verification: 'supported' }], ['C2', { id: 'C2', verification: 'partial' }]]);
+  const reviews = { C1: { verdict: 'wrong', issues: ['quote', 'english'], comment: 'no', at: 't' }, C2: { verdict: 'correct', issues: [], at: 't' } };
+  const rows = exportRows(reviews, claims);
+  assert.equal(rows[0].issues, 'quote;english'); assert.equal(rows[0].page, 3); assert.equal(rows[0].verification_by_model, 'supported');
+  assert.ok(toCsv(rows).includes('"a ""b"""'));
+  assert.deepEqual(reviewStats(reviews, claims), { n: 2, by: { wrong: 1, correct: 1 }, by_model: { supported: { wrong: 1 }, partial: { correct: 1 } } });
 });

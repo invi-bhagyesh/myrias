@@ -15,9 +15,10 @@ export function fileInfo(path) {
   return { path, bytes: data.length, rows, sha256: createHash('sha256').update(data).digest('hex') };
 }
 
-// Pure: what the call logs of a step say: calls, cost, models, finish reasons.
-export function callSummary(lines) {
-  const calls = lines.filter(Boolean).map(l => JSON.parse(l));
+// Pure: what the call logs of a step say: calls, cost, models, finish reasons. With since, only calls made from
+// then on count: a rerun that resumes appends to the same log, and the earlier attempt has its own ledger line.
+export function callSummary(lines, since = null) {
+  const calls = lines.filter(Boolean).map(l => JSON.parse(l)).filter(c => !since || !c.at || c.at >= since);
   const models = {};
   for (const c of calls) {
     const m = models[c.model || c.requested_model || 'unknown'] ||= { calls: 0, cost_usd: 0, input_tokens: 0, output_tokens: 0 };
@@ -46,7 +47,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const meta = {
     run: basename(root), phase, step, started, finished, seconds: Math.round((Date.parse(finished) - Date.parse(started)) / 1000),
     exit_code: r.status, command: cmd.join(' '), git_commit: commit, inputs,
-    outputs: files.filter(f => !f.endsWith('.log')).map(f => fileInfo(join(out, f))), ...callSummary(callLines)
+    outputs: files.filter(f => !f.endsWith('.log')).map(f => fileInfo(join(out, f))), ...callSummary(callLines, started)
   };
   writeFileSync(join(out, 'step.json'), JSON.stringify(meta, null, 1));
   appendFileSync(join(root, 'ledger.jsonl'), JSON.stringify({ run: meta.run, phase, step, started, finished, exit_code: r.status, calls: meta.calls, cost_usd: meta.cost_usd, outputs: meta.outputs.map(o => ({ path: basename(o.path), rows: o.rows })) }) + '\n');

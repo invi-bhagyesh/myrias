@@ -26,7 +26,9 @@ export function evidenceModel(data, lang = 'en') {
     a.color = c.color;
   }
   const inApps = new Set(data.applications.flatMap(a => a.claim_ids));
-  const claimTotal = data.claims.length || data.runs?.[0]?.counts?.claims_released || 0;
+  // Until the claim files arrive: the released counts of the runs for the species shown.
+  const shown = new Set(data.species.map(x => x.id));
+  const claimTotal = data.claims.length || (data.runs || []).filter(r => !r.species_id || shown.has(r.species_id)).reduce((n, r) => n + (r.counts?.claims_released || 0), 0);
   return {
     classes, problems, apps,
     totals: {

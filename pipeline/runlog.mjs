@@ -3,7 +3,7 @@
 //   node pipeline/runlog.mjs start   --store STORE --run run-3 --title "..." [--inputs FILE.json] [--release REL] [--note "..."]... [--planned]
 //   node pipeline/runlog.mjs finish  --store STORE --run run-3 --root RUN_DIR --release public/data/release.json [--note "..."]...
 //   node pipeline/runlog.mjs note    --store STORE --run run-3 --note "..."
-//   node pipeline/runlog.mjs publish --store STORE --out public/data/runs.json
+//   node pipeline/runlog.mjs publish --store STORE [--store STORE2 ...] --out public/data/runs.json
 // start snapshots the settings (model per stage, a fingerprint and version of every prompt, the ranking spec's
 // checksum), the code version, and the store as it stands (claims, papers, each finding's claim set, each
 // action), and lists what changed since the previous run: models, prompts, the spec, and the commits that
@@ -13,7 +13,7 @@
 // release with the snapshot: claims and papers added, findings new, rewritten, unchanged or gone, actions.
 // publish writes the site file without model costs (they stay in the private store).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execSync } from 'node:child_process';
 import { CONFIG } from './llm.mjs';
@@ -154,6 +154,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (cmd === 'start') await start(store);
   else if (cmd === 'finish') finish(store);
   else if (cmd === 'note') note(store);
-  else if (cmd === 'publish') { const runs = publicLog(load(store)); writeFileSync(arg('out'), JSON.stringify({ as_of: new Date().toISOString().slice(0, 10), runs }, null, 1) + '\n'); console.log({ runs: runs.length }); }
+  else if (cmd === 'publish') {
+    // Every species' log (--store may repeat), each run tagged with its species, newest first.
+    const runs = args('store').flatMap(s => publicLog(load(s)).map(r => ({ species_id: basename(dirname(join(s, '.'))), ...r })))
+      .sort((a, b) => String(b.started || '9').localeCompare(String(a.started || '9')));
+    writeFileSync(arg('out'), JSON.stringify({ as_of: new Date().toISOString().slice(0, 10), runs }, null, 1) + '\n'); console.log({ runs: runs.length });
+  }
   else { console.error('usage: runlog.mjs start|finish|note|publish --store STORE ...'); process.exit(1); }
 }

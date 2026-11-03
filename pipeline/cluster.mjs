@@ -1,5 +1,5 @@
 // Cluster practices: find the practice names that mean the same practice, so their claims are read together.
-//   node pipeline/cluster.mjs --release public/data/release.json --store STORE_DIR [--threshold 0.30] [--log FILE]
+//   node pipeline/cluster.mjs --release public/data/release.json --store STORE_DIR [--species-id ID] [--threshold 0.30] [--log FILE]
 // Follows the shape of Inverse Constitutional AI (Findeis et al., 2025): propose, cluster, test.
 //   1. Items: one per practice name within a technology class, as the claims name it.
 //   2. Embed each item (its names in English and Chinese plus up to three of its claims) and cluster
@@ -30,10 +30,11 @@ export const CLUSTER_SCHEMA = { type: 'object', additionalProperties: false, req
 const norm = s => String(s || '').toLowerCase().trim();
 
 // Pure: one item per technology class and practice name, with its claim ids.
-export function practiceItems(release) {
+export function practiceItems(release, speciesId = null) {
   const iv = new Map(release.interventions.map(i => [i.id, i]));
   const items = new Map();
   for (const a of release.applications) {
+    if (speciesId && a.species_id !== speciesId) continue;
     const i = iv.get(a.intervention_id);
     const name = norm(i?.name_en || i?.name_zh || a.intervention_id);
     const key = `${a.technology_class}|${name}`;
@@ -76,7 +77,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   rel.claims = (rel.claim_files || []).flatMap(f => JSON.parse(readFileSync(join(dir, f), 'utf8')));
   const claims = new Map(rel.claims.map(c => [c.id, c]));
   const client = createClient({ logPath: arg('log', join(store, '..', `cluster-${new Date().toISOString().slice(0, 10)}.calls.jsonl`)) });
-  const items = practiceItems(rel);
+  // With --species-id only that species' practices are clustered: practices are never merged across species.
+  const items = practiceItems(rel, arg('species-id') || null);
   // Embeddings, cached by the text embedded.
   const cachePath = join(store, 'practice-embeddings.json');
   const cache = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, 'utf8')) : {};

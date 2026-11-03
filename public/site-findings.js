@@ -72,7 +72,7 @@ export function findingPageHtml(f, ctx) {
     <dl class="facts"><dt>${esc(tr('fd.practice'))}</dt><dd>${esc(practice)}</dd><dt>${esc(tr('fd.problem'))}</dt><dd>${esc(taxonomyLabel('welfare_problems', f.welfare_problem))}</dd>
       <dt>${esc(tr('fd.class'))}</dt><dd>${esc(taxonomyLabel('technology_classes', f.technology_class))}</dd><dt>${esc(tr('fd.evidence'))}</dt><dd>${esc(meta(f, tr))}${f.counts.measured ? ' · ' + esc(tr('fd.measured', { n: f.counts.measured })) : ''}</dd>
       <dt>${esc(tr('fd.written'))}</dt><dd>${esc(how)}${f.check && f.check !== 'numbers_ok' ? ` <span class="fd-warn">${esc(tr('fd.check.' + f.check))}</span>` : ''}</dd></dl>
-    <p class="small-note">${esc(tr('fd.note'))}</p>
+    <p class="small-note">${esc(tr('fd.note'))} <a href="${link('review', { finding: f.id })}">${esc(tr('rv.finding'))} →</a></p>
     ${findingBasisHtml(f, ctx)}
     <h2>${esc(tr(f.counts.claims === 1 ? 'fd.claims.h.one' : 'fd.claims.h', { n: n(f.counts.claims) }))}</h2><ol class="fd-claimlist">${claimItemsHtml(f, ctx)}</ol>`;
 }
