@@ -159,8 +159,10 @@ function viewCorpus() {
       .then(parts => { state.papers = parts.flatMap(unpackPapers); if (parseHash().parts[0] === 'corpus') render(); }).catch(() => { state.papers = []; });
   }
   const topics = c.charts ? Object.keys(c.charts.topics) : [];
+  const inList = new Set((state.papers || []).map(p => p.species));
+  const listSpecies = state.data.species.filter(s => inList.has(s.id)).map(s => [s.id, pick(s, 'common', state.lang)]);
   const listBlock = `<h2 id="papers">${esc(tr('cl.title'))}</h2><p class="cv-note">${esc(tr('cl.lead'))}</p>` + (state.papers
-    ? `<div class="cl-root" data-cl-root>${controlsHtml(state.corpusFilter || FILTER_DEFAULTS, topics, tr)}<p class="cl-count" data-cl-count></p><ul class="cl-list" data-cl-list></ul><button type="button" class="button small" data-cl-more hidden></button></div>`
+    ? `<div class="cl-root" data-cl-root>${controlsHtml(state.corpusFilter || FILTER_DEFAULTS, topics, tr, listSpecies)}<p class="cl-count" data-cl-count></p><ul class="cl-list" data-cl-list></ul><button type="button" class="button small" data-cl-more hidden></button></div>`
     : `<p class="loading">${esc(tr('loading'))}</p>`);
   return {
     title: tr('nav.corpus'),

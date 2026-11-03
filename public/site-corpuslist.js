@@ -69,10 +69,12 @@ export function paperHtml(p, tr, c) {
     <dl class="cl-facts">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></details></li>`;
 }
 
-export function controlsHtml(f, topics, tr) {
+// species: [[id, name]] of the species in the list; the species menu shows when there is more than one.
+export function controlsHtml(f, topics, tr, species = []) {
   const opt = (v, label, cur) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(label)}</option>`;
   return `<div class="cl-controls">
     <input type="search" data-cl="q" value="${esc(f.q)}" placeholder="${esc(tr('cl.search'))}" aria-label="${esc(tr('cl.search'))}">
+    ${species.length > 1 ? `<select data-cl="species" aria-label="${esc(tr('nav.species'))}">${opt('all', tr('cl.species.all'), f.species)}${species.map(([id, name]) => opt(id, name, f.species)).join('')}</select>` : ''}
     <select data-cl="lang" aria-label="${esc(tr('cl.lang'))}">${opt('all', tr('cl.lang.all'), f.lang)}${opt('en', tr('cv.lang.en'), f.lang)}${opt('zh', tr('cv.lang.zh'), f.lang)}</select>
     <select data-cl="topic" aria-label="${esc(tr('cl.topic'))}">${opt('all', tr('cl.topic.all'), f.topic)}${topics.map(k => opt(k, tr('cv.topic.' + k), f.topic)).join('')}</select>
     <select data-cl="ft" aria-label="${esc(tr('cl.ft'))}">${opt('all', tr('cl.ft.all'), f.ft)}${opt('with', tr('cl.ft.with'), f.ft)}${opt('without', tr('cl.ft.without'), f.ft)}</select>
