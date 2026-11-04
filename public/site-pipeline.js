@@ -27,7 +27,7 @@ export const STEP_TEXT = {
     what: ['A model reads each page window and writes every claim with a word-for-word quote.', '模型逐个窗口阅读，写出每条论断并附逐字引文。'],
     how: ['Overlapping windows so a claim across a page break is seen whole; repeated claims from the overlap are merged.', '窗口相互重叠，跨页论断不会被截断；重叠处的重复论断会合并。'] },
   quote: { name: ['Check the quote', '核对引文'], in: ['claims', '条'], out: ['quotes found on the page', '条引文在原页找到'],
-    what: ['Code checks that every quote is really on its page. Claims whose quote is not are dropped.', '代码核对每条引文确实在所在页，找不到的论断被剔除。'],
+    what: ['Code checks that each quote is on its page. Claims whose quote is not are dropped.', '代码核对每条引文确实在所在页，找不到的论断被剔除。'],
     how: ['Ignores spacing, punctuation width and known glyph errors. It can only reject, never wrongly accept.', '忽略空格、全半角标点和已知字形错误；只会拒绝，不会错误放行。'] },
   map: { name: ['Map', '归类'], in: ['claims', '条'], out: ['about welfare', '条涉及福利'],
     what: ['Label each claim: is it about welfare, which technology, which welfare problem, what kind of evidence.', '为每条论断标注：是否涉及福利、属于哪类技术、哪种福利问题、证据类型。'],
@@ -43,7 +43,7 @@ export const STEP_TEXT = {
     how: ['In batches, each batch sees the groups so far. The original wording is kept.', '分批处理，每批都能看到已有分组；保留原始措辞。'] },
   merge: { name: ['Merge into the store', '并入数据库'], in: ['claims that passed', '条通过'], out: ['claims in the store', '条在库中'],
     what: ['Add the run to everything found before. A claim found again is not added twice.', '把本次结果并入已有数据；再次找到的论断不会重复加入。'],
-    how: ['Permanent ids for claims and papers, so links never break.', '论断和论文使用永久编号，链接不会失效。'] },
+    how: ['Permanent ids for claims and papers keep links working.', '论断和论文使用永久编号，链接不会失效。'] },
   export: { name: ['Release', '发布'], in: ['claims', '条'], out: ['claims released', '条已发布'],
     what: ['Write the files this site reads.', '写出本站读取的文件。'],
     how: ['Split into small files. Quotes longer than 600 characters are held back.', '拆分为小文件；超过 600 字符的引文暂不发布。'] },
@@ -55,10 +55,10 @@ export const STEP_TEXT = {
     how: ['Counts and strength by code; the sentence by a model from the claims only; numbers checked against them.', '计数和强度由代码给出；句子由模型仅依据论断撰写；数字逐一核对。'] },
   actions: { name: ['Draft actions', '起草行动'], in: ['multi-paper findings', '条多篇论文发现'], out: ['draft actions', '条行动草案'],
     what: ['Propose next steps from findings that rest on two or more papers.', '依据来自两篇及以上论文的发现提出下一步。'],
-    how: ['Each action cites its findings and says who would do it, what is not yet known, the risks, and why. Ranking is the next step.', '每项行动都引用其依据的发现，并写明由谁执行、尚不清楚之处、风险和理由。排序在下一步进行。'] },
+    how: ['Actions cite their findings and give who would do it, what is not yet known, the risks and the reasoning. Ranking comes next.', '每项行动都引用其依据的发现，并写明由谁执行、尚不清楚之处、风险和理由。排序在下一步进行。'] },
   rank: { name: ['Rank actions', '行动排序'], in: ['draft actions', '条行动草案'], out: ['ranked', '条已排序'],
-    what: ['A model ranks all actions against each other, following a written spec of what priority means.', '模型按一份写明“优先级”含义的规范，把所有行动放在一起排序。'],
-    how: ['The spec (pipeline/priority-spec.md) weighs welfare gain, strength of evidence, whether it can be done now and the risk if wrong. Each action gets a score, a reason and a note per criterion; change the spec to change the ranking.', '规范（pipeline/priority-spec.md）权衡福利收益、证据强度、能否立即实施以及出错时的风险。每项行动都有分数、理由和逐项评估；修改规范即可改变排序。'] },
+    what: ['A model ranks all actions together, following a written spec of what priority means.', '模型按一份写明“优先级”含义的规范，把所有行动放在一起排序。'],
+    how: ['The spec (pipeline/priority-spec.md) weighs welfare gain, strength of evidence, whether it can be done now and the risk if wrong. Each action gets a score, a reason and a note per criterion. Changing the spec changes the ranking.', '规范（pipeline/priority-spec.md）权衡福利收益、证据强度、能否立即实施以及出错时的风险。每项行动都有分数、理由和逐项评估；修改规范即可改变排序。'] },
   audit: { name: ['Expert audit', '专家审核'], in: null, out: null,
     what: ['A fish-welfare expert checks a sample of claims and findings, and the error rates are published.', '由鱼类福利专家抽查论断和发现，并公布错误率。'],
     how: ['Not started. Until then everything here is a lead to check, not a finding to rely on.', '尚未开始。在此之前，这里的一切都只是待核查的线索。'] }
@@ -94,8 +94,8 @@ function exampleHtml(key, e, c) {
     case 'screen': return paper + ok(L('Names the species in the title', '标题中出现该物种')) +
       ok(L('Touches welfare topics: ', '涉及福利主题：') + e.screen.topics.map(t => c.taxonomyLabel('welfare_problems', t).replace(/_/g, ' ')).join(', ')) +
       `<p class="ex-verdict v-pass">${esc(L('Kept', '保留'))}</p>`;
-    case 'supplied': return `<p class="ex-p">${esc(L('Our example came from the open search, not from a supplied batch, so this step passed it by.', '本例来自开放检索，而非人工提供的论文，因此不经过这一步。'))}</p>`;
-    case 'fetch': return paper + `<p class="ex-file"><span>${esc((e.fetch.format || 'pdf').toUpperCase())}</span>${esc(L('Open-access full text downloaded. Stays private, never published.', '已下载开放获取全文；仅内部使用，不公开。'))}</p>`;
+    case 'supplied': return `<p class="ex-p">${esc(L('Our example came from the open search, so it did not go through this step.', '本例来自开放检索，而非人工提供的论文，因此不经过这一步。'))}</p>`;
+    case 'fetch': return paper + `<p class="ex-file"><span>${esc((e.fetch.format || 'pdf').toUpperCase())}</span>${esc(L('Open-access full text downloaded. Kept private, not published.', '已下载开放获取全文；仅内部使用，不公开。'))}</p>`;
     case 'prepare': return `<div class="ex-pages">${Array.from({ length: e.prepare.pages }, (_, k) => `<span class="${k + 1 === e.prepare.page ? 'on' : ''}">${k + 1}</span>`).join('')}</div>` +
       `<p class="ex-p">${esc(L(`${e.prepare.pages} pages of text, each with its page number. Our claim will come from page ${e.prepare.page}.`, `共 ${e.prepare.pages} 页文本，每页保留页码；我们的论断来自第 ${e.prepare.page} 页。`))}</p>`;
     case 'extract': return `<div class="ex-windows" aria-hidden="true">${Array.from({ length: e.extract.windows }, (_, k) => `<span class="${k === e.extract.window ? 'on' : ''}"></span>`).join('')}</div>` +
@@ -115,7 +115,7 @@ function exampleHtml(key, e, c) {
       `<p class="ex-k">${esc(L(`Checked by ${short(e.verify.model)} (${lab(e.verify.model)}); the claim was written by ${short(e.extract.model)} (${lab(e.extract.model)}).`, `由 ${short(e.verify.model)}（${lab(e.verify.model)}）核验；论断由 ${short(e.extract.model)}（${lab(e.extract.model)}）写出。`))}</p>`;
     case 'render': return `<div class="ex-two"><div><span class="ex-k">${esc(L('record', '原始记录'))}</span><p lang="${esc(e.extract.lang)}">${hi(e.extract.statement, e.render.numbers)}</p></div>
         <div><span class="ex-k">English</span><p lang="en">${hi(e.render.text_en, e.render.numbers)}</p></div></div>` +
-      ok(L(`Every number survives: ${e.render.numbers.join(', ')}`, `所有数字都保留：${e.render.numbers.join('、')}`));
+      ok(L(`All numbers kept: ${e.render.numbers.join(', ')}`, `所有数字都保留：${e.render.numbers.join('、')}`));
     case 'reconcile': return `<div class="ex-flow"><div><span class="ex-k">${esc(L('as written', '原写法'))}</span><b lang="zh">${esc(e.reconcile.before[0])}</b>${e.reconcile.before[1] ? `<span>${esc(e.reconcile.before[1])}</span>` : ''}</div>
         <span class="ex-arrow" aria-hidden="true">→</span><div class="on"><span class="ex-k">${esc(L('practice name', '做法名称'))}</span><b>${esc(L(e.reconcile.after[0], e.reconcile.after[1]))}</b><span>${esc(L(e.reconcile.after[1], e.reconcile.after[0]))}</span></div></div>` +
       `<p class="ex-k">${esc(L('The wording in the paper is kept beside the name.', '论文原有措辞与名称一同保留。'))}</p>`;
