@@ -57,7 +57,7 @@ export function mountBrowse(root, { items, groups, groupOf, test, render, tr, pa
     if (view === 'rank') {
       list.innerHTML = rows.length ? `<ol class="${esc(listClass)}">${rows.slice(0, shown).map(render).join('')}</ol>` : `<p class="br-none">${esc(tr('br.none'))}</p>`;
       more.hidden = rows.length <= shown;
-      more.textContent = tr('br.more', { n: Math.min(pageSize, rows.length - shown) });
+      more.textContent = more.hidden ? '' : tr('br.more', { n: Math.min(pageSize, rows.length - shown) });
     } else {
       list.innerHTML = [...byGroup].filter(([, l]) => l.length).map(([g, l]) => {
         const all = open.has(g), cut = all ? l : l.slice(0, perGroup);

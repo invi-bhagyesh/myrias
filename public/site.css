@@ -33,6 +33,8 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+/* Anything marked hidden stays hidden, whatever display a class gives it (buttons are inline-flex). */
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 var(--font); -webkit-font-smoothing: antialiased; }
 a { color: var(--accent); text-underline-offset: 3px; }
 a:hover { text-decoration-thickness: 2px; }
@@ -1476,7 +1478,12 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .rn { background: var(--card-bg); border: 1px solid var(--card-line, var(--line)); border-radius: 22px; box-shadow: var(--card-shadow); padding: 18px 22px 16px; scroll-margin-top: 80px; }
 .rn.st-running { border-color: var(--accent); }
 .rn.st-planned { border-style: dashed; box-shadow: none; background: transparent; }
-.rn-h { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 18px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; }
+.rn-h { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 18px; flex-wrap: wrap; cursor: pointer; list-style: none; }
+.rn-h::-webkit-details-marker { display: none; }
+.rn-h > div::before { content: '▸'; display: inline-block; width: 1em; color: var(--soft); transition: transform .15s; }
+.rn-d[open] > .rn-h > div::before { transform: rotate(90deg); }
+.rn-d[open] > .rn-h { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; }
+.rn-brief { display: block; margin: 4px 0 0 1em; font-size: 13px; color: var(--soft); }
 .rn-h h3 { margin: 0; font: 600 19px/1.25 var(--font); letter-spacing: -.01em; display: inline; }
 .rn-id { font: 600 12px var(--mono); color: var(--accent); margin-right: 10px; }
 .rn-meta { margin: 0; font: 12px var(--mono); color: var(--soft); }
@@ -1599,13 +1606,13 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .ac-review-link { margin: 4px 0 0; font-size: 14px; }
 
 /* Species tabs at the top of list pages (Findings, Actions, Explore, Review, the Corpus paper list) */
-.sp-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 18px; }
-.sp-tab { display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px 6px 8px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--card-bg); color: var(--ink); font: inherit; font-size: 15px; text-decoration: none; cursor: pointer; }
-.sp-tab img { width: 40px; height: 36px; object-fit: contain; }
-.sp-tab-all { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--bg); color: var(--soft); font-size: 15px; }
-.sp-tab b { font: 600 12px var(--mono); color: var(--soft); }
+.sp-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 14px; }
+.sp-tab { display: inline-flex; align-items: center; gap: 6px; padding: 3px 11px 3px 5px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--card-bg); color: var(--ink); font: inherit; font-size: 13.5px; text-decoration: none; cursor: pointer; }
+.sp-tab img { width: 26px; height: 24px; object-fit: contain; }
+.sp-tab-all { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--bg); color: var(--soft); font-size: 12px; }
+.sp-tab b { font: 600 11px var(--mono); color: var(--soft); }
 .sp-tab:hover { border-color: var(--accent); }
 .sp-tab[aria-current] { background: var(--accent); border-color: var(--accent); color: var(--card-bg); }
 .sp-tab[aria-current] b { color: var(--card-bg); }
 .sp-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-@media (max-width: 600px) { .sp-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } .sp-tab { flex: none; font-size: 14px; } }
+@media (max-width: 600px) { .sp-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } .sp-tab { flex: none; } }

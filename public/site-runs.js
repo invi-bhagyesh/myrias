@@ -32,11 +32,13 @@ export function runCardHtml(r, ctx) {
       ${res.funnel ? `<p class="small-note">${esc(tr('rn.funnel', { e: n(res.funnel.claims_extracted), q: n(res.funnel.quote_found), w: n(res.funnel.about_welfare), r: n(res.funnel.released) }))}</p>` : ''}
       ${res.note_en ? `<p class="small-note">${linkIds(res.note_en, link)}</p>` : ''}` : `<p class="small-note">${esc(tr('rn.pending'))}</p>`;
   const models = Object.entries(r.settings?.models || {}).map(([k, m]) => `<span><i>${esc(k)}</i>${esc(m.split('/').pop())}</span>`).join('');
-  return `<article class="rn st-${esc(r.status)}" id="run-${esc(r.id)}"><header class="rn-h"><div><span class="rn-id">${esc(r.id)}</span><h3>${esc(r.title_en || r.id)}</h3></div>
-      <p class="rn-meta"><span class="rn-st">${esc(tr('rn.status.' + r.status))}</span>${esc(day(r.started))}${r.finished && day(r.finished) !== day(r.started) ? ' – ' + esc(day(r.finished)) : ''}${secs ? ' · ' + esc(dur(secs)) : ''}${calls ? ' · ' + esc(tr('rn.ncalls', { n: n(calls) })) : ''}${r.git?.commit ? ` · <a href="${esc(REPO + r.git.commit)}" target="_blank" rel="noopener"><code>${esc(r.git.commit)}</code></a>` : ''}</p></header>
+  // Folded by default: the header (and what the run added) is the summary; the rest opens on click.
+  const brief = res ? `<span class="rn-brief">${esc(tr('rn.brief', { c: signed(res.claims.added), f: n(res.findings.total) }))}</span>` : '';
+  return `<article class="rn st-${esc(r.status)}" id="run-${esc(r.id)}"><details class="rn-d"><summary class="rn-h"><div><span class="rn-id">${esc(r.id)}</span><h3>${esc(r.title_en || r.id)}</h3>${brief}</div>
+      <p class="rn-meta"><span class="rn-st">${esc(tr('rn.status.' + r.status))}</span>${esc(day(r.started))}${r.finished && day(r.finished) !== day(r.started) ? ' – ' + esc(day(r.finished)) : ''}${secs ? ' · ' + esc(dur(secs)) : ''}${calls ? ' · ' + esc(tr('rn.ncalls', { n: n(calls) })) : ''}${r.git?.commit ? ` · <a href="${esc(REPO + r.git.commit)}" target="_blank" rel="noopener"><code>${esc(r.git.commit)}</code></a>` : ''}</p></summary>
     <div class="rn-body"><section><h4>${esc(tr('rn.read'))}</h4>${inputs}${models ? `<p class="rn-models">${models}</p>` : ''}${r.settings?.window_en ? `<p class="small-note">${esc(r.settings.window_en)}</p>` : ''}</section>
       <section><h4>${esc(ch.since ? tr('rn.changed', { prev: ch.since }) : tr('rn.first'))}</h4>${changes ? `<ul class="rn-changes">${changes}</ul>` : `<p class="small-note">${esc(tr('rn.nochange'))}</p>`}${code}</section>
-      <section><h4>${esc(tr('rn.result'))}</h4>${tiles}</section></div>${stepRows}</article>`;
+      <section><h4>${esc(tr('rn.result'))}</h4>${tiles}</section></div>${stepRows}</details></article>`;
 }
 
 export function runsHtml(R, ctx) {
