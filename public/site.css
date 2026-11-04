@@ -1377,7 +1377,8 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 /* ===== Compact rows that open to the full card ===== */
 .fd, .ac { padding: 0; display: block; }
 .row > .row-sum { list-style: none; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 14px; }
-.ac .row > .row-sum { grid-template-columns: 22px auto minmax(0, 1fr) auto; }
+.ac .row > .row-sum { grid-template-columns: 22px 110px minmax(0, 1fr) auto; }
+.ac .row > .row-sum .ac-type { justify-self: stretch; text-align: center; white-space: nowrap; }
 .row > .row-sum::-webkit-details-marker { display: none; }
 .row-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14.5px; }
 .row[open] > .row-sum .row-line { white-space: normal; font-size: 15.5px; line-height: 1.5; }
