@@ -69,12 +69,14 @@ export function paperHtml(p, tr, c) {
     <dl class="cl-facts">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></details></li>`;
 }
 
-// species: [[id, name]] of the species in the list; the species menu shows when there is more than one.
+// species: [[id, name, count, image]] of the species in the list; the species tabs show when there is more than one.
 export function controlsHtml(f, topics, tr, species = []) {
   const opt = (v, label, cur) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(label)}</option>`;
-  return `<div class="cl-controls">
+  const total = species.reduce((n, x) => n + (x[2] || 0), 0);
+  const tab = (id, name, n, img) => `<button type="button" class="sp-tab" data-cl-species="${esc(id)}"${(f.species || 'all') === id ? ' aria-current="page"' : ''}>${img ? `<img src="${esc(img)}" alt="" width="40" height="36">` : '<span class="sp-tab-all" aria-hidden="true">✶</span>'}<span>${esc(name)}</span><b>${Number(n).toLocaleString()}</b></button>`;
+  const tabs = species.length > 1 ? `<div class="sp-tabs" role="group" aria-label="${esc(tr('nav.species'))}">${tab('all', tr('cl.species.all'), total)}${species.map(([id, name, n, img]) => tab(id, name, n, img)).join('')}</div>` : '';
+  return `${tabs}<div class="cl-controls">
     <input type="search" data-cl="q" value="${esc(f.q)}" placeholder="${esc(tr('cl.search'))}" aria-label="${esc(tr('cl.search'))}">
-    ${species.length > 1 ? `<select data-cl="species" aria-label="${esc(tr('nav.species'))}">${opt('all', tr('cl.species.all'), f.species)}${species.map(([id, name]) => opt(id, name, f.species)).join('')}</select>` : ''}
     <select data-cl="lang" aria-label="${esc(tr('cl.lang'))}">${opt('all', tr('cl.lang.all'), f.lang)}${opt('en', tr('cv.lang.en'), f.lang)}${opt('zh', tr('cv.lang.zh'), f.lang)}</select>
     <select data-cl="topic" aria-label="${esc(tr('cl.topic'))}">${opt('all', tr('cl.topic.all'), f.topic)}${topics.map(k => opt(k, tr('cv.topic.' + k), f.topic)).join('')}</select>
     <select data-cl="ft" aria-label="${esc(tr('cl.ft'))}">${opt('all', tr('cl.ft.all'), f.ft)}${opt('with', tr('cl.ft.with'), f.ft)}${opt('without', tr('cl.ft.without'), f.ft)}</select>
@@ -101,6 +103,12 @@ export function mountCorpusList(root, papers, c, tr, state) {
     f[el.dataset.cl] = el.type === 'checkbox' ? el.checked : el.value; shown = PAGE; draw();
   }));
   more.addEventListener('click', () => { shown += PAGE; draw(); });
+  root.querySelectorAll('[data-cl-species]').forEach(b => b.addEventListener('click', () => {
+    f.species = b.dataset.clSpecies; shown = PAGE;
+    root.querySelectorAll('[data-cl-species]').forEach(x => x.toggleAttribute('aria-current', x === b));
+    root.querySelectorAll('[data-cl-species][aria-current]').forEach(x => x.setAttribute('aria-current', 'page'));
+    draw();
+  }));
   // Institutions, most papers first: clicking one searches for it.
   const insts = [...papers.reduce((m, p) => (p.institution ? m.set(p.institution, (m.get(p.institution) || 0) + 1) : m), new Map())].sort((a, b) => b[1] - a[1]);
   const il = root.querySelector('[data-cl-inst-list]');

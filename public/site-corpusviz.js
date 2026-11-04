@@ -153,8 +153,6 @@ export function authorModel(meta) {
     countries: [...new Set(papers.filter(p => !p.group.startsWith('cn_') && p.country).map(p => p.country))].sort() };
 }
 
-// Country codes as names in the page's language, where the browser knows them.
-const countryNames = (codes, lang) => { let dn = null; try { dn = new Intl.DisplayNames([lang], { type: 'region' }); } catch { /* codes as they are */ } return codes.map(c => (dn && dn.of(c)) || c); };
 
 export function authorFlowHtml(meta, tr) {
   const m = authorModel(meta);
@@ -186,7 +184,5 @@ export function authorFlowHtml(meta, tr) {
   // Phones: the same counts as two lists of bars.
   const list = (rows, col, key) => `<ul class="cv-bars">${rows.map(([k, v]) => `<li><span class="cv-bar-label">${esc(tr(key + k))}</span><span class="cv-bar"><i style="width:${(100 * v / m.n).toFixed(1)}%;background:${col(k)}"></i></span><span class="cv-bar-n">${n(v)}</span></li>`).join('')}</ul>`;
   const phone = `<h3>${esc(tr('af.left'))}</h3>${list(m.groups, g => color[g], 'af.g.')}<h3>${esc(tr('af.right'))}</h3>${list(m.kinds, () => 'var(--soft)', 'af.k.')}`;
-  const pct = x => Math.round(100 * x / m.n) + '%';
-  const sum = tr('af.sum', { n: n(m.n), china: n(m.china), pc: pct(m.china), intl: n(m.intl), countries: countryNames(m.countries, tr('af.lang')).join(', ') || '—' });
-  return `<div class="fx-sankey">${svg}</div><div class="fx-phone">${phone}</div><p class="fx-keep fx-keep-row af-sum">${esc(sum)}</p>`;
+  return `<div class="fx-sankey">${svg}</div><div class="fx-phone">${phone}</div>`;
 }

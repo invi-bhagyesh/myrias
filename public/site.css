@@ -435,7 +435,8 @@ h1, h2, h3 { font-weight: 500; }
 .graph-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ===== Header: three floating glass pills, with a liquid highlight on the nav ===== */
-.topbar { background: transparent; border: 0; padding: 14px 0 0; pointer-events: none; }
+/* The bar behind the pills is solid, so the page never shows through around them when it scrolls. */
+.topbar { background: var(--bg); border: 0; border-bottom: 1px solid var(--line); padding: 12px 0 12px; pointer-events: none; }
 .topbar-in { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; min-height: 0; width: calc(100% - 40px); max-width: 1280px; margin: 0 auto; padding: 0; pointer-events: none; }
 .topbar-in > * { pointer-events: auto; }
 .glass { background: color-mix(in srgb, var(--card) 88%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); border-radius: 999px;
@@ -976,7 +977,7 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .sp-art { margin: 0; display: grid; place-items: center; }
 .sp-art img { width: 100%; max-width: 440px; height: auto; image-rendering: pixelated; filter: drop-shadow(0 18px 28px color-mix(in srgb, var(--lang-en) 16%, transparent)); }
 .sp-contents { margin-bottom: 8px; }
-.sp-sec { padding: 26px 0 8px; scroll-margin-top: 80px; }
+.sp-sec { padding: 26px 0 8px; scroll-margin-top: 140px; }
 .sp-sec h2 { font-size: 26px; font-weight: 500; letter-spacing: -.015em; margin: 0 0 8px; }
 .sp-sec h3 { font-size: 16px; margin: 26px 0 10px; }
 .sp-lead { max-width: 68ch; color: var(--soft); line-height: 1.6; margin: 0 0 16px; }
@@ -1127,7 +1128,7 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 
 /* ===== Long lists: index, filters, grouped or ranked ===== */
 .br { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 18px; }
-.br-index { position: sticky; top: 86px; max-height: calc(100vh - 110px); overflow: auto; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--card-bg); }
+.br-index { position: sticky; top: 89px; max-height: calc(100vh - 110px); overflow: auto; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--card-bg); }
 .br-index-h { margin: 0 0 6px; font: 500 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
 .br-index ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .br-index a { display: flex; justify-content: space-between; gap: 8px; padding: 6px 8px; border-radius: 8px; color: var(--ink); text-decoration: none; font-size: 13.5px; }
@@ -1146,7 +1147,7 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .br-gmore { background: none; border: 0; padding: 4px 0; color: var(--accent); font: 13.5px var(--font); cursor: pointer; }
 .br-more { margin: 6px 0 20px; }
 .br-none { color: var(--soft); }
-.sp-contents { position: sticky; top: 76px; z-index: 5; background: color-mix(in srgb, var(--bg) 96%, transparent); backdrop-filter: blur(6px); }
+.sp-contents { position: sticky; top: 77px; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
 .sp-contents a[aria-current] { color: var(--accent); font-weight: 600; }
 @media (max-width: 860px) {
   .br { grid-template-columns: 1fr; gap: 12px; }
@@ -1155,7 +1156,7 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
   .br-index a { white-space: nowrap; border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; }
   .br-f select, .br-f input[type=search], .br-search input { min-width: 0; width: 100%; }
   .br-filters, .br-f { width: 100%; }
-  .sp-contents { top: 70px; overflow-x: auto; flex-wrap: nowrap; }
+  .sp-contents { top: 66px; overflow-x: auto; flex-wrap: nowrap; }
   .sp-contents a { white-space: nowrap; }
 }
 .br-fbox > summary { display: none; }
@@ -1415,7 +1416,7 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .sp-sec:nth-of-type(4n) { --sp-band: color-mix(in srgb, var(--band-sand) 70%, transparent); }
 .sp-sec > h2::before { content: counter(spsec, decimal-leading-zero); display: block; font: 500 11px var(--mono); letter-spacing: .08em; color: var(--accent); margin-bottom: 6px; }
 /* Findings and Actions pages: the group's title stays at the top while you scroll through it. */
-.br-group > h3 { position: sticky; top: 74px; z-index: 3; margin: 0 0 10px; padding: 10px 0 8px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.br-group > h3 { position: sticky; top: 77px; z-index: 3; margin: 0 0 10px; padding: 10px 0 8px; background: var(--bg); border-bottom: 1px solid var(--line); }
 .br-group + .br-group { margin-top: 26px; }
 /* Fade in as each block reaches the screen. */
 @media (prefers-reduced-motion: no-preference) {
@@ -1424,7 +1425,7 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 }
 @media (max-width: 860px) {
   .sp-sec { padding: 36px 0 30px; }
-  .br-group > h3 { top: 68px; font-size: 15px; }
+  .br-group > h3 { top: 66px; font-size: 15px; }
 }
 .load-skel { display: grid; gap: 12px; padding: 24px 0; max-width: 760px; }
 .load-skel i { display: block; height: 56px; border-radius: 16px; background: linear-gradient(90deg, var(--line) 0%, color-mix(in srgb, var(--line) 40%, transparent) 50%, var(--line) 100%); background-size: 200% 100%; opacity: .6; }
@@ -1596,3 +1597,15 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .rv-action { font-size: 17px; }
 .rv-findings { display: grid; gap: 6px; padding-left: 18px; font-size: 14px; }
 .ac-review-link { margin: 4px 0 0; font-size: 14px; }
+
+/* Species tabs at the top of list pages (Findings, Actions, Explore, Review, the Corpus paper list) */
+.sp-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 18px; }
+.sp-tab { display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px 6px 8px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--card-bg); color: var(--ink); font: inherit; font-size: 15px; text-decoration: none; cursor: pointer; }
+.sp-tab img { width: 40px; height: 36px; object-fit: contain; }
+.sp-tab-all { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--bg); color: var(--soft); font-size: 15px; }
+.sp-tab b { font: 600 12px var(--mono); color: var(--soft); }
+.sp-tab:hover { border-color: var(--accent); }
+.sp-tab[aria-current] { background: var(--accent); border-color: var(--accent); color: var(--card-bg); }
+.sp-tab[aria-current] b { color: var(--card-bg); }
+.sp-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 600px) { .sp-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } .sp-tab { flex: none; font-size: 14px; } }

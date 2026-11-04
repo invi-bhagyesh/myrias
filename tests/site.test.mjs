@@ -246,7 +246,8 @@ test('the live release validates, is not a sample, and has enough claims for the
   assert.ok(live.claims.every(c => ['supported', 'partial'].includes(c.verification) && c.quote.length <= 600 && c.locator.page));
   assert.ok(live.claims.every(c => c.audit === 'not_audited'));
   assert.ok(!('suggestions' in live));
-  const g = layoutGraph(buildGraph(live, 'en'));
+  // The force layout grows with the square of the claims; the site no longer draws it, so a slice is enough.
+  const g = layoutGraph(buildGraph({ ...live, claims: live.claims.slice(0, 2000) }, 'en'));
   assert.ok(g.nodes.some(n => n.type === 'claim'));
 });
 

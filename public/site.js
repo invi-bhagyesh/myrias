@@ -10,7 +10,7 @@ import { matrixChart } from './site-chart.js';
 
 import { placeholderGraph, simplifyGraph, mountGraph, legendHtml, MIN_REAL_CLAIMS } from './site-graph.js';
 import { evidenceModel, evidenceMapHtml, mountEvidenceMap } from './site-evmap.js';
-import { speciesModel, speciesPageHtml, speciesCardsHtml } from './site-species.js';
+import { speciesModel, speciesPageHtml, speciesCardsHtml, PROFILES } from './site-species.js';
 import { findingsListHtml, findingPageHtml, findingText, findingItemHtml, byWeight, claimItemsHtml } from './site-findings.js';
 import { actionItemHtml, rankNoteHtml } from './site-actions.js';
 import { browseHtml, mountBrowse } from './site-browse.js';
@@ -159,8 +159,8 @@ function viewCorpus() {
       .then(parts => { state.papers = parts.flatMap(unpackPapers); if (parseHash().parts[0] === 'corpus') render(); }).catch(() => { state.papers = []; });
   }
   const topics = c.charts ? Object.keys(c.charts.topics) : [];
-  const inList = new Set((state.papers || []).map(p => p.species));
-  const listSpecies = state.data.species.filter(s => inList.has(s.id)).map(s => [s.id, pick(s, 'common', state.lang)]);
+  const inList = (state.papers || []).reduce((m, p) => m.set(p.species, (m.get(p.species) || 0) + 1), new Map());
+  const listSpecies = state.data.species.filter(s => inList.has(s.id)).map(s => [s.id, pick(s, 'common', state.lang), inList.get(s.id), PROFILES[s.id]?.image]);
   const listBlock = `<h2 id="papers">${esc(tr('cl.title'))}</h2><p class="cv-note">${esc(tr('cl.lead'))}</p>` + (state.papers
     ? `<div class="cl-root" data-cl-root>${controlsHtml(state.corpusFilter || FILTER_DEFAULTS, topics, tr, listSpecies)}<p class="cl-count" data-cl-count></p><ul class="cl-list" data-cl-list></ul><button type="button" class="button small" data-cl-more hidden></button></div>`
     : `<p class="loading">${esc(tr('loading'))}</p>`);
@@ -178,18 +178,6 @@ function viewExplore(params) {
   const speciesId = params.get('species') || 'all';
   const matrix = L.buildMatrix(d, speciesId);
   const selected = params.get('cell') || '';
-  const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : d.runs.reduce((n, r) => n + (r.counts?.claims_supported ?? 0), 0);
-  const zhSources = d.sources.filter(s => s.lang === 'zh').length;
-  const aside = `<aside class="lead-aside"><h2>${esc(tr('land.ledger'))}</h2><dl class="ledger">
-    <dt>${esc(tr('land.l.species'))}</dt><dd>${d.species.length}</dd>
-    <dt>${esc(tr('land.l.apps'))}</dt><dd>${d.applications.length}</dd>
-    <dt>${esc(tr(isDemo(d) ? 'land.l.claims.demo' : 'land.l.claims'))}</dt><dd>${supported}</dd>
-    <dt>${esc(tr('land.l.sources'))}</dt><dd>${d.sources.length}</dd>
-    <dt>${esc(tr('land.l.zh'))}</dt><dd>${zhSources}</dd></dl></aside>`;
-
-  const speciesOptions = [`<option value="all">${esc(tr('land.allspecies'))}</option>`]
-    .concat(d.species.map(s => `<option value="${esc(s.id)}" ${s.id === speciesId ? 'selected' : ''}>${esc(pick(s, 'common', state.lang))}</option>`)).join('');
-
   const head = matrix.columns.map(c => `<th scope="col">${esc(pick(c, '', state.lang))}</th>`).join('');
   const body = matrix.rows.map(row => {
     const cells = row.cells.map(cell => {
@@ -220,10 +208,8 @@ function viewExplore(params) {
 
   return {
     title: tr('nav.explore'),
-    html: lead(tr('land.kicker'), tr('land.title'), tr('land.desc'), aside) +
-      `<p class="subnav">${esc(tr('explore.browse'))}: <a href="${link('species')}">${esc(tr('nav.species'))}</a> \u00b7 <a href="${link('sources')}">${esc(tr('nav.sources'))}</a></p>
-       <div class="section-head"><h2>${esc(tr('land.explorer'))}</h2>
-        <label class="inline-field">${esc(tr('land.species'))} <select id="species-filter" aria-label="${esc(tr('land.species'))}">${speciesOptions}</select></label></div>
+    html: `<div class="section-head explore-head"><h1>${esc(tr('land.explorer'))}</h1>
+        <p class="subnav">${esc(tr('explore.browse'))}: <a href="${link('species')}">${esc(tr('nav.species'))}</a> \u00b7 <a href="${link('sources')}">${esc(tr('nav.sources'))}</a></p></div>${speciesTabsHtml('explore', params, Object.fromEntries([['all', d.runs.reduce((n, r) => n + (r.counts?.claims_released || 0), 0)], ...d.runs.map(r => [r.species_id, r.counts?.claims_released])]))}
        <p class="small-note">${esc(tr('land.how'))}</p>
        ${matrixChart({ matrix, data: d, lang: state.lang, selected, speciesId, link, tr })}
        <details class="matrix-details"><summary>${esc(tr('chart.table'))}</summary><div class="matrix-wrap" tabindex="0" role="region" aria-label="${esc(tr('land.explorer'))}"><table class="matrix"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div></details>
@@ -239,7 +225,7 @@ const statusText = d => isDemo(d) ? tr('status.demo') : tr(d.release.sample ? 's
 const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-sand)', 'var(--band-clay)', 'var(--band-mint)', 'var(--bg)'];
 // Each section sits on a tint; neighbouring bands meet on a shared mix of their two colours.
 const band = i => `--band-from: color-mix(in srgb, ${BANDS[i - 1]} 50%, ${BANDS[i]}); --band-color: ${BANDS[i]}; --band-to: color-mix(in srgb, ${BANDS[i]} 50%, ${BANDS[i + 1]});`;
-const SECTIONS = [['numbers', 'sec.numbers'], ['how', 'how.title'], ['map', 'fig.title'], ['rely', 'prin.title'], ['help', 'join.title']];
+const SECTIONS = [['numbers', 'sec.numbers'], ['map', 'fig.title'], ['help', 'join.title']];
 
 function viewOverview() {
   const d = state.data;
@@ -282,17 +268,10 @@ function viewOverview() {
       <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2>${d.release.sample ? `<p>${esc(tr(note))}</p>` : ''}</div>
         <ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul></section>
 
-      <section class="band-section" id="how" style="${band(2)}"><div class="story-copy"><h2>${esc(tr('how.title'))}</h2><p>${esc(tr('how.lead'))}</p></div>
-        <div class="band-card"><dl class="arena-protocol">${[1, 2, 3].map(i => `<div><dt>${esc(tr(`how.${i}.t`))}</dt><dd>${esc(tr(`how.${i}.d`))}</dd></div>`).join('')}</dl></div></section>
-
       <section class="band-section" id="map" style="${band(3)}"><div class="story-copy"><h2>${esc(tr('fig.title'))}</h2><p>${esc(tr('map.lead'))}</p></div>
         <div class="band-split is-wide"><div class="home-chart">${matrixChart({ matrix, data: d, lang: state.lang, selected: null, speciesId: 'all', link, tr })}
           <a class="button small" href="${link('explore')}">${esc(tr('fig.cta'))}</a></div>
           <aside class="band-notes" aria-label="${esc(tr('fig.title'))}">${notes.map(([k, t, text]) => `<div class="band-note"><span class="band-note-dot" aria-hidden="true"></span><p class="band-note-kicker">${esc(tr(k))}</p><h3>${esc(t)}</h3><p>${esc(text)}</p></div>`).join('')}</aside></div></section>
-
-      <section class="band-section" id="rely" style="${band(4)}"><div class="story-copy"><h2>${esc(tr('prin.title'))}</h2><p>${esc(tr('rely.lead'))}</p></div>
-        <div class="band-card"><ul class="arena-rows">${rows('prin')}</ul></div>
-        <p class="story-small"><strong>${esc(tr('cav.label'))}.</strong> ${esc(tr('cav.text'))}</p></section>
 
       <section class="story-closing" id="help"><h2>${esc(tr('join.title'))}</h2><p class="small-note">${esc(tr('help.lead'))}</p>
         <ul class="arena-rows">${rows('join')}</ul>
@@ -327,10 +306,17 @@ document.addEventListener('toggle', e => {
 }, true);
 
 // A species filter for a list, only when the list holds more than one species.
-function speciesFilter(items) {
-  const ids = [...new Set(items.map(x => x.species_id))];
-  return ids.length > 1 ? [{ key: 'species', type: 'select', label: tr('nav.species'), options: state.data.species.filter(s => ids.includes(s.id)).map(s => [s.id, pick(s, 'common', state.lang)]) }] : [];
+// Tabs at the top of a list page to swap species: All, then each species with its picture and how many items it
+// has. Each tab is a link, so a species view can be shared. counts: { all, [speciesId]: n } (a missing count shows none).
+function speciesTabsHtml(route, params, counts = {}) {
+  if (state.data.species.length < 2) return '';
+  const cur = params.get('species') === 'all' ? '' : params.get('species') || '';
+  const keep = Object.fromEntries([...params].filter(([k]) => !['species', 'i', 'cell'].includes(k)));
+  const n = x => (x == null ? '' : `<b>${Number(x).toLocaleString()}</b>`);
+  const tab = (id, label, count, img) => `<a class="sp-tab" href="${link(route, id ? { ...keep, species: id } : keep)}"${cur === id ? ' aria-current="page"' : ''}>${img ? `<img src="${esc(img)}" alt="" width="40" height="36">` : '<span class="sp-tab-all" aria-hidden="true">✶</span>'}<span>${esc(label)}</span>${n(count)}</a>`;
+  return `<nav class="sp-tabs" aria-label="${esc(tr('nav.species'))}">${tab('', tr('land.allspecies'), counts.all)}${state.data.species.map(s => tab(s.id, pick(s, 'common', state.lang), counts[s.id], PROFILES[s.id]?.image)).join('')}</nav>`;
 }
+const countBySpecies = list => list.reduce((m, x) => ({ ...m, [x.species_id]: (m[x.species_id] || 0) + 1 }), { all: list.length });
 
 // Feed acclimation: findings on moving fish from live or fresh food onto formulated feed (see site-topic.js).
 function viewFeedAcclimation() {
@@ -346,15 +332,15 @@ function viewFeedAcclimation() {
 // Actions (?kind=action): every current draft action, by species and rank; ?species= narrows to one species.
 // Reviews stay in the browser.
 function reviewQueue(params) {
-  const d = state.data, fById = new Map((d.findings || []).map(f => [f.id, f]));
+  const d = state.data, fById = new Map((d.findings || []).map(f => [f.id, f])), sp = params.get('species');
   if (params.get('kind') === 'action') {
-    const spOrder = id => d.species.findIndex(s => s.id === id), sp = params.get('species');
+    const spOrder = id => d.species.findIndex(s => s.id === id);
     return [...(d.actions || [])].filter(a => !sp || a.species_id === sp).sort((a, b) => spOrder(a.species_id) - spOrder(b.species_id) || (a.rank ?? 1e9) - (b.rank ?? 1e9));
   }
   let ids;
   if (params.get('finding')) ids = fById.get(params.get('finding'))?.claim_ids || [];
   else if (params.get('source')) ids = d.claims.filter(c => c.source_id === params.get('source')).map(c => c.id);
-  else ids = [...(d.actions || [])].sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9)).flatMap(a => a.finding_ids.flatMap(f => fById.get(f)?.claim_ids || []));
+  else ids = [...(d.actions || [])].filter(a => !sp || a.species_id === sp).sort((a, b) => (a.rank ?? 1e9) - (b.rank ?? 1e9)).flatMap(a => a.finding_ids.flatMap(f => fById.get(f)?.claim_ids || []));
   return [...new Set(ids)].map(id => state.index.claims.get(id)).filter(Boolean);
 }
 function viewReview(params) {
@@ -368,15 +354,18 @@ function viewReview(params) {
   const pct = k => (st.n ? Math.round(100 * (st.by[k] || 0) / st.n) + '%' : '—');
   const spName = id => pick(d.species.find(s => s.id === id) || {}, 'common', state.lang) || id;
   const scope = isAction ? (params.get('species') ? tr('rv.a.scope.species', { s: spName(params.get('species')) }) : tr('rv.a.scope'))
-    : params.get('finding') ? tr('rv.scope.finding', { id: params.get('finding') }) : params.get('source') ? tr('rv.scope.source', { id: params.get('source') }) : tr('rv.scope.actions');
-  const tabs = `<nav class="rv-tabs" aria-label="${esc(tr('rv.kicker'))}"><a href="${link('review')}"${isAction ? '' : ' aria-current="page"'}>${esc(tr('rv.tab.claims'))}</a><a href="${link('review', { kind: 'action' })}"${isAction ? ' aria-current="page"' : ''}>${esc(tr('rv.tab.actions'))}</a></nav>`;
+    : params.get('finding') ? tr('rv.scope.finding', { id: params.get('finding') }) : params.get('source') ? tr('rv.scope.source', { id: params.get('source') })
+    : params.get('species') ? tr('rv.scope.species', { s: spName(params.get('species')) }) : tr('rv.scope.actions');
+  // Species tabs for the default sets (not when reviewing one finding or one paper).
+  const spTabs = params.get('finding') || params.get('source') ? '' : speciesTabsHtml('review', params, isAction ? countBySpecies(d.actions || []) : {});
+  const tabs = `<nav class="rv-tabs" aria-label="${esc(tr('rv.kicker'))}"><a href="${link('review', params.get('species') ? { species: params.get('species') } : {})}"${isAction ? '' : ' aria-current="page"'}>${esc(tr('rv.tab.claims'))}</a><a href="${link('review', { kind: 'action', ...(params.get('species') ? { species: params.get('species') } : {}) })}"${isAction ? ' aria-current="page"' : ''}>${esc(tr('rv.tab.actions'))}</a></nav>`;
   const nav = `<div class="rv-nav"><a class="button small" href="${link('review', { ...q, i: Math.max(0, i - 1) })}"${i ? '' : ' aria-disabled="true"'}>← ${esc(tr('rv.prev'))}</a>
       <span>${esc(tr('rv.pos', { i: todo.length ? i + 1 : 0, n: todo.length, all: queue.length }))}</span>
       <a class="button small" href="${link('review', { ...q, i: i + 1 })}"${i + 1 < todo.length ? '' : ' aria-disabled="true"'}>${esc(tr('rv.next'))} →</a>
       <a class="rv-toggle" href="${link('review', { ...q, all: params.get('all') ? '' : '1', i: 0 })}">${esc(tr(params.get('all') ? 'rv.only.todo' : 'rv.show.all'))}</a></div>`;
   const card = !c ? `<p class="empty">${esc(tr(queue.length ? (isAction ? 'rv.a.done' : 'rv.done') : 'rv.empty'))}</p>`
     : isAction ? reviewActionCardHtml(c, { ...findingCtx(), findings: new Map((d.findings || []).map(f => [f.id, f])), speciesName: spName }) : reviewCardHtml(c, { ...findingCtx() });
-  return { title: tr(isAction ? 'rv.a.title' : 'rv.title'), html: lead(tr('rv.kicker'), tr(isAction ? 'rv.a.title' : 'rv.title'), tr(isAction ? 'rv.a.lead' : 'rv.lead')) + tabs +
+  return { title: tr(isAction ? 'rv.a.title' : 'rv.title'), html: lead(tr('rv.kicker'), tr(isAction ? 'rv.a.title' : 'rv.title'), tr(isAction ? 'rv.a.lead' : 'rv.lead')) + tabs + spTabs +
       `<p class="rv-demo">${esc(tr('rv.demo'))}</p>
       <div class="rv-stats"><span><b>${st.n}</b> ${esc(tr('rv.st.n'))}</span>${['correct', 'partly', 'wrong', 'unsure'].map(k => `<span class="v-${k}"><b>${pct(k)}</b> ${esc(tr(vp + k))}</span>`).join('')}
         <button type="button" class="button small" data-rv-export="json">${esc(tr('rv.export.json'))}</button><button type="button" class="button small" data-rv-export="csv">${esc(tr('rv.export.csv'))}</button>
@@ -441,13 +430,14 @@ function goneView(kind, id, kicker) {
 function viewFindings(params) {
   const d = state.data, sp = params.get('species') || '';
   const items = (d.findings || []).filter(f => !sp || f.species_id === sp).sort(byWeight);
+  const tabs = speciesTabsHtml('findings', params, countBySpecies(d.findings || []));
   const tax = d.taxonomy;
   const filters = [
     { key: 'q', type: 'search', label: tr('br.search'), placeholder: tr('fd.search.ph') },
     { key: 'strength', type: 'select', label: tr('fd.f.strength'), options: ['agree', 'mixed', 'against', 'described', 'one_paper'].map(k => [k, tr('fd.strength.' + k)]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: tax.welfare_problems.map(p => [p.id, pick(p, '', state.lang)]) },
-    { key: 'multi', type: 'check', label: tr('fd.f.multi') }, ...speciesFilter(items)];
-  return { title: tr('nav.findings'), html: lead(tr('fd.kicker'), tr('fd.page.title'), tr('fd.page.lead', { n: items.length.toLocaleString(), multi: items.filter(f => f.counts.papers > 1).length })) +
+    { key: 'multi', type: 'check', label: tr('fd.f.multi') }];
+  return { title: tr('nav.findings'), html: lead(tr('fd.kicker'), tr('fd.page.title'), tr('fd.page.lead', { n: items.length.toLocaleString(), multi: items.filter(f => f.counts.papers > 1).length })) + tabs +
       `<p class="fa-banner"><a href="${link('topics/feed-acclimation')}"><b>${esc(tr('fa.title'))}</b> ${esc(tr('fa.banner'))} →</a></p>` +
       browseHtml({ filters, views: [['group', tr('br.view.group')], ['rank', tr('br.view.rank')]], tr }),
     mount: root => mountBrowse(root, { items, tr, listClass: 'fd-list', groups: tax.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: f => f.technology_class,
@@ -483,9 +473,10 @@ function viewActions(params) {
     { key: 'type', type: 'select', label: tr('ac.f.type'), options: ['adopt', 'avoid', 'test_on_farms', 'monitor', 'research'].filter(t => items.some(a => a.type === t)).map(t => [t, tr('ac.type.' + t)]) },
     { key: 'who', type: 'select', label: tr('ac.f.who'), options: [...new Set(items.map(a => a.who))].map(w => [w, tr('ac.who.' + w.replace(/ /g, '_'))]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) },
-    ...speciesFilter(items)];
+  ];
+  const tabs = speciesTabsHtml('actions', params, countBySpecies(ver ? state.archivedActions[vr] : d.actions || []));
   return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => (!sp || f.species_id === sp) && f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
-      (ver ? '' : `<p class="ac-review-link"><a href="${link('review', { kind: 'action', ...(sp ? { species: sp } : {}) })}">${esc(tr('rv.a.go'))} →</a></p>`) +
+      tabs + (ver ? '' : `<p class="ac-review-link"><a href="${link('review', { kind: 'action', ...(sp ? { species: sp } : {}) })}">${esc(tr('rv.a.go'))} →</a></p>`) +
       actionVersionsHtml(params) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
       browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
@@ -929,10 +920,6 @@ document.addEventListener('click', event => {
 });
 
 document.addEventListener('change', event => {
-  if (event.target.id === 'species-filter') {
-    const { params } = parseHash();
-    location.hash = link('explore', { species: event.target.value, cell: params.get('cell') || '' });
-  }
   if (event.target.id === 'source-lang') updateSourceList();
 });
 document.addEventListener('input', event => { if (event.target.id === 'source-q') updateSourceList(); });
