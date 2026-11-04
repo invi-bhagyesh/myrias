@@ -37,8 +37,13 @@ export function mountBrowse(root, { items, groups, groupOf, test, render, tr, pa
   let shown = pageSize, expanded = false;
   const applyExpand = () => box.querySelectorAll('[data-b-list] [data-row]').forEach(d => { d.open = expanded; });
   const ex = box.querySelector('[data-bexpand]');
-  ex.addEventListener('click', () => { expanded = !expanded; ex.setAttribute('aria-pressed', String(expanded)); ex.textContent = tr(expanded ? 'br.collapse' : 'br.expand'); applyExpand(); });
   const open = new Set();
+  // Expand all means everything: every row in the list and every row of every group, not only those on screen.
+  ex.addEventListener('click', () => {
+    expanded = !expanded; ex.setAttribute('aria-pressed', String(expanded)); ex.textContent = tr(expanded ? 'br.collapse' : 'br.expand');
+    if (expanded) { shown = Infinity; groups.forEach(([g]) => open.add(g)); } else { shown = pageSize; open.clear(); }
+    draw();
+  });
   const idOf = g => 'br-g-' + String(g).replace(/[^a-z0-9_-]/gi, '-');
   const draw = () => {
     const rows = items.filter(it => test(it, values));
@@ -62,7 +67,7 @@ export function mountBrowse(root, { items, groups, groupOf, test, render, tr, pa
       more.hidden = true;
       list.querySelectorAll('[data-bgroup]').forEach(b => b.addEventListener('click', () => { const g = b.dataset.bgroup; open.has(g) ? open.delete(g) : open.add(g); draw(); }));
     }
-    if (expanded) applyExpand();
+    if (expanded) { [...byGroup.keys()].forEach(g => open.add(g)); applyExpand(); }
     // Filtered down to one item from the address: open it.
     else if (rows.length === 1 && Object.values(initial).some(Boolean)) list.querySelector('[data-row]')?.setAttribute('open', '');
     box.querySelectorAll('[data-bjump]').forEach(a => a.addEventListener('click', e => {
