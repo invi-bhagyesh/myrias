@@ -165,7 +165,7 @@ test('pixel landscape is deterministic, decorative and merges equal-height colum
 test('every id used by the overview contents list is a section the page defines', () => {
   const src = readFileSync(new URL('../public/site.js', import.meta.url), 'utf8');
   const ids = [...src.matchAll(/\['(\w+)', '[\w.]+'\]/g)].map(m => m[1]).filter(id => ['numbers', 'how', 'map', 'rely', 'help'].includes(id));
-  assert.deepEqual(ids, ['numbers', 'map', 'help']);
+  assert.deepEqual(ids, ['map', 'help']);
   for (const id of ids) assert.ok(src.includes(`id="${id}"`), id);
 });
 

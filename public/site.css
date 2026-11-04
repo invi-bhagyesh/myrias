@@ -1651,3 +1651,20 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 @media (max-width: 600px) { .ac-body { padding: 12px 12px 14px; } .ac-fcards { grid-template-columns: 1fr; } }
 /* An open row shows its whole line, on phones too (closed rows stay clamped to two lines). */
 .row[open] > .row-sum .row-line { display: block; -webkit-line-clamp: unset; overflow: visible; white-space: normal; }
+
+/* ===== List pages (Findings, Actions): compact header and one toolbar row ===== */
+.list-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; padding: 28px 0 14px; border-bottom: 1px solid var(--line); }
+.list-head-main { min-width: 0; }
+.list-head h1 { margin: 4px 0 4px; font-size: clamp(26px, 3.2vw, 34px); letter-spacing: -.025em; line-height: 1.1; }
+.list-head p { margin: 0; font-size: 14px; color: var(--soft); }
+.list-head-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.list-tools .sp-tabs { margin: 0; }
+.list-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 12px 0 16px; }
+.list-tools-l, .list-tools-r { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.list-tools .ac-versions { margin: 0; }
+.tool-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--card-bg); color: var(--ink); font-size: 13.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+.tool-btn.is-primary { background: var(--accent); border-color: var(--accent); color: var(--card-bg); }
+.tool-btn.is-primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); color: var(--card-bg); }
+.tool-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 700px) { .list-head { padding-top: 18px; } .list-tools .sp-tabs { width: 100%; } }
