@@ -1377,7 +1377,8 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 /* ===== Compact rows that open to the full card ===== */
 .fd, .ac { padding: 0; display: block; }
 .row > .row-sum { list-style: none; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 14px; }
-.ac .row > .row-sum { grid-template-columns: 22px auto minmax(0, 1fr) auto; }
+.ac .row > .row-sum { grid-template-columns: 22px 110px minmax(0, 1fr) auto; }
+.ac .row > .row-sum .ac-type { justify-self: stretch; text-align: center; white-space: nowrap; }
 .row > .row-sum::-webkit-details-marker { display: none; }
 .row-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14.5px; }
 .row[open] > .row-sum .row-line { white-space: normal; font-size: 15.5px; line-height: 1.5; }
@@ -1616,3 +1617,54 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .sp-tab[aria-current] b { color: var(--card-bg); }
 .sp-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 600px) { .sp-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } .sp-tab { flex: none; } }
+
+/* ===== Open action card: labelled blocks, findings as cards, folds at the end ===== */
+.ac-body { padding: 14px 18px 16px; display: grid; gap: 14px; }
+.ac-body .ac-head { margin: 0; gap: 6px; }
+.ac-body .ac-who { font-size: 13px; color: var(--ink); font-weight: 500; }
+.ac-blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.ac-block { padding: 12px 14px; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); }
+.ac-block h4, .ac-sub { margin: 0 0 6px; font: 500 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+.ac-block p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.ac-block-why { grid-column: 1 / -1; background: color-mix(in srgb, var(--accent) 7%, var(--bg)); border-color: color-mix(in srgb, var(--accent) 25%, transparent); }
+.ac-block-why h4 { color: var(--accent); }
+.ac-block-risk h4 { color: var(--danger); }
+.ac-sub { margin: 2px 0 -6px; }
+.ac-fcards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.ac-fcard { display: flex; flex-direction: column; border-radius: 14px; border: 1px solid var(--line); background: var(--card-bg); overflow: hidden; }
+.ac-fcard-main { display: grid; gap: 6px; padding: 11px 13px 10px; color: var(--ink); text-decoration: none; }
+.ac-fcard-main:hover { background: color-mix(in srgb, var(--accent) 5%, var(--card-bg)); }
+.ac-fcard-main:hover .ac-fcard-text { color: var(--accent); }
+.ac-fcard-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 11px var(--mono); color: var(--soft); }
+.ac-fcard-top code { font: 600 11px var(--mono); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); padding: 1px 6px; border-radius: 6px; }
+.ac-fcard-strength { text-transform: uppercase; letter-spacing: .04em; font-size: 10px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line-strong); }
+.ac-fcard.s-agree .ac-fcard-strength { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.ac-fcard.s-mixed .ac-fcard-strength { color: var(--lang-zh); border-color: var(--lang-zh); }
+.ac-fcard.s-against .ac-fcard-strength { color: var(--danger); border-color: var(--danger); }
+.ac-fcard-n { margin-left: auto; }
+.ac-fcard-text { font-size: 13.5px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.ac-fcard-why { margin: 0; padding: 8px 13px 10px; border-top: 1px dashed var(--line); font-size: 12.5px; line-height: 1.45; color: var(--soft); }
+.ac-folds { display: grid; gap: 8px; }
+.ac-folds .ac-rankwhy { margin: 0; }
+.ac-folds .ac-rankwhy > summary span { font-weight: 400; color: var(--soft); }
+.ac-folds .rv-inline { margin: 0; padding: 10px 14px; border: 1px solid var(--line); border-top: 1px solid var(--line); border-radius: 14px; }
+@media (max-width: 600px) { .ac-body { padding: 12px 12px 14px; } .ac-fcards { grid-template-columns: 1fr; } }
+/* An open row shows its whole line, on phones too (closed rows stay clamped to two lines). */
+.row[open] > .row-sum .row-line { display: block; -webkit-line-clamp: unset; overflow: visible; white-space: normal; }
+
+/* ===== List pages (Findings, Actions): compact header and one toolbar row ===== */
+.list-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; padding: 28px 0 14px; border-bottom: 1px solid var(--line); }
+.list-head-main { min-width: 0; }
+.list-head h1 { margin: 4px 0 4px; font-size: clamp(26px, 3.2vw, 34px); letter-spacing: -.025em; line-height: 1.1; }
+.list-head p { margin: 0; font-size: 14px; color: var(--soft); }
+.list-head-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.list-tools .sp-tabs { margin: 0; }
+.list-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 12px 0 16px; }
+.list-tools-l, .list-tools-r { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.list-tools .ac-versions { margin: 0; }
+.tool-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--card-bg); color: var(--ink); font-size: 13.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+.tool-btn.is-primary { background: var(--accent); border-color: var(--accent); color: var(--card-bg); }
+.tool-btn.is-primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); color: var(--card-bg); }
+.tool-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 700px) { .list-head { padding-top: 18px; } .list-tools .sp-tabs { width: 100%; } }

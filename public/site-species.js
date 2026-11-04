@@ -11,15 +11,15 @@ export const PROFILES = {
     family: ['Sinipercidae', '鮨鲈科'],
     range: ['Rivers and lakes of East Asia, mainly China', '东亚的江河湖泊，主要在中国'],
     farmed: ['Farmed widely in China in ponds and cages', '在中国广泛养殖，以池塘和网箱为主'],
-    diet: ['Eats only live fish in the wild; farms train it onto dead or formulated feed', '野生状态下只吃活鱼；养殖中需要驯化它吃冰鲜鱼或人工饲料'],
+    diet: ['Eats only live fish in the wild. Farms train it onto dead fish or formulated feed', '野生状态下只吃活鱼；养殖中需要驯化它吃冰鲜鱼或人工饲料'],
     why: ['Feed training, live-prey supply, disease and stocking density shape most of its welfare on farms.', '驯食、活饵供应、疾病和放养密度决定了它在养殖中的大部分福利状况。']
   },
   'crucian-carp': {
     image: 'art/species/crucian-carp.webp',
     family: ['Cyprinidae', '鲤科'],
-    range: ['Fresh waters across Europe and Asia; the farmed forms come mainly from East Asia', '欧亚大陆的淡水水域；养殖品种主要来自东亚'],
+    range: ['Fresh waters across Europe and Asia. Farmed forms come mainly from East Asia', '欧亚大陆的淡水水域；养殖品种主要来自东亚'],
     farmed: ['One of the most farmed freshwater fish in China, in ponds, often with other carps', '中国养殖量最大的淡水鱼之一，以池塘养殖为主，常与其他鲤科鱼混养'],
-    diet: ['Omnivorous; takes formulated feed readily, unlike mandarin fish', '杂食性；与鳜鱼不同，容易接受配合饲料'],
+    diet: ['Omnivorous. Takes formulated feed readily, unlike mandarin fish', '杂食性；与鳜鱼不同，容易接受配合饲料'],
     why: ['Stocking density, water quality, disease (above all cyprinid herpesvirus 2), handling and slaughter shape most of its welfare on farms.', '放养密度、水质、疾病（尤其是鲤疱疹病毒 2 型）、捕捞操作和屠宰决定了它在养殖中的大部分福利状况。']
   }
 };

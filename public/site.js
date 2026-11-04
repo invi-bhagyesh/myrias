@@ -103,6 +103,11 @@ const auditBadge = a => badge(`b-audit-${a}`, tr(`audit.${a}`));
 const orUnknown = v => (v === null || v === undefined || v === '' ? `<span class="unknown">${esc(tr('unknown'))}</span>` : esc(v));
 const dl = rows => `<dl class="facts">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>`;
 const lead = (kicker, title, desc, aside = '') => `<section class="lead"><div><div class="record-type">${esc(kicker)}</div><h1>${esc(title)}</h1><p>${esc(desc)}</p></div>${aside}</section>`;
+// Compact header for list pages: title and one line of counts on the left, buttons to related pages on the right;
+// then one toolbar row (left: species tabs; right: other switches such as the version).
+const listHead = (kicker, title, sum, buttons = '') => `<header class="list-head"><div class="list-head-main">${kicker ? `<div class="record-type">${esc(kicker)}</div>` : ''}<h1>${esc(title)}</h1><p>${esc(sum)}</p></div>${buttons ? `<div class="list-head-btns">${buttons}</div>` : ''}</header>`;
+const listTools = (left = '', right = '') => (left || right ? `<div class="list-tools"><div class="list-tools-l">${left}</div><div class="list-tools-r">${right}</div></div>` : '');
+const toolLink = (href, label, primary = false) => `<a class="tool-btn${primary ? ' is-primary' : ''}" href="${href}">${esc(label)} <span aria-hidden="true">→</span></a>`;
 const empty = (title, text) => `<div class="empty"><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`;
 
 function issueLink(title, body) {
@@ -225,14 +230,13 @@ const statusText = d => isDemo(d) ? tr('status.demo') : tr(d.release.sample ? 's
 const BANDS = ['var(--bg)', 'var(--band-sage)', 'var(--band-sand)', 'var(--band-clay)', 'var(--band-mint)', 'var(--bg)'];
 // Each section sits on a tint; neighbouring bands meet on a shared mix of their two colours.
 const band = i => `--band-from: color-mix(in srgb, ${BANDS[i - 1]} 50%, ${BANDS[i]}); --band-color: ${BANDS[i]}; --band-to: color-mix(in srgb, ${BANDS[i]} 50%, ${BANDS[i + 1]});`;
-const SECTIONS = [['numbers', 'sec.numbers'], ['map', 'fig.title'], ['help', 'join.title']];
+const SECTIONS = [['map', 'fig.title'], ['help', 'join.title']];
 
 function viewOverview() {
   const d = state.data;
   const supported = d.claims.length ? d.claims.filter(c => c.verification === 'supported').length : d.runs.reduce((n, r) => n + (r.counts?.claims_supported ?? 0), 0);
   const zhSources = d.sources.filter(x => x.lang === 'zh').length;
   const stats = [[supported, isDemo(d) ? 'stats.claims.demo' : 'stats.claims'], [d.sources.length, 'stats.sources'], [zhSources, 'stats.zh'], [d.species.length, 'stats.species']];
-  const note = isDemo(d) ? 'stats.note.demo' : d.release.sample ? 'stats.note.sample' : d.release.status === 'pre-release' ? 'stats.note.prerelease' : 'stats.note.released';
   const matrix = L.buildMatrix(d, 'all');
   const cells = matrix.rows.flatMap(r => r.cells);
   const count = s => cells.filter(c => c.status === s).length;
@@ -264,9 +268,6 @@ function viewOverview() {
       <section class="graph-feature" aria-labelledby="graph-title">
         <figure class="band-card graph-card"><div class="graph-head"><h2 class="graph-name" id="graph-title">${esc(tr('graph.title'))}</h2><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
           <figcaption class="graph-note" data-gnote></figcaption></figure></section>
-
-      <section class="band-section" id="numbers" style="${band(1)}"><div class="story-copy"><h2>${esc(tr('sec.numbers'))}</h2>${d.release.sample ? `<p>${esc(tr(note))}</p>` : ''}</div>
-        <ul class="stat-list">${stats.map(([n, key]) => `<li><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></li>`).join('')}</ul></section>
 
       <section class="band-section" id="map" style="${band(3)}"><div class="story-copy"><h2>${esc(tr('fig.title'))}</h2><p>${esc(tr('map.lead'))}</p></div>
         <div class="band-split is-wide"><div class="home-chart">${matrixChart({ matrix, data: d, lang: state.lang, selected: null, speciesId: 'all', link, tr })}
@@ -437,8 +438,9 @@ function viewFindings(params) {
     { key: 'strength', type: 'select', label: tr('fd.f.strength'), options: ['agree', 'mixed', 'against', 'described', 'one_paper'].map(k => [k, tr('fd.strength.' + k)]) },
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: tax.welfare_problems.map(p => [p.id, pick(p, '', state.lang)]) },
     { key: 'multi', type: 'check', label: tr('fd.f.multi') }];
-  return { title: tr('nav.findings'), html: lead(tr('fd.kicker'), tr('fd.page.title'), tr('fd.page.lead', { n: items.length.toLocaleString(), multi: items.filter(f => f.counts.papers > 1).length })) + tabs +
-      `<p class="fa-banner"><a href="${link('topics/feed-acclimation')}"><b>${esc(tr('fa.title'))}</b> ${esc(tr('fa.banner'))} →</a></p>` +
+  return { title: tr('nav.findings'), html: listHead('', tr('fd.page.title'), tr('fd.head.sum', { n: items.length.toLocaleString(), multi: items.filter(f => f.counts.papers > 1).length.toLocaleString() }),
+        toolLink(link('topics/feed-acclimation'), tr('fa.chip')) + toolLink(link('review', sp ? { species: sp } : {}), tr('rv.claims.btn'))) +
+      listTools(tabs) +
       browseHtml({ filters, views: [['group', tr('br.view.group')], ['rank', tr('br.view.rank')]], tr }),
     mount: root => mountBrowse(root, { items, tr, listClass: 'fd-list', groups: tax.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: f => f.technology_class,
       render: f => findingItemHtml(f, findingCtx()),
@@ -475,9 +477,9 @@ function viewActions(params) {
     { key: 'problem', type: 'select', label: tr('fd.problem'), options: d.taxonomy.welfare_problems.filter(p => items.some(a => a.welfare_problems.includes(p.id))).map(p => [p.id, pick(p, '', state.lang)]) },
   ];
   const tabs = speciesTabsHtml('actions', params, countBySpecies(ver ? state.archivedActions[vr] : d.actions || []));
-  return { title: tr('nav.actions'), html: (ver ? lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead.archived', { n: items.length, run: ver.run })) : '') + (ver ? '' : lead(tr('ac.kicker'), tr('ac.page.title'), tr('ac.lead', { n: items.length, multi: (d.findings || []).filter(f => (!sp || f.species_id === sp) && f.counts.papers > 1).length, f: new Set(items.flatMap(a => a.finding_ids)).size }))) +
-      tabs + (ver ? '' : `<p class="ac-review-link"><a href="${link('review', { kind: 'action', ...(sp ? { species: sp } : {}) })}">${esc(tr('rv.a.go'))} →</a></p>`) +
-      actionVersionsHtml(params) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
+  const sum = ver ? tr('ac.lead.archived', { n: items.length, run: ver.run }) : tr('ac.head.sum', { n: items.length, f: new Set(items.flatMap(a => a.finding_ids)).size });
+  return { title: tr('nav.actions'), html: listHead(tr('ac.kicker'), tr('ac.page.title'), sum, ver ? '' : toolLink(link('review', { kind: 'action', ...(sp ? { species: sp } : {}) }), tr('rv.a.go'), true)) +
+      listTools(tabs, actionVersionsHtml(params)) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
       browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
     mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
       render: a => actionItemHtml(a, { ...findingCtx(), review: !ver }, fById),
@@ -749,7 +751,7 @@ function render(navigated = false) {
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   // A short fade when the page changes (not when a filter redraws part of it).
   if (navigated) { const c = $('#content'); c.classList.remove('is-enter'); void c.offsetWidth; c.classList.add('is-enter'); }
-  document.title = `${view.title} — ${tr('site.title')}`;
+  document.title = view.title === tr('site.title') ? view.title : `${view.title} — ${tr('site.title')}`;
   const pathKey = parts.join('/');
   if (navigated && pathKey !== state.lastPath) { window.scrollTo(0, 0); $('#content').focus({ preventScroll: true }); }
   else if (navigated && params.get('cell')) { const panel = $('.cell-panel'); if (panel) panel.scrollIntoView({ block: 'nearest' }); }
