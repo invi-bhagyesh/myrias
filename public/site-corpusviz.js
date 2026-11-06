@@ -138,12 +138,18 @@ export function decadeColumnsHtml(decades) {
 // author works (China by sector, then other regions) to the kind of paper. Reads data/papers.json, which
 // pipeline/affiliations.mjs writes from the papers' title pages. Groups are coloured in a fixed order
 // checked with the dataviz validator (light #ECEADF and dark #20241C: CVD and normal-vision separation pass).
-export const AF_GROUPS = [['cn_university', '#b5562a'], ['cn_institute', '#008c80'], ['cn_other', '#97761f'], ['asia', '#b04a6e'], ['europe', '#2a67a4'], ['americas', '#4e8a3a'], ['other', '#8457a8'], ['unknown', 'var(--line-strong)']];
+export const AF_GROUPS = [['cn_university', '#b5562a'], ['cn_institute', '#008c80'], ['cn_other', '#97761f'], ['asia', '#b04a6e'], ['europe', '#2a67a4'], ['us', '#4e8a3a'], ['other', '#8457a8']];
 export const AF_KINDS = ['experiment', 'field_study', 'methods', 'review', 'thesis', 'other', 'unknown'];
 
-// Pure: counts per group, per kind and per pair. A Chinese company or other sector folds into cn_other.
+// Display groups only: source records retain their original region and country.
+// The US is determined by the first affiliation's country, not coauthor countries.
 export function authorModel(meta) {
-  const papers = (meta?.papers || []).map(p => ({ ...p, group: p.group === 'cn_company' ? 'cn_other' : AF_GROUPS.some(([id]) => id === p.group) ? p.group : 'unknown', kind: AF_KINDS.includes(p.kind) ? p.kind : 'other' }));
+  const groupOf = p => {
+    if (['US', 'USA', 'UNITED STATES', 'UNITED STATES OF AMERICA'].includes(String(p.country || '').trim().toUpperCase())) return 'us';
+    if (p.group === 'cn_company') return 'cn_other';
+    return AF_GROUPS.some(([id]) => id !== 'us' && id === p.group) ? p.group : 'other';
+  };
+  const papers = (meta?.papers || []).map(p => ({ ...p, group: groupOf(p), kind: AF_KINDS.includes(p.kind) ? p.kind : 'other' }));
   const count = (f, keys) => keys.map(k => [k, papers.filter(p => f(p) === k).length]).filter(([, v]) => v);
   const groups = count(p => p.group, AF_GROUPS.map(([k]) => k)), kinds = count(p => p.kind, AF_KINDS);
   const links = [];
@@ -156,8 +162,8 @@ export function authorModel(meta) {
 
 // A single papers-to-pixels scale on both sides keeps every ribbon proportional.
 // Small nodes reserve label space without inflating their data bars.
-export function authorLayout(model, height = 500) {
-  const gap = 10, minRoom = 48;
+export function authorLayout(model, height = 400) {
+  const gap = 8, minRoom = 40;
   const room = (rows, scale) => rows.reduce((sum, [, v]) => sum + Math.max(minRoom, v * scale), 0) + Math.max(0, rows.length - 1) * gap;
   let lo = 0, hi = height / Math.max(1, model.n);
   for (let i = 0; i < 48; i++) {
@@ -182,12 +188,12 @@ export function authorLayout(model, height = 500) {
 }
 
 const afPercent = (count, total) => `${(100 * count / Math.max(1, total)).toFixed(1)}%`;
-const afColor = id => id === 'unknown' ? 'var(--af-unknown)' : Object.fromEntries(AF_GROUPS)[id];
+const afColor = id => Object.fromEntries(AF_GROUPS)[id];
 
-export function authorFlowHtml(meta, tr) {
-  const m = authorModel(meta);
-  if (!m.n) return '';
-  const layout = authorLayout(m), top = 42, xl = 268, xr = 784, bw = 12;
+function authorDiagram(m, tr, width = 960, height = 340) {
+  const layout = authorLayout(m, height), top = 36, bw = 12;
+  const xl = Math.max(235, Math.min(width * .27, 280));
+  const xr = width - Math.max(190, Math.min(width * .25, 260));
   const fmt = v => Number(v.toFixed(3));
   const ribbon = l => {
     const x0 = xl + bw, x1 = xr, mid = (x0 + x1) / 2;
@@ -211,32 +217,35 @@ export function authorFlowHtml(meta, tr) {
     const labelY = cy - (lines.length > 1 ? 15 : 7);
     const groupSegments = left ? '' : layout.links.filter(l => l.k === id).map(l => `<rect class="af-segment" data-af-g="${l.g}" data-af-k="${l.k}" x="${xr}" y="${fmt(l.y1 + top)}" width="${bw}" height="${fmt(l.h)}" fill="${afColor(l.g)}"/>`).join('');
     return `<g class="af-node" role="button" tabindex="0" aria-pressed="false" aria-label="${esc(tr('af.select', { name }))}" data-af-${side}="${id}">
-      <rect class="af-hit" x="${left ? 0 : xr - 4}" y="${fmt(cy - 24)}" width="${left ? xl + bw + 4 : 288}" height="48" rx="6"/>
+      <rect class="af-hit" x="${left ? 0 : xr - 4}" y="${fmt(cy - 24)}" width="${left ? xl + bw + 4 : width - xr + 4}" height="48" rx="6"/>
       ${left ? `<rect x="${xl}" y="${fmt(y)}" width="${bw}" height="${fmt(r.h)}" fill="${afColor(id)}"/>` : groupSegments}
       <text class="af-label" x="${textX}" y="${fmt(labelY)}">${lines.map((line, i) => `<tspan x="${textX}" dy="${i ? 17 : 0}">${esc(line)}</tspan>`).join('')}</text>
       <text class="af-count" x="${textX}" y="${fmt(cy + (lines.length > 1 ? 21 : 14))}">${n(count)}<tspan class="af-percent"> / ${afPercent(count, m.n)}</tspan></text>
     </g>`;
   }).join('');
-  const options = (rows, key) => rows.map(([id, count]) => `<option value="${id}">${esc(tr(key + id))} (${n(count)})</option>`).join('');
-  const table = `<details class="af-table"><summary>${esc(tr('af.table'))}</summary><div class="af-table-scroll" tabindex="0" role="region" aria-label="${esc(tr('af.table'))}"><table><caption>${esc(tr('af.aria', { n: n(m.n) }))}</caption><thead><tr><th scope="col">${esc(tr('af.left'))}</th>${m.kinds.map(([k]) => `<th scope="col">${esc(tr('af.k.' + k))}</th>`).join('')}<th scope="col">${esc(tr('af.total'))}</th></tr></thead><tbody>${m.groups.map(([g, count]) => `<tr><th scope="row">${esc(tr('af.g.' + g))}</th>${m.kinds.map(([k]) => `<td>${n(m.links.find(l => l.g === g && l.k === k)?.v || 0)}</td>`).join('')}<td>${n(count)}</td></tr>`).join('')}</tbody></table></div></details>`;
-  return `<div class="af-explorer" data-affiliations>
-    <div class="af-toolbar"><p class="af-total"><strong>${n(m.n)}</strong> ${esc(tr('af.totalLabel'))}<span class="af-desktop-caption">${esc(tr('af.encoding'))}</span><span class="af-mobile-caption">${esc(tr('af.encodingMobile'))}</span></p>
-      <div class="af-filters"><label>${esc(tr('af.affiliation'))}<select data-af-filter="g"><option value="">${esc(tr('af.allGroups'))}</option>${options(m.groups, 'af.g.')}</select></label>
-      <label>${esc(tr('af.right'))}<select data-af-filter="k"><option value="">${esc(tr('af.allKinds'))}</option>${options(m.kinds, 'af.k.')}</select></label><button type="button" data-af-reset disabled>${esc(tr('af.reset'))}</button></div></div>
-    <div class="af-visual"><svg class="af-diagram" viewBox="0 0 1080 570" role="group" aria-label="${esc(tr('af.aria', { n: n(m.n) }))}">
+  return `<svg class="af-diagram" viewBox="0 0 ${width} ${height + 54}" role="group" aria-label="${esc(tr('af.aria', { n: n(m.n) }))}">
       <text class="af-axis" x="12" y="20">${esc(tr('af.left'))}</text><text class="af-axis" x="${xr + 30}" y="20">${esc(tr('af.right'))}</text>
-      <g class="af-ribbons">${paths}</g>${nodes(m.groups, layout.left, 'g')}${nodes(m.kinds, layout.right, 'k')}</svg></div>
-    <div class="af-feedback"><p data-af-status role="status" aria-live="polite"></p><p class="af-hover" data-af-hover>${esc(tr('af.hint'))}</p></div>
-    <div class="af-breakdowns" data-af-breakdowns></div>
-    ${table}<p class="af-method">${esc(tr('af.note'))}</p>
+      <g class="af-ribbons">${paths}</g>${nodes(m.groups, layout.left, 'g')}${nodes(m.kinds, layout.right, 'k')}</svg>`;
+}
+
+export function authorFlowHtml(meta, tr) {
+  const m = authorModel(meta);
+  if (!m.n) return '';
+  return `<div class="af-explorer" data-affiliations>
+    <div class="af-toolbar"><p class="af-total"><strong>${n(m.n)}</strong> ${esc(tr('af.totalLabel'))}</p>
+</div>
+    <div class="af-visual">${authorDiagram(m, tr)}</div>
+    <div class="af-feedback"><p data-af-status role="status" aria-live="polite"></p></div>
+    <div class="af-breakdowns" data-af-breakdowns tabindex="0" role="region" aria-label="${esc(tr('af.title'))}"></div>
   </div>`;
 }
 
 export function mountAuthorFlow(root, meta, tr) {
   const m = authorModel(meta), selected = { g: '', k: '' };
   const controller = new AbortController(), signal = controller.signal;
-  const flows = [...root.querySelectorAll('.af-ribbon, .af-segment')], nodes = [...root.querySelectorAll('.af-node')];
-  const status = root.querySelector('[data-af-status]'), hover = root.querySelector('[data-af-hover]');
+  let flows = [], nodes = [];
+  const visual = root.querySelector('.af-visual');
+  const status = root.querySelector('[data-af-status]');
   const matching = (l, f) => (!f.g || l.g === f.g) && (!f.k || l.k === f.k);
   const paint = (filter = selected) => {
     const active = m.links.filter(l => matching(l, filter));
@@ -250,12 +259,9 @@ export function mountAuthorFlow(root, meta, tr) {
   };
   const update = () => {
     const focused = root.contains(document.activeElement) && document.activeElement.matches('.af-breakdown') ? document.activeElement : null;
-    root.querySelectorAll('[data-af-filter]').forEach(el => { el.value = selected[el.dataset.afFilter]; });
-    root.querySelector('[data-af-reset]').disabled = !selected.g && !selected.k;
     const active = m.links.filter(l => matching(l, selected)), count = active.reduce((sum, l) => sum + l.v, 0);
     const labels = [selected.g && tr('af.g.' + selected.g), selected.k && tr('af.k.' + selected.k)].filter(Boolean);
     status.textContent = tr('af.selection', { n: n(count), total: n(m.n), pct: afPercent(count, m.n) }) + (labels.length ? ` — ${labels.join(' → ')}` : '');
-    hover.textContent = count ? tr('af.hint') : tr('af.noMatch');
     root.dataset.filtered = String(Boolean(selected.g || selected.k));
     const list = (rows, side) => {
       const items = rows.map(([id]) => [id, active.filter(l => l[side] === id).reduce((sum, l) => sum + l.v, 0)]).filter(([, v]) => v).sort((a, b) => b[1] - a[1]);
@@ -265,17 +271,18 @@ export function mountAuthorFlow(root, meta, tr) {
     paint();
     if (focused) {
       const side = focused.dataset.afG ? 'g' : 'k', id = focused.dataset.afG || focused.dataset.afK;
-      (root.querySelector(`.af-breakdown[data-af-${side}="${id}"]`) || root.querySelector(`[data-af-filter="${side}"]`)).focus({ preventScroll: true });
+      (root.querySelector(`.af-breakdown[data-af-${side}="${id}"]`) || root.querySelector('[data-af-breakdowns]')).focus({ preventScroll: true });
     }
   };
   const activate = el => {
-    if (el.classList.contains('af-ribbon')) { selected.g = el.dataset.afG; selected.k = el.dataset.afK; }
+    if (el.classList.contains('af-ribbon')) {
+      const same = selected.g === el.dataset.afG && selected.k === el.dataset.afK;
+      selected.g = same ? '' : el.dataset.afG; selected.k = same ? '' : el.dataset.afK;
+    }
     else { const side = el.dataset.afG ? 'g' : 'k', id = el.dataset.afG || el.dataset.afK; selected[side] = selected[side] === id ? '' : id; }
     update();
   };
-  root.addEventListener('change', e => { if (e.target.matches('[data-af-filter]')) { selected[e.target.dataset.afFilter] = e.target.value; update(); } }, { signal });
   root.addEventListener('click', e => {
-    if (e.target.closest('[data-af-reset]')) { selected.g = ''; selected.k = ''; update(); return; }
     const el = e.target.closest('.af-node, .af-ribbon, .af-breakdown'); if (el) activate(el);
   }, { signal });
   root.addEventListener('keydown', e => {
@@ -286,15 +293,40 @@ export function mountAuthorFlow(root, meta, tr) {
     const el = e.target.closest('.af-node, .af-ribbon'); if (!el) return;
     const filter = { ...selected, ...(el.dataset.afG ? { g: el.dataset.afG } : {}), ...(el.dataset.afK ? { k: el.dataset.afK } : {}) };
     paint(filter);
-    const count = m.links.filter(l => matching(l, filter)).reduce((sum, l) => sum + l.v, 0);
-    hover.textContent = el.dataset.afDescription || [filter.g && tr('af.g.' + filter.g), filter.k && tr('af.k.' + filter.k), tr('af.papers', { n: n(count) })].filter(Boolean).join(' · ');
   };
   root.addEventListener('pointerover', preview, { signal });
   root.addEventListener('focusin', preview, { signal });
-  const clear = () => { paint(); hover.textContent = tr('af.hint'); };
+  const clear = () => { paint(); };
   root.querySelector('.af-visual').addEventListener('pointerout', e => { if (!e.relatedTarget?.closest?.('.af-node, .af-ribbon')) clear(); }, { signal });
   root.querySelector('.af-visual').addEventListener('pointerleave', clear, { signal });
   root.addEventListener('focusout', clear, { signal });
+  let previousSize = '', pending = 0;
+  const resize = () => {
+    const width = Math.floor(visual.clientWidth - 32);
+    if (width <= 0) return;
+    const rows = Math.max(m.groups.length, m.kinds.length);
+    const height = Math.round(Math.max(rows * 48 - 8, Math.min(innerHeight * .4, width * .4)));
+    const size = `${width}:${height}`;
+    if (size === previousSize) return;
+    previousSize = size;
+    const focused = visual.contains(document.activeElement) ? document.activeElement : null;
+    visual.innerHTML = authorDiagram(m, tr, width, height);
+    flows = [...visual.querySelectorAll('.af-ribbon, .af-segment')];
+    nodes = [...visual.querySelectorAll('.af-node')];
+    paint();
+    if (focused?.dataset.afG || focused?.dataset.afK) {
+      const side = focused.dataset.afG ? 'g' : 'k';
+      visual.querySelector(`.af-node[data-af-${side}="${focused.dataset.afG || focused.dataset.afK}"]`)?.focus({ preventScroll: true });
+    }
+  };
+  const scheduleResize = () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(resize); };
+  const observer = new ResizeObserver(scheduleResize);
+  observer.observe(root);
+  const hero = root.closest('.arena-home')?.querySelector('.hero');
+  if (hero) observer.observe(hero);
+  document.fonts?.ready.then(() => { if (!signal.aborted) scheduleResize(); });
+  addEventListener('resize', scheduleResize, { signal });
+  resize();
   update();
-  return { destroy: () => controller.abort() };
+  return { destroy: () => { controller.abort(); observer.disconnect(); cancelAnimationFrame(pending); } };
 }

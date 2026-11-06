@@ -356,7 +356,7 @@ test('home author flow: counts per group, kind and pair add up; companies fold i
     { group: 'europe', kind: 'experiment', country: 'DE', countries: ['DE', 'CN'] }, { group: 'unknown', kind: 'odd', countries: [] }] };
   const m = authorModel(meta);
   assert.equal(m.n, 4);
-  assert.deepEqual(m.groups, [['cn_university', 1], ['cn_other', 1], ['europe', 1], ['unknown', 1]]);
+  assert.deepEqual(m.groups, [['cn_university', 1], ['cn_other', 1], ['europe', 1], ['other', 1]]);
   assert.equal(m.links.reduce((s, l) => s + l.v, 0), 4);
   assert.equal(m.china, 2); assert.equal(m.intl, 1); assert.deepEqual(m.countries, ['DE']);
   for (const lang of ['en', 'zh']) {

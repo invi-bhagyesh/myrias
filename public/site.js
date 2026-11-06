@@ -214,11 +214,9 @@ function viewExplore(params) {
   return {
     title: tr('nav.explore'),
     html: `<div class="section-head explore-head"><h1>${esc(tr('land.explorer'))}</h1>
-        <p class="subnav">${esc(tr('explore.browse'))}: <a href="${link('species')}">${esc(tr('nav.species'))}</a> \u00b7 <a href="${link('sources')}">${esc(tr('nav.sources'))}</a></p></div>${speciesTabsHtml('explore', params, Object.fromEntries([['all', d.runs.reduce((n, r) => n + (r.counts?.claims_released || 0), 0)], ...d.runs.map(r => [r.species_id, r.counts?.claims_released])]))}
-       <p class="small-note">${esc(tr('land.how'))}</p>
+        <nav class="explore-browse" aria-label="${esc(tr('explore.browse'))}"><a href="${link('species')}">${esc(tr('nav.species'))}</a><a href="${link('sources')}">${esc(tr('nav.sources'))}</a></nav></div>${speciesTabsHtml('explore', params, Object.fromEntries([['all', d.runs.reduce((n, r) => n + (r.counts?.claims_released || 0), 0)], ...d.runs.map(r => [r.species_id, r.counts?.claims_released])]))}
        ${matrixChart({ matrix, data: d, lang: state.lang, selected, speciesId, link, tr })}
        <details class="matrix-details"><summary>${esc(tr('chart.table'))}</summary><div class="matrix-wrap" tabindex="0" role="region" aria-label="${esc(tr('land.explorer'))}"><table class="matrix"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div></details>
-       <ul class="legend" aria-label="${esc(tr('land.legend'))}">${legend}</ul>
        <section class="cell-panel" aria-live="polite">${panel}</section>`
   };
 }
@@ -241,20 +239,13 @@ function viewOverview() {
   const cells = matrix.rows.flatMap(r => r.cells);
   const count = s => cells.filter(c => c.status === s).length;
   const issue = (title, body) => esc(issueLink(title, `${body}\nRelease: ${d.release.version} (${d.release.as_of})\n\n`));
-  const some = count('has_records') > 0;
-  const notes = [
-    ['note.read.k', tr('note.read.t'), tr('note.read.d')],
-    ['note.stand.k', some ? tr('note.stand.t.some', { n: count('has_records'), total: cells.length }) : tr('note.stand.t.none'),
-      some ? tr('note.stand.d.some', { empty: count('probed_empty'), not: count('not_collected') }) : tr('note.stand.d.none')],
-    ['note.why.k', tr('note.why.t'), tr('note.why.d')]
-  ];
-  const rows = (prefix) => [1, 2, 3].map(i => `<li>${esc(tr(`${prefix}.${i}`))}</li>`).join('');
+  const coverage = [['has_records', 'coverage.records'], ['probed_empty', 'coverage.empty'], ['not_collected', 'coverage.unsearched']];
   return {
     title: tr('site.title'),
     html: `<div class="arena-home">
       <section class="hero hero-with-hills" aria-labelledby="home-title"><div class="hero-hills" aria-hidden="true">${pixelHills('hero')}</div>
         <div class="hero-copy">
-        ${d.release.sample ? `<span class="pill">${esc(statusText(d))}</span>` : ''}<div class="record-type">${esc(tr('hero.kicker'))}</div>
+        ${d.release.sample ? `<span class="pill">${esc(statusText(d))}</span>` : ''}
         <h1 id="home-title">${esc(tr('hero.title'))}</h1><p class="hero-sub">${esc(tr('hero.sub'))}</p>
         <div class="home-actions"><a class="button-primary" href="${link('explore')}">${esc(tr('hero.cta.explore'))} <span aria-hidden="true">↗</span></a><a class="button-secondary" href="${link('methods')}">${esc(tr('hero.cta.methods'))} <span aria-hidden="true">→</span></a></div>
         </div>
@@ -272,13 +263,12 @@ function viewOverview() {
       <section class="band-section" id="map" style="${band(3)}"><div class="story-copy"><h2>${esc(tr('fig.title'))}</h2><p>${esc(tr('map.lead'))}</p></div>
         <div class="band-split is-wide"><div class="home-chart">${matrixChart({ matrix, data: d, lang: state.lang, selected: null, speciesId: 'all', link, tr })}
           <a class="button small" href="${link('explore')}">${esc(tr('fig.cta'))}</a></div>
-          <aside class="band-notes" aria-label="${esc(tr('fig.title'))}">${notes.map(([k, t, text]) => `<div class="band-note"><span class="band-note-dot" aria-hidden="true"></span><p class="band-note-kicker">${esc(tr(k))}</p><h3>${esc(t)}</h3><p>${esc(text)}</p></div>`).join('')}</aside></div></section>
+          <aside class="coverage-summary" aria-label="${esc(tr('coverage.title'))}"><ul>${coverage.map(([status, key]) => `<li><span class="swatch st-${status}" aria-hidden="true"></span><strong>${count(status)}${status === 'has_records' ? `/${cells.length}` : ''}</strong> ${esc(tr(key))}</li>`).join('')}</ul></aside></div></section>
 
-      <section class="story-closing" id="help"><h2>${esc(tr('join.title'))}</h2><p class="small-note">${esc(tr('help.lead'))}</p>
-        <ul class="arena-rows">${rows('join')}</ul>
-        <div class="home-actions"><a class="button-primary" href="${issue('Offer to review', 'Languages, fish-welfare background, hours available:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.review'))} <span aria-hidden="true">↗</span></a>
-          <a class="button-secondary" href="${issue('Correction or missing source', 'What is wrong or missing:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.report'))} <span aria-hidden="true">↗</span></a>
-          <a class="button-secondary" href="${link('download')}">${esc(tr('join.download'))} <span aria-hidden="true">→</span></a></div></section>
+      <section class="story-closing" id="help"><h2>${esc(tr('join.title'))}</h2><p>${esc(tr('help.lead'))}</p>
+        <div class="contribute-actions"><a class="button-primary" href="${issue('Offer to review', 'Languages, fish-welfare background, hours available:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.review'))}</a>
+          <a class="button-secondary" href="${issue('Correction or missing source', 'What is wrong or missing:')}" target="_blank" rel="noopener noreferrer">${esc(tr('join.report'))}</a>
+          <a class="button-secondary" href="${link('download')}">${esc(tr('join.download'))}</a></div></section>
     </div>`
   };
 }
@@ -748,6 +738,7 @@ function render(navigated = false) {
   });
   moveBlob(true);
   const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus', 'actions'].includes(parts[0]) || (parts[0] === 'species' && parts[1]) || (parts[0] === 'findings' && !parts[1]);
+  $('#content').dataset.page = parts[0] || 'home';
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   // A short fade when the page changes (not when a filter redraws part of it).
   if (navigated) { const c = $('#content'); c.classList.remove('is-enter'); void c.offsetWidth; c.classList.add('is-enter'); }
@@ -853,7 +844,9 @@ function setupHomeEffects() {
         home.querySelector('[data-glegend]').innerHTML = legendHtml(g, tr);
       }
       home.querySelector('[data-gbadge]').hidden = true;
-      home.querySelector('[data-gnote]').textContent = sample ? tr('graph.note.placeholder') : tr('evmap.hint');
+      const note = home.querySelector('[data-gnote]');
+      note.textContent = sample ? tr('graph.note.placeholder') : '';
+      note.hidden = !sample;
       home.querySelectorAll('[data-gview]').forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.gview === view)));
     };
     home.querySelectorAll('[data-gview]').forEach(btn => btn.addEventListener('click', () => { state.graphView = btn.dataset.gview; show(); }));
