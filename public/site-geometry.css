@@ -1,16 +1,11 @@
 /* Shape follows purpose: plots, linked species, process steps, and examples. */
 
-/* Plots sit on open sheets, with corner marks rather than a card outline. */
+/* Broad, asymmetric curves keep plots distinct without sharp corners. */
 #content[data-page] :is(.cv-card, .mchart-wrap) {
   border: 0;
-  border-radius: 0;
+  border-radius: 28px 12px 36px 12px;
   box-shadow: none;
-  background:
-    linear-gradient(var(--line-strong), var(--line-strong)) left top / 24px 1px no-repeat,
-    linear-gradient(var(--line-strong), var(--line-strong)) left top / 1px 24px no-repeat,
-    linear-gradient(var(--line-strong), var(--line-strong)) right bottom / 24px 1px no-repeat,
-    linear-gradient(var(--line-strong), var(--line-strong)) right bottom / 1px 24px no-repeat,
-    var(--card-bg);
+  background: var(--card-bg);
 }
 .af-toolbar { border-bottom-color: var(--line); }
 .af-total { padding-left: 0; border: 0; }
@@ -27,7 +22,7 @@
 #content[data-page] .sp-card {
   padding: 18px 22px 18px 16px;
   border: 1px solid var(--line);
-  border-radius: 64px 8px 32px 64px;
+  border-radius: 64px 20px 32px 64px;
   background: var(--card-bg);
   box-shadow: none;
   transition: border-color 160ms ease;
@@ -39,59 +34,36 @@
 #content[data-page] .fw-phases {
   border: 0;
   border-block: 1px solid var(--line-strong);
-  border-radius: 0;
+  border-radius: 20px;
   background: transparent;
   box-shadow: none;
 }
 #content[data-page] .fw-explain {
   border: 0;
   border-left: 2px solid var(--accent);
-  border-radius: 0;
+  border-radius: 16px 0 0 16px;
   background: transparent;
   box-shadow: none;
 }
 
-/* A folded-page silhouette is reserved for the worked example. */
+/* Worked examples have a softer, offset outline rather than a folded corner. */
 #content[data-page] .fw-ex {
-  --fold: 20px;
-  position: relative;
-  isolation: isolate;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 12px 36px 20px 12px;
+  background: var(--card-bg);
   box-shadow: none;
   padding-right: 28px;
-}
-#content[data-page] .fw-ex::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--card-bg);
-  clip-path: polygon(0 0, calc(100% - var(--fold)) 0, 100% var(--fold), 100% 100%, 0 100%);
-}
-#content[data-page] .fw-ex::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: var(--fold);
-  height: var(--fold);
-  pointer-events: none;
-  background: var(--line-strong);
-  clip-path: polygon(0 0, 0 100%, 100% 100%);
 }
 
 /* Small stats remain tags, visually separate from content and controls. */
 .arena-home .hero-side .hero-tile {
-  border-radius: 3px 14px 14px 3px;
+  border-radius: 16px 28px 28px 16px;
   clip-path: none;
   box-shadow: none;
 }
 
 @media (max-width: 700px) {
-  #content[data-page] .sp-card { border-radius: 48px 6px 24px 48px; padding: 16px 18px 16px 12px; }
+  #content[data-page] .sp-card { border-radius: 48px 16px 24px 48px; padding: 16px 18px 16px 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #content[data-page] .sp-card { transition: none; }
