@@ -2,10 +2,10 @@
 
 export const STR = {
   en: {
-    'site.title': 'Myrias: animal welfare evidence',
+    'site.title': 'Myrias: animal welfare synthesis',
     'site.desc': 'Research on welfare technology for farmed fish and shrimp, in English and Chinese. Every claim links to the page it came from.',
     'subhead.left': 'Open evidence base',
-    'brand.sub': 'Animal welfare evidence',
+    'brand.sub': 'Animal welfare synthesis',
     'subhead.version': 'Version {version} · as of {asof}',
     'status.pre-release': 'Pre-release: nothing verified yet',
     'status.sample': 'Sample data',
@@ -873,10 +873,10 @@ export const STR = {
     'dl.feedback.button': 'Open an issue'
   },
   zh: {
-    'site.title': 'Myrias — 动物福利证据',
+    'site.title': 'Myrias — 动物福利研究综合',
     'site.desc': '中英文研究中关于养殖鱼虾福利技术的内容，每条论断都链接到原文所在页。',
     'subhead.left': '开放证据库',
-    'brand.sub': '动物福利证据',
+    'brand.sub': '动物福利研究综合',
     'subhead.version': '版本 {version} · 截至 {asof}',
     'status.pre-release': '预发布：尚无经核验的内容',
     'status.sample': '示例数据',

@@ -16,20 +16,20 @@
   --footer-panel: #BCD1CA;
 }
 :root[data-palette="teal"][data-theme="dark"] {
-  --bg: #121F22;
-  --card-bg: #1A2B2E;
+  --bg: #000000;
+  --card-bg: #0A0A0A;
   --ink: #DFEEEE;
   --soft: #A2BEC0;
-  --line: #30494D;
-  --line-strong: #50787D;
+  --line: #252525;
+  --line-strong: #474747;
   --accent: #8ACDD0;
-  --accent-soft: #244448;
-  --on-accent: #102629;
-  --band-sage: #1B3035;
-  --band-sand: #292E28;
-  --band-clay: #302C25;
-  --band-mint: #1D3532;
-  --footer-panel: #1A2C30;
+  --accent-soft: #102223;
+  --on-accent: #000000;
+  --band-sage: #050909;
+  --band-sand: #090909;
+  --band-clay: #0B0907;
+  --band-mint: #060C0A;
+  --footer-panel: #050505;
 }
 :root[data-palette] {
   --card: var(--card-bg);
