@@ -1,0 +1,97 @@
+name: Collect China welfare digest
+on:
+  schedule:
+    - cron: '17 1 * * *' # Daily, 09:17 Beijing; the completed Friday gets one issue.
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: Search two years of OpenAlex publications
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: weekly-digest
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check collector
+        run: npm run check && npm test
+      - name: Restore last successful collection
+        env:
+          DIGEST_BRANCH: automation/weekly-digest
+        run: |
+          set -euo pipefail
+          git ls-remote --heads origin "$DIGEST_BRANCH" > "$RUNNER_TEMP/digest-ref"
+          expected=$(cut -f1 "$RUNNER_TEMP/digest-ref")
+          echo "DIGEST_EXPECTED=$expected" >> "$GITHUB_ENV"
+          if [ -n "$expected" ]; then
+            git fetch origin "$DIGEST_BRANCH"
+            mkdir -p "$RUNNER_TEMP/digest-snapshot"
+            git archive FETCH_HEAD pipeline/digest/state.json public/data/digest | tar -x -C "$RUNNER_TEMP/digest-snapshot"
+            node pipeline/digest/restore.mjs "$RUNNER_TEMP/digest-snapshot"
+          fi
+      - name: Collect through yesterday in Beijing
+        env:
+          WFDATA_APP_KEY: ${{ secrets.WFDATA_APP_KEY }}
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+          BACKFILL: ${{ inputs.backfill }}
+        run: |
+          set -euo pipefail
+          extra=()
+          # The first Saturday of each month widens OpenAlex's publication search.
+          if [ "$BACKFILL" = true ] || { [ "$(TZ=Asia/Shanghai date +%u)" = 6 ] && [ "$(TZ=Asia/Shanghai date +%-d)" -le 7 ]; }; then
+            extra+=(--backfill)
+          fi
+          node pipeline/digest.mjs --collect-only "${extra[@]}"
+      - name: Assemble completed week if not already present
+        run: node pipeline/digest.mjs --weekly --publish-only
+      - name: Save checkpoint and open weekly pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIGEST_BRANCH: automation/weekly-digest
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B "$DIGEST_BRANCH"
+          git add pipeline/digest/state.json public/data/digest
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update China welfare digest collection'
+            git push --force-with-lease="refs/heads/$DIGEST_BRANCH:$DIGEST_EXPECTED" origin "HEAD:refs/heads/$DIGEST_BRANCH"
+          fi
+          if ! git diff --quiet origin/main -- public/data/digest; then
+            gh pr list --head "$DIGEST_BRANCH" --base main --state open --json number --jq 'length' > "$RUNNER_TEMP/digest-pr-count"
+            if [ "$(cat "$RUNNER_TEMP/digest-pr-count")" = 0 ]; then
+              cat > "$RUNNER_TEMP/digest-pr.md" <<'BODY'
+          Adds the completed week's newly discovered China-focused animal welfare links. Original publication dates are retained; source coverage and failures are recorded in each issue.
+
+          The collection checkpoint prevents links being repeated across issues. Review the links and source status before merging; merging deploys the digest through the existing Pages workflow.
+
+          Validation: collector syntax checks and the repository test suite passed before collection.
+          BODY
+              gh pr create --base main --head "$DIGEST_BRANCH" --title 'Weekly China animal welfare digest' --body-file "$RUNNER_TEMP/digest-pr.md"
+            fi
+          fi
+      - name: Report coverage
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import { existsSync, readFileSync, appendFileSync } from 'node:fs';
+          if (existsSync('pipeline/digest/state.json')) {
+            const state = JSON.parse(readFileSync('pipeline/digest/state.json'));
+            const rows = Object.entries(state.sources).map(([id, s]) => `| ${id} | ${s.latest.status} | ${s.last_success || '—'} | ${s.latest.reason || s.latest.error || ''} |`);
+            appendFileSync(process.env.GITHUB_STEP_SUMMARY, ['Last saved collection. If this run failed before saving, see the collection step for current errors.', '', '| Source | Status | Collected through | Detail |', '|---|---|---|---|', ...rows, ''].join('\n'));
+          }
+          JS

@@ -1,136 +1,156 @@
-# Weekly digest: method
+# China animal welfare digest
 
-A weekly list of links to Chinese-language material on animal welfare: news, government notices,
-association posts and papers. All animals are in scope: farmed (land and aquatic), laboratory,
-companion and wild. For now the digest is links only, with titles as published. Short English
-summaries come later and will be edited by a person before they go out.
+The digest covers China-related animal welfare news, notices and research in any language.
+A paper qualifies through an author affiliation in China (including Hong Kong and Macao),
+or an explicit China mention in its title or abstract. The latter is labelled **China mentioned**:
+it is a screening signal, not proof that a study took place in China. Human review is still needed.
 
-- Collector: `pipeline/digest.mjs`
-- Sources: `pipeline/digest/sources.json`
-- Words used to keep and sort items: `pipeline/digest/terms.json`
-- Output: `public/data/digest/<YYYY-MM-DD>.json` (one issue) and `public/data/digest/index.json`
-- Site page: `#/digest` (`public/site-digest.js`)
-- Tests: `tests/digest.test.mjs`
+Collection runs daily. The weekly issue contains links not listed in earlier issues, including
+papers indexed after their original publication week. Titles remain as published. Original
+publication dates, indexing dates when supplied, and first-discovery timestamps are separate.
+There are no model calls, summaries or email delivery in this collector.
 
-## Running it
+## Configuration
 
-```
-node pipeline/digest.mjs                                   # the 7 days ending today
-node pipeline/digest.mjs --from 2026-10-31 --to 2026-11-06 # a given week
-node pipeline/digest.mjs --only cvma,moa-news --dry-run    # some sources, print only
-```
+Sources live in `pipeline/digest/sources.json`; matching words and China-affiliation hints live in
+`pipeline/digest/terms.json`. The collector supports `people-search`, `html-list`, `europepmc`,
+`wanfang` and `openalex` readers. Set `enabled: false` on a source to disable it explicitly.
 
-A run takes about a minute and makes no model calls. It prints a summary and writes the issue file
-and the index. Commit both files to publish the issue.
+Add these **repository Actions secrets**, not entries in the JSON file:
 
-## The hard part: getting the material
-
-Most Chinese welfare material is not behind an API. It sits on government and association websites,
-national news sites, WeChat official accounts and paywalled databases. The design rests on four
-rules.
-
-**1. Prefer structured access, scrape last.** The order of preference for a source is:
-
-1. a search API that returns JSON with dates (People's Daily site search, Europe PMC);
-2. a feed or sitemap (none of the sources tried so far has a usable one);
-3. a list page whose links carry a date, either in the URL (`t20261106_…` on the Ministry site) or
-   in the text beside the link (`[ 2026-11-05 ]` on the veterinary association site);
-4. a list page without dates, where the date is read from the article page itself, and only for
-   items that already passed the word filter (ScienceNet).
-
-Structured access breaks less often, carries real dates and is kinder to the site.
-
-**2. Every source is declared, not coded.** A source is an entry in `sources.json`:
-
-| Field | Meaning |
-|---|---|
-| `id`, `name_zh`, `name_en` | how the source is named in the issue |
-| `kind` | `news`, `government`, `association` or `paper` (shown on each link) |
-| `scope` | `general` for sources about everything; `agriculture` or `veterinary` for sources already about animals. Decides how strict the word filter is. |
-| `access.type` | which reader to use: `people-search`, `europepmc` or `html-list` |
-| `access.url` | the page or API |
-| `access.link` | for `html-list`: a pattern that article links match |
-| `access.title` | `attr` (the link's title attribute, falling back to its text) or `text` |
-| `access.date_from_url` | a pattern with year, month and day groups (day optional) |
-| `access.date_near` | look for a date in the text just after the link |
-| `access.date_from_page` | if only the month is known, open the article to find the day |
-| `access.encoding` | force a text encoding (otherwise the page's own, with GBK handled) |
-
-Adding a site that lists articles with dates is usually one entry and no code. A site with a
-different kind of API gets a new reader in `digest.mjs` (a function of about 20 lines).
-
-**3. Every run reports on every source.** Each issue records, per source: `ok`, `empty` (read fine,
-nothing in the week) or `failed` with the error. It also records how many items were read and how
-many were kept. A site that blocks us, goes down or changes its layout shows up at once on the
-digest page under "How this issue was collected". It does not quietly drop out. Two checks guard
-against silent failure: a nearly empty page is reported as such, and a list page where no link
-matches the pattern is reported as a layout change.
-
-**4. Be a polite, named client.** One request at a time per site, at least a second apart, a
-20-second timeout and one retry. The user agent names the project and links the repository. A bare
-custom user agent got empty pages from the Ministry site. A Mozilla-compatible string that still
-names the project works, so that is what we send. We read only public pages. We do not log in, and
-we do not touch WeChat or paywalled databases.
-
-## Keeping and sorting items
-
-An item is kept when it is dated inside the week and its words say it is about animals and welfare.
-The **title** decides. The search snippet (People's Daily only) can add an item to a lower tier, but
-it cannot raise one.
-
-| Tier | Rule | Kept from |
+| Secret | How to obtain it | Used for |
 |---|---|---|
-| Animal welfare | a strong welfare word in the title (动物福利, 屠宰, 疼痛, 断尾, 去势, 啄羽, welfare, slaughter, stunning …) and an animal in view | all sources |
-| Stress, disease and handling | an animal and a broader word in the title (应激, 疫病, 运输, 密度, 热应激 …) | all sources |
-| Mentions animal protection | no welfare word in the title, but the snippet has one | general sources only |
-| Farming and veterinary news | an animal in the title, no welfare word | agriculture and veterinary sources only |
+| `WFDATA_APP_KEY` | Sign in at [Wanfang AI Hub](https://ai.wfdata.com/), subscribe to literature search, and obtain an AppKey under My subscriptions | Wanfang |
+| `OPENALEX_API_KEY` | Create an [OpenAlex account and API key](https://openalex.org/settings/api) | OpenAlex cursor pagination and searches |
 
-Papers (Europe PMC) must have a welfare word in the title. Searching abstracts brought in molecular
-work on "stress" and breeding studies.
+The registry's `access.key_env` names the environment variable. Missing keys produce an explicit
+`skipped` status; they do not prevent the public sources from collecting. An invalid key, an
+unavailable service or a malformed response produces `failed`, never a successful empty result.
+Keys are sent in HTTPS headers and never stored in collection state or public issue files.
 
-Some words are removed before matching because they contain an animal character by accident:
-熊猫 (panda) is not 猫 (cat), and 牛市 (bull market) is not 牛 (cattle). The list is
-`exclude` in `terms.json`. 散养 and 笼养 (free-range, caged) count only as context words. Most news
-that uses them is about rural income, not welfare.
+Wanfang's official API uses `POST /openwanfang/getQuery` with an `X-App-Key` header. We use its
+HTTPS compatibility gateway, `https://api.wanfangdata.com.cn`, and the `OpenPeriodical` collection
+without a language restriction. Pagination uses `start` and `rows`. Publication year bounds keep
+the search manageable. Its public schema names `MetadataOnlineDate` but does not specify its date
+format, so the first implementation retrieves the configured recent years and deduplicates them.
+Only a valid full date is interpreted as a date. The adapter needs validation with your subscribed
+account before relying on coverage or adding online-date range filters.
+See the [platform migration notice](https://open.wf.pub/docs/JSAPI) and
+[official API schema](https://github.com/wanfangdata/wfdata-open-skills/blob/master/skills/wfdata-search/references/api-catalog.md).
 
-Duplicates are dropped by URL, and by title once spaces and punctuation are removed.
+Europe PMC searches `FIRST_IDATE`, its first indexing date, and requests `core` records so language,
+affiliations and original publication dates are available. The query includes both Chinese
+affiliations and China mentions. [Europe PMC API documentation](https://dev.europepmc.org/RestfulWebService).
 
-## Sources in the first issue (2026-11-06)
+OpenAlex runs separate affiliation and China-text searches, with no language filter. Its default
+publication lookback is 90 days. `--backfill` widens that to 730 days; the scheduled job does this
+on the first Saturday of each month. This reduces late-indexing gaps but does not guarantee that
+arbitrarily old additions will be discovered. Update-date filters require a suitable subscription
+and are not assumed here. [OpenAlex filters](https://help.openalex.org/api/filtering/).
 
-| Source | How | What it gave |
-|---|---|---|
-| People's Daily site search | JSON search API, 8 welfare keywords, 2 pages each | 114 read; mostly wildlife protection stories, in the "mentions" tier |
-| Europe PMC | search API by POST: welfare and animal words, an author affiliation in China, first published in the week | 6 read, none with a welfare word in the title |
-| Ministry of Agriculture: news | list page, date in URL | 2 farming items |
-| Ministry of Agriculture: notices | list page, date in URL (links go to department folders) | newest notice was from September |
-| Chinese Veterinary Medical Association | list page, date beside link | the draft cattle and sheep slaughter quality standards (the one welfare item) |
-| ScienceNet news | list page, month in URL, day from article | nothing on animals this week |
+People's Daily uses the site's search endpoint. This worked in the November 2026 probe but is not
+a documented public API contract. It searches targeted terms, paginates until results are older
+than the collection window, and reports failure if the configured page ceiling is reached first.
+The ministry, veterinary association and ScienceNet use public list pages. HTML readers remain
+limited to the links currently on those lists; daily checks reduce, but cannot eliminate, gaps.
+The journal RSS links investigated returned 404 and are not configured as working feeds.
 
-The sources tried and not used are listed in `sources.json` under `not_used`, each with the reason.
-They include the Ministry's fisheries and livestock bureau sites (time out from our servers),
-Farmers' Daily (403), the animal welfare cooperation committee ICCAW (503), Xinhua search (405),
-CNKI and Wanfang (paywalled, terms forbid scraping), WeChat official accounts (no open feed, terms
-forbid scraping) and Crossref by journal (Chinese animal-science journals are mostly missing).
+## Local commands
 
-## Known gaps
+Run from the repository root with Node 22 or newer. Provide credentials through environment
+variables or your secret manager; do not commit them or paste them into issue descriptions.
 
-- **WeChat** carries much of the timely welfare material (associations, companies, researchers).
-  There is no open way in. The honest options are to ask organisations for their posts directly, or
-  to have a person add links by hand to a weekly file the collector also reads.
-- **Chinese journals.** CNKI and Wanfang hold most Chinese papers. Their tables of contents are
-  sometimes public on the journal's own site; those can be added as `html-list` sources one by one.
-- **Wildlife noise.** "动物保护" in People's Daily search brings many wildlife conservation stories.
-  They stay in a separate tier. Whether conservation belongs in a welfare digest is an editorial call.
-- **Our servers' location.** Several Chinese government sites time out from outside China. Running
-  the collector from a machine in China would open them.
+```sh
+# Collect through yesterday, using the Beijing calendar. Save state, without making an issue.
+npm run digest:collect
 
-## Next steps
+# Build the completed Saturday–Friday issue from saved state. Existing issues are immutable.
+npm run digest:weekly
 
-1. Summaries: one or two English lines per kept item, written by a model and edited by a person
-   before an issue is published. Titles stay as published.
-2. A hand-added links file for WeChat posts and anything else an editor finds.
-3. More `html-list` sources: provincial agriculture departments, the Chinese Association of Animal
-   Science and Veterinary Medicine (its pages carry no dates on the list, so it needs
-   `date_from_page`), journal contents pages.
-4. Run weekly on a schedule (GitHub Actions or a scheduled task), commit the issue, and later send
-   it by email.
+# Inspect selected sources without writing anything.
+node pipeline/digest.mjs --only europepmc-cn,people-search --collect-only --dry-run
+
+# Fetch and build an explicit completed week, using isolated state and output.
+node pipeline/digest.mjs --from 2026-10-31 --to 2026-11-06 \
+  --state /tmp/myrias-digest/state.json --out /tmp/myrias-digest/issues
+
+# Wider OpenAlex search for records indexed late.
+node pipeline/digest.mjs --collect-only --backfill
+```
+
+`--sources PATH` supplies another registry. `--state PATH` and `--out PATH` isolate experiments
+from the production checkpoint. `--only` is accepted only with `--collect-only` or `--dry-run`,
+so a diagnostic source subset cannot publish an incomplete issue by accident. Dates must be valid
+and end before the current Beijing day. The default combined command collects and then assembles
+an issue; the workflow uses the separate commands above.
+
+## State, duplication and failures
+
+`pipeline/digest/state.json` is the durable checkpoint, created by the first successful run.
+It contains bibliographic metadata, identity aliases, first/last discovery timestamps, the issue
+that used each record, and each source's last successful date. It contains no abstracts, article
+bodies, PDFs, credentials or model costs. Abstracts and affiliation text may be inspected in memory
+for relevance, then discarded.
+
+Deduplication uses normalized DOI, provider ID, URL and normalized title. Identity aliases persist
+across runs and sources. Existing `public/data/digest/*.json` issues seed the checkpoint, so the
+original issue is not repeated when upgrading. Matching translated titles without a common DOI
+or provider identity is still imperfect.
+
+Each source resumes at its last successful date with a two-day overlap. A failure never advances
+that watermark. OpenAlex and Wanfang use their documented bounded search strategies above instead
+of relying on publication dates as an incremental cursor. A paper with an unknown publication day
+can be included based on discovery, with its date shown as unknown. Undated news is excluded.
+
+If every attempted source fails or is unconfigured, the command exits unsuccessfully and writes
+nothing. Partial success preserves the successful sources' discoveries and records coverage gaps.
+The new issue is labelled partial if any configured source failed or was skipped. Publication
+requires a successful collection through the issue end. Source-table counts distinguish the latest
+scan from unique links included in the issue.
+
+Issue files are never overwritten. Repeating publication for the same end date leaves new arrivals
+queued for the next issue. JSON files use temporary-file replacement; after an interrupted issue
+write, the next run imports that issue before assigning records again and rebuilds the index.
+Do not delete the checkpoint to retry a source. Fix its configuration and rerun collection.
+
+## GitHub schedule and publication
+
+`.github/workflows/digest.yml` runs at **01:17 UTC / 09:17 Beijing daily** and supports manual runs.
+Each run uses the latest `main` code, checks syntax and tests, restores saved collection data,
+collects through yesterday, and assembles the most recent completed Friday if its issue is missing.
+Thus Saturday normally creates the issue, while a delayed or missed run can catch up later.
+GitHub schedules can be delayed; they run only once the workflow is on the default branch.
+[GitHub schedule behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+
+State and pending issues are saved on `automation/weekly-digest`, with concurrency control and an
+explicit Git lease. The workflow reconstructs that automation branch from current `main`, retaining
+its checkpoint and all unmerged issues. Existing issue files on `main` take precedence over restored
+copies. The branch is exclusively machine-maintained; make editorial corrections on `main` through
+a separate PR, not directly on the automation branch.
+
+When issue data differs from `main`, the job opens one weekly PR or updates its existing branch.
+Daily checkpoint changes alone do not open a PR. Review and squash-merge the weekly PR to publish;
+the existing `pages.yml` workflow deploys it. If several weeks await review, their issues accumulate
+in the same PR. There is no direct automated push to `main` and no automatic email.
+
+Repository setup:
+
+1. Add the two API secrets above; public sources work while either key is absent.
+2. Allow GitHub Actions to create pull requests in Settings → Actions → General. Job permissions
+   are limited to repository contents and pull requests.
+3. Merge the implementation PR so the schedule is on `main`.
+4. Run **Collect China welfare digest** manually once. Inspect its coverage summary and source
+   statuses; verify Wanfang with the subscribed key before treating it as a complete source.
+5. Review and merge generated weekly issues.
+
+The workflow writes the checkpoint before attempting PR creation. If repository settings prevent
+PR creation, the checkpoint remains on the automation branch and the job retries on the next run.
+The Actions job summary lists missing keys and failures. A source that exceeds its pagination limit
+fails visibly so its query can be narrowed or its limit raised; it is not silently truncated.
+
+## Tests
+
+`npm run check && npm test` covers the readers with injected responses, late-indexed papers,
+China screening, language metadata, pagination errors, missing keys, retry behavior, persistent
+cross-source identities, completed Beijing weeks, failed-run preservation, immutable reruns and
+restoration of unmerged issues. Live API checks remain necessary when source contracts change.
