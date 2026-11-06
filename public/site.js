@@ -253,7 +253,7 @@ function viewOverview() {
         <aside class="hero-side" aria-hidden="true"><img class="hero-art" src="art/research-desk.webp" width="1004" height="849" alt="" decoding="async"><div class="hero-tiles">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</div></aside>
       </section>
       ${state.authors?.papers?.length ? `<section class="home-flow" aria-labelledby="home-flow-title"><div class="home-flow-head"><h2 id="home-flow-title">${esc(tr('af.title'))}</h2>
-        <p class="cv-legend"><a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
+        <p class="cv-legend"><a class="corpus-link" href="${link('corpus')}">${esc(tr('home.flow.more'))}</a></p></div>
         <div class="cv-card">${authorFlowHtml(state.authors, tr)}</div></section>` : ''}
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
       <section class="graph-feature" aria-labelledby="graph-title">
