@@ -13,8 +13,8 @@
 .af-visual { padding: 8px 16px 0; }
 .af-diagram { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--font); }
 .af-axis { fill: var(--soft); font-size: 13px; font-weight: 500; }
-.af-label { fill: var(--ink); font-size: 13.5px; font-weight: 500; pointer-events: none; }
-.af-count { fill: var(--ink); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none; }
+.af-label { fill: var(--ink); font-size: 12.5px; font-weight: 500; pointer-events: none; }
+.af-count { fill: var(--ink); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none; }
 .af-percent { fill: var(--soft); font-weight: 400; }
 .af-ribbon { fill: var(--flow); fill-opacity: .36; stroke: var(--flow); stroke-width: .4; stroke-opacity: .5; cursor: pointer; transition: opacity 140ms ease, fill-opacity 140ms ease; }
 .af-ribbon:hover { fill-opacity: .8; }

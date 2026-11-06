@@ -26,7 +26,7 @@ test('rare affiliations retain label space without inflating their bars', () => 
   const m = authorModel({ papers }), layout = authorLayout(m);
   assert.ok(Math.abs(layout.left.cn_university.h / layout.left.europe.h - 1000) < 1e-8);
   const centers = Object.values(layout.left).map(r => r.y + r.h / 2);
-  for (let i = 1; i < centers.length; i++) assert.ok(centers[i] - centers[i - 1] >= 48);
+  for (let i = 1; i < centers.length; i++) assert.ok(centers[i] - centers[i - 1] >= 42);
 });
 
 test('unrecognized and missing affiliation groups remain counted in Others', () => {

@@ -1,0 +1,42 @@
+/* Teal colour scheme, with separate light and dark surfaces. */
+:root[data-palette="teal"]:not([data-theme="dark"]) {
+  --bg: #D3E2DF;
+  --card-bg: #E1ECE8;
+  --ink: #17383B;
+  --soft: #415E60;
+  --line: #B5CCC7;
+  --line-strong: #82A6A2;
+  --accent: #155E63;
+  --accent-soft: #C0DAD4;
+  --on-accent: #FFFFFF;
+  --band-sage: #C3D8CE;
+  --band-sand: #DCDDCB;
+  --band-clay: #DDD2BF;
+  --band-mint: #BDD6CE;
+  --footer-panel: #BCD1CA;
+}
+:root[data-palette="teal"][data-theme="dark"] {
+  --bg: #121F22;
+  --card-bg: #1A2B2E;
+  --ink: #DFEEEE;
+  --soft: #A2BEC0;
+  --line: #30494D;
+  --line-strong: #50787D;
+  --accent: #8ACDD0;
+  --accent-soft: #244448;
+  --on-accent: #102629;
+  --band-sage: #1B3035;
+  --band-sand: #292E28;
+  --band-clay: #302C25;
+  --band-mint: #1D3532;
+  --footer-panel: #1A2C30;
+}
+:root[data-palette] {
+  --card: var(--card-bg);
+  --hill-1: var(--band-sage); --hill-2: var(--band-mint); --hill-3: var(--band-clay); --hill-edge: var(--bg);
+  --card-line: color-mix(in srgb, var(--ink) 9%, transparent);
+  --card-shadow: inset 0 1px 0 color-mix(in srgb, var(--card-bg) 50%, transparent), 0 8px 24px color-mix(in srgb, var(--ink) 5%, transparent);
+  --card-shadow-hover: 0 12px 28px color-mix(in srgb, var(--ink) 9%, transparent);
+}
+/* Keep filled controls legible in either mode. */
+:root[data-palette] :is(.rv-badge, .sp-tab[aria-current], .tool-btn.is-primary) { color: var(--on-accent); }

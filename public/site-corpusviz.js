@@ -163,7 +163,7 @@ export function authorModel(meta) {
 // A single papers-to-pixels scale on both sides keeps every ribbon proportional.
 // Small nodes reserve label space without inflating their data bars.
 export function authorLayout(model, height = 400) {
-  const gap = 8, minRoom = 40;
+  const gap = 6, minRoom = 36;
   const room = (rows, scale) => rows.reduce((sum, [, v]) => sum + Math.max(minRoom, v * scale), 0) + Math.max(0, rows.length - 1) * gap;
   let lo = 0, hi = height / Math.max(1, model.n);
   for (let i = 0; i < 48; i++) {
@@ -190,8 +190,8 @@ export function authorLayout(model, height = 400) {
 const afPercent = (count, total) => `${(100 * count / Math.max(1, total)).toFixed(1)}%`;
 const afColor = id => Object.fromEntries(AF_GROUPS)[id];
 
-function authorDiagram(m, tr, width = 960, height = 340) {
-  const layout = authorLayout(m, height), top = 36, bw = 12;
+function authorDiagram(m, tr, width = 960, height = 288) {
+  const layout = authorLayout(m, height), top = 30, bw = 12;
   const xl = Math.max(235, Math.min(width * .27, 280));
   const xr = width - Math.max(190, Math.min(width * .25, 260));
   const fmt = v => Number(v.toFixed(3));
@@ -214,16 +214,16 @@ function authorDiagram(m, tr, width = 960, height = 340) {
   const nodes = (rows, positions, side) => rows.map(([id, count]) => {
     const left = side === 'g', r = positions[id], y = r.y + top, cy = y + r.h / 2;
     const textX = left ? 12 : xr + 30, name = tr(`af.${side}.${id}`), lines = labelLines(name);
-    const labelY = cy - (lines.length > 1 ? 15 : 7);
+    const labelY = cy - (lines.length > 1 ? 14 : 7);
     const groupSegments = left ? '' : layout.links.filter(l => l.k === id).map(l => `<rect class="af-segment" data-af-g="${l.g}" data-af-k="${l.k}" x="${xr}" y="${fmt(l.y1 + top)}" width="${bw}" height="${fmt(l.h)}" fill="${afColor(l.g)}"/>`).join('');
     return `<g class="af-node" role="button" tabindex="0" aria-pressed="false" aria-label="${esc(tr('af.select', { name }))}" data-af-${side}="${id}">
-      <rect class="af-hit" x="${left ? 0 : xr - 4}" y="${fmt(cy - 24)}" width="${left ? xl + bw + 4 : width - xr + 4}" height="48" rx="6"/>
+      <rect class="af-hit" x="${left ? 0 : xr - 4}" y="${fmt(cy - 21)}" width="${left ? xl + bw + 4 : width - xr + 4}" height="42" rx="6"/>
       ${left ? `<rect x="${xl}" y="${fmt(y)}" width="${bw}" height="${fmt(r.h)}" fill="${afColor(id)}"/>` : groupSegments}
-      <text class="af-label" x="${textX}" y="${fmt(labelY)}">${lines.map((line, i) => `<tspan x="${textX}" dy="${i ? 17 : 0}">${esc(line)}</tspan>`).join('')}</text>
-      <text class="af-count" x="${textX}" y="${fmt(cy + (lines.length > 1 ? 21 : 14))}">${n(count)}<tspan class="af-percent"> / ${afPercent(count, m.n)}</tspan></text>
+      <text class="af-label" x="${textX}" y="${fmt(labelY)}">${lines.map((line, i) => `<tspan x="${textX}" dy="${i ? 15 : 0}">${esc(line)}</tspan>`).join('')}</text>
+      <text class="af-count" x="${textX}" y="${fmt(cy + (lines.length > 1 ? 17 : 12))}">${n(count)}<tspan class="af-percent"> / ${afPercent(count, m.n)}</tspan></text>
     </g>`;
   }).join('');
-  return `<svg class="af-diagram" viewBox="0 0 ${width} ${height + 54}" role="group" aria-label="${esc(tr('af.aria', { n: n(m.n) }))}">
+  return `<svg class="af-diagram" viewBox="0 0 ${width} ${height + 46}" role="group" aria-label="${esc(tr('af.aria', { n: n(m.n) }))}">
       <text class="af-axis" x="12" y="20">${esc(tr('af.left'))}</text><text class="af-axis" x="${xr + 30}" y="20">${esc(tr('af.right'))}</text>
       <g class="af-ribbons">${paths}</g>${nodes(m.groups, layout.left, 'g')}${nodes(m.kinds, layout.right, 'k')}</svg>`;
 }
@@ -305,7 +305,7 @@ export function mountAuthorFlow(root, meta, tr) {
     const width = Math.floor(visual.clientWidth - 32);
     if (width <= 0) return;
     const rows = Math.max(m.groups.length, m.kinds.length);
-    const height = Math.round(Math.max(rows * 48 - 8, Math.min(innerHeight * .4, width * .4)));
+    const height = Math.round(Math.max(rows * 42 - 6, Math.min(innerHeight * .32, width * .32)));
     const size = `${width}:${height}`;
     if (size === previousSize) return;
     previousSize = size;
