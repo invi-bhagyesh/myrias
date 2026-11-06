@@ -1,0 +1,389 @@
+{
+ "id": "2026-11-06",
+ "from": "2026-10-31",
+ "to": "2026-11-06",
+ "generated_at": "2026-11-06T16:38:53.122Z",
+ "counts": {
+  "items": 21,
+  "welfare": 1
+ },
+ "sources": [
+  {
+   "id": "people-search",
+   "name_zh": "人民网（站内搜索）",
+   "name_en": "People's Daily (site search)",
+   "kind": "news",
+   "status": "ok",
+   "scanned": 114,
+   "relevant": 75,
+   "in_window": 36,
+   "undated": 0,
+   "seconds": 10.2
+  },
+  {
+   "id": "europepmc-cn",
+   "name_zh": "Europe PMC（中国作者论文）",
+   "name_en": "Europe PMC (papers with authors in China)",
+   "kind": "paper",
+   "status": "empty",
+   "scanned": 6,
+   "relevant": 0,
+   "in_window": 0,
+   "undated": 0,
+   "seconds": 0.5
+  },
+  {
+   "id": "moa-news",
+   "name_zh": "农业农村部 · 政务动态",
+   "name_en": "Ministry of Agriculture and Rural Affairs: news",
+   "kind": "government",
+   "status": "ok",
+   "scanned": 20,
+   "relevant": 2,
+   "in_window": 2,
+   "undated": 0,
+   "seconds": 2
+  },
+  {
+   "id": "moa-notices",
+   "name_zh": "农业农村部 · 通知公告",
+   "name_en": "Ministry of Agriculture and Rural Affairs: notices",
+   "kind": "government",
+   "status": "empty",
+   "scanned": 20,
+   "relevant": 3,
+   "in_window": 0,
+   "undated": 0,
+   "seconds": 0.7
+  },
+  {
+   "id": "cvma",
+   "name_zh": "中国兽医协会",
+   "name_en": "Chinese Veterinary Medical Association",
+   "kind": "association",
+   "status": "ok",
+   "scanned": 65,
+   "relevant": 49,
+   "in_window": 1,
+   "undated": 6,
+   "seconds": 3
+  },
+  {
+   "id": "sciencenet",
+   "name_zh": "科学网 · 新闻",
+   "name_en": "ScienceNet China: news",
+   "kind": "news",
+   "status": "empty",
+   "scanned": 92,
+   "relevant": 0,
+   "in_window": 0,
+   "undated": 0,
+   "seconds": 1.7
+  }
+ ],
+ "not_used": [
+  {
+   "name": "农业农村部渔业渔政管理局 yyj.moa.gov.cn",
+   "why": "times out from our servers"
+  },
+  {
+   "name": "农业农村部畜牧兽医局 xmsyj.moa.gov.cn",
+   "why": "times out from our servers"
+  },
+  {
+   "name": "全国水产技术推广总站 nftec.agri.cn",
+   "why": "times out"
+  },
+  {
+   "name": "中国水产科学研究院 cafs.ac.cn",
+   "why": "times out"
+  },
+  {
+   "name": "动物福利国际合作委员会 iccaw.org.cn",
+   "why": "HTTP 503"
+  },
+  {
+   "name": "农民日报 farmer.com.cn",
+   "why": "HTTP 403"
+  },
+  {
+   "name": "新华网搜索 so.news.cn",
+   "why": "HTTP 405 to scripted requests; revisit"
+  },
+  {
+   "name": "中国水产频道 fishfirst.cn",
+   "why": "list pages not updated since 2018"
+  },
+  {
+   "name": "CNKI, Wanfang",
+   "why": "paywalled; their terms forbid scraping"
+  },
+  {
+   "name": "WeChat official accounts",
+   "why": "much of the timely material is here, but there is no open feed and scraping breaks WeChat's terms"
+  },
+  {
+   "name": "Crossref by journal ISSN",
+   "why": "most Chinese animal-science journals are not in Crossref or not current there"
+  }
+ ],
+ "items": [
+  {
+   "source": "cvma",
+   "kind": "association",
+   "lang": "zh",
+   "url": "https://www.cvma.org.cn/6849/202611/74579.html",
+   "title": "农业农村部畜牧兽医局关于征求《牛屠宰质量管理规范（征求意见稿）》《羊屠宰质量管理规范（征求意见稿）》意见的通知",
+   "date": "2026-11-05",
+   "tier": "welfare",
+   "matched": [
+    "屠宰",
+    "畜",
+    "牛",
+    "羊",
+    "兽医"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://politics.people.com.cn/n1/2026/1106/c461001-40829408.html",
+   "title": "全国人民代表大会常务委员会关于修改《中华人民共和国突发事件应对法》等十五部法律的决定",
+   "date": "2026-11-06",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://jl.people.com.cn/n2/2026/1106/c349771-41743854.html",
+   "title": "爱鸟护鸟 镜护生灵——洮南市司法局开展法治宣传进校园活动",
+   "date": "2026-11-06",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://jl.people.com.cn/n2/2026/1105/c349771-41742710.html",
+   "title": "全球极危物种白鹤现身蛟河",
+   "date": "2026-11-05",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://hlj.people.com.cn/n2/2026/1105/c220005-41742332.html",
+   "title": "黑龙江新增3家国家4A级旅游景区",
+   "date": "2026-11-05",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://gx.people.com.cn/n2/2026/1105/c179430-41742291.html",
+   "title": "广西全面开展鸟网巡查巡护活动",
+   "date": "2026-11-05",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://world.people.com.cn/n1/2026/1105/c1002-40828206.html",
+   "title": "同心守护熊猫家园 携手共谋绿色发展——2026全球熊猫伙伴大会观察",
+   "date": "2026-11-05",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://sc.people.com.cn/n2/2026/1104/c345167-41741979.html",
+   "title": "万千“资”色 借熊猫走向世界",
+   "date": "2026-11-04",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://nm.people.com.cn/n2/2026/1104/c410293-41741903.html",
+   "title": "托克托县黄河湿地迎来候鸟迁徙高峰",
+   "date": "2026-11-04",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://cpc.people.com.cn/n1/2026/1104/c64387-40827449.html",
+   "title": "十四届全国人大常委会第二十五次会议审议多部法律草案",
+   "date": "2026-11-04",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://society.people.com.cn/n1/2026/1104/c1008-40827273.html",
+   "title": "东北林海里，一派万物共生的新美景",
+   "date": "2026-11-04",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://henan.people.com.cn/n2/2026/1104/c351638-41740855.html",
+   "title": "2026全球熊猫伙伴大会在成都举行",
+   "date": "2026-11-04",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://nm.people.com.cn/n2/2026/1104/c196667-41741008.html",
+   "title": "一头牛撬起乡村振兴“金杠杆”",
+   "date": "2026-11-04",
+   "tier": "mention",
+   "matched": [
+    "牛",
+    "屠宰"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://zj.people.com.cn/n2/2026/1103/c186327-41740355.html",
+   "title": "温州乐清全域打造“乐读”全民阅读品牌",
+   "date": "2026-11-03",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://fj.people.com.cn/n2/2026/1103/c181466-41740353.html",
+   "title": "福建晋江：“藏蓝”守护候鸟南迁路",
+   "date": "2026-11-03",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://jl.people.com.cn/n2/2026/1102/c349771-41739450.html",
+   "title": "“鸟中国宝” 成群现身蛟河松花湖流域",
+   "date": "2026-11-02",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://jl.people.com.cn/n2/2026/1102/c349771-41739252.html",
+   "title": "中俄协同守护迁徙通道 镇赉莫莫格湿地迎来候鸟迁徙高峰",
+   "date": "2026-11-02",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://nm.people.com.cn/n2/2026/1101/c192247-41738339.html",
+   "title": "《黄旗海自然保护区生态环境司法保护令》发布",
+   "date": "2026-11-01",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "people-search",
+   "kind": "news",
+   "lang": "zh",
+   "url": "http://jx.people.com.cn/n2/2026/1031/c186330-41737902.html",
+   "title": "江西省持续提升生态保护监管效能",
+   "date": "2026-10-31",
+   "tier": "mention",
+   "matched": [
+    "动物保护"
+   ]
+  },
+  {
+   "source": "moa-news",
+   "kind": "government",
+   "lang": "zh",
+   "url": "http://www.moa.gov.cn/xw/zwdt/202611/t20261106_6489273.htm",
+   "title": "全国首届兽医化验员检测技能竞赛决赛在山东举办",
+   "date": "2026-11-06",
+   "tier": "animal",
+   "matched": [
+    "兽医"
+   ]
+  },
+  {
+   "source": "moa-news",
+   "kind": "government",
+   "lang": "zh",
+   "url": "http://www.moa.gov.cn/xw/zwdt/202611/t20261103_6489132.htm",
+   "title": "2026年全国畜牧业统计监测劳动竞赛在重庆举办",
+   "date": "2026-11-03",
+   "tier": "animal",
+   "matched": [
+    "畜"
+   ]
+  }
+ ]
+}

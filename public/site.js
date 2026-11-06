@@ -3,6 +3,7 @@ import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { pipelineHtml, mountPipeline } from './site-pipeline.js';
 import { runsHtml } from './site-runs.js';
+import { digestHtml } from './site-digest.js';
 import { claimReviewPanelHtml, mountReviewForms, reviewCardHtml, reviewActionCardHtml, bindReviews, loadReviews, saveReview, exportRows, exportActionRows, toCsv, reviewStats } from './site-review.js';
 import { feedModel, feedPageHtml } from './site-topic.js';
 import { historyHtml, mountHistory, versionHead, versionsOf, loadVersionFile } from './site-history.js';
@@ -393,6 +394,26 @@ function viewReview(params) {
     } };
 }
 
+// Weekly digest of Chinese-language animal welfare links (pipeline/digest.mjs). The index and each issue load on
+// first visit; ?issue=YYYY-MM-DD picks an earlier issue.
+function viewDigest(params) {
+  const dg = state.digest ||= { index: null, issues: {}, error: null };
+  const loading = { title: tr('dg.title'), html: `<p class="loading">${esc(tr('loading'))}</p>` };
+  if (dg.error) return { title: tr('dg.title'), html: `<p class="empty">${esc(tr('dg.none'))}</p>` };
+  if (!dg.index) {
+    fetch('data/digest/index.json').then(r => (r.ok ? r.json() : Promise.reject(new Error(r.status)))).then(x => { dg.index = x; render(); }).catch(e => { dg.error = String(e); render(); });
+    return loading;
+  }
+  const id = params.get('issue') || dg.index.issues?.[0]?.id;
+  const meta = (dg.index.issues || []).find(i => i.id === id);
+  if (!meta) return { title: tr('dg.title'), html: `<p class="empty">${esc(tr('dg.none'))}</p>` };
+  if (!dg.issues[id]) {
+    fetch('data/digest/' + meta.file).then(r => r.json()).then(x => { dg.issues[id] = x; render(); }).catch(e => { dg.error = String(e); render(); });
+    return loading;
+  }
+  return { title: tr('dg.title'), html: digestHtml(dg.index, dg.issues[id], { tr, link, lang: state.lang }) };
+}
+
 function viewFinding(id) {
   const f = state.index.findings.get(id);
   if (!f) return goneView('findings', id, 'fd.kicker');
@@ -725,6 +746,7 @@ function render(navigated = false) {
     else if (head === 'findings') view = id ? viewFinding(id) : viewFindings(params);
     else if (head === 'actions') view = viewActions(params);
     else if (head === 'pipeline') view = viewPipeline();
+    else if (head === 'digest') view = viewDigest(params);
     else if (head === 'corpus') view = viewCorpus();
     else if (head === 'methods') view = viewMethods();
     else if (head === 'download') view = viewDownload();
@@ -773,7 +795,7 @@ function renderFooter() {
   const list = items => `<ul>${items.map(([label, href, ext]) => `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(label)}${ext ? ' ↗' : ''}</a></li>`).join('')}</ul>`;
   const card = (key, items) => `<nav class="site-footer-card" aria-label="${esc(tr(key))}"><h2>${esc(tr(key))}</h2>${list(items)}</nav>`;
   $('#site-footer').innerHTML = `<div class="site-footer-panel"><div class="site-footer-cards">
-      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.findings'), link('findings')], [tr('fa.nav'), link('topics/feed-acclimation')], [tr('nav.actions'), link('actions')], [tr('nav.sources'), link('sources')]])}
+      ${card('foot.explore', [[tr('nav.explore'), link('explore')], [tr('nav.species'), link('species')], [tr('nav.findings'), link('findings')], [tr('fa.nav'), link('topics/feed-acclimation')], [tr('dg.nav'), link('digest')], [tr('nav.actions'), link('actions')], [tr('nav.sources'), link('sources')]])}
       ${card('foot.learn', [[tr('nav.methods'), link('methods')], [tr('nav.download'), link('download')], [tr('nav.pipeline'), link('pipeline')], [tr('nav.corpus'), link('corpus')], [tr('rv.nav'), link('review')]])}
       ${card('foot.open', [['myrias.org', 'https://myrias.org/', true], [tr('footer.repo'), 'https://github.com/invi-bhagyesh/myrias', true]])}
       <div class="site-footer-card site-footer-cta"><div><p>${esc(tr('foot.cta'))}</p><a class="site-footer-button" href="${reviewLink}" target="_blank" rel="noopener noreferrer">${esc(tr('foot.cta.btn'))} <span aria-hidden="true">→</span></a></div></div>

@@ -1,0 +1,142 @@
+{
+ "_about": "Where the weekly digest looks. One entry per source. 'access' says how it is read; 'status' records what we found when the source was added. pipeline/digest.mjs reads this file; pipeline/digest/METHOD.md explains each field.",
+ "user_agent": "Mozilla/5.0 (compatible; MyriasDigest/0.1; +https://github.com/invi-bhagyesh/myrias)",
+ "sources": [
+  {
+   "id": "people-search",
+   "name_zh": "人民网（站内搜索）",
+   "name_en": "People's Daily (site search)",
+   "kind": "news",
+   "scope": "general",
+   "access": {
+    "type": "people-search",
+    "url": "http://search.people.cn/search-platform/front/search",
+    "keywords": [
+     "动物福利",
+     "动物保护",
+     "福利养殖",
+     "人道屠宰",
+     "笼养",
+     "散养",
+     "实验动物福利",
+     "野生动物保护"
+    ],
+    "pages": 2
+   }
+  },
+  {
+   "id": "europepmc-cn",
+   "name_zh": "Europe PMC（中国作者论文）",
+   "name_en": "Europe PMC (papers with authors in China)",
+   "kind": "paper",
+   "scope": "general",
+   "access": {
+    "type": "europepmc",
+    "query": "TITLE_ABS:(welfare OR \"stocking density\" OR slaughter OR stunning OR \"transport stress\" OR \"heat stress\" OR enrichment OR \"tail biting\" OR \"feather pecking\" OR lameness OR castration OR \"cage-free\" OR \"free-range\") AND TITLE_ABS:(pig OR swine OR sow OR piglet OR poultry OR chicken OR broiler OR hen OR duck OR goose OR cattle OR cow OR dairy OR calf OR sheep OR goat OR rabbit OR fish OR shrimp OR aquaculture OR livestock OR \"farm animal\" OR \"laboratory animal\" OR dog OR cat) AND AFF:\"China\""
+   }
+  },
+  {
+   "id": "moa-news",
+   "name_zh": "农业农村部 · 政务动态",
+   "name_en": "Ministry of Agriculture and Rural Affairs: news",
+   "kind": "government",
+   "scope": "agriculture",
+   "access": {
+    "type": "html-list",
+    "url": "http://www.moa.gov.cn/xw/zwdt/",
+    "link": "\\./\\d{6}/t\\d{8}_\\d+\\.htm",
+    "title": "attr",
+    "date_from_url": "t(\\d{4})(\\d{2})(\\d{2})_"
+   }
+  },
+  {
+   "id": "moa-notices",
+   "name_zh": "农业农村部 · 通知公告",
+   "name_en": "Ministry of Agriculture and Rural Affairs: notices",
+   "kind": "government",
+   "scope": "agriculture",
+   "access": {
+    "type": "html-list",
+    "url": "http://www.moa.gov.cn/gk/tzgg_1/",
+    "link": "govpublic/[A-Za-z0-9]+/\\d{6}/t\\d{8}_\\d+\\.htm",
+    "title": "attr",
+    "date_from_url": "t(\\d{4})(\\d{2})(\\d{2})_"
+   }
+  },
+  {
+   "id": "cvma",
+   "name_zh": "中国兽医协会",
+   "name_en": "Chinese Veterinary Medical Association",
+   "kind": "association",
+   "scope": "veterinary",
+   "access": {
+    "type": "html-list",
+    "url": "https://www.cvma.org.cn/",
+    "link": "/\\d{4}/\\d{6}/\\d+\\.html",
+    "title": "text",
+    "date_near": true
+   }
+  },
+  {
+   "id": "sciencenet",
+   "name_zh": "科学网 · 新闻",
+   "name_en": "ScienceNet China: news",
+   "kind": "news",
+   "scope": "general",
+   "access": {
+    "type": "html-list",
+    "url": "https://news.sciencenet.cn/",
+    "link": "htmlnews/\\d{4}/\\d{1,2}/\\d+\\.shtm",
+    "title": "text",
+    "date_from_url": "htmlnews/(\\d{4})/(\\d{1,2})/",
+    "date_from_page": true
+   }
+  }
+ ],
+ "not_used": [
+  {
+   "name": "农业农村部渔业渔政管理局 yyj.moa.gov.cn",
+   "why": "times out from our servers"
+  },
+  {
+   "name": "农业农村部畜牧兽医局 xmsyj.moa.gov.cn",
+   "why": "times out from our servers"
+  },
+  {
+   "name": "全国水产技术推广总站 nftec.agri.cn",
+   "why": "times out"
+  },
+  {
+   "name": "中国水产科学研究院 cafs.ac.cn",
+   "why": "times out"
+  },
+  {
+   "name": "动物福利国际合作委员会 iccaw.org.cn",
+   "why": "HTTP 503"
+  },
+  {
+   "name": "农民日报 farmer.com.cn",
+   "why": "HTTP 403"
+  },
+  {
+   "name": "新华网搜索 so.news.cn",
+   "why": "HTTP 405 to scripted requests; revisit"
+  },
+  {
+   "name": "中国水产频道 fishfirst.cn",
+   "why": "list pages not updated since 2018"
+  },
+  {
+   "name": "CNKI, Wanfang",
+   "why": "paywalled; their terms forbid scraping"
+  },
+  {
+   "name": "WeChat official accounts",
+   "why": "much of the timely material is here, but there is no open feed and scraping breaks WeChat's terms"
+  },
+  {
+   "name": "Crossref by journal ISSN",
+   "why": "most Chinese animal-science journals are not in Crossref or not current there"
+  }
+ ]
+}
