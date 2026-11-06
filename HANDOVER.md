@@ -119,12 +119,16 @@ supplied, as it was for mandarin fish.
 
 ## Weekly digest
 
-`node pipeline/digest.mjs` collects a week of links from Chinese sources (People's Daily search,
-Europe PMC, the Ministry of Agriculture, the Chinese Veterinary Medical Association, ScienceNet).
-It writes `public/data/digest/<date>.json`, which the `#/digest` page shows. It makes no model calls.
-The first issue covers 31 October to 6 November. The design, the sources that failed and why, and
-next steps are in `pipeline/digest/METHOD.md`. It is not yet scheduled; someone runs it and commits
-the result.
+`pipeline/digest.mjs` discovers China-related animal welfare links in any language. The daily
+collector saves metadata and persistent identities; the weekly command assembles newly discovered
+links while retaining original publication dates. Europe PMC uses indexing dates. Wanfang and
+OpenAlex adapters use optional `WFDATA_APP_KEY` and `OPENALEX_API_KEY` secrets. Missing keys are shown
+as skipped sources. Existing issues cannot be overwritten by a failed run or a rerun.
+
+`.github/workflows/digest.yml` collects daily at 09:17 Beijing, saves its checkpoint on
+`automation/weekly-digest`, and proposes completed Friday issues through a PR. Merging that PR
+publishes through the existing Pages workflow. See `pipeline/digest/METHOD.md` for setup, commands,
+source limitations and recovery. Summaries and email delivery remain future work.
 
 ## Working rules so far
 
@@ -147,7 +151,7 @@ the result.
 - **README.md** is out of date: it describes the site as pre-release.
 - **Chinese wording.** Some Chinese strings still include sentences that were trimmed from the
   English.
-- **Digest:** summaries, a hand-added links file for WeChat posts, more sources, a weekly schedule
+- **Digest:** summaries, a hand-added links file for WeChat posts, more sources
   and email. See its method notes.
 - **Chinese full text** remains the main gap. CNKI and Wanfang are paywalled, and several Chinese
   government sites time out from outside China.

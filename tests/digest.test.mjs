@@ -50,7 +50,7 @@ test('digest: duplicates by URL or by title are dropped', () => {
 });
 
 test('digest registry: every source has an id, names, a kind, a scope and a known access type', () => {
-  const types = new Set(['html-list', 'people-search', 'europepmc']);
+  const types = new Set(['html-list', 'people-search', 'europepmc', 'wanfang', 'openalex']);
   for (const s of registry.sources) {
     assert.ok(s.id && s.name_zh && s.name_en && s.kind && s.scope, s.id);
     assert.ok(types.has(s.access.type), s.id);
