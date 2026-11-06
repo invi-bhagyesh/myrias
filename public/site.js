@@ -14,7 +14,7 @@ import { speciesModel, speciesPageHtml, speciesCardsHtml, PROFILES } from './sit
 import { findingsListHtml, findingPageHtml, findingText, findingItemHtml, byWeight, claimItemsHtml } from './site-findings.js';
 import { actionItemHtml, rankNoteHtml } from './site-actions.js';
 import { browseHtml, mountBrowse } from './site-browse.js';
-import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, authorFlowHtml, LANG_COLOR } from './site-corpusviz.js';
+import { corpusFlowHtml, topicBarsHtml, decadeColumnsHtml, authorFlowHtml, mountAuthorFlow, LANG_COLOR } from './site-corpusviz.js';
 import { controlsHtml, mountCorpusList, FILTER_DEFAULTS, unpackPapers } from './site-corpuslist.js';
 
 const { escapeHtml: esc, safeUrl, pick } = L;
@@ -262,7 +262,7 @@ function viewOverview() {
         <aside class="hero-side" aria-hidden="true"><img class="hero-art" src="art/research-desk.webp" width="1004" height="849" alt="" decoding="async"><div class="hero-tiles">${stats.slice(0, 3).map(([n, key], k) => `<div class="hero-tile t${k}"><strong>${esc(n)}</strong><span>${esc(tr(key))}</span></div>`).join('')}</div></aside>
       </section>
       ${state.authors?.papers?.length ? `<section class="home-flow" aria-labelledby="home-flow-title"><div class="home-flow-head"><h2 id="home-flow-title">${esc(tr('af.title'))}</h2>
-        <p class="cv-legend"><span>${esc(tr('af.note'))}</span><a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
+        <p class="cv-legend"><a href="${link('corpus')}">${esc(tr('home.flow.more'))} →</a></p></div>
         <div class="cv-card">${authorFlowHtml(state.authors, tr)}</div></section>` : ''}
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
       <section class="graph-feature" aria-labelledby="graph-title">
@@ -825,7 +825,13 @@ setupNav();
 let observers = [];
 function setupHomeEffects() {
   const home = document.querySelector('.arena-home');
-  if (!home || !('IntersectionObserver' in window)) return;
+  if (!home) return;
+  const affiliations = home.querySelector('[data-affiliations]');
+  if (affiliations) {
+    const chart = mountAuthorFlow(affiliations, state.authors, tr);
+    observers.push({ disconnect: () => chart.destroy() });
+  }
+  if (!('IntersectionObserver' in window)) return;
   home.querySelectorAll('[data-scroll]').forEach(b => b.addEventListener('click', () => { const t = document.getElementById(b.dataset.scroll); if (t) t.closest('section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   const stage = home.querySelector('[data-graph]');
   if (stage && state.data) {

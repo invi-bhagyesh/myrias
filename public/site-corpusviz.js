@@ -143,7 +143,7 @@ export const AF_KINDS = ['experiment', 'field_study', 'methods', 'review', 'thes
 
 // Pure: counts per group, per kind and per pair. A Chinese company or other sector folds into cn_other.
 export function authorModel(meta) {
-  const papers = (meta?.papers || []).map(p => ({ ...p, group: p.group === 'cn_company' ? 'cn_other' : p.group, kind: AF_KINDS.includes(p.kind) ? p.kind : 'other' }));
+  const papers = (meta?.papers || []).map(p => ({ ...p, group: p.group === 'cn_company' ? 'cn_other' : AF_GROUPS.some(([id]) => id === p.group) ? p.group : 'unknown', kind: AF_KINDS.includes(p.kind) ? p.kind : 'other' }));
   const count = (f, keys) => keys.map(k => [k, papers.filter(p => f(p) === k).length]).filter(([, v]) => v);
   const groups = count(p => p.group, AF_GROUPS.map(([k]) => k)), kinds = count(p => p.kind, AF_KINDS);
   const links = [];
@@ -154,35 +154,147 @@ export function authorModel(meta) {
 }
 
 
+// A single papers-to-pixels scale on both sides keeps every ribbon proportional.
+// Small nodes reserve label space without inflating their data bars.
+export function authorLayout(model, height = 500) {
+  const gap = 10, minRoom = 48;
+  const room = (rows, scale) => rows.reduce((sum, [, v]) => sum + Math.max(minRoom, v * scale), 0) + Math.max(0, rows.length - 1) * gap;
+  let lo = 0, hi = height / Math.max(1, model.n);
+  for (let i = 0; i < 48; i++) {
+    const mid = (lo + hi) / 2;
+    if (Math.max(room(model.groups, mid), room(model.kinds, mid)) <= height) lo = mid; else hi = mid;
+  }
+  const place = rows => {
+    let y = (height - room(rows, lo)) / 2;
+    return Object.fromEntries(rows.map(([id, count]) => {
+      const slot = Math.max(minRoom, count * lo), h = count * lo;
+      const node = { y: y + (slot - h) / 2, h, count, used: 0 };
+      y += slot + gap; return [id, node];
+    }));
+  };
+  const left = place(model.groups), right = place(model.kinds);
+  const links = model.links.map(link => {
+    const a = left[link.g], b = right[link.k], h = link.v * lo;
+    const ribbon = { ...link, y0: a.y + a.used, y1: b.y + b.used, h };
+    a.used += h; b.used += h; return ribbon;
+  });
+  return { left, right, links, scale: lo, height };
+}
+
+const afPercent = (count, total) => `${(100 * count / Math.max(1, total)).toFixed(1)}%`;
+const afColor = id => id === 'unknown' ? 'var(--af-unknown)' : Object.fromEntries(AF_GROUPS)[id];
+
 export function authorFlowHtml(meta, tr) {
   const m = authorModel(meta);
   if (!m.n) return '';
-  const color = Object.fromEntries(AF_GROUPS);
-  const W = 1000, TOP = 40, H0 = 330, GAP = 8, BW = 16, XL = 330, XR = 652;
-  // Small groups keep at least MIN px of room so their labels never collide; the rest share what is left.
-  const MIN = 18, lay = rows => { const small = rows.filter(([, v]) => v * (H0 / m.n) < MIN), big = m.n - small.reduce((s, [, v]) => s + v, 0);
-    const sc = (H0 - GAP * (rows.length - 1) - small.length * MIN) / Math.max(big, 1); let y = TOP;
-    return Object.fromEntries(rows.map(([k, v]) => { const room = small.some(([s]) => s === k) ? MIN : v * sc, h = Math.max(3, Math.min(room, v * sc)); const r = [k, { y: y + (room - h) / 2, h, v, used: 0 }]; y += room + GAP; return r; })); };
-  const L = lay(m.groups), R = lay(m.kinds);
-  const edge = (y0, y1, x0, x1) => { const c = (x0 + x1) / 2; return `M${x0},${y0} C${c},${y0} ${c},${y1} ${x1},${y1}`; };
-  let links = '';
-  for (const l of m.links) {
-    const a = L[l.g], b = R[l.k], ha = a.h * l.v / a.v, hb = b.h * l.v / b.v;
-    const ya = a.y + a.used, yb = b.y + b.used; a.used += ha; b.used += hb;
-    const k = Math.max(1, Math.round(Math.max(ha, hb) / 4)); let d = '';
-    for (let j = 0; j <= k; j++) { const t = k ? j / k : 0.5; d += edge(ya + t * ha, yb + t * hb, XL + BW + 2, XR - 2) + ' '; }
-    links += `<g class="sk-flow af-l" data-g="${l.g}" style="stroke:${color[l.g]}"><title>${esc(tr('af.g.' + l.g))} → ${esc(tr('af.k.' + l.k))}: ${n(l.v)}</title><path class="sk-strand" d="${d.trim()}"/>`
-      + `<path class="sk-edge" d="${edge(ya, yb, XL + BW + 2, XR - 2)} ${edge(ya + ha, yb + hb, XL + BW + 2, XR - 2)}"/></g>`;
-  }
-  const bar = (x, r, fill, cls, g) => `<rect class="${cls}" ${g ? `data-g="${g}"` : ''} x="${x}" y="${r.y.toFixed(1)}" width="${BW}" height="${r.h.toFixed(1)}" rx="${Math.min(4, r.h / 2).toFixed(1)}" style="fill:${fill}"/>`;
-  let nodes = `<text class="sk-stage" x="${XL + BW}" y="${TOP - 18}" text-anchor="end">${esc(tr('af.left'))}</text><text class="sk-stage" x="${XR}" y="${TOP - 18}">${esc(tr('af.right'))}</text>`;
-  for (const [g, r] of Object.entries(L)) nodes += bar(XL, r, color[g], 'af-n', g) +
-    `<text class="af-t" x="${XL - 12}" y="${(r.y + r.h / 2 + 4).toFixed(1)}" text-anchor="end">${esc(tr('af.g.' + g))} <tspan class="af-v">${n(r.v)}</tspan></text>`;
-  for (const [k, r] of Object.entries(R)) nodes += bar(XR, r, 'var(--soft)', 'af-k', '') +
-    `<text class="af-t" x="${XR + BW + 12}" y="${(r.y + r.h / 2 + 4).toFixed(1)}"><tspan class="af-v">${n(r.v)}</tspan> ${esc(tr('af.k.' + k))}</text>`;
-  const svg = `<svg class="cv-svg af-svg" viewBox="0 0 ${W} ${TOP + H0 + 16}" role="img" aria-label="${esc(tr('af.aria', { n: m.n }))}">${links}${nodes}</svg>`;
-  // Phones: the same counts as two lists of bars.
-  const list = (rows, col, key) => `<ul class="cv-bars">${rows.map(([k, v]) => `<li><span class="cv-bar-label">${esc(tr(key + k))}</span><span class="cv-bar"><i style="width:${(100 * v / m.n).toFixed(1)}%;background:${col(k)}"></i></span><span class="cv-bar-n">${n(v)}</span></li>`).join('')}</ul>`;
-  const phone = `<h3>${esc(tr('af.left'))}</h3>${list(m.groups, g => color[g], 'af.g.')}<h3>${esc(tr('af.right'))}</h3>${list(m.kinds, () => 'var(--soft)', 'af.k.')}`;
-  return `<div class="fx-sankey">${svg}</div><div class="fx-phone">${phone}</div>`;
+  const layout = authorLayout(m), top = 42, xl = 268, xr = 784, bw = 12;
+  const fmt = v => Number(v.toFixed(3));
+  const ribbon = l => {
+    const x0 = xl + bw, x1 = xr, mid = (x0 + x1) / 2;
+    const y0 = fmt(l.y0 + top), y1 = fmt(l.y1 + top), b0 = fmt(y0 + l.h), b1 = fmt(y1 + l.h);
+    return `M${x0},${y0}C${mid},${y0} ${mid},${y1} ${x1},${y1}L${x1},${b1}C${mid},${b1} ${mid},${b0} ${x0},${b0}Z`;
+  };
+  const description = l => `${tr('af.g.' + l.g)} → ${tr('af.k.' + l.k)}: ${tr('af.papers', { n: n(l.v) })} (${afPercent(l.v, m.n)})`;
+  const paths = layout.links.map(l => `<path class="af-ribbon" data-af-g="${l.g}" data-af-k="${l.k}" data-af-description="${esc(description(l))}" style="--flow:${afColor(l.g)}" d="${ribbon(l)}"><title>${esc(description(l))}</title></path>`).join('');
+  const labelLines = label => {
+    if (label.length <= 28 || !label.includes(' ')) return [label];
+    const words = label.split(' '), lines = [''];
+    for (const word of words) {
+      if (lines.at(-1).length + word.length > 28) lines.push(word);
+      else lines[lines.length - 1] += (lines.at(-1) ? ' ' : '') + word;
+    }
+    return lines;
+  };
+  const nodes = (rows, positions, side) => rows.map(([id, count]) => {
+    const left = side === 'g', r = positions[id], y = r.y + top, cy = y + r.h / 2;
+    const textX = left ? 12 : xr + 30, name = tr(`af.${side}.${id}`), lines = labelLines(name);
+    const labelY = cy - (lines.length > 1 ? 15 : 7);
+    const groupSegments = left ? '' : layout.links.filter(l => l.k === id).map(l => `<rect class="af-segment" data-af-g="${l.g}" data-af-k="${l.k}" x="${xr}" y="${fmt(l.y1 + top)}" width="${bw}" height="${fmt(l.h)}" fill="${afColor(l.g)}"/>`).join('');
+    return `<g class="af-node" role="button" tabindex="0" aria-pressed="false" aria-label="${esc(tr('af.select', { name }))}" data-af-${side}="${id}">
+      <rect class="af-hit" x="${left ? 0 : xr - 4}" y="${fmt(cy - 24)}" width="${left ? xl + bw + 4 : 288}" height="48" rx="6"/>
+      ${left ? `<rect x="${xl}" y="${fmt(y)}" width="${bw}" height="${fmt(r.h)}" fill="${afColor(id)}"/>` : groupSegments}
+      <text class="af-label" x="${textX}" y="${fmt(labelY)}">${lines.map((line, i) => `<tspan x="${textX}" dy="${i ? 17 : 0}">${esc(line)}</tspan>`).join('')}</text>
+      <text class="af-count" x="${textX}" y="${fmt(cy + (lines.length > 1 ? 21 : 14))}">${n(count)}<tspan class="af-percent"> / ${afPercent(count, m.n)}</tspan></text>
+    </g>`;
+  }).join('');
+  const options = (rows, key) => rows.map(([id, count]) => `<option value="${id}">${esc(tr(key + id))} (${n(count)})</option>`).join('');
+  const table = `<details class="af-table"><summary>${esc(tr('af.table'))}</summary><div class="af-table-scroll" tabindex="0" role="region" aria-label="${esc(tr('af.table'))}"><table><caption>${esc(tr('af.aria', { n: n(m.n) }))}</caption><thead><tr><th scope="col">${esc(tr('af.left'))}</th>${m.kinds.map(([k]) => `<th scope="col">${esc(tr('af.k.' + k))}</th>`).join('')}<th scope="col">${esc(tr('af.total'))}</th></tr></thead><tbody>${m.groups.map(([g, count]) => `<tr><th scope="row">${esc(tr('af.g.' + g))}</th>${m.kinds.map(([k]) => `<td>${n(m.links.find(l => l.g === g && l.k === k)?.v || 0)}</td>`).join('')}<td>${n(count)}</td></tr>`).join('')}</tbody></table></div></details>`;
+  return `<div class="af-explorer" data-affiliations>
+    <div class="af-toolbar"><p class="af-total"><strong>${n(m.n)}</strong> ${esc(tr('af.totalLabel'))}<span class="af-desktop-caption">${esc(tr('af.encoding'))}</span><span class="af-mobile-caption">${esc(tr('af.encodingMobile'))}</span></p>
+      <div class="af-filters"><label>${esc(tr('af.affiliation'))}<select data-af-filter="g"><option value="">${esc(tr('af.allGroups'))}</option>${options(m.groups, 'af.g.')}</select></label>
+      <label>${esc(tr('af.right'))}<select data-af-filter="k"><option value="">${esc(tr('af.allKinds'))}</option>${options(m.kinds, 'af.k.')}</select></label><button type="button" data-af-reset disabled>${esc(tr('af.reset'))}</button></div></div>
+    <div class="af-visual"><svg class="af-diagram" viewBox="0 0 1080 570" role="group" aria-label="${esc(tr('af.aria', { n: n(m.n) }))}">
+      <text class="af-axis" x="12" y="20">${esc(tr('af.left'))}</text><text class="af-axis" x="${xr + 30}" y="20">${esc(tr('af.right'))}</text>
+      <g class="af-ribbons">${paths}</g>${nodes(m.groups, layout.left, 'g')}${nodes(m.kinds, layout.right, 'k')}</svg></div>
+    <div class="af-feedback"><p data-af-status role="status" aria-live="polite"></p><p class="af-hover" data-af-hover>${esc(tr('af.hint'))}</p></div>
+    <div class="af-breakdowns" data-af-breakdowns></div>
+    ${table}<p class="af-method">${esc(tr('af.note'))}</p>
+  </div>`;
+}
+
+export function mountAuthorFlow(root, meta, tr) {
+  const m = authorModel(meta), selected = { g: '', k: '' };
+  const controller = new AbortController(), signal = controller.signal;
+  const flows = [...root.querySelectorAll('.af-ribbon, .af-segment')], nodes = [...root.querySelectorAll('.af-node')];
+  const status = root.querySelector('[data-af-status]'), hover = root.querySelector('[data-af-hover]');
+  const matching = (l, f) => (!f.g || l.g === f.g) && (!f.k || l.k === f.k);
+  const paint = (filter = selected) => {
+    const active = m.links.filter(l => matching(l, filter));
+    flows.forEach(el => el.classList.toggle('is-muted', !matching({ g: el.dataset.afG, k: el.dataset.afK }, filter)));
+    nodes.forEach(el => {
+      const side = el.dataset.afG ? 'g' : 'k', id = el.dataset.afG || el.dataset.afK;
+      el.classList.toggle('is-muted', !active.some(l => l[side] === id));
+      el.classList.toggle('is-selected', selected[side] === id);
+      el.setAttribute('aria-pressed', String(selected[side] === id));
+    });
+  };
+  const update = () => {
+    const focused = root.contains(document.activeElement) && document.activeElement.matches('.af-breakdown') ? document.activeElement : null;
+    root.querySelectorAll('[data-af-filter]').forEach(el => { el.value = selected[el.dataset.afFilter]; });
+    root.querySelector('[data-af-reset]').disabled = !selected.g && !selected.k;
+    const active = m.links.filter(l => matching(l, selected)), count = active.reduce((sum, l) => sum + l.v, 0);
+    const labels = [selected.g && tr('af.g.' + selected.g), selected.k && tr('af.k.' + selected.k)].filter(Boolean);
+    status.textContent = tr('af.selection', { n: n(count), total: n(m.n), pct: afPercent(count, m.n) }) + (labels.length ? ` — ${labels.join(' → ')}` : '');
+    hover.textContent = count ? tr('af.hint') : tr('af.noMatch');
+    root.dataset.filtered = String(Boolean(selected.g || selected.k));
+    const list = (rows, side) => {
+      const items = rows.map(([id]) => [id, active.filter(l => l[side] === id).reduce((sum, l) => sum + l.v, 0)]).filter(([, v]) => v).sort((a, b) => b[1] - a[1]);
+      return `<section><h3>${esc(tr(side === 'g' ? 'af.left' : 'af.right'))}</h3><ul>${items.map(([id, v]) => `<li><button type="button" class="af-breakdown" data-af-${side}="${id}" aria-pressed="${selected[side] === id}"><span>${esc(tr(`af.${side}.${id}`))}</span><strong>${n(v)} <small>${afPercent(v, count)}</small></strong><span class="af-track"><i style="width:${100 * v / count}%;background:${side === 'g' ? afColor(id) : 'var(--accent)'}"></i></span></button></li>`).join('')}</ul></section>`;
+    };
+    root.querySelector('[data-af-breakdowns]').innerHTML = count ? list(m.groups, 'g') + list(m.kinds, 'k') : `<p>${esc(tr('af.noMatch'))}</p>`;
+    paint();
+    if (focused) {
+      const side = focused.dataset.afG ? 'g' : 'k', id = focused.dataset.afG || focused.dataset.afK;
+      (root.querySelector(`.af-breakdown[data-af-${side}="${id}"]`) || root.querySelector(`[data-af-filter="${side}"]`)).focus({ preventScroll: true });
+    }
+  };
+  const activate = el => {
+    if (el.classList.contains('af-ribbon')) { selected.g = el.dataset.afG; selected.k = el.dataset.afK; }
+    else { const side = el.dataset.afG ? 'g' : 'k', id = el.dataset.afG || el.dataset.afK; selected[side] = selected[side] === id ? '' : id; }
+    update();
+  };
+  root.addEventListener('change', e => { if (e.target.matches('[data-af-filter]')) { selected[e.target.dataset.afFilter] = e.target.value; update(); } }, { signal });
+  root.addEventListener('click', e => {
+    if (e.target.closest('[data-af-reset]')) { selected.g = ''; selected.k = ''; update(); return; }
+    const el = e.target.closest('.af-node, .af-ribbon, .af-breakdown'); if (el) activate(el);
+  }, { signal });
+  root.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { selected.g = ''; selected.k = ''; update(); }
+    else if (e.target.matches('.af-node') && ['Enter', ' '].includes(e.key)) { e.preventDefault(); activate(e.target); }
+  }, { signal });
+  const preview = e => {
+    const el = e.target.closest('.af-node, .af-ribbon'); if (!el) return;
+    const filter = { ...selected, ...(el.dataset.afG ? { g: el.dataset.afG } : {}), ...(el.dataset.afK ? { k: el.dataset.afK } : {}) };
+    paint(filter);
+    const count = m.links.filter(l => matching(l, filter)).reduce((sum, l) => sum + l.v, 0);
+    hover.textContent = el.dataset.afDescription || [filter.g && tr('af.g.' + filter.g), filter.k && tr('af.k.' + filter.k), tr('af.papers', { n: n(count) })].filter(Boolean).join(' · ');
+  };
+  root.addEventListener('pointerover', preview, { signal });
+  root.addEventListener('focusin', preview, { signal });
+  const clear = () => { paint(); hover.textContent = tr('af.hint'); };
+  root.querySelector('.af-visual').addEventListener('pointerout', e => { if (!e.relatedTarget?.closest?.('.af-node, .af-ribbon')) clear(); }, { signal });
+  root.querySelector('.af-visual').addEventListener('pointerleave', clear, { signal });
+  root.addEventListener('focusout', clear, { signal });
+  update();
+  return { destroy: () => controller.abort() };
 }
