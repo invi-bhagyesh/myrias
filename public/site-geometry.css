@@ -1,0 +1,70 @@
+/* Shape follows purpose: plots, linked species, process steps, and examples. */
+
+/* Broad, asymmetric curves keep plots distinct without sharp corners. */
+#content[data-page] :is(.cv-card, .mchart-wrap) {
+  border: 0;
+  border-radius: 28px 12px 36px 12px;
+  box-shadow: none;
+  background: var(--card-bg);
+}
+.af-toolbar { border-bottom-color: var(--line); }
+.af-total { padding-left: 0; border: 0; }
+
+/* The network already defines its own geometry; no enclosing frame. */
+#content[data-page] .graph-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Species are linked profiles: a rounded illustration end and a flat text end. */
+#content[data-page] .sp-card {
+  padding: 18px 22px 18px 16px;
+  border: 1px solid var(--line);
+  border-radius: 64px 20px 32px 64px;
+  background: var(--card-bg);
+  box-shadow: none;
+  transition: border-color 160ms ease;
+}
+#content[data-page] .sp-card:hover { transform: none; border-color: var(--accent); }
+#content[data-page] .sp-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+/* Process stages form one connected sequence, not independent cards. */
+#content[data-page] .fw-phases {
+  border: 0;
+  border-block: 1px solid var(--line-strong);
+  border-radius: 20px;
+  background: transparent;
+  box-shadow: none;
+}
+#content[data-page] .fw-explain {
+  border: 0;
+  border-left: 2px solid var(--accent);
+  border-radius: 16px 0 0 16px;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Worked examples have a softer, offset outline rather than a folded corner. */
+#content[data-page] .fw-ex {
+  border: 1px solid var(--line);
+  border-radius: 12px 36px 20px 12px;
+  background: var(--card-bg);
+  box-shadow: none;
+  padding-right: 28px;
+}
+
+/* Small stats remain tags, visually separate from content and controls. */
+.arena-home .hero-side .hero-tile {
+  border-radius: 16px 28px 28px 16px;
+  clip-path: none;
+  box-shadow: none;
+}
+
+@media (max-width: 700px) {
+  #content[data-page] .sp-card { border-radius: 48px 16px 24px 48px; padding: 16px 18px 16px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #content[data-page] .sp-card { transition: none; }
+}

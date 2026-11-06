@@ -128,11 +128,7 @@ export function evidenceMapHtml(model, { tr, href, open = null }) {
   const list = classes.filter(c => c.apps).map(c => `<li><details ${c.id === open ? 'open' : ''}><summary><span class="sw" style="background:${c.color}"></span>${esc(c.label)}<span class="em-list-n">${esc(sub(c))}</span></summary><ul>${(r => r.slice(0, OPEN_MAX).map(a => { const prob = [...a.probs.entries()].sort((x, y) => y[1] - x[1])[0][0];
     return `<li><a href="${explore({ species: a.species, cell: `${prob}|${a.cls}` })}">${esc(a.label)}</a><span>${esc(count('evmap.claims', a.claims))} → ${esc([...a.probs.keys()].map(p => problems.find(x => x.id === p).label).join(', '))}</span></li>`; }).join('')
     + (r.length > OPEN_MAX ? `<li><a href="${explore({ species: r[0].species })}">${esc(tr('evmap.more', { n: r.length - OPEN_MAX }))} →</a></li>` : ''))(rowsFor(c.id))}</ul></details></li>`).join('');
-  const gaps = classes.filter(c => !c.apps).map(c => c.label);
-  const src = tr(totals.zh === totals.sources ? 'evmap.src.allzh' : 'evmap.src', { n: totals.sources, zh: totals.zh });
-  const summary = tr('evmap.summary', { src, claims: totals.claims, inApps: totals.inApps, apps: apps.length, k: totals.classesWith, K: classes.length }) +
-    (gaps.length ? ' ' + tr('evmap.gaps', { list: gaps.join(', ') }) : '');
-  return `<div class="evmap">${svg}<ul class="em-list">${list}</ul><p class="em-summary">${esc(summary)}</p></div>`;
+  return `<div class="evmap">${svg}<ul class="em-list">${list}</ul></div>`;
 }
 
 // Hover: light up an item and everything it connects to. Returns { destroy }.
