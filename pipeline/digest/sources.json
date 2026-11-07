@@ -64,6 +64,7 @@
     "lookback_days": 90,
     "backfill_days": 730,
     "max_pages": 20,
+    "max_requests": 400,
     "query": "(\"animal welfare\" OR \"stocking density\" OR slaughter OR stunning OR \"transport stress\" OR \"heat stress\" OR \"environmental enrichment\" OR \"tail biting\" OR \"feather pecking\" OR lameness OR castration OR \"cage-free\") AND (animal OR pig OR swine OR cattle OR poultry OR chicken OR fish OR shrimp OR aquaculture OR livestock OR sheep OR goat OR rabbit OR duck OR dog OR cat)"
    }
   },

@@ -99,6 +99,9 @@ test('OpenAlex searches affiliations and China context separately without a lang
     assert.equal(opts.headers.Authorization, `Bearer ${env.OPENALEX_API_KEY}`);
     const params = new URL(url).searchParams;
     assert.equal(params.get('per_page'), '100');
+    assert.equal(params.has('search'), false);
+    assert.ok(params.get('search.title_and_abstract').includes('animal welfare'));
+    assert.equal(params.get('search.title_and_abstract').includes('China OR Chinese'), calls === 2);
     assert.ok(!params.get('filter').includes('language:'));
     assert.ok(!params.get('filter').includes('updated_date'));
     assert.equal(params.get('filter').includes('country_code'), calls === 1);
@@ -109,6 +112,61 @@ test('OpenAlex searches affiliations and China context separately without a lang
   assert.equal(calls, 2);
   assert.equal(result.items.length, 1);
   assert.equal(result.items[0].lang, 'en');
+});
+
+const oaRecord = (id, date) => ({ id: `https://openalex.org/W${id}`, title: `Animal welfare in pigs in China ${id}`,
+  doi: `10.1234/pig${id}`, publication_date: date, language: 'en', authorships: [{ countries: ['CN'] }] });
+const oaResponse = (results, count = results.length, next_cursor = null) => JSON.stringify({ meta: { count, next_cursor }, results });
+
+test('OpenAlex splits crowded backfills without losing papers at date boundaries', async () => {
+  const src = source('openalex'); src.access.max_pages = 1; src.access.backfill_days = 3;
+  const records = Array.from({ length: 101 }, (_, i) => oaRecord(i, i < 50 ? '2026-11-04' : '2026-11-05'));
+  const windows = [];
+  const result = await run(src, async url => {
+    const p = new URL(url).searchParams;
+    if (!p.get('filter').includes('country_code')) return oaResponse([]);
+    const start = p.get('filter').match(/from_publication_date:([^,]+)/)[1];
+    const end = p.get('filter').match(/to_publication_date:([^,]+)/)[1];
+    windows.push([start, end]);
+    const rows = records.filter(r => r.publication_date >= start && r.publication_date <= end);
+    return oaResponse(rows.slice(0, 100), rows.length, rows.length > 100 ? 'next' : null);
+  }, { backfill: true });
+  assert.equal(result.status[0].status, 'ok');
+  assert.equal(result.items.length, 101);
+  assert.deepEqual(windows, [['2026-11-03', '2026-11-06'], ['2026-11-03', '2026-11-04'], ['2026-11-05', '2026-11-06']]);
+});
+
+test('OpenAlex follows cursors within each date range and rejects broken pagination', async () => {
+  const records = Array.from({ length: 101 }, (_, i) => oaRecord(i, '2026-11-05'));
+  const cursors = [];
+  const result = await run(source('openalex'), async url => {
+    const p = new URL(url).searchParams;
+    if (!p.get('filter').includes('country_code')) return oaResponse([]);
+    const cursor = p.get('cursor'); cursors.push(cursor);
+    return cursor === '*' ? oaResponse(records.slice(0, 100), 101, 'next') : oaResponse(records.slice(100), 101);
+  });
+  assert.equal(result.status[0].status, 'ok');
+  assert.equal(result.items.length, 101);
+  assert.deepEqual(cursors, ['*', 'next']);
+  const failed = await run(source('openalex'), async () => oaResponse([records[0]], 101, '*'));
+  assert.equal(failed.status[0].status, 'failed');
+  assert.match(failed.status[0].error, /pagination stopped early/);
+  assert.equal(failed.items.length, 0);
+});
+
+test('OpenAlex fails visibly on a crowded single day or exhausted request budget', async () => {
+  const src = source('openalex'); src.access.max_pages = 1; src.access.lookback_days = 0;
+  const crowded = await run(src, async () => oaResponse([oaRecord(1, window.to)], 101, 'next'));
+  assert.equal(crowded.status[0].status, 'failed');
+  assert.match(crowded.status[0].error, /page limit reached for 2026-11-06/);
+  assert.equal(crowded.items.length, 0);
+  src.access.lookback_days = 3; src.access.max_requests = 1;
+  let requests = 0;
+  const exhausted = await run(src, async () => { requests++; return oaResponse([oaRecord(1, window.to)], 101, 'next'); });
+  assert.equal(requests, 1);
+  assert.equal(exhausted.status[0].status, 'failed');
+  assert.match(exhausted.status[0].error, /request limit reached/);
+  assert.equal(exhausted.items.length, 0);
 });
 
 test('People search uses Beijing dates at the boundary and counts unique links', async () => {

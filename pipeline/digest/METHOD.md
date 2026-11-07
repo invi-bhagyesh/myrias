@@ -42,11 +42,19 @@ Europe PMC searches `FIRST_IDATE`, its first indexing date, and requests `core` 
 affiliations and original publication dates are available. The query includes both Chinese
 affiliations and China mentions. [Europe PMC API documentation](https://dev.europepmc.org/RestfulWebService).
 
-OpenAlex runs separate affiliation and China-text searches, with no language filter. Its default
-publication lookback is 90 days. `--backfill` widens that to 730 days; the scheduled job does this
+OpenAlex searches titles and abstracts, running separate affiliation and China-text searches with
+no language filter. Full-text-only and keyword-only matches are excluded from this discovery query.
+Its default publication lookback is 90 days. `--backfill` widens that to 730 days; the scheduled job does this
 on the first Saturday of each month. This reduces late-indexing gaps but does not guarantee that
 arbitrarily old additions will be discovered. Update-date filters require a suitable subscription
 and are not assumed here. [OpenAlex filters](https://help.openalex.org/api/filtering/).
+
+OpenAlex searches that exceed 20 pages are divided into smaller, non-overlapping publication-date
+ranges, down to individual days. Each range follows cursors; both China searches together are
+limited to 400 requests per collection. Exceeding that budget or a single day's page limit is
+reported as a failure and leaves the source watermark unchanged. This keeps the monthly backfill
+complete without silently truncating it at 2,000 results. [OpenAlex pagination](https://help.openalex.org/api/paging/),
+[search fields](https://help.openalex.org/api/searching/).
 
 People's Daily uses the site's search endpoint. This worked in the November 2026 probe but is not
 a documented public API contract. It searches targeted terms, paginates until results are older

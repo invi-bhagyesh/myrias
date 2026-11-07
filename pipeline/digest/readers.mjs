@@ -131,20 +131,30 @@ export const READERS = {
   },
 
   async openalex(src, ctx) {
-    const items = []; let scanned = 0;
+    const items = []; let scanned = 0, requests = 0;
     const from = shiftDate(ctx.to, -(ctx.backfill ? src.access.backfill_days : src.access.lookback_days));
-    // Affiliation and China-in-text searches are separate: OpenAlex cannot OR different filters.
-    for (const mode of ['affiliation', 'context']) {
-      let cursor = '*', queryScanned = 0, complete = false;
+    const maxPages = src.access.max_pages || 20;
+    async function searchWindow(mode, start, end) {
+      let cursor = '*', queryScanned = 0;
       const seen = new Set();
-      for (let page = 0; page < (src.access.max_pages || 20); page++) {
+      async function splitWindow() {
+        if (start === end) throw new Error(`OpenAlex page limit reached for ${start}`);
+        const days = Math.round((Date.parse(end) - Date.parse(start)) / 86400000);
+        const middle = shiftDate(start, Math.floor(days / 2));
+        await searchWindow(mode, start, middle);
+        await searchWindow(mode, shiftDate(middle, 1), end);
+      }
+      for (let page = 0; page < maxPages; page++) {
+        if (++requests > (src.access.max_requests || 400)) throw new Error('OpenAlex request limit reached');
         const url = new URL(src.access.url);
-        url.search = new URLSearchParams({ search: mode === 'context' ? `(${src.access.query}) AND (China OR Chinese)` : src.access.query,
-          filter: [`from_publication_date:${from}`, `to_publication_date:${ctx.to}`, ...(mode === 'affiliation' ? ['authorships.institutions.country_code:cn|hk|mo'] : [])].join(','),
+        url.search = new URLSearchParams({ 'search.title_and_abstract': mode === 'context' ? `(${src.access.query}) AND (China OR Chinese)` : src.access.query,
+          filter: [`from_publication_date:${start}`, `to_publication_date:${end}`, ...(mode === 'affiliation' ? ['authorships.institutions.country_code:cn|hk|mo'] : [])].join(','),
           per_page: '100', cursor, select: 'id,doi,title,publication_date,language,primary_location,authorships,abstract_inverted_index' });
         const d = await json(ctx, url.href, { headers: { Authorization: `Bearer ${ctx.env[src.access.key_env]}` } });
         if (!Array.isArray(d.results) || !Number.isFinite(d.meta?.count)) throw new Error('OpenAlex response missing results or count');
         scanned += d.results.length; queryScanned += d.results.length;
+        // Split crowded inclusive date ranges before spending requests paging through them.
+        if (d.meta.count > maxPages * 100) return splitWindow();
         for (const r of d.results) {
           const authors = r.authorships || [];
           const item = paper(src, ctx, { provider_id: r.id, title: r.title, doi: r.doi,
@@ -154,13 +164,15 @@ export const READERS = {
             affiliations: authors.flatMap(a => a.raw_affiliation_strings || []), abstract: flattenAbstract(r.abstract_inverted_index) });
           if (item) items.push(item);
         }
-        if (queryScanned >= d.meta.count) { complete = true; break; }
+        if (queryScanned >= d.meta.count) return;
         const next = d.meta.next_cursor;
         if (!d.results.length || !next || next === cursor || seen.has(next)) throw new Error('OpenAlex pagination stopped early');
         seen.add(cursor); cursor = next;
       }
-      if (!complete) throw new Error('OpenAlex page limit reached');
+      return splitWindow();
     }
+    // Affiliation and China-in-text searches are separate: OpenAlex cannot OR different filters.
+    for (const mode of ['affiliation', 'context']) await searchWindow(mode, from, ctx.to);
     return { items, scanned };
   },
 
