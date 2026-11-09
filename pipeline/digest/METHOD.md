@@ -20,7 +20,7 @@ Add these **repository Actions secrets**, not entries in the JSON file:
 
 | Secret | How to obtain it | Used for |
 |---|---|---|
-| `WFDATA_APP_KEY` | Sign in at [Wanfang AI Hub](https://ai.wfdata.com/), subscribe to literature search, and obtain an AppKey under My subscriptions | Wanfang |
+| `WFDATA_APP_KEY` | Sign in at [Wanfang AI Hub](https://ai.wfdata.com/), open Skills/API → My subscriptions, confirm literature search is enabled, then select Apply for App Key | Wanfang |
 | `OPENALEX_API_KEY` | Create an [OpenAlex account and API key](https://openalex.org/settings/api) | OpenAlex cursor pagination and searches |
 
 The registry's `access.key_env` names the environment variable. Missing keys produce an explicit
@@ -33,8 +33,12 @@ HTTPS compatibility gateway, `https://api.wanfangdata.com.cn`, and the `OpenPeri
 without a language restriction. Pagination uses `start` and `rows`. Publication year bounds keep
 the search manageable. Its public schema names `MetadataOnlineDate` but does not specify its date
 format, so the first implementation retrieves the configured recent years and deduplicates them.
-Only a valid full date is interpreted as a date. The adapter needs validation with your subscribed
-account before relying on coverage or adding online-date range filters.
+Only a valid full date is interpreted as a date. The authenticated gateway returns `numFound` as
+a decimal string; the reader accepts that and numeric counts, rejecting malformed values. Validate
+coverage with your subscribed account before adding online-date range filters. AI Hub currently
+uses `/skill-api`; older `/skills/api` links may show a blank page. Literature search may already
+be included in the account's default subscription. Check the displayed usage rates and wallet;
+creating an AppKey does not itself guarantee free API usage.
 See the [platform migration notice](https://open.wf.pub/docs/JSAPI) and
 [official API schema](https://github.com/wanfangdata/wfdata-open-skills/blob/master/skills/wfdata-search/references/api-catalog.md).
 
