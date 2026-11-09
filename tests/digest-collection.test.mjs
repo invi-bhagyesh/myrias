@@ -92,6 +92,29 @@ test('Wanfang uses the authenticated JSON API, screens China relevance and keeps
   assert.ok(!JSON.stringify(state).includes('浙江大学'));
 });
 
+test('Wanfang accepts live string counts and continues through all result pages', async () => {
+  const starts = [];
+  const records = Array.from({ length: 51 }, (_, i) => ({ fields: { Id: `wf${i}`, Title: [`鱼类动物福利研究 ${i}`], OriginalOrganization: ['浙江大学'], PublishDate: '2026-10-01' } }));
+  const result = await run(source('wanfang'), async (_url, opts) => {
+    const { start, rows } = JSON.parse(opts.body);
+    starts.push(start);
+    return JSON.stringify({ numFound: '51', documents: records.slice(start, start + rows) });
+  });
+  assert.equal(result.status[0].status, 'ok');
+  assert.equal(result.items.length, 51);
+  assert.deepEqual(starts, [0, 50]);
+  const empty = await run(source('wanfang'), async () => JSON.stringify({ numFound: '0', documents: [] }));
+  assert.equal(empty.status[0].status, 'empty');
+});
+
+test('Wanfang rejects invalid counts instead of declaring a successful empty collection', async () => {
+  for (const count of [undefined, null, '', ' ', true, false, '2e1', '1.5', 'NaN', '-1', -1, 0.5, '9007199254740992']) {
+    const result = await run(source('wanfang'), async () => JSON.stringify({ numFound: count, documents: [] }));
+    assert.equal(result.status[0].status, 'failed', String(count));
+    assert.equal(result.items.length, 0);
+  }
+});
+
 test('OpenAlex searches affiliations and China context separately without a language filter', async () => {
   let calls = 0;
   const result = await run(source('openalex'), async (url, opts) => {

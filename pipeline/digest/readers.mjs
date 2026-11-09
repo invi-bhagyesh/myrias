@@ -190,8 +190,10 @@ export const READERS = {
           returned_fields: ['Id', 'Title', 'OriginalOrganization', 'Abstract', 'DOI', 'PeriodicalTitle', 'Language', 'PublishDate', 'MetadataOnlineDate'],
           sort: { sorts: [{ by: 'PublishYear', order: 'DESC' }, { by: 'Id', order: 'ASC' }] } }) });
       const result = d.data ?? d;
-      const total = result.num_found ?? result.numFound;
-      if (!Array.isArray(result.documents) || !Number.isFinite(total)) throw new Error('Wanfang response missing documents or count');
+      const rawTotal = result.num_found ?? result.numFound;
+      // The live JSON gateway serializes numFound as a decimal string.
+      const total = typeof rawTotal === 'string' && /^\d+$/.test(rawTotal) ? Number(rawTotal) : rawTotal;
+      if (!Array.isArray(result.documents) || !Number.isSafeInteger(total) || total < 0) throw new Error('Wanfang response missing documents or count');
       scanned += result.documents.length;
       for (const r of result.documents) {
         const f = r.fields;
