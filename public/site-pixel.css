@@ -1,0 +1,73 @@
+/* Pixel look, loaded after every other stylesheet: square corners, crisp 2px borders, hard offset shadows,
+   flat fills. It overrides the rounded, frosted and gradient styling in the files before it, so the site matches
+   its pixel-art hills and species pictures. Chart patterns that carry meaning (hatching for "searched, nothing
+   found") are left alone. */
+
+* {
+  --px-line: color-mix(in srgb, var(--ink) 80%, transparent);
+  --px-shadow: 3px 3px 0 0 color-mix(in srgb, var(--ink) 20%, transparent);
+  --px-shadow-hover: 5px 5px 0 0 color-mix(in srgb, var(--ink) 28%, transparent);
+  --card-shadow: var(--px-shadow) !important;
+  --card-shadow-hover: var(--px-shadow-hover) !important;
+}
+
+/* Square corners everywhere (SVG chart shapes are drawn by the charts and are unaffected). */
+*, *::before, *::after { border-radius: 0 !important; }
+
+/* No frosted glass, glows, aurora blobs or gradient-filled text. */
+.glass { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: var(--card-bg, var(--card)) !important;
+  border: 2px solid var(--px-line) !important; box-shadow: var(--px-shadow) !important; }
+.hero-aurora, .hero-aurora::before, .graph-stage canvas { background: none !important; }
+.hero h1, .arena-home .hero h1 { background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important;
+  -webkit-text-fill-color: currentColor !important; color: var(--ink) !important; }
+.band-section[style]::before { background: var(--band-color, transparent) !important; }
+.sp-sec:nth-of-type(even)::before { background: var(--sp-band, transparent) !important; }
+.load-skel i { background: var(--line) !important; animation: none !important; }
+
+/* Cards and panels: a crisp border and a hard shadow. */
+.band-card, .cv-card, .graph-card, .rn, .br-index, .site-footer-card, .dg-item, .rv-card, .rv-panel, .ac-fcard, .ac-block, .ac-rankwhy,
+.rv-inline, .dg-how, .sp-card, .fa-banner a, .ac-archived, .rv-demo, .fd-list > li > .row, .ac-list > li > .row, .cl-paper, .rn-steps, .hist {
+  border-width: 2px !important; border-style: solid !important; border-color: var(--px-line) !important; box-shadow: var(--px-shadow) !important;
+}
+.fd-list > li > .row:hover, .ac-list > li > .row:hover, .sp-card:hover, .ac-fcard:hover { box-shadow: var(--px-shadow-hover) !important; transform: translate(-1px, -1px); }
+.ac-block, .ac-fcard, .ac-rankwhy, .rv-inline, .rv-panel { box-shadow: none !important; border-color: color-mix(in srgb, var(--ink) 35%, transparent) !important; }
+.fd-list, .ac-list, .dg-list { gap: 10px !important; }
+
+/* Buttons, chips, tabs and fields: 2px borders; buttons press in when clicked. */
+.button, .button-primary, .button-secondary, .tool-btn, .chip, .sp-tab, .nl-filter button, .br-expand, .br-gmore, .br-more, .ac-versions a,
+.rv-tabs a, .graph-tabs button, .br-views button, .rv-verdicts span, .scroll-cue {
+  border-width: 2px !important; border-style: solid !important; border-color: var(--px-line) !important;
+}
+.button, .button-primary, .button-secondary, .tool-btn, .sp-tab, .br-expand, .br-more { box-shadow: 2px 2px 0 0 var(--px-line) !important; transition: transform .05s, box-shadow .05s; }
+.button:active, .button-primary:active, .button-secondary:active, .tool-btn:active, .sp-tab:active, .br-expand:active, .br-more:active { transform: translate(2px, 2px); box-shadow: none !important; }
+.graph-tabs, .br-views, .rv-tabs { border: 2px solid var(--px-line) !important; padding: 2px !important; gap: 2px !important; }
+.graph-tabs button, .br-views button, .rv-tabs a { border: 0 !important; }
+select, input[type="search"], input[type="text"], textarea { border: 2px solid var(--px-line) !important; box-shadow: none !important; }
+select:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible, button:focus-visible { outline: 2px dashed var(--accent) !important; outline-offset: 2px !important; }
+
+/* Header: square pills on a solid bar with a 2px rule. */
+.topbar { border-bottom: 2px solid var(--px-line) !important; }
+.sections a[aria-current=page] { box-shadow: inset 0 -3px 0 0 var(--accent); }
+
+/* Labels read as pixel tags: a small square before kickers. */
+.record-type::before, .nl-kicker::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 7px; vertical-align: 1px; background: currentColor; }
+
+/* Badges and tags: square, outlined. */
+.ac-type, .fd-strength, .dg-kind, .ac-fcard-strength, .ac-draft, .sp-chip, .rn-st, .cl-tag, .pill, .rv-badge { border-width: 1.5px !important; }
+
+/* Dividers between desks and sections: solid 2px rules. */
+.list-head { border-bottom: 2px solid var(--px-line) !important; }
+.nl-mast { border-top: 4px double var(--ink) !important; border-bottom: 2px solid var(--ink) !important; }
+.nl-desk-h, .nl-archive { border-top: 3px solid var(--ink) !important; }
+
+/* Tiles and fact boxes on species, corpus and run pages; the hero's number tiles. */
+.sp-tiles > li, .sp-facts > div, .sp-facts > li, .corpus-tiles > li, .fa-tiles > li, .rn-res > li, .hero-tile, .sp-step, .sp-table, .cv-two > * {
+  border-width: 2px !important; border-style: solid !important; border-color: color-mix(in srgb, var(--ink) 45%, transparent) !important; box-shadow: none !important;
+}
+/* Pixel art casts a hard shadow, not a soft glow. */
+.hero-art, .sp-art img { filter: drop-shadow(5px 5px 0 color-mix(in srgb, var(--ink) 16%, transparent)) !important; }
+.br-gmore { padding: 5px 12px !important; margin-top: 8px; background: transparent; }
+/* Number tiles sit straight on a grid, not tilted. */
+.hero-tile, .hero-tile.t0, .hero-tile.t1, .hero-tile.t2 { transform: none !important; translate: none !important; animation: none !important; }
+@media (max-width: 860px) { .hero-tiles { align-items: stretch !important; } .hero-tile { margin: 0 !important; } }
+.corpus-link { border: 2px solid var(--px-line) !important; box-shadow: 2px 2px 0 0 var(--px-line) !important; }
