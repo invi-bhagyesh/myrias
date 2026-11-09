@@ -50,7 +50,7 @@ test('digest: duplicates by URL or by title are dropped', () => {
 });
 
 test('digest registry: every source has an id, names, a kind, a scope and a known access type', () => {
-  const types = new Set(['html-list', 'people-search', 'europepmc']);
+  const types = new Set(['html-list', 'people-search', 'europepmc', 'wanfang', 'openalex']);
   for (const s of registry.sources) {
     assert.ok(s.id && s.name_zh && s.name_en && s.kind && s.scope, s.id);
     assert.ok(types.has(s.access.type), s.id);
@@ -60,7 +60,7 @@ test('digest registry: every source has an id, names, a kind, a scope and a know
 });
 
 test('digest page: groups by tier, links open the source, every string translated', () => {
-  const issue = { id: '2026-11-06', from: '2026-10-31', to: '2026-11-06', sources: [{ id: 'cvma', name_zh: '中国兽医协会', name_en: 'Chinese Veterinary Medical Association', kind: 'association', status: 'ok', scanned: 65, in_window: 1 }, { id: 'x', name_zh: 'X', name_en: 'X', kind: 'news', status: 'failed', error: 'HTTP 503' }],
+  const issue = { id: '2026-11-06', from: '2026-10-31', to: '2026-11-06', sources: [{ id: 'cvma', name_zh: '中国兽医协会', name_en: 'Chinese Veterinary Medical Association', kind: 'association', status: 'ok', scanned: 65, in_window: 36 }, { id: 'x', name_zh: 'X', name_en: 'X', kind: 'news', status: 'failed', error: 'HTTP 503' }],
     not_used: [{ name: 'WeChat', why: 'no open feed' }],
     items: [{ source: 'cvma', kind: 'association', lang: 'zh', url: 'https://www.cvma.org.cn/1.html', title: '牛屠宰质量管理规范', date: '2026-11-05', tier: 'welfare', matched: ['屠宰', '牛'] }, { source: 'cvma', kind: 'association', lang: 'zh', url: 'https://www.cvma.org.cn/2.html', title: '兽医竞赛', date: '2026-11-06', tier: 'animal', matched: ['兽医'] }] };
   assert.deepEqual(Object.fromEntries(Object.entries(groupIssue(issue)).map(([k, v]) => [k, v.length])), { welfare: 1, related: 0, mention: 0, animal: 1 });
@@ -68,6 +68,7 @@ test('digest page: groups by tier, links open the source, every string translate
     const html = digestHtml({ issues: [{ id: issue.id, to: issue.to }] }, issue, { tr: (k, v) => t(lang, k, v), link: p => '#/' + p, lang });
     assert.ok(html.includes('href="https://www.cvma.org.cn/1.html"') && html.includes('rel="noopener noreferrer"'));
     assert.ok(html.includes('HTTP 503') && html.includes('WeChat'));
+    assert.ok(html.includes('<td>65</td><td>2</td>'), 'count issue links rather than legacy pre-deduplication counts');
     assert.ok(!/undefined|NaN|dg\.[a-z]/.test(html), lang);
   }
   for (const k of [...TIERS.flatMap(x => ['dg.tier.' + x, 'dg.tier.' + x + '.d']), 'dg.title', 'dg.sum', 'dg.nav', 'dg.st.ok', 'dg.st.empty', 'dg.st.failed']) assert.ok(STR.en[k] && STR.zh[k], k);

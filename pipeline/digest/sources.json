@@ -1,5 +1,5 @@
 {
- "_about": "Where the weekly digest looks. One entry per source. 'access' says how it is read; 'status' records what we found when the source was added. pipeline/digest.mjs reads this file; pipeline/digest/METHOD.md explains each field.",
+ "_about": "China-focused animal welfare discovery in any language. See METHOD.md for credentials, date windows and weekly publishing.",
  "user_agent": "Mozilla/5.0 (compatible; MyriasDigest/0.1; +https://github.com/invi-bhagyesh/myrias)",
  "sources": [
   {
@@ -13,26 +13,59 @@
     "url": "http://search.people.cn/search-platform/front/search",
     "keywords": [
      "动物福利",
-     "动物保护",
      "福利养殖",
      "人道屠宰",
+     "动物运输",
+     "养殖密度",
      "笼养",
-     "散养",
      "实验动物福利",
-     "野生动物保护"
+     "动物保护"
     ],
-    "pages": 2
+    "pages": 20
    }
   },
   {
    "id": "europepmc-cn",
-   "name_zh": "Europe PMC（中国作者论文）",
-   "name_en": "Europe PMC (papers with authors in China)",
+   "name_zh": "Europe PMC：中国相关论文",
+   "name_en": "Europe PMC: China-related papers",
    "kind": "paper",
-   "scope": "general",
+   "scope": "paper",
    "access": {
     "type": "europepmc",
-    "query": "TITLE_ABS:(welfare OR \"stocking density\" OR slaughter OR stunning OR \"transport stress\" OR \"heat stress\" OR enrichment OR \"tail biting\" OR \"feather pecking\" OR lameness OR castration OR \"cage-free\" OR \"free-range\") AND TITLE_ABS:(pig OR swine OR sow OR piglet OR poultry OR chicken OR broiler OR hen OR duck OR goose OR cattle OR cow OR dairy OR calf OR sheep OR goat OR rabbit OR fish OR shrimp OR aquaculture OR livestock OR \"farm animal\" OR \"laboratory animal\" OR dog OR cat) AND AFF:\"China\""
+    "query": "TITLE_ABS:(welfare OR \"stocking density\" OR slaughter OR stunning OR \"transport stress\" OR \"heat stress\" OR enrichment OR \"tail biting\" OR \"feather pecking\" OR lameness OR castration OR \"cage-free\" OR \"free-range\") AND TITLE_ABS:(pig OR swine OR sow OR piglet OR poultry OR chicken OR broiler OR hen OR duck OR goose OR cattle OR cow OR dairy OR calf OR sheep OR goat OR rabbit OR fish OR shrimp OR aquaculture OR livestock OR \"farm animal\" OR \"laboratory animal\" OR dog OR cat) AND (AFF:\"China\" OR TITLE_ABS:(China OR Chinese OR 中国))",
+    "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/searchPOST"
+   }
+  },
+  {
+   "id": "wanfang",
+   "name_zh": "万方：中国相关论文",
+   "name_en": "Wanfang: China-related papers",
+   "kind": "paper",
+   "scope": "paper",
+   "access": {
+    "type": "wanfang",
+    "url": "https://api.wanfangdata.com.cn/openwanfang/getQuery",
+    "key_env": "WFDATA_APP_KEY",
+    "lookback_years": 2,
+    "max_pages": 40,
+    "query": "动物福利 OR 福利养殖 OR 人道屠宰 OR 致晕 OR 动物运输 OR 养殖密度 OR 饲养密度 OR 动物丰容 OR 啄羽 OR 咬尾 OR \"animal welfare\" OR \"stocking density\" OR \"humane slaughter\" OR \"transport stress\" OR \"feather pecking\""
+   }
+  },
+  {
+   "id": "openalex-cn",
+   "name_zh": "OpenAlex：中国相关论文",
+   "name_en": "OpenAlex: China-related papers",
+   "kind": "paper",
+   "scope": "paper",
+   "access": {
+    "type": "openalex",
+    "url": "https://api.openalex.org/works",
+    "key_env": "OPENALEX_API_KEY",
+    "lookback_days": 90,
+    "backfill_days": 730,
+    "max_pages": 20,
+    "max_requests": 400,
+    "query": "(\"animal welfare\" OR \"stocking density\" OR slaughter OR stunning OR \"transport stress\" OR \"heat stress\" OR \"environmental enrichment\" OR \"tail biting\" OR \"feather pecking\" OR lameness OR castration OR \"cage-free\") AND (animal OR pig OR swine OR cattle OR poultry OR chicken OR fish OR shrimp OR aquaculture OR livestock OR sheep OR goat OR rabbit OR duck OR dog OR cat)"
    }
   },
   {
@@ -127,8 +160,8 @@
    "why": "list pages not updated since 2018"
   },
   {
-   "name": "CNKI, Wanfang",
-   "why": "paywalled; their terms forbid scraping"
+   "name": "CNKI",
+   "why": "no authenticated search integration configured"
   },
   {
    "name": "WeChat official accounts",
