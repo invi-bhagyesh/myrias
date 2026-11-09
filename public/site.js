@@ -3,7 +3,7 @@ import * as L from './site-lib.js';
 import { pixelHills } from './site-art.js';
 import { pipelineHtml, mountPipeline } from './site-pipeline.js';
 import { runsHtml } from './site-runs.js';
-import { digestHtml } from './site-digest.js';
+import { digestHtml, mountDigest } from './site-digest.js';
 import { claimReviewPanelHtml, mountReviewForms, reviewCardHtml, reviewActionCardHtml, bindReviews, loadReviews, saveReview, exportRows, exportActionRows, toCsv, reviewStats } from './site-review.js';
 import { feedModel, feedPageHtml } from './site-topic.js';
 import { historyHtml, mountHistory, versionHead, versionsOf, loadVersionFile } from './site-history.js';
@@ -411,7 +411,7 @@ function viewDigest(params) {
     fetch('data/digest/' + meta.file).then(r => r.json()).then(x => { dg.issues[id] = x; render(); }).catch(e => { dg.error = String(e); render(); });
     return loading;
   }
-  return { title: tr('dg.title'), html: digestHtml(dg.index, dg.issues[id], { tr, link, lang: state.lang }) };
+  return { title: tr('dg.title'), html: digestHtml(dg.index, dg.issues[id], { tr, link, lang: state.lang }), mount: mountDigest };
 }
 
 function viewFinding(id) {
@@ -759,7 +759,7 @@ function render(navigated = false) {
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   moveBlob(true);
-  const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus', 'actions'].includes(parts[0]) || (parts[0] === 'species' && parts[1]) || (parts[0] === 'findings' && !parts[1]);
+  const wide = !parts[0] || ['content', 'explore', 'pipeline', 'corpus', 'actions', 'digest'].includes(parts[0]) || (parts[0] === 'species' && parts[1]) || (parts[0] === 'findings' && !parts[1]);
   $('#content').dataset.page = parts[0] || 'home';
   $('#content').innerHTML = wide ? view.html : `<div class="narrow">${view.html}</div>`;
   // A short fade when the page changes (not when a filter redraws part of it).
