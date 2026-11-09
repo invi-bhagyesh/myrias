@@ -73,3 +73,12 @@ test('digest page: groups by tier, links open the source, every string translate
   }
   for (const k of [...TIERS.flatMap(x => ['dg.tier.' + x, 'dg.tier.' + x + '.d']), 'dg.title', 'dg.sum', 'dg.nav', 'dg.st.ok', 'dg.st.empty', 'dg.st.failed']) assert.ok(STR.en[k] && STR.zh[k], k);
 });
+
+test('digest newsletter: topic tags from Chinese and English titles; a panda is wildlife, not a pet', async () => {
+  const { tagsOf, TAGS } = await import('../public/site-digest.js');
+  const { STR } = await import('../public/i18n.js');
+  assert.deepEqual(tagsOf({ title: '农业农村部关于征求《牛屠宰质量管理规范》意见的通知', kind: 'association' }), ['policy', 'slaughter', 'livestock']);
+  assert.deepEqual(tagsOf({ title: '2026全球熊猫伙伴大会在成都举行', kind: 'news' }), ['wildlife']);
+  assert.deepEqual(tagsOf({ title: 'Heat stress alters feeding behaviour in broilers', kind: 'paper' }), ['poultry', 'health', 'research']);
+  for (const t of ['all', 'none', ...TAGS]) assert.ok(STR.en['dg.tag.' + t] && STR.zh['dg.tag.' + t], t);
+});
