@@ -258,7 +258,7 @@ function viewOverview() {
         <div class="cv-card">${authorFlowHtml(state.authors, tr)}</div></section>` : ''}
       <nav class="home-contents" aria-label="${esc(tr('contents'))}"><span>${esc(tr('contents'))}</span>${SECTIONS.map(([id, key], i) => `<a href="${link()}" data-jump="${id}"><span>${String(i + 1).padStart(2, '0')}</span>${esc(tr(key))}</a>`).join('')}</nav>
       <section class="graph-feature" aria-labelledby="graph-title">
-        <figure class="band-card graph-card"><div class="graph-head"><h2 class="graph-name" id="graph-title">${esc(tr('graph.title'))}</h2><div class="graph-tabs" role="group" aria-label="${esc(tr('graph.view.label'))}">${GRAPH_VIEWS.map(v => `<button type="button" data-gview="${v}" aria-pressed="${v === graphView(d)}">${esc(tr('graph.view.' + v))}</button>`).join('')}</div><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
+        <figure class="band-card graph-card"><div class="graph-head"><h2 class="graph-name" id="graph-title">${esc(tr('graph.title'))}</h2><span class="graph-badge" data-gbadge${graphView(d) !== 'today' ? '' : ' hidden'}>${esc(tr('graph.badge'))}</span></div><div class="graph-stage" data-graph></div><div data-glegend></div>
           <figcaption class="graph-note" data-gnote></figcaption></figure></section>
 
       <section class="band-section" id="map" style="${band(3)}"><div class="story-copy"><h2>${esc(tr('fig.title'))}</h2><p>${esc(tr('map.lead'))}</p></div>
@@ -492,7 +492,7 @@ function viewActions(params) {
   return { title: tr('nav.actions'), html: listHead(tr('ac.kicker'), tr('ac.page.title'), sum, ver ? '' : toolLink(link('review', { kind: 'action', ...(sp ? { species: sp } : {}) }), tr('rv.a.go'), true)) +
       listTools(tabs, actionVersionsHtml(params)) + (ver ? `<p class="ac-archived">${esc(tr('ac.archived', { run: ver.run, v: ver.version || '', next: ver.replaced_by || '' }))}</p>` : '') +
       browseHtml({ filters, views: [['rank', tr('ac.view.rank')], ['group', tr('ac.view.class')]], tr }) + (ver ? '' : rankNoteHtml(d, tr)),
-    mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 30, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
+    mount: root => mountBrowse(root, { items, tr, listClass: 'ac-list', initial: { q: params.get('q') || '' }, initialView: params.get('q') ? 'rank' : null, pageSize: 100, perGroup: 10, groups: d.taxonomy.technology_classes.map(t => [t.id, pick(t, '', state.lang)]), groupOf: a => a.technology_class,
       render: a => actionItemHtml(a, { ...findingCtx(), review: !ver }, fById),
       test: (a, v) => (!v.type || a.type === v.type) && (!v.who || a.who === v.who) && (!v.problem || a.welfare_problems.includes(v.problem)) && (!v.species || a.species_id === v.species) &&
         (!v.q || [a.id, a.action_en, a.action_zh, a.evidence_gap, a.risks].filter(Boolean).join(' ').toLowerCase().includes(v.q.toLowerCase())) }) };
