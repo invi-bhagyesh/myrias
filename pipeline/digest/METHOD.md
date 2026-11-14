@@ -166,3 +166,12 @@ fails visibly so its query can be narrowed or its limit raised; it is not silent
 China screening, language metadata, pagination errors, missing keys, retry behavior, persistent
 cross-source identities, completed Beijing weeks, failed-run preservation, immutable reruns and
 restoration of unmerged issues. Live API checks remain necessary when source contracts change.
+
+## English titles
+
+`node pipeline/digest_translate.mjs public/data/digest/<issue>.json` adds `title_en` to every item whose
+title is in Chinese, using the pipeline's `translate` model (`pipeline/models.json`), 25 titles to a call.
+Items that already have an English title are skipped unless `--force` is given, and the original title is
+never changed. In English the digest page leads with the translation and shows the original under it; in
+Chinese it shows the original only. Translating one issue costs well under a cent. Pass `--log PATH` to keep
+the model-call log; keep it outside `public/`, since it records costs.
