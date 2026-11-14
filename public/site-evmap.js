@@ -78,7 +78,7 @@ export function evidenceMapHtml(model, { tr, href, open = null }) {
   const pairs = new Map();
   for (const a of apps) { const k = a.cls + '|' + a.prob; const e = pairs.get(k) || { cls: a.cls, prob: a.prob, claims: 0, color: a.color }; e.claims += a.claims; pairs.set(k, e); }
   const maxPair = Math.max(1, ...[...pairs.values()].map(e => e.claims)), maxApp = Math.max(1, ...openApps.map(a => a.claims));
-  const w = (k, max) => (1.6 + 8 * Math.sqrt(k / max)).toFixed(1);
+  const w = (k, max) => (0.9 + 3.6 * Math.sqrt(k / max)).toFixed(1);
 
   let links = '';
   for (const e of pairs.values()) {
