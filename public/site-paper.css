@@ -16,7 +16,6 @@ body {
 /* Sections stay see-through so the art shows; pixel ribbons, aurora blobs and gradient text go. */
 .hero-hills, .site-footer-scene .pixel-hills, .hero-aurora, .hero-aurora::before { display: none !important; }
 .hero h1, .arena-home .hero h1 { background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; -webkit-text-fill-color: currentColor !important; }
-.band-section[style]::before, .sp-sec:nth-of-type(even)::before { background: transparent !important; }
 .band-section[style]::after, #numbers::after, #map::after, #help::after { background: none !important; }
 .arena-home .hero, .sp-sec, .band-section { background: transparent !important; }
 
@@ -145,3 +144,24 @@ main h2, h2 { font-size: clamp(20px, 2vw, 26px); }
 .nav-digest-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent); }
 @media (prefers-reduced-motion: no-preference) { .nav-digest-dot { animation: nav-digest-pulse 2.4s ease-out infinite; } @keyframes nav-digest-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); } 70%, 100% { box-shadow: 0 0 0 6px transparent; } } }
 @media (max-width: 860px) { .sections a.nav-digest { margin: 6px 0 10px 12px; align-self: flex-start; } .sections a.nav-digest::before { display: none; } }
+
+/* ---------- section washes: each section sits on its own soft tint with an abstract mark; the tints overlap
+   and fade into each other, so the page moves from one to the next without hard edges ---------- */
+.arena-home .home-flow, .arena-home .graph-feature, .arena-home #map, .arena-home #help, .sp-sec { position: relative; isolation: isolate; }
+.arena-home .home-flow::before, .arena-home #map::before, .arena-home #help::before, .sp-sec::before {
+  content: "" !important; position: absolute; z-index: -1; left: 50%; width: 100vw; transform: translateX(-50%); top: -90px !important; bottom: -90px !important; pointer-events: none; border: 0 !important;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 140px, #000 calc(100% - 140px), transparent); mask-image: linear-gradient(180deg, transparent, #000 140px, #000 calc(100% - 140px), transparent);
+  background-repeat: no-repeat !important;
+}
+.arena-home .home-flow::before { background: url("art/wash-rings.svg") no-repeat right -160px center / 620px auto, color-mix(in srgb, var(--accent) 7%, transparent) !important; }
+.arena-home #map::before { background: url("art/wash-plane.svg") no-repeat left -60px bottom 40px / 520px auto, color-mix(in srgb, var(--ochre) 11%, transparent) !important; }
+.arena-home #help::before { bottom: -40px !important; background: url("art/wash-dots.svg") no-repeat right 8% center / 300px auto, color-mix(in srgb, var(--accent) 9%, transparent) !important; }
+.arena-home .home-flow { padding-top: 40px; padding-bottom: 40px; }
+.arena-home #help { padding: 60px 0 70px !important; border-top: 0 !important; }
+.sp-sec::before { background: color-mix(in srgb, var(--accent) 6%, transparent) !important; }
+.sp-sec:nth-of-type(even)::before { background: url("art/wash-rings.svg") no-repeat right -200px center / 520px auto, color-mix(in srgb, var(--ochre) 9%, transparent) !important; }
+.sp-sec:nth-of-type(3n)::before { background: url("art/wash-plane.svg") no-repeat left -80px center / 440px auto, color-mix(in srgb, var(--accent) 8%, transparent) !important; }
+@media (max-width: 860px) {
+  .arena-home .home-flow::before, .arena-home #map::before, .arena-home #help::before, .sp-sec::before { background-size: 320px auto, auto !important; }
+  .arena-home #help::before { background-size: 180px auto, auto !important; }
+}
