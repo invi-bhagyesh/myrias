@@ -36,7 +36,7 @@ export function dateFromUrl(url, pattern) {
 }
 
 // Links on a list page that match the source's link pattern, with their title and any date beside them.
-// opts: { link, title: 'attr' | 'text', date_from_url, date_near }
+// opts: { link, title: 'attr' | 'text', date_from_url, date_near }; date_near looks inside the link, then just after it.
 export function parseList(html, baseUrl, opts) {
   const out = [], seen = new Set();
   const re = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
@@ -53,7 +53,7 @@ export function parseList(html, baseUrl, opts) {
     seen.add(url);
     let date = null, month = null;
     if (opts.date_from_url) ({ date, month } = dateFromUrl(url, opts.date_from_url));
-    if (!date && opts.date_near) date = findDate(html.slice(m.index + m[0].length, m.index + m[0].length + 160));
+    if (!date && opts.date_near) date = findDate(m[2]) || findDate(html.slice(m.index + m[0].length, m.index + m[0].length + 160));
     out.push({ url, title, date, month });
   }
   return out;
