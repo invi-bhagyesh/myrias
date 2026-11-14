@@ -20,7 +20,7 @@ export const TOPICS = [
   ['lab', /实验动物|\blaboratory animals?\b/i]
 ];
 export function tagsOf(item) {
-  const title = String(item.title || ''), text = NOT.reduce((t, w) => t.split(w).join(' '), title);
+  const title = [item.title, item.title_en].filter(Boolean).join(' '), text = NOT.reduce((t, w) => t.split(w).join(' '), title);
   const tags = TOPICS.filter(([, re]) => re.test(text)).map(([k]) => k);
   if (/熊猫|panda/i.test(title) && !tags.includes('wildlife')) tags.push('wildlife');
   if (item.kind === 'paper') tags.push('research');
@@ -60,7 +60,9 @@ export function digestHtml(index, issue, ctx) {
   const extra = it => [it.venue, it.first_seen_at ? tr('dg.found', { date: day(new Date(Date.parse(it.first_seen_at) + 8 * 3600e3).toISOString().slice(0, 10), lang) }) : null,
     it.china_basis ? tr('dg.china.' + it.china_basis) : null].filter(Boolean).map(x => `<span>${esc(x)}</span>`).join('');
   const byline = it => `<p class="nl-by"><span class="nl-src">${esc(name(it.source))}</span><span>${esc(tr('dg.kind.' + it.kind))}</span>${it.kind === 'paper' ? `<span>${esc(tr('dg.published', { date: day(it.date, lang) }))}</span>` : ''}${extra(it)}${zhTitle(it) && lang !== 'zh' ? `<span class="nl-zh" title="${esc(tr('dg.zh.t'))}">中文</span>` : ''}</p>`;
-  const headline = (it, cls) => `<a class="${cls}" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer" lang="${esc(it.title_lang || it.lang || 'und')}">${esc(it.title)}</a>`;
+  // In English the translated title leads and the original follows in small type; in Chinese, the original only.
+  const headline = (it, cls) => { const en = lang !== 'zh' && it.title_en ? it.title_en : null;
+    return `<a class="${cls}" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer" lang="${en ? 'en' : esc(it.title_lang || it.lang || 'und')}">${esc(en || it.title)}</a>${en ? `<p class="nl-orig" lang="${esc(it.title_lang || 'zh-Hans')}">${esc(it.title)}</p>` : ''}`; };
   const attrs = it => `data-tags="${esc(it.tags.join(' '))}"`;
   // A date stamp beside each item: day over month.
   const stamp = it => { const d = Date.parse((it.date || '') + 'T00:00:00'); if (Number.isNaN(d)) return '<span class="nl-stamp"></span>';

@@ -82,3 +82,19 @@ test('digest newsletter: topic tags from Chinese and English titles; a panda is 
   assert.deepEqual(tagsOf({ title: 'Heat stress alters feeding behaviour in broilers', kind: 'paper' }), ['poultry', 'health', 'research']);
   for (const t of ['all', 'none', ...TAGS]) assert.ok(STR.en['dg.tag.' + t] && STR.zh['dg.tag.' + t], t);
 });
+
+test('digest translation: answers go back by number, only to items asked for; the page leads with English and keeps the original', async () => {
+  const { applyTitles, needsEnglish, batchUser } = await import('../pipeline/digest_translate.mjs');
+  const items = [{ title: '牛屠宰质量管理规范' }, { title: 'Heat stress in broilers' }, { title: '鸟网巡查' }];
+  assert.deepEqual(items.map(needsEnglish), [true, false, true]);
+  assert.equal(batchUser([[0, '牛'], [2, '鸟']]).split('\n')[1], '2. 鸟');
+  assert.equal(applyTitles(items, [0, 2], [{ i: 0, en: 'Cattle slaughter rules.' }, { i: 1, en: 'should be ignored' }, { i: 2, en: ' ' }]), 1);
+  assert.deepEqual(items.map(i => i.title_en), ['Cattle slaughter rules', undefined, undefined]);
+  const { digestHtml } = await import('../public/site-digest.js');
+  const { t } = await import('../public/i18n.js');
+  const issue = { id: 'x', from: '2026-11-01', to: '2026-11-07', sources: [], items: [{ source: 's', kind: 'news', url: 'https://e.cn/1', title: '牛屠宰质量管理规范', title_en: 'Cattle slaughter rules', date: '2026-11-05', tier: 'welfare', matched: [] }] };
+  const en = digestHtml({ issues: [] }, issue, { tr: (k, v) => t('en', k, v), link: p => '#/' + p, lang: 'en' });
+  assert.ok(en.includes('>Cattle slaughter rules</a>') && en.includes('class="nl-orig" lang="zh-Hans">牛屠宰质量管理规范'));
+  const zh = digestHtml({ issues: [] }, issue, { tr: (k, v) => t('zh', k, v), link: p => '#/' + p, lang: 'zh' });
+  assert.ok(zh.includes('>牛屠宰质量管理规范</a>') && !zh.includes('Cattle slaughter rules'));
+});
