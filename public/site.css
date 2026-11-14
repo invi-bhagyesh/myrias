@@ -1710,7 +1710,6 @@ html[lang^=zh] .arena-home .hero h1 { letter-spacing: 0; }
 .nl-dek { margin: 0; font: italic 17px/1.4 var(--serif); color: var(--soft); }
 .nl-stats { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 28px; margin: 16px 0 0; padding: 0; font-size: 13px; color: var(--soft); }
 .nl-stats b { display: block; font: 600 22px/1.1 var(--font); color: var(--ink); }
-.nl-note { margin: 12px 0 0; text-align: center; font-size: 12.5px; color: var(--soft); }
 /* Page grid: stories, and a rail */
 .nl-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 40px; margin-top: 22px; align-items: start; }
 .nl-rail { position: sticky; top: 96px; display: grid; gap: 22px; }
