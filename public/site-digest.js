@@ -89,7 +89,6 @@ export function digestHtml(index, issue, ctx) {
       <p class="nl-dek">${esc(tr('dg.dek'))}</p>
       <ul class="nl-stats"><li><b>${items.length}</b>${esc(tr('dg.stat.links'))}</li><li><b>${by.welfare.length + by.related.length}</b>${esc(tr('dg.stat.welfare'))}</li><li><b>${included.size}</b>${esc(tr('dg.stat.sources'))}</li><li><b>${TAGS.filter(t => counts[t]).length}</b>${esc(tr('dg.stat.topics'))}</li></ul>
     </header>
-    <p class="nl-note">${esc(tr(issue.date_basis === 'discovery' ? 'dg.note.discovery' : 'dg.note'))}${issue.partial ? ' ' + esc(tr('dg.partial')) : ''}</p>
     <div class="nl-grid">
       <div class="nl-main">
         ${lead ? `<section class="nl-lead" ${attrs(lead)} data-desk><p class="nl-kicker">${esc(tr('dg.lead'))}</p>${headline(lead, 'nl-hl-lead')}${byline(lead)}

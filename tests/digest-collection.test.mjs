@@ -320,6 +320,6 @@ test('digest renders publication and discovery dates and skipped sources in both
     const html = digestHtml({ issues: [] }, issue, { lang, tr: (k, v) => t(lang, k, v), link: x => '#/' + x });
     assert.ok(!/undefined|NaN|Invalid Date|dg\.[a-z]/.test(html));
     assert.ok(html.includes('lang="en"'));
-    assert.ok(html.includes(t(lang, 'dg.partial')));
+    assert.ok(html.includes(t(lang, 'dg.st.skipped')), 'a skipped source shows in the collection table');
   }
 });
