@@ -29,6 +29,9 @@ test('digest: list pages give links with titles from the attribute or the text, 
   const cvma = `<a href="/6849/202611/74577.html" target="_blank">· 关于征求《牛屠宰质量管理规范》意见的通知</a><span>[ 2026-11-05 ]</span>`;
   const r2 = parseList(cvma, 'https://www.cvma.org.cn/', { link: '/\\d{4}/\\d{6}/\\d+\\.html', title: 'text', date_near: true });
   assert.deepEqual([r2[0].title, r2[0].date, r2[0].url], ['关于征求《牛屠宰质量管理规范》意见的通知', '2026-11-05', 'https://www.cvma.org.cn/6849/202611/74577.html']);
+  const calas = `<a href="/article/view?cid=8_19_8353" title="实验动物福利伦理培训班举办"><div class="title">实验动物福利伦理培训班举办</div><div class="update">2026-11-13</div></a>`;
+  const r3 = parseList(calas, 'http://www.calas.org.cn/article?cid=8_19', { link: '/article/view\\?cid=8_19_\\d+', title: 'attr', date_near: true });
+  assert.deepEqual([r3[0].title, r3[0].date], ['实验动物福利伦理培训班举办', '2026-11-13']);
   assert.equal(cleanText('· <b>猪</b>&nbsp;福利'), '猪 福利');
 });
 

@@ -63,7 +63,13 @@ complete without silently truncating it at 2,000 results. [OpenAlex pagination](
 People's Daily uses the site's search endpoint. This worked in the November 2026 probe but is not
 a documented public API contract. It searches targeted terms, paginates until results are older
 than the collection window, and reports failure if the configured page ceiling is reached first.
-The ministry, veterinary association and ScienceNet use public list pages. HTML readers remain
+The ministry, veterinary association, ScienceNet and the other `html-list` sources use public list pages:
+the National Animal Husbandry Service (`nahs-work`, `nahs-home`), the National Forestry and Grassland
+Administration news list (`forestry-news`, which resets connections on some requests), the China Fisheries
+Association (`cfa-news`, `cfa-notices`), the Chinese Association for Laboratory Animal Sciences (`calas-news`,
+`calas-notices`, `calas-industry`; the date sits inside the link, so it uses `date_near`), and Xinhua food and
+local lists and China News Service's rolling list (`xinhua-food`, `xinhua-local`, `chinanews-live`; broad news,
+few hits). Sites that failed, block scripts or have no dated lists are in `not_used` in `sources.json`. HTML readers remain
 limited to the links currently on those lists; daily checks reduce, but cannot eliminate, gaps.
 The journal RSS links investigated returned 404 and are not configured as working feeds.
 

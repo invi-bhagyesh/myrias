@@ -124,6 +124,160 @@
     "date_from_url": "htmlnews/(\\d{4})/(\\d{1,2})/",
     "date_from_page": true
    }
+  },
+  {
+   "id": "nahs-work",
+   "name_zh": "全国畜牧总站 · 工作动态",
+   "name_en": "National Animal Husbandry Service: work news",
+   "kind": "government",
+   "scope": "livestock",
+   "access": {
+    "type": "html-list",
+    "url": "https://www.nahs.org.cn/dt/zzdt/",
+    "link": "t\\d{8}_\\d+\\.htm",
+    "title": "attr",
+    "date_from_url": "t(\\d{4})(\\d{2})(\\d{2})_"
+   }
+  },
+  {
+   "id": "nahs-home",
+   "name_zh": "全国畜牧总站 · 首页",
+   "name_en": "National Animal Husbandry Service: home page",
+   "kind": "government",
+   "scope": "livestock",
+   "access": {
+    "type": "html-list",
+    "url": "https://www.nahs.org.cn/",
+    "link": "t\\d{8}_\\d+\\.htm",
+    "title": "attr",
+    "date_from_url": "t(\\d{4})(\\d{2})(\\d{2})_"
+   }
+  },
+  {
+   "id": "forestry-news",
+   "name_zh": "国家林业和草原局 · 动态",
+   "name_en": "National Forestry and Grassland Administration: news",
+   "kind": "government",
+   "scope": "wildlife",
+   "access": {
+    "type": "html-list",
+    "url": "https://www.forestry.gov.cn/main/586/index.html",
+    "link": "/lyj/1/lcdt/\\d{8}/\\d+\\.html",
+    "title": "text",
+    "date_from_url": "lcdt/(\\d{4})(\\d{2})(\\d{2})/"
+   }
+  },
+  {
+   "id": "cfa-news",
+   "name_zh": "中国渔业协会 · 协会动态",
+   "name_en": "China Fisheries Association: news",
+   "kind": "association",
+   "scope": "aquaculture",
+   "access": {
+    "type": "html-list",
+    "url": "http://www.china-cfa.org/xwzx/xydt/",
+    "link": "/xwzx/xydt/\\d{4}/\\d{4}/\\d+\\.html",
+    "title": "attr",
+    "date_from_url": "/(\\d{4})/(\\d{2})(\\d{2})/\\d+\\.html"
+   }
+  },
+  {
+   "id": "cfa-notices",
+   "name_zh": "中国渔业协会 · 通知公告",
+   "name_en": "China Fisheries Association: notices",
+   "kind": "association",
+   "scope": "aquaculture",
+   "access": {
+    "type": "html-list",
+    "url": "http://www.china-cfa.org/tzgg/",
+    "link": "/tzgg/\\d{8}/\\d+\\.html",
+    "title": "attr",
+    "date_from_url": "/(\\d{4})(\\d{2})(\\d{2})/\\d+\\.html"
+   }
+  },
+  {
+   "id": "calas-news",
+   "name_zh": "中国实验动物学会 · 学会动态",
+   "name_en": "Chinese Association for Laboratory Animal Sciences: news",
+   "kind": "association",
+   "scope": "laboratory",
+   "access": {
+    "type": "html-list",
+    "url": "http://www.calas.org.cn/article?cid=8_19",
+    "link": "/article/view\\?cid=8_19_\\d+",
+    "title": "attr",
+    "date_near": true
+   }
+  },
+  {
+   "id": "calas-notices",
+   "name_zh": "中国实验动物学会 · 通知公告",
+   "name_en": "Chinese Association for Laboratory Animal Sciences: notices",
+   "kind": "association",
+   "scope": "laboratory",
+   "access": {
+    "type": "html-list",
+    "url": "http://www.calas.org.cn/article?cid=8_20",
+    "link": "/article/view\\?cid=8_20_\\d+",
+    "title": "attr",
+    "date_near": true
+   }
+  },
+  {
+   "id": "calas-industry",
+   "name_zh": "中国实验动物学会 · 行业资讯",
+   "name_en": "Chinese Association for Laboratory Animal Sciences: industry news",
+   "kind": "association",
+   "scope": "laboratory",
+   "access": {
+    "type": "html-list",
+    "url": "http://www.calas.org.cn/article?cid=8_22",
+    "link": "/article/view\\?cid=8_22_\\d+",
+    "title": "attr",
+    "date_near": true
+   }
+  },
+  {
+   "id": "xinhua-food",
+   "name_zh": "新华网 · 食品",
+   "name_en": "Xinhua: food",
+   "kind": "news",
+   "scope": "general",
+   "access": {
+    "type": "html-list",
+    "url": "https://www.news.cn/food/",
+    "link": "/food/\\d{8}/[0-9a-f]+/c\\.html",
+    "title": "text",
+    "date_from_url": "/(\\d{4})(\\d{2})(\\d{2})/"
+   }
+  },
+  {
+   "id": "xinhua-local",
+   "name_zh": "新华网 · 地方",
+   "name_en": "Xinhua: local",
+   "kind": "news",
+   "scope": "general",
+   "access": {
+    "type": "html-list",
+    "url": "https://www.news.cn/local/",
+    "link": "/(?:local|politics|legal|food)/\\d{8}/[0-9a-f]+/c\\.html",
+    "title": "text",
+    "date_from_url": "/(\\d{4})(\\d{2})(\\d{2})/"
+   }
+  },
+  {
+   "id": "chinanews-live",
+   "name_zh": "中国新闻网 · 即时",
+   "name_en": "China News Service: latest",
+   "kind": "news",
+   "scope": "general",
+   "access": {
+    "type": "html-list",
+    "url": "https://www.chinanews.com.cn/scroll-news/news1.html",
+    "link": "/20\\d{2}/\\d{2}-\\d{2}/\\d+\\.shtml",
+    "title": "text",
+    "date_from_url": "/(\\d{4})/(\\d{2})-(\\d{2})/"
+   }
   }
  ],
  "not_used": [
@@ -170,6 +324,94 @@
   {
    "name": "Crossref by journal ISSN",
    "why": "most Chinese animal-science journals are not in Crossref or not current there"
+  },
+  {
+   "name": "中国畜牧业协会 caaa.cn",
+   "why": "connection fails from our servers"
+  },
+  {
+   "name": "中国畜牧兽医学会 caav.org.cn",
+   "why": "connection reset"
+  },
+  {
+   "name": "中国动物疫病预防控制中心 cadc.net.cn",
+   "why": "connection fails; the host answers with a block page"
+  },
+  {
+   "name": "全国畜牧总站 nahs.org.cn 农业农村部信息栏 (/dt/nyncbxx/)",
+   "why": "reposts moa.gov.cn news, already covered by moa-news"
+  },
+  {
+   "name": "生态环境部 mee.gov.cn 要闻 (/ywdt/hjywnews/)",
+   "why": "reachable with dated links, but the list is climate and COP news; no animal items in a six-week check. Biodiversity list (/ywgz/zrstbh/swdyxbh/) last updated 2025-08"
+  },
+  {
+   "name": "中国渔业报 / 中国水产养殖网 cnfm.com.cn, shuichan.cc",
+   "why": "cnfm.com.cn serves a default nginx page; shuichan.cc does not connect"
+  },
+  {
+   "name": "新华网搜索 so.news.cn (retried)",
+   "why": "still HTTP 405 to scripted requests; section lists news.cn/food and /local are used instead"
+  },
+  {
+   "name": "中国日报搜索 newssearch.chinadaily.com.cn",
+   "why": "JSON endpoint works but is relevance-ranked and English-only; one hit in 2.5 months, about Kenya. A new reader is not worth it"
+  },
+  {
+   "name": "中国日报 chinadaily.com.cn 栏目页",
+   "why": "English; no animal section; no RSS (feed URLs return 404)"
+  },
+  {
+   "name": "ChinaXiv chinaxiv.org",
+   "why": "HTTP 403 to scripted requests, including search"
+  },
+  {
+   "name": "百度学术 xueshu.baidu.com",
+   "why": "HTTP 403; no public API"
+  },
+  {
+   "name": "万方/知网开放目录 (CNKI cnki.net)",
+   "why": "home page is a JS redirect; no open list of new items"
+  },
+  {
+   "name": "动物营养学报 chinajan.com",
+   "why": "reachable, but the current-issue page has no per-article dates (pages show the render date); issue labels only"
+  },
+  {
+   "name": "中国畜牧杂志 zgxmzz.cn",
+   "why": "single-page app; list is not in the HTML"
+  },
+  {
+   "name": "畜牧兽医学报、水产学报、中国兽医科学 journal sites",
+   "why": "domains tried (xmsyxb, jfc.shou.edu.cn, zgsykx.cn and others) do not connect or have been taken over by spam pages"
+  },
+  {
+   "name": "中国小动物保护协会 cnsapa.org",
+   "why": "site is an 'under construction' page"
+  },
+  {
+   "name": "中国动物保护 NGO sites: 亚洲动物基金 animalsasia.org/cn, 它基金 tajiorg.org, 野生救援 wildaid.org.cn, 中国绿发会 cbcgdf.org, 国际爱护动物基金会 fourpawsinternational.org.cn",
+   "why": "HTTP 403 or no connection from our servers"
+  },
+  {
+   "name": "世界自然基金会中国 wwfchina.org",
+   "why": "reachable, but pages are script-built and carry no dated article links"
+  },
+  {
+   "name": "中国野生动物保护协会 cwca.org.cn",
+   "why": "connection fails"
+  },
+  {
+   "name": "微博 Weibo",
+   "why": "login wall and no open feed; scraping breaks the terms of use"
+  },
+  {
+   "name": "Crossref (retried)",
+   "why": "HTTP 429 on a trial query; already ruled out above for coverage"
+  },
+  {
+   "name": "国家林草局 forestry.gov.cn 首页",
+   "why": "connection resets; only /main/586/index.html answers (configured as forestry-news, which may fail on some days)"
   }
  ]
 }
