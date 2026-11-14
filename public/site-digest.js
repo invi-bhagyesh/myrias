@@ -41,59 +41,73 @@ const day = (d, lang, long = false) => {
   try { return new Date(d + 'T00:00:00').toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-GB', long ? { day: 'numeric', month: 'long', year: 'numeric' } : { day: 'numeric', month: 'short' }); } catch { return d; }
 };
 
+// A short source name for bylines: no "(site search)" and no ": news" section.
+export const shortName = n => String(n || '').replace(/\s*[（(][^)）]*[)）]\s*/g, ' ').split(/[:：·]/)[0].replace('Ministry of Agriculture and Rural Affairs', 'Ministry of Agriculture').trim();
+
 export function digestHtml(index, issue, ctx) {
   const { tr, link, lang } = ctx;
   const src = new Map((issue.sources || []).map(s => [s.id, s]));
-  const name = id => { const s = src.get(id); return s ? (lang === 'zh' ? s.name_zh : s.name_en || s.name_zh) : id; };
+  const fullName = id => { const s = src.get(id); return s ? (lang === 'zh' ? s.name_zh : s.name_en || s.name_zh) : id; };
+  const name = id => shortName(fullName(id));
   const items = (issue.items || []).map(it => ({ ...it, tags: tagsOf(it) }));
   const by = groupIssue({ items });
   const included = items.reduce((counts, item) => counts.set(item.source, (counts.get(item.source) || 0) + 1), new Map());
   const issues = index.issues || [];
   const number = issues.length - Math.max(0, issues.findIndex(i => i.id === issue.id));
+  const zhTitle = it => (it.title_lang || it.lang) === 'zh' || /[一-鿿]/.test(it.title || '');
 
-  const tagsHtml = it => it.tags.length ? `<span class="nl-tags-in">${it.tags.map(t => `<i class="nl-tag g-${t}">${esc(tr('dg.tag.' + t))}</i>`).join('')}</span>` : '';
-  const when = it => esc(it.kind === 'paper' ? tr('dg.published', { date: day(it.date, lang) }) : day(it.date, lang));
+  const chips = it => it.tags.length ? `<span class="nl-chips">${it.tags.map(t => `<i class="nl-chip g-${t}">${esc(tr('dg.tag.' + t))}</i>`).join('')}</span>` : '';
   const extra = it => [it.venue, it.first_seen_at ? tr('dg.found', { date: day(new Date(Date.parse(it.first_seen_at) + 8 * 3600e3).toISOString().slice(0, 10), lang) }) : null,
     it.china_basis ? tr('dg.china.' + it.china_basis) : null].filter(Boolean).map(x => `<span>${esc(x)}</span>`).join('');
-  const byline = it => `<p class="nl-by"><span class="nl-src">${esc(name(it.source))}</span><span>${esc(tr('dg.kind.' + it.kind))}</span><span>${when(it)}</span>${extra(it)}</p>`;
+  const byline = it => `<p class="nl-by"><span class="nl-src">${esc(name(it.source))}</span><span>${esc(tr('dg.kind.' + it.kind))}</span>${it.kind === 'paper' ? `<span>${esc(tr('dg.published', { date: day(it.date, lang) }))}</span>` : ''}${extra(it)}${zhTitle(it) && lang !== 'zh' ? `<span class="nl-zh" title="${esc(tr('dg.zh.t'))}">中文</span>` : ''}</p>`;
   const headline = (it, cls) => `<a class="${cls}" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer" lang="${esc(it.title_lang || it.lang || 'und')}">${esc(it.title)}</a>`;
   const attrs = it => `data-tags="${esc(it.tags.join(' '))}"`;
+  // A date stamp beside each item: day over month.
+  const stamp = it => { const d = Date.parse((it.date || '') + 'T00:00:00'); if (Number.isNaN(d)) return '<span class="nl-stamp"></span>';
+    const dt = new Date(d); return `<time class="nl-stamp" datetime="${esc(it.date)}"><b>${dt.getDate()}</b><span>${esc(dt.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-GB', { month: 'short' }))}</span></time>`; };
 
   // The top story: the newest welfare item, else the newest related one.
   const lead = by.welfare[0] || by.related[0] || null;
   const rest = t => by[t].filter(it => it !== lead);
-  const story = it => `<li class="nl-story" ${attrs(it)}>${tagsHtml(it)}${headline(it, 'nl-hl')}${byline(it)}</li>`;
-  const brief = it => `<li class="nl-brief" ${attrs(it)}>${headline(it, 'nl-hl-sm')}${byline(it)}</li>`;
-  const desk = (key, list, kind) => list.length ? `<section class="nl-desk d-${key}" data-desk><header class="nl-desk-h"><h2>${esc(tr('dg.tier.' + key))}</h2><span>${esc(tr('dg.tier.' + key + '.d'))}</span></header>
-      <ul class="${kind === 'story' ? 'nl-stories' : 'nl-briefs'}">${list.map(kind === 'story' ? story : brief).join('')}</ul></section>` : '';
+  const item = (it, big) => `<li class="nl-item${big ? ' is-story' : ''} g-${esc(it.tags[0] || 'none')}" ${attrs(it)}>${stamp(it)}<div class="nl-body">${headline(it, big ? 'nl-hl' : 'nl-hl-sm')}${byline(it)}${chips(it)}</div></li>`;
+  const desk = (key, list, big) => list.length ? `<section class="nl-desk d-${key}" data-desk><header class="nl-desk-h"><h2>${esc(tr('dg.tier.' + key))} <span class="nl-n">${list.length}</span></h2><p>${esc(tr('dg.tier.' + key + '.d'))}</p></header>
+      <ul class="nl-items${big ? '' : ' is-briefs'}">${list.map(it => item(it, big)).join('')}</ul></section>` : '';
 
   const counts = Object.fromEntries(TAGS.map(t => [t, items.filter(it => it.tags.includes(t)).length]));
-  const tagBar = `<nav class="nl-filter" aria-label="${esc(tr('dg.tags'))}"><button type="button" data-tag="" aria-pressed="true">${esc(tr('dg.tag.all'))} <b>${items.length}</b></button>${TAGS.filter(t => counts[t]).map(t => `<button type="button" data-tag="${t}" aria-pressed="false" class="g-${t}">${esc(tr('dg.tag.' + t))} <b>${counts[t]}</b></button>`).join('')}</nav>`;
-
-  const archive = issues.length > 1 ? `<section class="nl-archive"><h2>${esc(tr('dg.archive'))}</h2><ol>${issues.map((i, k) => `<li><a href="${link('digest', { issue: i.id })}"${i.id === issue.id ? ' aria-current="page"' : ''}><b>${esc(tr('dg.issue.n', { n: issues.length - k }))}</b> ${esc(day(i.from, lang))} – ${esc(day(i.to, lang))}</a><span>${esc(tr('dg.links', { n: i.items }))}</span></li>`).join('')}</ol></section>` : '';
+  const topics = `<nav class="nl-filter" aria-label="${esc(tr('dg.tags'))}"><button type="button" data-tag="" aria-pressed="true"><i class="nl-dot"></i>${esc(tr('dg.tag.all'))} <b>${items.length}</b></button>${TAGS.filter(t => counts[t]).sort((a, b) => counts[b] - counts[a]).map(t => `<button type="button" data-tag="${t}" aria-pressed="false" class="g-${t}"><i class="nl-dot"></i>${esc(tr('dg.tag.' + t))} <b>${counts[t]}</b></button>`).join('')}</nav>`;
+  const sourcesRail = [...included].sort((a, b) => b[1] - a[1]).map(([id, n]) => `<li><span>${esc(name(id))}</span><b>${n}</b></li>`).join('');
+  const archive = issues.length > 1 ? `<section class="nl-rail-sec"><h3>${esc(tr('dg.archive'))}</h3><ol class="nl-archive">${issues.map((i, k) => `<li><a href="${link('digest', { issue: i.id })}"${i.id === issue.id ? ' aria-current="page"' : ''}><b>${esc(tr('dg.issue.n', { n: issues.length - k }))}</b> ${esc(day(i.from, lang))} – ${esc(day(i.to, lang))}</a><span>${esc(tr('dg.links', { n: i.items }))}</span></li>`).join('')}</ol></section>` : '';
   const status = (issue.sources || []).map(s => `<tr class="st-${esc(s.status || 'unknown')}"><td>${esc(lang === 'zh' ? s.name_zh : s.name_en || s.name_zh)}</td><td>${esc(tr('dg.kind.' + s.kind))}</td><td><b>${esc(tr('dg.st.' + (s.status || 'unknown')))}</b>${s.error ? `<small>${esc(s.error)}</small>` : ''}</td><td>${s.scanned ?? '—'}</td><td>${included.get(s.id) || 0}</td></tr>`).join('');
   const notUsed = (issue.not_used || []).map(x => `<li><b>${esc(x.name)}</b> ${esc(x.why)}</li>`).join('');
 
   return `<article class="nl">
     <header class="nl-mast">
-      <p class="nl-strap"><span>${esc(tr('dg.issue.n', { n: number }))}</span><span>${esc(tr('dg.kicker'))}</span><span>${esc(day(issue.from, lang))} – ${esc(day(issue.to, lang, true))}</span></p>
-      <h1 class="nl-name">${esc(tr('dg.name'))}</h1>
-      <p class="nl-dek">${esc(tr('dg.dek'))} · ${esc(tr('dg.sum.short', { n: items.length, w: by.welfare.length }))}</p>
+      <p class="nl-strap"><span>${esc(tr('dg.issue.n', { n: number }))}</span><span>${esc(day(issue.from, lang))} – ${esc(day(issue.to, lang, true))}</span></p>
+      <h1 class="nl-name"><img src="icon.svg" alt="" width="44" height="30">${esc(tr('dg.name'))}</h1>
+      <p class="nl-dek">${esc(tr('dg.dek'))}</p>
+      <ul class="nl-stats"><li><b>${items.length}</b>${esc(tr('dg.stat.links'))}</li><li><b>${by.welfare.length + by.related.length}</b>${esc(tr('dg.stat.welfare'))}</li><li><b>${included.size}</b>${esc(tr('dg.stat.sources'))}</li><li><b>${TAGS.filter(t => counts[t]).length}</b>${esc(tr('dg.stat.topics'))}</li></ul>
     </header>
-    ${items.length ? tagBar : ''}
     <p class="nl-note">${esc(tr(issue.date_basis === 'discovery' ? 'dg.note.discovery' : 'dg.note'))}${issue.partial ? ' ' + esc(tr('dg.partial')) : ''}</p>
-    ${lead ? `<section class="nl-lead" ${attrs(lead)} data-desk><p class="nl-kicker">${esc(tr('dg.lead'))}</p>${headline(lead, 'nl-hl-lead')}${byline(lead)}${tagsHtml(lead)}
-      <a class="nl-read" href="${esc(lead.url)}" target="_blank" rel="noopener noreferrer">${esc(tr('dg.read'))} ↗</a></section>` : ''}
-    ${desk('welfare', rest('welfare'), 'story')}${desk('related', rest('related'), 'story')}${desk('mention', by.mention, 'brief')}${desk('animal', by.animal, 'brief')}
-    ${items.length ? `<p class="nl-empty" data-empty hidden>${esc(tr('dg.tag.none'))}</p>` : `<p class="empty">${esc(tr('dg.none'))}</p>`}
-    ${archive}
-    <details class="dg-how"><summary>${esc(tr('dg.how'))}</summary><p class="small-note">${esc(tr('dg.how.d'))} <a href="https://github.com/invi-bhagyesh/myrias/blob/main/pipeline/digest/METHOD.md" target="_blank" rel="noopener">${esc(tr('dg.method'))} ↗</a></p>
-      <table class="dg-status"><thead><tr><th>${esc(tr('dg.th.source'))}</th><th>${esc(tr('dg.th.kind'))}</th><th>${esc(tr('dg.th.status'))}</th><th>${esc(tr('dg.th.scanned'))}</th><th>${esc(tr('dg.th.kept'))}</th></tr></thead><tbody>${status}</tbody></table>
-      ${notUsed ? `<h3>${esc(tr('dg.notused'))}</h3><ul class="dg-notused">${notUsed}</ul>` : ''}</details>
+    <div class="nl-grid">
+      <div class="nl-main">
+        ${lead ? `<section class="nl-lead" ${attrs(lead)} data-desk><p class="nl-kicker">${esc(tr('dg.lead'))}</p>${headline(lead, 'nl-hl-lead')}${byline(lead)}
+          <div class="nl-lead-foot">${chips(lead)}<a class="nl-read" href="${esc(lead.url)}" target="_blank" rel="noopener noreferrer">${esc(tr('dg.read'))} ↗</a></div></section>` : ''}
+        ${desk('welfare', rest('welfare'), true)}${desk('related', rest('related'), true)}${desk('mention', by.mention, false)}${desk('animal', by.animal, false)}
+        ${items.length ? `<p class="nl-empty" data-empty hidden>${esc(tr('dg.tag.none'))}</p>` : `<p class="empty">${esc(tr('dg.none'))}</p>`}
+        <details class="dg-how"><summary>${esc(tr('dg.how'))}</summary><p class="small-note">${esc(tr('dg.how.d'))} <a href="https://github.com/invi-bhagyesh/myrias/blob/main/pipeline/digest/METHOD.md" target="_blank" rel="noopener">${esc(tr('dg.method'))} ↗</a></p>
+          <table class="dg-status"><thead><tr><th>${esc(tr('dg.th.source'))}</th><th>${esc(tr('dg.th.kind'))}</th><th>${esc(tr('dg.th.status'))}</th><th>${esc(tr('dg.th.scanned'))}</th><th>${esc(tr('dg.th.kept'))}</th></tr></thead><tbody>${status}</tbody></table>
+          ${notUsed ? `<h3>${esc(tr('dg.notused'))}</h3><ul class="dg-notused">${notUsed}</ul>` : ''}</details>
+      </div>
+      <aside class="nl-rail">
+        ${items.length ? `<section class="nl-rail-sec"><h3>${esc(tr('dg.inissue'))}</h3>${topics}</section>` : ''}
+        ${sourcesRail ? `<section class="nl-rail-sec nl-rail-src"><h3>${esc(tr('dg.sources'))}</h3><ul class="nl-sources">${sourcesRail}</ul></section>` : ''}
+        ${archive}
+      </aside>
+    </div>
   </article>`;
 }
 
-// Tag filter: a tag shows only the stories carrying it; desks left empty are hidden.
+// Topic filter: a topic shows only the stories carrying it; desks left empty are hidden.
 export function mountDigest(root) {
   const bar = root.querySelector('.nl-filter');
   if (!bar) return;
