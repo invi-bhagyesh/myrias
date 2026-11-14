@@ -1,3 +1,38 @@
+/* Paper colour scheme: warm paper, ink, deep forest green and ochre. */
+:root[data-palette="paper"]:not([data-theme="dark"]) {
+  --bg: #F4F1EA;
+  --card-bg: #FAF8F3;
+  --ink: #1B1A17;
+  --soft: #66655E;
+  --line: #DEDACF;
+  --line-strong: #BDB7A8;
+  --accent: #2A4D3E;
+  --accent-soft: #E4EAE3;
+  --on-accent: #FFFFFF;
+  --ochre: #C9953F;
+  --band-sage: #EEEBE3;
+  --band-sand: #F0ECE3;
+  --band-clay: #EFEAE1;
+  --band-mint: #ECEDE6;
+  --footer-panel: #ECE8DF;
+}
+:root[data-palette="paper"][data-theme="dark"] {
+  --bg: #121513;
+  --card-bg: #181C19;
+  --ink: #ECE9E2;
+  --soft: #A6ABA4;
+  --line: #2A2F2B;
+  --line-strong: #444A45;
+  --accent: #A3C7B2;
+  --accent-soft: #1D2A23;
+  --on-accent: #0E1210;
+  --ochre: #D9AD6C;
+  --band-sage: #151916;
+  --band-sand: #161917;
+  --band-clay: #171917;
+  --band-mint: #141815;
+  --footer-panel: #161A17;
+}
 /* Teal colour scheme, with separate light and dark surfaces. */
 :root[data-palette="teal"]:not([data-theme="dark"]) {
   --bg: #D3E2DF;

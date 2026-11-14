@@ -190,42 +190,49 @@ export function authorLayout(model, height = 400) {
 const afPercent = (count, total) => `${(100 * count / Math.max(1, total)).toFixed(1)}%`;
 const afColor = id => Object.fromEntries(AF_GROUPS)[id];
 
-function authorDiagram(m, tr, width = 960, height = 288) {
-  const layout = authorLayout(m, height), top = 30, bw = 12;
-  const xl = Math.max(235, Math.min(width * .27, 280));
-  const xr = width - Math.max(190, Math.min(width * .25, 260));
-  const fmt = v => Number(v.toFixed(3));
-  const ribbon = l => {
-    const x0 = xl + bw, x1 = xr, mid = (x0 + x1) / 2;
-    const y0 = fmt(l.y0 + top), y1 = fmt(l.y1 + top), b0 = fmt(y0 + l.h), b1 = fmt(y1 + l.h);
-    return `M${x0},${y0}C${mid},${y0} ${mid},${y1} ${x1},${y1}L${x1},${b1}C${mid},${b1} ${mid},${b0} ${x0},${b0}Z`;
-  };
+// A dot matrix: rows are where the first author works, columns the kind of paper. A circle's area is the number
+// of papers in that pair; totals sit at the end of each row and under each column heading. Circles carry the
+// .af-ribbon hooks and labels the .af-node hooks, so selecting, hovering and the breakdowns work as before.
+function authorDiagram(m, tr, width = 960) {
+  const rowH = 44, head = 64, foot = 8;
+  const labelW = Math.max(150, Math.min(width * .26, 250)), totalW = Math.max(70, Math.min(width * .14, 120));
+  const cols = m.kinds.length, rows = m.groups.length;
+  const cellW = (width - labelW - totalW) / Math.max(1, cols);
+  const height = head + rows * rowH + foot;
+  const max = Math.max(1, ...m.links.map(l => l.v));
+  const rMax = Math.min(cellW, rowH) / 2 - 3;
+  const radius = v => Math.max(2.5, Math.sqrt(v / max) * rMax);
+  const fmt = v => Number(v.toFixed(2));
+  const maxRow = Math.max(1, ...m.groups.map(([, v]) => v));
+  const cx = j => labelW + cellW * (j + .5), cy = i => head + rowH * (i + .5);
   const description = l => `${tr('af.g.' + l.g)} → ${tr('af.k.' + l.k)}: ${tr('af.papers', { n: n(l.v) })} (${afPercent(l.v, m.n)})`;
-  const paths = layout.links.map(l => `<path class="af-ribbon" data-af-g="${l.g}" data-af-k="${l.k}" data-af-description="${esc(description(l))}" style="--flow:${afColor(l.g)}" d="${ribbon(l)}"><title>${esc(description(l))}</title></path>`).join('');
-  const labelLines = label => {
-    if (label.length <= 28 || !label.includes(' ')) return [label];
-    const words = label.split(' '), lines = [''];
-    for (const word of words) {
-      if (lines.at(-1).length + word.length > 28) lines.push(word);
-      else lines[lines.length - 1] += (lines.at(-1) ? ' ' : '') + word;
-    }
-    return lines;
-  };
-  const nodes = (rows, positions, side) => rows.map(([id, count]) => {
-    const left = side === 'g', r = positions[id], y = r.y + top, cy = y + r.h / 2;
-    const textX = left ? 12 : xr + 30, name = tr(`af.${side}.${id}`), lines = labelLines(name);
-    const labelY = cy - (lines.length > 1 ? 14 : 7);
-    const groupSegments = left ? '' : layout.links.filter(l => l.k === id).map(l => `<rect class="af-segment" data-af-g="${l.g}" data-af-k="${l.k}" x="${xr}" y="${fmt(l.y1 + top)}" width="${bw}" height="${fmt(l.h)}" fill="${afColor(l.g)}"/>`).join('');
-    return `<g class="af-node" role="button" tabindex="0" aria-pressed="false" aria-label="${esc(tr('af.select', { name }))}" data-af-${side}="${id}">
-      <rect class="af-hit" x="${left ? 0 : xr - 4}" y="${fmt(cy - 21)}" width="${left ? xl + bw + 4 : width - xr + 4}" height="42" rx="6"/>
-      ${left ? `<rect x="${xl}" y="${fmt(y)}" width="${bw}" height="${fmt(r.h)}" fill="${afColor(id)}"/>` : groupSegments}
-      <text class="af-label" x="${textX}" y="${fmt(labelY)}">${lines.map((line, i) => `<tspan x="${textX}" dy="${i ? 15 : 0}">${esc(line)}</tspan>`).join('')}</text>
-      <text class="af-count" x="${textX}" y="${fmt(cy + (lines.length > 1 ? 17 : 12))}">${n(count)}<tspan class="af-percent"> / ${afPercent(count, m.n)}</tspan></text>
-    </g>`;
+  const wrap = (label, w) => { const max = Math.max(8, Math.floor(w / 7.2)); if (label.length <= max || !label.includes(' ')) return [label];
+    const lines = ['']; for (const word of label.split(' ')) { if (lines.at(-1).length + word.length + 1 > max && lines.at(-1)) lines.push(word); else lines[lines.length - 1] += (lines.at(-1) ? ' ' : '') + word; } return lines.slice(0, 2); };
+  const grid = m.groups.map((_, i) => `<line class="af-grid" x1="${labelW}" x2="${fmt(width - totalW + 8)}" y1="${fmt(cy(i))}" y2="${fmt(cy(i))}"/>`).join('')
+    + m.kinds.map((_, j) => `<line class="af-grid" x1="${fmt(cx(j))}" x2="${fmt(cx(j))}" y1="${head - 6}" y2="${height - foot}"/>`).join('');
+  const cells = m.links.map(l => {
+    const i = m.groups.findIndex(([g]) => g === l.g), j = m.kinds.findIndex(([k]) => k === l.k), r = radius(l.v);
+    return `<g class="af-ribbon af-cell" data-af-g="${l.g}" data-af-k="${l.k}" data-af-description="${esc(description(l))}"><title>${esc(description(l))}</title>
+      <circle cx="${fmt(cx(j))}" cy="${fmt(cy(i))}" r="${fmt(r)}"/>${r >= 13 ? `<text class="af-cell-n" x="${fmt(cx(j))}" y="${fmt(cy(i) + 4)}">${n(l.v)}</text>` : ''}</g>`;
   }).join('');
-  return `<svg class="af-diagram" viewBox="0 0 ${width} ${height + 46}" role="group" aria-label="${esc(tr('af.aria', { n: n(m.n) }))}">
-      <text class="af-axis" x="12" y="20">${esc(tr('af.left'))}</text><text class="af-axis" x="${xr + 30}" y="20">${esc(tr('af.right'))}</text>
-      <g class="af-ribbons">${paths}</g>${nodes(m.groups, layout.left, 'g')}${nodes(m.kinds, layout.right, 'k')}</svg>`;
+  const rowsHtml = m.groups.map(([id, count], i) => {
+    const name = tr(`af.g.${id}`), lines = wrap(name, labelW - 16), y = cy(i), bw = (totalW - 44) * count / maxRow;
+    return `<g class="af-node" role="button" tabindex="0" aria-pressed="false" aria-label="${esc(tr('af.select', { name }))}" data-af-g="${id}">
+      <rect class="af-hit" x="0" y="${fmt(y - rowH / 2 + 2)}" width="${fmt(width)}" height="${rowH - 4}" rx="8"/>
+      <text class="af-label" x="4" y="${fmt(y - (lines.length - 1) * 7.5 + 4)}">${lines.map((line, k) => `<tspan x="4" dy="${k ? 15 : 0}">${esc(line)}</tspan>`).join('')}</text>
+      <rect class="af-total-bar" x="${fmt(width - totalW + 16)}" y="${fmt(y - 3)}" width="${fmt(Math.max(2, bw))}" height="6" rx="3"/>
+      <text class="af-count" x="${fmt(width - 2)}" y="${fmt(y + 4)}" text-anchor="end">${n(count)}</text></g>`;
+  }).join('');
+  const colsHtml = m.kinds.map(([id, count], j) => {
+    const name = tr(`af.k.${id}`), lines = wrap(name, cellW - 6), x = cx(j);
+    return `<g class="af-node" role="button" tabindex="0" aria-pressed="false" aria-label="${esc(tr('af.select', { name }))}" data-af-k="${id}">
+      <rect class="af-hit" x="${fmt(x - cellW / 2 + 2)}" y="0" width="${fmt(cellW - 4)}" height="${fmt(height)}" rx="8"/>
+      <text class="af-label af-col" x="${fmt(x)}" y="${fmt(head - 30 - (lines.length - 1) * 14)}" text-anchor="middle">${lines.map((line, k) => `<tspan x="${fmt(x)}" dy="${k ? 14 : 0}">${esc(line)}</tspan>`).join('')}</text>
+      <text class="af-count" x="${fmt(x)}" y="${head - 12}" text-anchor="middle">${n(count)}</text></g>`;
+  }).join('');
+  return `<svg class="af-diagram af-matrix" viewBox="0 0 ${fmt(width)} ${height}" role="group" aria-label="${esc(tr('af.aria', { n: n(m.n) }))}">
+      <text class="af-axis" x="4" y="${head - 30}">${esc(tr('af.left'))}</text><text class="af-axis" x="${fmt(width - 2)}" y="${head - 30}" text-anchor="end">${esc(tr('af.papersTotal'))}</text>
+      <g>${grid}</g>${rowsHtml}${colsHtml}<g class="af-ribbons">${cells}</g></svg>`;
 }
 
 export function authorFlowHtml(meta, tr) {
@@ -310,7 +317,7 @@ export function mountAuthorFlow(root, meta, tr) {
     if (size === previousSize) return;
     previousSize = size;
     const focused = visual.contains(document.activeElement) ? document.activeElement : null;
-    visual.innerHTML = authorDiagram(m, tr, width, height);
+    visual.innerHTML = authorDiagram(m, tr, width);
     flows = [...visual.querySelectorAll('.af-ribbon, .af-segment')];
     nodes = [...visual.querySelectorAll('.af-node')];
     paint();

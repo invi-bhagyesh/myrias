@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+<polygon points="1080,0 1600,0 1600,520 760,1000 520,1000" fill="#8FAE9A" fill-opacity="0.099"/>
+<circle cx="1330" cy="170" r="430" fill="none" stroke="#2A4D3E" stroke-opacity="0.099" stroke-width="1.4"/>
+<circle cx="1330" cy="170" r="320" fill="none" stroke="#2A4D3E" stroke-opacity="0.074" stroke-width="1.2"/>
+<circle cx="1330" cy="170" r="210" fill="none" stroke="#2A4D3E" stroke-opacity="0.056" stroke-width="1"/>
+<circle cx="150" cy="880" r="230" fill="#C9953F" fill-opacity="0.081"/>
+<circle cx="330" cy="760" r="90" fill="#B8664A" fill-opacity="0.074"/>
+<path d="M0 420 Q 260 360 420 520 T 820 600" fill="none" stroke="#B8664A" stroke-opacity="0.112" stroke-width="1.4"/>
+<rect x="40" y="110" width="140" height="140" fill="#2A4D3E" fill-opacity="0.031" transform="rotate(14 110 180)"/>
+</svg>

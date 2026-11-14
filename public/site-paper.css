@@ -1,0 +1,94 @@
+/* Theme, loaded last: warm paper, Space Grotesk with JetBrains Mono labels, one forest green with ochre accents,
+   a fine dot grid and a large abstract composition behind the page, hairlines instead of boxes and shadows. It
+   restyles the site through tokens and a small set of overrides; the layout rules before it still apply. */
+
+* { --card-shadow: none; --card-shadow-hover: none; }
+.nl { --serif: var(--font); }
+
+/* ---------- background: dot grid over an abstract composition ---------- */
+body::before, body::after { content: none !important; }
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 10%, transparent) 1px, transparent 1.4px), url("art/abstract-bg.svg");
+  background-size: 22px 22px, cover; background-position: 0 0, center; background-attachment: fixed, fixed; background-repeat: repeat, no-repeat;
+}
+:root[data-theme="dark"] body { background-image: radial-gradient(color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 1.4px), url("art/abstract-bg-dark.svg"); }
+/* Sections stay see-through so the art shows; pixel ribbons, aurora blobs and gradient text go. */
+.hero-hills, .site-footer-scene .pixel-hills, .hero-aurora, .hero-aurora::before { display: none !important; }
+.hero h1, .arena-home .hero h1 { background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; -webkit-text-fill-color: currentColor !important; }
+.band-section[style]::before, .sp-sec:nth-of-type(even)::before { background: transparent !important; }
+.band-section[style]::after, #numbers::after, #map::after, #help::after { background: none !important; }
+.arena-home .hero, .sp-sec, .band-section { background: transparent !important; }
+
+/* ---------- type ---------- */
+h1, .lead h1, .list-head h1, .sp-hero h1 { font-weight: 500 !important; letter-spacing: -.03em !important; line-height: 1.05 !important; }
+.arena-home .hero h1 { font-size: clamp(38px, 4.4vw, 56px) !important; color: var(--ink) !important; }
+.nl-name { font: 600 clamp(38px, 6vw, 60px)/1 var(--font) !important; letter-spacing: -.035em !important; }
+.nl-dek { font: 400 16px/1.4 var(--font) !important; font-style: normal !important; }
+.nl-hl-lead { font: 600 clamp(22px, 3vw, 30px)/1.3 var(--font) !important; }
+.nl-hl, .nl-hl-sm { font-family: var(--font) !important; font-weight: 600 !important; }
+.nl-desk-h h2 { font: 600 19px/1.2 var(--font) !important; }
+/* Kickers: ochre, spaced capitals, a short rule before. */
+.record-type, .nl-kicker { font: 500 11.5px var(--mono) !important; letter-spacing: .14em !important; text-transform: uppercase; color: var(--ochre) !important; }
+.record-type::before, .nl-kicker::before { content: ""; display: inline-block; width: 24px; height: 1.5px; margin-right: 10px; vertical-align: 4px; background: currentColor; }
+
+/* ---------- navbar as a cutout: the strip is see-through; only the brand, links and tools cover the page ---------- */
+.topbar { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+.glass, .brand-pill, .sections, .tools { background: var(--bg) !important; border: 1px solid var(--line) !important; box-shadow: 0 6px 20px color-mix(in srgb, var(--ink) 6%, transparent) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.brand-icon { width: 30px; height: auto; image-rendering: auto; }
+.brand-mark { letter-spacing: -.02em; }
+.sections a[aria-current=page] { background: var(--accent-soft) !important; color: var(--accent) !important; }
+.sp-contents { background: var(--bg) !important; }
+
+/* ---------- buttons: pills; the main one filled in forest green ---------- */
+.button-primary, .button-secondary, .button, .tool-btn, .corpus-link, .nl-read { border-radius: 999px !important; box-shadow: none !important; }
+.button-primary, .tool-btn.is-primary { background: var(--accent) !important; border: 1px solid var(--accent) !important; color: var(--on-accent) !important; }
+.button-secondary, .button, .tool-btn, .corpus-link, .nl-read { background: color-mix(in srgb, var(--bg) 70%, transparent) !important; border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent) !important; color: var(--ink) !important; }
+.button-secondary:hover, .button:hover, .tool-btn:hover, .corpus-link:hover, .nl-read:hover { border-color: var(--accent) !important; color: var(--accent) !important; }
+
+/* ---------- surfaces: paper, hairlines, no shadows ---------- */
+.band-card, .cv-card, .graph-card, .rn, .rv-card, .rv-panel, .ac-fcard, .ac-block, .ac-rankwhy, .rv-inline, .dg-how, .sp-card, .fa-banner a, .nl-lead, .mchart-wrap, .fw-ph, .fw-explain, .fw-ex { box-shadow: none !important; }
+.fd-list > .fd:has(> .row[open]), .ac-list > .ac:has(> .row[open]) { box-shadow: none !important; background: var(--card-bg) !important; }
+.sp-tab[aria-current], .ac-versions a[aria-current], .graph-tabs button[aria-pressed="true"], .br-views button[aria-pressed="true"], .rv-tabs a[aria-current] { background: var(--accent) !important; border-color: var(--accent) !important; color: var(--on-accent) !important; }
+.fa-banner a, .nl-lead { background: color-mix(in srgb, var(--card-bg) 88%, transparent) !important; border: 1px solid var(--line) !important; }
+.nl-lead::after { display: none; }
+.ac-block-why { background: color-mix(in srgb, var(--accent) 6%, var(--card-bg)) !important; }
+
+/* ---------- home hero: the aquarium pixel art on a field of dots; no floating number tags ---------- */
+.hero-side { position: relative; min-height: 360px; background: url("art/dotfield.svg") center / 92% auto no-repeat; }
+.hero-side .hero-tiles { display: none !important; }
+.hero-side .hero-art { position: relative; filter: drop-shadow(0 18px 24px color-mix(in srgb, var(--ink) 10%, transparent)) !important; }
+.hero-sub { color: var(--soft) !important; }
+@media (max-width: 860px) { .hero-side { min-height: 220px; } }
+
+/* ---------- footer: the wordmark large and faint, no pixel scene ---------- */
+.site-footer-scene { min-height: 0 !important; height: auto !important; padding: 28px 0 8px; background: none !important; }
+.site-footer-wordmark { position: static !important; display: block; font: 600 clamp(60px, 11vw, 150px)/0.9 var(--font) !important; letter-spacing: -.05em; color: color-mix(in srgb, var(--ink) 9%, transparent) !important; text-align: center; transform: none !important; }
+
+/* ---------- digest ---------- */
+.nl-stamp { border-left: 0 !important; }
+.nl-name img { width: clamp(34px, 4vw, 48px); image-rendering: auto; }
+.nl-desk-h { border-bottom: 1px solid var(--ink) !important; }
+
+/* ---------- author chart as a dot matrix ---------- */
+.af-matrix .af-grid { stroke: var(--line); stroke-width: 1; }
+.af-matrix .af-cell circle { fill: var(--accent); fill-opacity: .82; transition: fill-opacity .15s; }
+.af-matrix .af-cell:hover circle { fill-opacity: 1; }
+.af-matrix .af-cell.is-muted circle { fill-opacity: .12; }
+.af-matrix .af-cell-n { font: 600 11.5px var(--font); fill: var(--on-accent); text-anchor: middle; pointer-events: none; }
+.af-matrix .af-label { font: 400 13.5px var(--font); fill: var(--ink); }
+.af-matrix .af-col { font-size: 12.5px; }
+.af-matrix .af-count { font: 500 12px var(--mono); fill: var(--soft); }
+.af-matrix .af-axis { font: 500 10.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; fill: var(--soft); }
+.af-matrix .af-total-bar { fill: var(--ochre); fill-opacity: .75; }
+.af-matrix .af-hit { fill: transparent; }
+.af-matrix .af-node:hover .af-hit, .af-matrix .af-node:focus-visible .af-hit { fill: color-mix(in srgb, var(--accent) 6%, transparent); }
+.af-matrix .af-node.is-selected .af-label { font-weight: 600; fill: var(--accent); }
+.af-matrix .af-node.is-muted .af-label { fill: var(--soft); }
+
+/* ---------- "What we found": thin, quiet links; they light up on hover ---------- */
+.em-link { stroke-opacity: .22 !important; }
+.em-svg.is-focus .em-link.is-on { stroke-opacity: .75 !important; }
+
+/* ---------- contour lines behind page headers ---------- */
+.list-head::before, .sp-hero::before { opacity: .3 !important; }
