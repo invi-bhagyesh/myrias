@@ -94,3 +94,18 @@ h1, .lead h1, .list-head h1, .sp-hero h1 { font-weight: 500 !important; letter-s
 .list-head::before, .sp-hero::before { opacity: .3 !important; }
 .nl-orig { margin: 3px 0 0; font: 400 12.5px/1.45 var(--font); color: var(--soft); }
 .nl-lead .nl-orig { font-size: 14px; margin-top: 6px; }
+
+/* ---------- a smaller type scale ---------- */
+.arena-home .hero h1 { font-size: clamp(28px, 3vw, 40px) !important; letter-spacing: -.025em !important; }
+h1, .lead h1, .list-head h1, .sp-hero h1 { font-size: clamp(26px, 2.6vw, 34px) !important; }
+main h2, h2 { font-size: clamp(20px, 2vw, 26px); }
+.nl-name { font-size: clamp(28px, 3.4vw, 40px) !important; }
+.nl-name img { width: clamp(26px, 2.6vw, 34px) !important; }
+.nl-dek { font-size: 14.5px !important; }
+.nl-stats b { font-size: 18px !important; }
+.nl-hl-lead { font-size: clamp(17px, 1.7vw, 20px) !important; line-height: 1.38 !important; }
+.nl-hl { font-size: 15.5px !important; }
+.nl-hl-sm { font-size: 14px !important; }
+.nl-desk-h h2 { font-size: 16px !important; }
+.hero-sub { font-size: 16px !important; }
+.sp-sec h2, .fw-walk-h h2, .home-flow-head h2, .graph-name { font-size: clamp(19px, 1.8vw, 23px) !important; }
