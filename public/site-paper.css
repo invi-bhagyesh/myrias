@@ -137,3 +137,11 @@ main h2, h2 { font-size: clamp(20px, 2vw, 26px); }
   .site-footer-cta { margin: 10px 0 0; padding: 20px !important; border-top: 0 !important; }
   .site-footer-scene { margin: 24px -20px 0 !important; }
 }
+
+/* ---------- navbar: the weekly digest stands apart, an ochre pill with a live dot ---------- */
+.sections a.nav-digest { margin-left: 8px; display: inline-flex; align-items: center; gap: 7px; padding-left: 12px !important; padding-right: 14px !important; border-radius: 999px; background: var(--ochre) !important; color: #1B1A17 !important; font-weight: 600; position: relative; z-index: 1; }
+.sections a.nav-digest::before { content: ""; position: absolute; left: -9px; top: 22%; bottom: 22%; width: 1px; background: var(--line); }
+.sections a.nav-digest:hover, .sections a.nav-digest[aria-current=page] { background: color-mix(in srgb, var(--ochre) 82%, var(--ink)) !important; color: #fff !important; }
+.nav-digest-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent); }
+@media (prefers-reduced-motion: no-preference) { .nav-digest-dot { animation: nav-digest-pulse 2.4s ease-out infinite; } @keyframes nav-digest-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); } 70%, 100% { box-shadow: 0 0 0 6px transparent; } } }
+@media (max-width: 860px) { .sections a.nav-digest { margin: 6px 0 10px 12px; align-self: flex-start; } .sections a.nav-digest::before { display: none; } }
