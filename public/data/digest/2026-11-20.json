@@ -1,0 +1,1078 @@
+{
+  "id": "2026-11-20",
+  "from": "2026-11-14",
+  "to": "2026-11-20",
+  "generated_at": "2026-11-21T08:15:51.952Z",
+  "date_basis": "discovery",
+  "counts": {
+    "items": 42,
+    "welfare": 3
+  },
+  "partial": true,
+  "sources": [
+    {
+      "id": "people-search",
+      "name_zh": "人民网（站内搜索）",
+      "name_en": "People's Daily (site search)",
+      "kind": "news",
+      "status": "ok",
+      "scanned": 114,
+      "relevant": 62,
+      "in_window": 12,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "europepmc-cn",
+      "name_zh": "Europe PMC：中国相关论文",
+      "name_en": "Europe PMC: China-related papers",
+      "kind": "paper",
+      "status": "empty",
+      "scanned": 27,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "wanfang",
+      "name_zh": "万方：中国相关论文",
+      "name_en": "Wanfang: China-related papers",
+      "kind": "paper",
+      "status": "failed",
+      "error": "HTTP 403",
+      "from": "2026-11-14",
+      "to": "2026-11-20",
+      "in_window": 0,
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "openalex-cn",
+      "name_zh": "OpenAlex：中国相关论文",
+      "name_en": "OpenAlex: China-related papers",
+      "kind": "paper",
+      "status": "ok",
+      "scanned": 314,
+      "relevant": 53,
+      "in_window": 10,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "moa-news",
+      "name_zh": "农业农村部 · 政务动态",
+      "name_en": "Ministry of Agriculture and Rural Affairs: news",
+      "kind": "government",
+      "status": "ok",
+      "scanned": 20,
+      "relevant": 2,
+      "in_window": 1,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "moa-notices",
+      "name_zh": "农业农村部 · 通知公告",
+      "name_en": "Ministry of Agriculture and Rural Affairs: notices",
+      "kind": "government",
+      "status": "empty",
+      "scanned": 20,
+      "relevant": 1,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "cvma",
+      "name_zh": "中国兽医协会",
+      "name_en": "Chinese Veterinary Medical Association",
+      "kind": "association",
+      "status": "ok",
+      "scanned": 64,
+      "relevant": 48,
+      "in_window": 2,
+      "undated": 4,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "sciencenet",
+      "name_zh": "科学网 · 新闻",
+      "name_en": "ScienceNet China: news",
+      "kind": "news",
+      "status": "empty",
+      "scanned": 93,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "nahs-work",
+      "name_zh": "全国畜牧总站 · 工作动态",
+      "name_en": "National Animal Husbandry Service: work news",
+      "kind": "government",
+      "status": "empty",
+      "scanned": 18,
+      "relevant": 10,
+      "in_window": 1,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "nahs-home",
+      "name_zh": "全国畜牧总站 · 首页",
+      "name_en": "National Animal Husbandry Service: home page",
+      "kind": "government",
+      "status": "empty",
+      "scanned": 46,
+      "relevant": 23,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "forestry-news",
+      "name_zh": "国家林业和草原局 · 动态",
+      "name_en": "National Forestry and Grassland Administration: news",
+      "kind": "government",
+      "status": "empty",
+      "scanned": 16,
+      "relevant": 0,
+      "in_window": 1,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "cfa-news",
+      "name_zh": "中国渔业协会 · 协会动态",
+      "name_en": "China Fisheries Association: news",
+      "kind": "association",
+      "status": "empty",
+      "scanned": 9,
+      "relevant": 6,
+      "in_window": 3,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "cfa-notices",
+      "name_zh": "中国渔业协会 · 通知公告",
+      "name_en": "China Fisheries Association: notices",
+      "kind": "association",
+      "status": "ok",
+      "scanned": 10,
+      "relevant": 7,
+      "in_window": 4,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "calas-news",
+      "name_zh": "中国实验动物学会 · 学会动态",
+      "name_en": "Chinese Association for Laboratory Animal Sciences: news",
+      "kind": "association",
+      "status": "empty",
+      "scanned": 12,
+      "relevant": 9,
+      "in_window": 3,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "calas-notices",
+      "name_zh": "中国实验动物学会 · 通知公告",
+      "name_en": "Chinese Association for Laboratory Animal Sciences: notices",
+      "kind": "association",
+      "status": "ok",
+      "scanned": 12,
+      "relevant": 10,
+      "in_window": 4,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "calas-industry",
+      "name_zh": "中国实验动物学会 · 行业资讯",
+      "name_en": "Chinese Association for Laboratory Animal Sciences: industry news",
+      "kind": "association",
+      "status": "empty",
+      "scanned": 12,
+      "relevant": 3,
+      "in_window": 1,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "xinhua-food",
+      "name_zh": "新华网 · 食品",
+      "name_en": "Xinhua: food",
+      "kind": "news",
+      "status": "empty",
+      "scanned": 22,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "xinhua-local",
+      "name_zh": "新华网 · 地方",
+      "name_en": "Xinhua: local",
+      "kind": "news",
+      "status": "empty",
+      "scanned": 21,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "id": "chinanews-live",
+      "name_zh": "中国新闻网 · 即时",
+      "name_en": "China News Service: latest",
+      "kind": "news",
+      "status": "empty",
+      "scanned": 111,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-17",
+      "to": "2026-11-20",
+      "checked_at": "2026-11-21T08:14:57.325Z"
+    }
+  ],
+  "not_used": [
+    {
+      "name": "农业农村部渔业渔政管理局 yyj.moa.gov.cn",
+      "why": "times out from our servers"
+    },
+    {
+      "name": "农业农村部畜牧兽医局 xmsyj.moa.gov.cn",
+      "why": "times out from our servers"
+    },
+    {
+      "name": "全国水产技术推广总站 nftec.agri.cn",
+      "why": "times out"
+    },
+    {
+      "name": "中国水产科学研究院 cafs.ac.cn",
+      "why": "times out"
+    },
+    {
+      "name": "动物福利国际合作委员会 iccaw.org.cn",
+      "why": "HTTP 503"
+    },
+    {
+      "name": "农民日报 farmer.com.cn",
+      "why": "HTTP 403"
+    },
+    {
+      "name": "新华网搜索 so.news.cn",
+      "why": "HTTP 405 to scripted requests; revisit"
+    },
+    {
+      "name": "中国水产频道 fishfirst.cn",
+      "why": "list pages not updated since 2018"
+    },
+    {
+      "name": "CNKI",
+      "why": "no authenticated search integration configured"
+    },
+    {
+      "name": "WeChat official accounts",
+      "why": "much of the timely material is here, but there is no open feed and scraping breaks WeChat's terms"
+    },
+    {
+      "name": "Crossref by journal ISSN",
+      "why": "most Chinese animal-science journals are not in Crossref or not current there"
+    },
+    {
+      "name": "中国畜牧业协会 caaa.cn",
+      "why": "connection fails from our servers"
+    },
+    {
+      "name": "中国畜牧兽医学会 caav.org.cn",
+      "why": "connection reset"
+    },
+    {
+      "name": "中国动物疫病预防控制中心 cadc.net.cn",
+      "why": "connection fails; the host answers with a block page"
+    },
+    {
+      "name": "全国畜牧总站 nahs.org.cn 农业农村部信息栏 (/dt/nyncbxx/)",
+      "why": "reposts moa.gov.cn news, already covered by moa-news"
+    },
+    {
+      "name": "生态环境部 mee.gov.cn 要闻 (/ywdt/hjywnews/)",
+      "why": "reachable with dated links, but the list is climate and COP news; no animal items in a six-week check. Biodiversity list (/ywgz/zrstbh/swdyxbh/) last updated 2025-08"
+    },
+    {
+      "name": "中国渔业报 / 中国水产养殖网 cnfm.com.cn, shuichan.cc",
+      "why": "cnfm.com.cn serves a default nginx page; shuichan.cc does not connect"
+    },
+    {
+      "name": "新华网搜索 so.news.cn (retried)",
+      "why": "still HTTP 405 to scripted requests; section lists news.cn/food and /local are used instead"
+    },
+    {
+      "name": "中国日报搜索 newssearch.chinadaily.com.cn",
+      "why": "JSON endpoint works but is relevance-ranked and English-only; one hit in 2.5 months, about Kenya. A new reader is not worth it"
+    },
+    {
+      "name": "中国日报 chinadaily.com.cn 栏目页",
+      "why": "English; no animal section; no RSS (feed URLs return 404)"
+    },
+    {
+      "name": "ChinaXiv chinaxiv.org",
+      "why": "HTTP 403 to scripted requests, including search"
+    },
+    {
+      "name": "百度学术 xueshu.baidu.com",
+      "why": "HTTP 403; no public API"
+    },
+    {
+      "name": "万方/知网开放目录 (CNKI cnki.net)",
+      "why": "home page is a JS redirect; no open list of new items"
+    },
+    {
+      "name": "动物营养学报 chinajan.com",
+      "why": "reachable, but the current-issue page has no per-article dates (pages show the render date); issue labels only"
+    },
+    {
+      "name": "中国畜牧杂志 zgxmzz.cn",
+      "why": "single-page app; list is not in the HTML"
+    },
+    {
+      "name": "畜牧兽医学报、水产学报、中国兽医科学 journal sites",
+      "why": "domains tried (xmsyxb, jfc.shou.edu.cn, zgsykx.cn and others) do not connect or have been taken over by spam pages"
+    },
+    {
+      "name": "中国小动物保护协会 cnsapa.org",
+      "why": "site is an 'under construction' page"
+    },
+    {
+      "name": "中国动物保护 NGO sites: 亚洲动物基金 animalsasia.org/cn, 它基金 tajiorg.org, 野生救援 wildaid.org.cn, 中国绿发会 cbcgdf.org, 国际爱护动物基金会 fourpawsinternational.org.cn",
+      "why": "HTTP 403 or no connection from our servers"
+    },
+    {
+      "name": "世界自然基金会中国 wwfchina.org",
+      "why": "reachable, but pages are script-built and carry no dated article links"
+    },
+    {
+      "name": "中国野生动物保护协会 cwca.org.cn",
+      "why": "connection fails"
+    },
+    {
+      "name": "微博 Weibo",
+      "why": "login wall and no open feed; scraping breaks the terms of use"
+    },
+    {
+      "name": "Crossref (retried)",
+      "why": "HTTP 429 on a trial query; already ruled out above for coverage"
+    },
+    {
+      "name": "国家林草局 forestry.gov.cn 首页",
+      "why": "connection resets; only /main/586/index.html answers (configured as forestry-news, which may fail on some days)"
+    }
+  ],
+  "items": [
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7236345971",
+      "doi": "10.3389/fgene.2026.1976633",
+      "url": "https://doi.org/10.3389/fgene.2026.1976633",
+      "title": "Beyond human dignity concerns: animal welfare in human–animal chimera research policies",
+      "date": "2026-11-19",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "text_mention",
+      "venue": "Frontiers in Genetics",
+      "tier": "welfare",
+      "matched": [
+        "welfare",
+        "animal welfare",
+        "animal"
+      ],
+      "first_seen_at": "2026-11-20T08:30:37.243Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7233757799",
+      "doi": "10.5281/zenodo.24292566",
+      "url": "https://doi.org/10.5281/zenodo.24292566",
+      "title": "Data and Code for: A Discrete Choice Experiment on Consumer Preferences for Health and Animal Welfare Related Attributes of Pork Products in China",
+      "date": "2026-11-16",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "text_mention",
+      "venue": "Zenodo (CERN European Organization for Nuclear Research)",
+      "tier": "welfare",
+      "matched": [
+        "welfare",
+        "animal welfare",
+        "animal"
+      ],
+      "first_seen_at": "2026-11-18T08:30:46.936Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7234297673",
+      "doi": "10.1080/09712119.2026.2762550",
+      "url": "https://doi.org/10.1080/09712119.2026.2762550",
+      "title": "Ritual and cultural use of livestock in Africa: implications for one health, animal welfare, and sustainable production",
+      "date": "2026-11-15",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Journal of Applied Animal Research",
+      "tier": "welfare",
+      "matched": [
+        "welfare",
+        "animal welfare",
+        "animal",
+        "livestock"
+      ],
+      "first_seen_at": "2026-11-18T08:30:46.936Z"
+    },
+    {
+      "source": "cvma",
+      "kind": "association",
+      "url": "https://www.cvma.org.cn/6848/202611/74731.html",
+      "title": "中国兽医协会关于发布《动物疫病即时检测（POCT）质量和能力要求》等5项团体标准的公告",
+      "date": "2026-11-20",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "related",
+      "matched": [
+        "疫病",
+        "动物",
+        "兽医"
+      ],
+      "first_seen_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7235858312",
+      "doi": "10.3390/vetsci13111239",
+      "url": "https://doi.org/10.3390/vetsci13111239",
+      "title": "Patchouli Oil Alleviates Heat Stress-Induced Barrier Dysfunction in Bovine Ruminal Epithelial Cells: Involvement of the MAPK Signaling Pathway",
+      "date": "2026-11-18",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Veterinary Sciences",
+      "tier": "related",
+      "matched": [
+        "heat stress",
+        "bovine"
+      ],
+      "first_seen_at": "2026-11-20T08:30:37.243Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7236784720",
+      "doi": "10.20944/preprints202611.1723.v1",
+      "url": "https://doi.org/10.20944/preprints202611.1723.v1",
+      "title": "Heat Stress Induces Tissue-Specific HSP70 Expression in Wuhua Yellow Chickens and HSP70 Modulates Apoptosis in DF-1 Fibroblasts",
+      "date": "2026-11-17",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "text_mention",
+      "venue": "Preprints.org",
+      "tier": "related",
+      "matched": [
+        "heat stress",
+        "chicken"
+      ],
+      "first_seen_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7233724521",
+      "doi": "10.1007/s10499-026-02745-2",
+      "url": "https://doi.org/10.1007/s10499-026-02745-2",
+      "title": "Medium stocking density of Labeo rohita optimizes fish growth, nutrient recycling, and rice productivity in an integrated rice-fish co-culture system",
+      "date": "2026-11-16",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Aquaculture International",
+      "tier": "related",
+      "matched": [
+        "stocking density",
+        "fish"
+      ],
+      "first_seen_at": "2026-11-18T08:30:46.936Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7226040671",
+      "doi": "10.3390/ani16223603",
+      "url": "https://doi.org/10.3390/ani16223603",
+      "title": "Functional Nutrigenomics Approaches for Heat Stress Management in Poultry",
+      "date": "2026-11-13",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Animals",
+      "tier": "related",
+      "matched": [
+        "heat stress",
+        "poultry"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7226006063",
+      "doi": "10.1021/acs.jafc.6c10282",
+      "url": "https://doi.org/10.1021/acs.jafc.6c10282",
+      "title": "Alginate Oligosaccharides Attenuate Heat Stress-Induced Intestinal Ferroptosis in Broilers: Association with Nrf2/SLC7A11/GPX4 Signaling",
+      "date": "2026-11-13",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Journal of Agricultural and Food Chemistry",
+      "tier": "related",
+      "matched": [
+        "heat stress",
+        "broiler"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7225856333",
+      "doi": "10.1007/s11802-026-6732-7",
+      "url": "https://doi.org/10.1007/s11802-026-6732-7",
+      "title": "Prolonged Warm Acclimation Alters Tissue Morphology, Energy Metabolism, and Cellular Responses to Acute Heat Stress in Atlantic Salmon (Salmo salar",
+      "date": "2026-11-13",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Journal of Ocean University of China",
+      "tier": "related",
+      "matched": [
+        "heat stress",
+        "salmon"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7225645285",
+      "doi": "10.1017/anr.2026.10074",
+      "url": "https://doi.org/10.1017/anr.2026.10074",
+      "title": "Heat stress-induced intestinal barrier dysfunction in livestock and poultry: mechanisms and mitigation through trace element nutrition",
+      "date": "2026-11-09",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Animal Nutriomics",
+      "tier": "related",
+      "matched": [
+        "heat stress",
+        "poultry",
+        "livestock"
+      ],
+      "first_seen_at": "2026-11-16T07:57:02.343Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://henan.people.com.cn/n2/2026/1120/c378397-41756401.html",
+      "title": "今冬首批越冬潜鸭飞抵陕州黄河湿地",
+      "date": "2026-11-20",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "鸭",
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://hlj.people.com.cn/n2/2026/1120/c220005-41756390.html",
+      "title": "梅里斯达斡尔族区哈拉海农场：“巡山清套”筑牢生态安全屏障",
+      "date": "2026-11-20",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://sh.people.com.cn/n2/2026/1120/c134768-41756081.html",
+      "title": "高品质暖心城区，杨浦的“实”与“融”",
+      "date": "2026-11-20",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://cpc.people.com.cn/n1/2026/1120/c64094-40837452.html",
+      "title": "认真贯彻落实党的二十届五中全会精神 以高质量党建引领人大工作高质量发展",
+      "date": "2026-11-20",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://cpc.people.com.cn/n1/2026/1119/c64094-40837254.html",
+      "title": "李鸿忠在贵州调研时强调 认真贯彻落实党的二十届五中全会精神 以高质量党建引领人大工作高质量发展",
+      "date": "2026-11-19",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-20T08:30:37.243Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://he.people.com.cn/n2/2026/1119/c192235-41754786.html",
+      "title": "河北省共有国家重点保护陆生野生动物142种",
+      "date": "2026-11-19",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物",
+        "野生动物",
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-20T08:30:37.243Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://hlj.people.com.cn/n2/2026/1118/c220005-41754303.html",
+      "title": "哈尔滨极地公园今冬首只全人工孵化企鹅顺利破壳",
+      "date": "2026-11-18",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "鹅",
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-19T08:45:27.737Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://ah.people.com.cn/n2/2026/1117/c374164-41753261.html",
+      "title": "安徽和县：乌江生态警务联勤共治 守护一江碧水",
+      "date": "2026-11-17",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-18T08:30:46.936Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://js.people.com.cn/n2/2026/1116/c358232-41751658.html",
+      "title": "以光影之力守护生命 电影人走进南京红山森林动物园",
+      "date": "2026-11-16",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物",
+        "动物福利",
+        "福利"
+      ],
+      "first_seen_at": "2026-11-17T09:10:55.030Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://ent.people.com.cn/n1/2026/1116/c1012-40834528.html",
+      "title": "“观鸟经济”要解答好三个问题",
+      "date": "2026-11-16",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-17T09:10:55.030Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://pic.people.com.cn/n1/2026/1115/c1016-40834162.html",
+      "title": "聚焦APEC丨公园城市绘就人与自然和谐共生之美",
+      "date": "2026-11-15",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-16T07:57:02.343Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://jx.people.com.cn/n2/2026/1115/c186330-41751288.html",
+      "title": "2026年江西省保护野生动物宣传月启动",
+      "date": "2026-11-15",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物",
+        "野生动物",
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-16T07:57:02.343Z"
+    },
+    {
+      "source": "cfa-notices",
+      "kind": "association",
+      "url": "http://www.china-cfa.org/tzgg/20261120/1773.html",
+      "title": "关于《大水面圈养桶养殖技术规范》团体标准重新报批公示的通知",
+      "date": "2026-11-20",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "养殖"
+      ],
+      "first_seen_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "source": "calas-notices",
+      "kind": "association",
+      "url": "http://www.calas.org.cn/article/view?cid=8_20_8358",
+      "title": "关于召开“实验动物模型高质量发展研讨会暨中国实验动物学会实验动物模型鉴定与评价工作委员会年会”的通知 （第二轮）",
+      "date": "2026-11-20",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "动物",
+        "实验动物"
+      ],
+      "first_seen_at": "2026-11-21T08:14:57.325Z"
+    },
+    {
+      "source": "moa-news",
+      "kind": "government",
+      "url": "http://www.moa.gov.cn/xw/zwdt/202611/t20261119_6489622.htm",
+      "title": "“外国使节看渔业”活动在浙江省舟山市举办",
+      "date": "2026-11-19",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "渔业"
+      ],
+      "first_seen_at": "2026-11-20T08:30:37.243Z"
+    },
+    {
+      "source": "cfa-notices",
+      "kind": "association",
+      "url": "http://www.china-cfa.org/tzgg/20261117/1772.html",
+      "title": "关于举办“2026中国渔业协会虾蟹产业链对接交流活动”的通知",
+      "date": "2026-11-17",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "虾",
+        "蟹",
+        "渔业"
+      ],
+      "first_seen_at": "2026-11-18T08:30:46.936Z"
+    },
+    {
+      "source": "cvma",
+      "kind": "association",
+      "url": "https://www.cvma.org.cn/6847/202610/74727.html",
+      "title": "中国兽医协会关于举办第四届中兽医药传承创新发展大会的通知（第三轮）",
+      "date": "2026-11-16",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "兽医"
+      ],
+      "first_seen_at": "2026-11-17T09:10:55.030Z"
+    },
+    {
+      "source": "forestry-news",
+      "kind": "government",
+      "url": "https://www.forestry.gov.cn/lyj/1/lcdt/20261116/696041.html",
+      "title": "科普 | 靠颜值爆红高原的兔狲",
+      "date": "2026-11-16",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "兔"
+      ],
+      "first_seen_at": "2026-11-17T09:10:55.030Z"
+    },
+    {
+      "source": "calas-news",
+      "kind": "association",
+      "url": "http://www.calas.org.cn/article/view?cid=8_19_8357",
+      "title": "中国实验动物学会第五届实验动物设备工程专业委员会第二次学术交流活动在京顺利举办",
+      "date": "2026-11-16",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "动物",
+        "实验动物"
+      ],
+      "first_seen_at": "2026-11-17T09:10:55.030Z"
+    },
+    {
+      "source": "calas-industry",
+      "kind": "association",
+      "url": "http://www.calas.org.cn/article/view?cid=8_22_8355",
+      "title": "Cell：牛磺酸竟是先天免疫的“炎症刹车”！衰老时升高或是身体补救失败，补充它有望对抗炎症衰老",
+      "date": "2026-11-16",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "牛"
+      ],
+      "first_seen_at": "2026-11-17T09:10:55.030Z"
+    },
+    {
+      "source": "nahs-work",
+      "kind": "government",
+      "url": "https://www.nahs.org.cn/xxcm/nyzx/202611/t20261113_475671.htm",
+      "title": "牛羊产业饲草料高效利用与减碳增效技术培训班在银川举办",
+      "date": "2026-11-13",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "牛",
+        "羊"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "cfa-notices",
+      "kind": "association",
+      "url": "http://www.china-cfa.org/tzgg/20261113/1770.html",
+      "title": "关于批准《福州鲍鱼（活鲍）等级规格》团体标准立项的通知",
+      "date": "2026-11-13",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "鱼"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "calas-news",
+      "kind": "association",
+      "url": "http://www.calas.org.cn/article/view?cid=8_19_8353",
+      "title": "第六届实验动物学专业教育和学科建设发展研讨会圆满收官",
+      "date": "2026-11-13",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "动物",
+        "实验动物"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "calas-notices",
+      "kind": "association",
+      "url": "http://www.calas.org.cn/article/view?cid=8_20_8352",
+      "title": "2026世界生命科学大会 | “开放 融合 创新——实验动物科学技术分论坛”（二轮通知）",
+      "date": "2026-11-13",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "动物",
+        "实验动物"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "calas-notices",
+      "kind": "association",
+      "url": "http://www.calas.org.cn/article/view?cid=8_20_8351",
+      "title": "关于征求实验动物推荐性国家标准复审初评结论意见的通知",
+      "date": "2026-11-13",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "动物",
+        "实验动物"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "calas-notices",
+      "kind": "association",
+      "url": "http://www.calas.org.cn/article/view?cid=8_20_8350",
+      "title": "关于征求《实验动物 动物实验通用要求》等2项推荐性国家标准修订征求意见稿意见的通知",
+      "date": "2026-11-13",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "动物",
+        "实验动物"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "calas-news",
+      "kind": "association",
+      "url": "http://www.calas.org.cn/article/view?cid=8_19_8346",
+      "title": "第十六届中国中医药实验动物科技交流会在北京召开",
+      "date": "2026-11-12",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "动物",
+        "实验动物"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "cfa-news",
+      "kind": "association",
+      "url": "http://www.china-cfa.org/xwzx/xydt/2026/1111/1768.html",
+      "title": "青年聚力，科创赋能：广州（南沙）国际观赏鱼大会青年创客营路演成功举办",
+      "date": "2026-11-11",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "鱼"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "cfa-news",
+      "kind": "association",
+      "url": "http://www.china-cfa.org/xwzx/xydt/2026/1111/1767.html",
+      "title": "国粹金鱼耀南沙：2026广州（南沙）国际观赏鱼大会汇聚全域力量",
+      "date": "2026-11-11",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "鱼"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "cfa-news",
+      "kind": "association",
+      "url": "http://www.china-cfa.org/xwzx/xydt/2026/1111/1766.html",
+      "title": "500亿产业蓝图！广州助力我国观赏鱼产业更高水平对外开放发展",
+      "date": "2026-11-11",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "鱼"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    },
+    {
+      "source": "cfa-notices",
+      "kind": "association",
+      "url": "http://www.china-cfa.org/tzgg/20261110/1765.html",
+      "title": "关于设立“中国渔业协会水产功能性饲料分会”的通知",
+      "date": "2026-11-10",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "水产",
+        "渔业"
+      ],
+      "first_seen_at": "2026-11-15T07:49:02.188Z"
+    }
+  ]
+}
