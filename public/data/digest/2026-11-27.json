@@ -1,0 +1,908 @@
+{
+  "id": "2026-11-27",
+  "from": "2026-11-21",
+  "to": "2026-11-27",
+  "generated_at": "2026-11-28T08:54:15.586Z",
+  "date_basis": "discovery",
+  "counts": {
+    "items": 32,
+    "welfare": 7
+  },
+  "partial": true,
+  "sources": [
+    {
+      "id": "people-search",
+      "name_zh": "人民网（站内搜索）",
+      "name_en": "People's Daily (site search)",
+      "kind": "news",
+      "status": "ok",
+      "scanned": 134,
+      "relevant": 82,
+      "in_window": 23,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "europepmc-cn",
+      "name_zh": "Europe PMC：中国相关论文",
+      "name_en": "Europe PMC: China-related papers",
+      "kind": "paper",
+      "status": "ok",
+      "scanned": 56,
+      "relevant": 4,
+      "in_window": 2,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "wanfang",
+      "name_zh": "万方：中国相关论文",
+      "name_en": "Wanfang: China-related papers",
+      "kind": "paper",
+      "status": "failed",
+      "error": "HTTP 403",
+      "from": "2026-11-21",
+      "to": "2026-11-27",
+      "in_window": 0,
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "openalex-cn",
+      "name_zh": "OpenAlex：中国相关论文",
+      "name_en": "OpenAlex: China-related papers",
+      "kind": "paper",
+      "status": "ok",
+      "scanned": 329,
+      "relevant": 58,
+      "in_window": 5,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "moa-news",
+      "name_zh": "农业农村部 · 政务动态",
+      "name_en": "Ministry of Agriculture and Rural Affairs: news",
+      "kind": "government",
+      "status": "empty",
+      "scanned": 20,
+      "relevant": 1,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "moa-notices",
+      "name_zh": "农业农村部 · 通知公告",
+      "name_en": "Ministry of Agriculture and Rural Affairs: notices",
+      "kind": "government",
+      "status": "empty",
+      "scanned": 20,
+      "relevant": 1,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "cvma",
+      "name_zh": "中国兽医协会",
+      "name_en": "Chinese Veterinary Medical Association",
+      "kind": "association",
+      "status": "ok",
+      "scanned": 63,
+      "relevant": 47,
+      "in_window": 1,
+      "undated": 4,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "sciencenet",
+      "name_zh": "科学网 · 新闻",
+      "name_en": "ScienceNet China: news",
+      "kind": "news",
+      "status": "empty",
+      "scanned": 95,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "nahs-work",
+      "name_zh": "全国畜牧总站 · 工作动态",
+      "name_en": "National Animal Husbandry Service: work news",
+      "kind": "government",
+      "status": "empty",
+      "scanned": 18,
+      "relevant": 10,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "nahs-home",
+      "name_zh": "全国畜牧总站 · 首页",
+      "name_en": "National Animal Husbandry Service: home page",
+      "kind": "government",
+      "status": "empty",
+      "scanned": 46,
+      "relevant": 22,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "forestry-news",
+      "name_zh": "国家林业和草原局 · 动态",
+      "name_en": "National Forestry and Grassland Administration: news",
+      "kind": "government",
+      "status": "ok",
+      "scanned": 17,
+      "relevant": 1,
+      "in_window": 1,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "cfa-news",
+      "name_zh": "中国渔业协会 · 协会动态",
+      "name_en": "China Fisheries Association: news",
+      "kind": "association",
+      "status": "empty",
+      "scanned": 9,
+      "relevant": 6,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "cfa-notices",
+      "name_zh": "中国渔业协会 · 通知公告",
+      "name_en": "China Fisheries Association: notices",
+      "kind": "association",
+      "status": "empty",
+      "scanned": 10,
+      "relevant": 6,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "calas-news",
+      "name_zh": "中国实验动物学会 · 学会动态",
+      "name_en": "Chinese Association for Laboratory Animal Sciences: news",
+      "kind": "association",
+      "status": "empty",
+      "scanned": 12,
+      "relevant": 9,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "calas-notices",
+      "name_zh": "中国实验动物学会 · 通知公告",
+      "name_en": "Chinese Association for Laboratory Animal Sciences: notices",
+      "kind": "association",
+      "status": "empty",
+      "scanned": 12,
+      "relevant": 10,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "calas-industry",
+      "name_zh": "中国实验动物学会 · 行业资讯",
+      "name_en": "Chinese Association for Laboratory Animal Sciences: industry news",
+      "kind": "association",
+      "status": "empty",
+      "scanned": 12,
+      "relevant": 2,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "xinhua-food",
+      "name_zh": "新华网 · 食品",
+      "name_en": "Xinhua: food",
+      "kind": "news",
+      "status": "empty",
+      "scanned": 21,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "xinhua-local",
+      "name_zh": "新华网 · 地方",
+      "name_en": "Xinhua: local",
+      "kind": "news",
+      "status": "empty",
+      "scanned": 18,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "id": "chinanews-live",
+      "name_zh": "中国新闻网 · 即时",
+      "name_en": "China News Service: latest",
+      "kind": "news",
+      "status": "empty",
+      "scanned": 102,
+      "relevant": 0,
+      "in_window": 0,
+      "undated": 0,
+      "from": "2026-11-24",
+      "to": "2026-11-27",
+      "checked_at": "2026-11-28T08:53:28.179Z"
+    }
+  ],
+  "not_used": [
+    {
+      "name": "农业农村部渔业渔政管理局 yyj.moa.gov.cn",
+      "why": "times out from our servers"
+    },
+    {
+      "name": "农业农村部畜牧兽医局 xmsyj.moa.gov.cn",
+      "why": "times out from our servers"
+    },
+    {
+      "name": "全国水产技术推广总站 nftec.agri.cn",
+      "why": "times out"
+    },
+    {
+      "name": "中国水产科学研究院 cafs.ac.cn",
+      "why": "times out"
+    },
+    {
+      "name": "动物福利国际合作委员会 iccaw.org.cn",
+      "why": "HTTP 503"
+    },
+    {
+      "name": "农民日报 farmer.com.cn",
+      "why": "HTTP 403"
+    },
+    {
+      "name": "新华网搜索 so.news.cn",
+      "why": "HTTP 405 to scripted requests; revisit"
+    },
+    {
+      "name": "中国水产频道 fishfirst.cn",
+      "why": "list pages not updated since 2018"
+    },
+    {
+      "name": "CNKI",
+      "why": "no authenticated search integration configured"
+    },
+    {
+      "name": "WeChat official accounts",
+      "why": "much of the timely material is here, but there is no open feed and scraping breaks WeChat's terms"
+    },
+    {
+      "name": "Crossref by journal ISSN",
+      "why": "most Chinese animal-science journals are not in Crossref or not current there"
+    },
+    {
+      "name": "中国畜牧业协会 caaa.cn",
+      "why": "connection fails from our servers"
+    },
+    {
+      "name": "中国畜牧兽医学会 caav.org.cn",
+      "why": "connection reset"
+    },
+    {
+      "name": "中国动物疫病预防控制中心 cadc.net.cn",
+      "why": "connection fails; the host answers with a block page"
+    },
+    {
+      "name": "全国畜牧总站 nahs.org.cn 农业农村部信息栏 (/dt/nyncbxx/)",
+      "why": "reposts moa.gov.cn news, already covered by moa-news"
+    },
+    {
+      "name": "生态环境部 mee.gov.cn 要闻 (/ywdt/hjywnews/)",
+      "why": "reachable with dated links, but the list is climate and COP news; no animal items in a six-week check. Biodiversity list (/ywgz/zrstbh/swdyxbh/) last updated 2025-08"
+    },
+    {
+      "name": "中国渔业报 / 中国水产养殖网 cnfm.com.cn, shuichan.cc",
+      "why": "cnfm.com.cn serves a default nginx page; shuichan.cc does not connect"
+    },
+    {
+      "name": "新华网搜索 so.news.cn (retried)",
+      "why": "still HTTP 405 to scripted requests; section lists news.cn/food and /local are used instead"
+    },
+    {
+      "name": "中国日报搜索 newssearch.chinadaily.com.cn",
+      "why": "JSON endpoint works but is relevance-ranked and English-only; one hit in 2.5 months, about Kenya. A new reader is not worth it"
+    },
+    {
+      "name": "中国日报 chinadaily.com.cn 栏目页",
+      "why": "English; no animal section; no RSS (feed URLs return 404)"
+    },
+    {
+      "name": "ChinaXiv chinaxiv.org",
+      "why": "HTTP 403 to scripted requests, including search"
+    },
+    {
+      "name": "百度学术 xueshu.baidu.com",
+      "why": "HTTP 403; no public API"
+    },
+    {
+      "name": "万方/知网开放目录 (CNKI cnki.net)",
+      "why": "home page is a JS redirect; no open list of new items"
+    },
+    {
+      "name": "动物营养学报 chinajan.com",
+      "why": "reachable, but the current-issue page has no per-article dates (pages show the render date); issue labels only"
+    },
+    {
+      "name": "中国畜牧杂志 zgxmzz.cn",
+      "why": "single-page app; list is not in the HTML"
+    },
+    {
+      "name": "畜牧兽医学报、水产学报、中国兽医科学 journal sites",
+      "why": "domains tried (xmsyxb, jfc.shou.edu.cn, zgsykx.cn and others) do not connect or have been taken over by spam pages"
+    },
+    {
+      "name": "中国小动物保护协会 cnsapa.org",
+      "why": "site is an 'under construction' page"
+    },
+    {
+      "name": "中国动物保护 NGO sites: 亚洲动物基金 animalsasia.org/cn, 它基金 tajiorg.org, 野生救援 wildaid.org.cn, 中国绿发会 cbcgdf.org, 国际爱护动物基金会 fourpawsinternational.org.cn",
+      "why": "HTTP 403 or no connection from our servers"
+    },
+    {
+      "name": "世界自然基金会中国 wwfchina.org",
+      "why": "reachable, but pages are script-built and carry no dated article links"
+    },
+    {
+      "name": "中国野生动物保护协会 cwca.org.cn",
+      "why": "connection fails"
+    },
+    {
+      "name": "微博 Weibo",
+      "why": "login wall and no open feed; scraping breaks the terms of use"
+    },
+    {
+      "name": "Crossref (retried)",
+      "why": "HTTP 429 on a trial query; already ruled out above for coverage"
+    },
+    {
+      "name": "国家林草局 forestry.gov.cn 首页",
+      "why": "connection resets; only /main/586/index.html answers (configured as forestry-news, which may fail on some days)"
+    }
+  ],
+  "items": [
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://hn.people.com.cn/n2/2026/1126/c356887-41762033.html",
+      "title": "湖南江永：联防联控护候鸟 守住野生动物保护防线",
+      "date": "2026-11-26",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "welfare",
+      "matched": [
+        "动物保护",
+        "动物",
+        "野生动物"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7240072303",
+      "doi": "10.1007/s12571-026-01726-w",
+      "url": "https://doi.org/10.1007/s12571-026-01726-w",
+      "title": "Investing in safe poultry slaughter at wet markets as an effective tool to improve food safety in low- and middle-income countries (LMICs)",
+      "date": "2026-11-26",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Food Security",
+      "tier": "welfare",
+      "matched": [
+        "slaughter",
+        "poultry"
+      ],
+      "first_seen_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "source": "forestry-news",
+      "kind": "government",
+      "url": "https://www.forestry.gov.cn/lyj/1/lcdt/20261125/697869.html",
+      "title": "中国野生动物保护协会鼓励公众举报破坏鸟类违法行为",
+      "date": "2026-11-25",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "welfare",
+      "matched": [
+        "动物保护",
+        "动物",
+        "野生动物"
+      ],
+      "first_seen_at": "2026-11-26T09:29:41.736Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7239873059",
+      "doi": "10.1093/tas/txag199",
+      "url": "https://doi.org/10.1093/tas/txag199",
+      "title": "The potential of feather fault bars as a welfare indicator in male and female broiler chickens with differing growth rates",
+      "date": "2026-11-25",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Translational Animal Science",
+      "tier": "welfare",
+      "matched": [
+        "welfare",
+        "chicken",
+        "broiler"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7237129369",
+      "doi": "10.21203/rs.3.rs-11625483/v1",
+      "url": "https://doi.org/10.21203/rs.3.rs-11625483/v1",
+      "title": "Biosynthesis of Bacterial Cellulose from Tilapia Slaughter Washing Water without Exogenous Nitrogen Sources",
+      "date": "2026-11-20",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Research Square",
+      "tier": "welfare",
+      "matched": [
+        "slaughter",
+        "tilapia"
+      ],
+      "first_seen_at": "2026-11-22T07:58:03.977Z"
+    },
+    {
+      "source": "europepmc-cn",
+      "kind": "paper",
+      "provider_id": "MED:43090736",
+      "doi": "10.3390/life16111916",
+      "url": "https://doi.org/10.3390/life16111916",
+      "title": "Dietary α-Linolenic Acid Enrichment Is Associated with p38 Mapk/FoxO1-Related Signaling and Improved Fillet Quality in Nile Tilapia (<i>Oreochromis niloticus</i>).",
+      "date": "2026-11-12",
+      "indexed_at": "2026-11-27",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Life (Basel, Switzerland)",
+      "tier": "welfare",
+      "matched": [
+        "enrichment",
+        "tilapia"
+      ],
+      "first_seen_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7238811103",
+      "doi": "10.65161/rec32x69acxbel87w",
+      "url": "https://doi.org/10.65161/rec32x69acxbel87w",
+      "title": "Clear and Present Dangers: The State of Animal Welfare in China and Possible Solutions",
+      "date": "2026-11-01",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "text_mention",
+      "venue": "Oxford Journal of Student Scholarship",
+      "tier": "welfare",
+      "matched": [
+        "welfare",
+        "animal welfare",
+        "animal"
+      ],
+      "first_seen_at": "2026-11-25T09:48:28.746Z"
+    },
+    {
+      "source": "openalex-cn",
+      "kind": "paper",
+      "provider_id": "https://openalex.org/W7239344507",
+      "doi": "10.1038/s41597-026-08922-5",
+      "url": "https://doi.org/10.1038/s41597-026-08922-5",
+      "title": "Transcriptome and chromatin accessibility across multiple tissues in largemouth bass (Micropterus salmoides) and Nile tilapia (Oreochromis niloticus) under heat stress",
+      "date": "2026-11-24",
+      "lang": "en",
+      "title_lang": "en",
+      "china_basis": "affiliation",
+      "venue": "Scientific Data",
+      "tier": "related",
+      "matched": [
+        "heat stress",
+        "tilapia"
+      ],
+      "first_seen_at": "2026-11-26T09:29:41.736Z"
+    },
+    {
+      "source": "europepmc-cn",
+      "kind": "paper",
+      "provider_id": "PPR:PPR1374775",
+      "doi": "10.21203/rs.3.rs-11578293/v1",
+      "url": "https://doi.org/10.21203/rs.3.rs-11578293/v1",
+      "title": "Effects of heat stress on rumen microorganisms and metabolism in different sheep breeds",
+      "date": "2026-11-23",
+      "indexed_at": "2026-11-24",
+      "lang": "und",
+      "title_lang": "en",
+      "china_basis": "text_mention",
+      "venue": "",
+      "tier": "related",
+      "matched": [
+        "heat stress",
+        "sheep"
+      ],
+      "first_seen_at": "2026-11-25T09:48:28.746Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://hlj.people.com.cn/n2/2026/1127/c220005-41762959.html",
+      "title": "龙江森工集团秋季护飞112种鸟类",
+      "date": "2026-11-27",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://sh.people.com.cn/n2/2026/1127/c134768-41762625.html",
+      "title": "冲撞执法舰，百万公斤渔获被查！上海多部门联手守护生态防线",
+      "date": "2026-11-27",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://qh.people.com.cn/n2/2026/1127/c181467-41762407.html",
+      "title": "“雪豹为媒 联通世界” 雪豹国际传播交流活动举办",
+      "date": "2026-11-27",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://jx.people.com.cn/n2/2026/1127/c186330-41762379.html",
+      "title": "江西省人民代表大会常务委员会关于废止3件和修改17件地方性法规、决定的决定",
+      "date": "2026-11-27",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-28T08:53:28.179Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://gx.people.com.cn/n2/2026/1126/c179409-41762104.html",
+      "title": "罗城：强化生态管护能力 守护候鸟迁徙家园",
+      "date": "2026-11-26",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://jl.people.com.cn/n2/2026/1126/c349771-41761977.html",
+      "title": "敦化市秋梨沟镇开展走访排查 筑牢生态安全屏障",
+      "date": "2026-11-26",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://nx.people.com.cn/n2/2026/1126/c192493-41761971.html",
+      "title": "宁夏银川依托民生观察员机制推动城市更新与生态保护协同发力",
+      "date": "2026-11-26",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://jl.people.com.cn/n2/2026/1126/c349771-41761965.html",
+      "title": "敦化市雁鸣湖镇联合大山、大沟国有林场开展常态化清山清套清网活动",
+      "date": "2026-11-26",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://nm.people.com.cn/n2/2026/1126/c196667-41761365.html",
+      "title": "内蒙古启动“五大专项温暖行动”",
+      "date": "2026-11-26",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://he.people.com.cn/n2/2026/1126/c192235-41761285.html",
+      "title": "万物何以恋此城？",
+      "date": "2026-11-26",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://kpzg.people.com.cn/n1/2026/1126/c404214-40840705.html",
+      "title": "护鸟成日常 候鸟成“常客”",
+      "date": "2026-11-26",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-27T09:39:17.338Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://nx.people.com.cn/n2/2026/1125/c407413-41760932.html",
+      "title": "宁夏吴忠生态警务守护黄河金岸",
+      "date": "2026-11-25",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-26T09:29:41.736Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://gx.people.com.cn/n2/2026/1125/c398132-41760796.html",
+      "title": "检察听证进瑶乡，以案释法护生态",
+      "date": "2026-11-25",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-26T09:29:41.736Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://jl.people.com.cn/n2/2026/1125/c349771-41760760.html",
+      "title": "敦化市秋梨沟镇：排查乡镇五金市场 严查非法捕猎工具",
+      "date": "2026-11-25",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-26T09:29:41.736Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://qh.people.com.cn/n2/2026/1125/c181467-41760175.html",
+      "title": "湟源发现多处高山兀鹫集中繁殖点",
+      "date": "2026-11-25",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-26T09:29:41.736Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://society.people.com.cn/n1/2026/1125/c1008-40839978.html",
+      "title": "划定7条法律红线加强湿地保护",
+      "date": "2026-11-25",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-26T09:29:41.736Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://ah.people.com.cn/n2/2026/1124/c374164-41759831.html",
+      "title": "金寨：“全链生态警务”守护茶乡绿水青山",
+      "date": "2026-11-24",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-25T09:48:28.746Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://sc.people.com.cn/n2/2026/1124/c345167-41759628.html",
+      "title": "青山为卷七十载 绿绘天府启新程",
+      "date": "2026-11-24",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-25T09:48:28.746Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://gz.people.com.cn/n2/2026/1124/c389359-41759360.html",
+      "title": "紫云：集市宣传面对面 生态保护记心间",
+      "date": "2026-11-24",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-25T09:48:28.746Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://sc.people.com.cn/n2/2026/1124/c345453-41759218.html",
+      "title": "成都，诗意流淌于寻常生活（外国人眼中的中国城市）",
+      "date": "2026-11-24",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-25T09:48:28.746Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://gs.people.com.cn/n2/2026/1123/c183283-41757973.html",
+      "title": "甘肃省发布2026年第4号总林长令",
+      "date": "2026-11-23",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护",
+        "保护动物"
+      ],
+      "first_seen_at": "2026-11-24T10:53:12.335Z"
+    },
+    {
+      "source": "people-search",
+      "kind": "news",
+      "url": "http://military.people.com.cn/n1/2026/1122/c1011-40838231.html",
+      "title": "“迷彩绿”守护“生态绿”",
+      "date": "2026-11-22",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "mention",
+      "matched": [
+        "动物保护"
+      ],
+      "first_seen_at": "2026-11-23T08:59:11.547Z"
+    },
+    {
+      "source": "cvma",
+      "kind": "association",
+      "url": "https://www.cvma.org.cn/6848/202611/74755.html",
+      "title": "中国兽医协会关于征求《高致病性禽流感、新城疫、禽白血病和鸡白痢区域净化要求》等39项团体标准意见的通知",
+      "date": "2026-11-25",
+      "lang": "zh",
+      "title_lang": "zh-Hans",
+      "tier": "animal",
+      "matched": [
+        "禽",
+        "鸡",
+        "兽医"
+      ],
+      "first_seen_at": "2026-11-26T09:29:41.736Z"
+    }
+  ]
+}
